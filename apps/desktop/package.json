@@ -1,0 +1,7 @@
+{
+  "name": "@cs2-coach/desktop",
+  "version": "0.1.0",
+  "private": true,
+  "main": "dist/electron/main.js",
+  "type": "module"
+}
