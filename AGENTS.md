@@ -22,3 +22,7 @@ It does not include real-time overlays, GSI tracking, or unrelated platform feat
 - Keep deterministic analysis separate from AI coaching.
 - Evidence first: every coaching conclusion must reference measurable findings.
 - Prefer small maintainable changes.
+
+## Workflow
+
+follow `.agents/workflows` and `docs/development.md`.
