@@ -1,0 +1,2659 @@
+lockfileVersion: '9.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+importers:
+
+  .: {}
+
+  apps/desktop:
+    dependencies:
+      '@fluentui/react-components':
+        specifier: latest
+        version: 9.74.9(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)
+      react:
+        specifier: latest
+        version: 19.3.0
+      react-dom:
+        specifier: latest
+        version: 19.3.0(react@19.3.0)
+      zustand:
+        specifier: latest
+        version: 5.0.15(react@19.3.0)(use-sync-external-store@1.7.0(react@19.3.0))
+    devDependencies:
+      electron:
+        specifier: latest
+        version: 44.5.1
+      typescript:
+        specifier: latest
+        version: 7.0.2
+      vite:
+        specifier: latest
+        version: 8.3.2(@types/node@24.19.0)
+
+  packages/analytics: {}
+
+  packages/dem-parser:
+    dependencies:
+      '@laihoe/demoparser2':
+        specifier: ^0.42.0
+        version: 0.42.0
+
+  packages/findings: {}
+
+  packages/match-model: {}
+
+packages:
+
+  '@babel/runtime@7.29.7':
+    resolution: {integrity: sha512-Nq8OhGWiZIZGV6hLHoyAKLLcJihP/xFeBMGJoUrxTX2psI8dCifzLhZISFb+VWS3wFMRDmCGw5R+dOySCqPLhw==}
+    engines: {node: '>=6.9.0'}
+
+  '@electron-internal/extract-zip@1.0.5':
+    resolution: {integrity: sha512-+bqFCP98pLI0Tt0XQo1TmlXtwjWchISndDOxCkEcIuUgXWpBnLyRI+2DU+mesvnMMX6L1XDqYNA0lXNDHd/yiA==}
+    engines: {node: '>=22.12.0'}
+
+  '@electron/get@5.1.0':
+    resolution: {integrity: sha512-3kSBtG8ObcTVfXanm5vVJ6UnBLEVmVsRk1M+vGqCuMBV+XLCbJYuWQful+yIy0GQDsSlK0kHEriEHn7SPk4EnA==}
+    engines: {node: '>=22.12.0'}
+
+  '@emotion/hash@0.9.2':
+    resolution: {integrity: sha512-MyqliTZGuOm3+5ZRSaaBGP3USLw6+EGykkwZns2EPC5g8jJ4z9OrdZY9apkl3+UP9+sdz76YYkwCKP5gh8iY3g==}
+
+  '@floating-ui/core@1.8.0':
+    resolution: {integrity: sha512-0CIZ5itps/8x7BG8dEIhs53BvCUH2PCoogtakwRTut+Arm58sJooJ0AuZhLw2HJYIR5cMLNPBSS728sPho2khQ==}
+
+  '@floating-ui/devtools@0.2.3':
+    resolution: {integrity: sha512-ZTcxTvgo9CRlP7vJV62yCxdqmahHTGpSTi5QaTDgGoyQq0OyjaVZhUhXv/qdkQFOI3Sxlfmz0XGG4HaZMsDf8Q==}
+    peerDependencies:
+      '@floating-ui/dom': ^1.0.0
+
+  '@floating-ui/dom@1.8.0':
+    resolution: {integrity: sha512-yXSrzeHZBTZadLOlfyhCkJHNeLJnHRnRInwdZ40L7ZiaAtrBwoYlsDrX3v5zB1Utk7CLfzcOVnVVWoXEky7Ceg==}
+
+  '@floating-ui/utils@0.2.12':
+    resolution: {integrity: sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww==}
+
+  '@fluentui/keyboard-keys@9.0.9':
+    resolution: {integrity: sha512-DjX4z+dDCB49rsmyDuOwtD28Zbe9CUf86JKi8aUEvO5/TetsiuGPokgJiFIR0S9SGeFbquj5CUmAslk1RpgMzw==}
+
+  '@fluentui/priority-overflow@9.4.3':
+    resolution: {integrity: sha512-2BntHbObEJ8zuHni2/Finy20o0YEX4x1LAhL/lbft38YI1BN06QMdyxH6wD15iBxD9XX5mypdDWg7DusNJsMDw==}
+
+  '@fluentui/react-accordion@9.12.4':
+    resolution: {integrity: sha512-DW8eNc0Cv2/xSkjMHFK973/tMj+QO8gBY1Gh3iuXBFAe0N8ZjgVuc8B1QBaa93B3Uwe5Gq5J+wUErVMm0xsTEw==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-alert@9.0.2-beta.1':
+    resolution: {integrity: sha512-LOsdMQxkh31DSaWUeq0NT5aPlycH4zqDABIC4kdfcxvfAyyQgWPggrDxr67fktMQDXZL8PTyVKewlAUW1en0Dg==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-aria@9.17.15':
+    resolution: {integrity: sha512-aRC00FwYzkb1hgUbFcYAS2rI/Vu5kIvOM66Ko2MD5kGQ+7IHMGdNQglYw1lH4UpyKkdtVR5KvkLrn3ukYMBUOA==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-avatar@9.11.8':
+    resolution: {integrity: sha512-9Y6hCeCnloKuOQnAfVg5p3wrh84AIZuAG+2S4z3bKtXUyqKcFqg0DC5YPn21HvtfvqlL8yVczmzepMCK6vuklQ==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-badge@9.5.6':
+    resolution: {integrity: sha512-pseIYT51WMu6/m3+k77wrHjuPk2Nt1OJMEDcjnJqq3grEcO9qpOOe/Ztamg6tuhekzlNgklga/QqASdG1xxZpw==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-breadcrumb@9.4.6':
+    resolution: {integrity: sha512-BuwLYB8qQnIV8NyqaxSGANOP/auHbpBfvRc+4lf/Xw4+rUdb6GLndC78vikkVTwZfK7LvBqdyzqrynLE30gFWQ==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-button@9.11.1':
+    resolution: {integrity: sha512-Y8Dfcsrl+cKXDI80DXF0n2je+NyQ6TIB5BQBjmDGTHFiR3RaEEatyI9/Iy1VlxLH9m4q3x+NuwgJ/0H/S+XQMg==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-card@9.7.3':
+    resolution: {integrity: sha512-rvFSwmchrpw/+Sg2B7qEj3D+d6FHtd0rNqh8rvORFUDOatsZ5PJvExJKRfCEE4GsJCJDCZsSDSKbn57eqw69nQ==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-carousel@9.9.14':
+    resolution: {integrity: sha512-wGrOokDeHLj9bwAy+bTG7e4FoBbZrv1K2sQE9xQHr6SVXtWr2Ak+Fqy8f8O3Lpfd6IYX/Dfuv1L52ovUvDjBhQ==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-checkbox@9.6.5':
+    resolution: {integrity: sha512-8pQOhU94sYzL3auB+8A1yDLklEEc8LMlIBQ52gyCLtrQbejzvhFFTBK8Ig5K7UO3/VckXbTHPA3+pJrjJ3VZXg==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-color-picker@9.3.1':
+    resolution: {integrity: sha512-+KMVIrA/gtuyRSYIEWo3VtEWXmzXg4CAFhQWYROcIzrUI3wVNjEMuM0Qn6xu0JXtdcU4N1lilFbFlEAAMzVBSw==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-combobox@9.17.7':
+    resolution: {integrity: sha512-pPZT85nL/jnHt9uByV4VPqBV25w2ElG8aY+TXLpGpkMKW1ECwIEAJOjGMbenxT66YuH8ZHglr9pS4t8cWinL1w==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+      react-dom: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-components@9.74.9':
+    resolution: {integrity: sha512-cXXEW3vlOJLGx9f6ejajjrb2t+k7Ed0CDiFG1qtIPLsUxsAChx/beZ72VnjXJX1WhE2EjZMpe4B/gcqAZ/9fVg==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-context-selector@9.2.20':
+    resolution: {integrity: sha512-7AcVVBYIedph3S5yNLhwBQUO5yYE8shfroAt8b7Z0pkLqrWaFulUC7Ysi6mkzPhKgnKRrrNZkZfrZ9kWkLWzQg==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+      scheduler: '>=0.19.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-dialog@9.18.5':
+    resolution: {integrity: sha512-apZPCPrHExR7PYhFaoUeI7A/zD+GP0Dx59DmNV0BfBqc6UitpM7mdH7mzZ7/mvOjWgczVt7qpsypPHkHJtAEng==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-divider@9.7.5':
+    resolution: {integrity: sha512-SXOqeoBbrqFRvABZO/iFk6LprXGnQr5esKwuiODLUmB7zTrhxwvKuiL4JEg+m1NegfwrcFRo74WIZOxrMGiIgw==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-drawer@9.13.4':
+    resolution: {integrity: sha512-SsO7JCBY2zMjr40TDL9fF6rH5OfDd0rPkJva5wIdM0wjbpxVJR3g/xJ2xk1VlPsDgUlZdVFQbPBqZBim6msBrg==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-field@9.5.5':
+    resolution: {integrity: sha512-v9GGLUoR6L/hVo6xITJ2CMYK6iQ4p4thZt5BkLdbrTMZC7u6EAebgU7WtHE+mHTwF6GIRqL2nGqh0EOLxELktA==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-icons@2.0.343':
+    resolution: {integrity: sha512-CjwAZrog38QNPeIjBfMs0e7tPUW/Bxgge5qbhbfdhXJwXOSm5lDLCKkx4xyBSu1Mg/e/8wLocQvWcBZlS6/Axg==}
+    peerDependencies:
+      react: '>=16.8.0 <20.0.0'
+
+  '@fluentui/react-image@9.4.5':
+    resolution: {integrity: sha512-7vsYRen2GoYVvS6dWRKbeqjIlJq+1CoyuHHyOwFVSmcLr/pAyF3mWCbJ9r+3uY1BrI0UYJvulpyg4FYgNsISnw==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-infobutton@9.0.1-beta.1':
+    resolution: {integrity: sha512-tBmGi6g4ae83lv8BBzq/oeqa89X6NrMlwoy9SyAjNm3OF/XXZnmN28SZVfbX2a8OdISkF6M2kX38ykVZw3G55g==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-infolabel@9.4.27':
+    resolution: {integrity: sha512-7ZR6HXbSe0aVVybQ+ZYFeGQe+NGYJU6OGdFjRDbsW1D50vLt3GX6SDMaeHsYOObTsTXLUVVfKR+a3qnlVyK6nA==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-input@9.8.7':
+    resolution: {integrity: sha512-2L+i8LHPFhuKVw67UJsF2VNBhFvcitW9ehtcFWK9g1jJd3EPxX66dGux+gZfpL3pEZI5aMPUr8DZ3LVN2dZWwg==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-jsx-runtime@9.4.6':
+    resolution: {integrity: sha512-mSFNet1WSIQjVXguJNzOhgKQKFm4uHZqIWkHaQwvCNtR0vCxC6TJXeg21nYuz0qoASWOff9MhM5n6cQKo+139Q==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-label@9.4.5':
+    resolution: {integrity: sha512-U1jQURweSmueVr2RaN/rMcH4a+SctnCNCjNqXgJwQzF0hvy/1y+eoxc6XvgEGS+X/MUBzX/+70yr3QLuk5AaGQ==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-link@9.8.5':
+    resolution: {integrity: sha512-Tfgy7KJE1X+U1YFN+fcFZjg/DglNqvxWbvcdiEhJfq7r7ZP1mI85R/nzs0SNiPORB1zwFu7NnclAa058N/aeNA==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-list@9.6.19':
+    resolution: {integrity: sha512-nZDjQS//bVsvWj8b8qxBhdjsZcne1u/8P6mjTLYM/Ygv5sFOCDPzvjjZqtBQeH4qB8qA91LuQm8pTbhzAOHXRQ==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-menu@9.25.6':
+    resolution: {integrity: sha512-INmYYFW7pfnIaG8tqq2gH9i45mRsOhzC0xEtdcdvCYJneeE4LU6TYV7HiZQmRPQEsi2u1YpW1dg6LT0d2URTgQ==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-message-bar@9.7.7':
+    resolution: {integrity: sha512-Tjsm5b4dIednWTgMnyoivELaaxmEPUz6Jbil+HcrJ7oelJyNdJU20L1WaX/bNxjMwJF1f3ZpyBSl4O/xDyLSCQ==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-motion-components-preview@0.15.9':
+    resolution: {integrity: sha512-1RuPY5dDaegtWhEdoXmiY5ErroSuzg3y/k1puFY6SP8K5a18loGZgqSm6pVpH5bemFIfKsslM87t/Vx2EO/QLA==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-motion@9.16.4':
+    resolution: {integrity: sha512-CIX3SCA74mk6udpzsgifrjet4LmRO1AQrxo4mmNhLtQVpJIgVj6JJl6MTl/0Lf+Bgy6RDhPwAOV450RbR0aRMg==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-nav@9.4.7':
+    resolution: {integrity: sha512-7p9NKndRDFX+f89s6xV7uimq/P9jvrXdQNqgWhhg+V+zE8pPZFHVwqOxCTrKIcJZDKsKNz0N2P9QnwZ4mHK6UQ==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-overflow@9.9.4':
+    resolution: {integrity: sha512-05pLAR97ZQO0IlbFYXyKtv7dqE6bUW3kuGaK+3Opn8pAe6ZPw1kSbO++6yvex3ykoTCwLxbJBt+vvmnP4u0lTQ==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-persona@9.7.10':
+    resolution: {integrity: sha512-z1x0+/oV4z88QueNZY++beUOOxBXhGWgPNPHMx5OYr/LdEjADwpLapgAvWvEh95qSBRbxkW2tKCWJxHCom5SDQ==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-popover@9.14.9':
+    resolution: {integrity: sha512-2UP8yMVJgTuwbtRDYHC+YEKzc7UBGJPtyqhaVFtQ9tk1vPqUi9tzzjGILicwZyXZWn4edxs936KPtPLb1e3rqw==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-portal@9.8.16':
+    resolution: {integrity: sha512-sYHI9izmsWh9wuEmfiDccOWxM9D88s5uKwO0wuho+eAuYJPwoNX7Ruzhnvb8MIwvNplFTvHk+2IM/mFZum7LKg==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+      react-dom: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-positioning@9.23.3':
+    resolution: {integrity: sha512-EsUHurRI1arKoMevqvPwt/QeyI7UlbOywferqlGhbF2G8D5dTgNS8j1QortrSfDftOyhyKr3rxN45EgGGvdEjw==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-progress@9.5.6':
+    resolution: {integrity: sha512-RAvSQF84GiKGFhx74G98hpftTMnuoXzchYtkB5ekXArr2IjJDIIe3/prdNfyLkbgcrHv1WE8aixmEswC4fq+OA==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-provider@9.22.21':
+    resolution: {integrity: sha512-drW2UMIhIZVMl2pcGIgTiFrOIf56l86DPHKODTfsoyRxaCk+6cKXRsIla+9gERdox+ecIUHzXhtkjV+fjkqHig==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-radio@9.6.6':
+    resolution: {integrity: sha512-zZG507F+m5/aBG5oISzAZ1nlHkUFkOPCGRZUA/5xFGfADVgeCkiKOTCdPewZJgsDmNAmMY4hy5aLv9te6VRTyg==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-rating@9.4.6':
+    resolution: {integrity: sha512-eoSlEZdBjhGV8hFNxWX0z2clqb1eP5kcxYmltt+oMhLVzkEeI7uBya2gVYFa0piCUwuZMpJ5zCiWZMja/4i7/A==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-search@9.4.7':
+    resolution: {integrity: sha512-M+GQrjSy5ewqM++Hf41JnxnuAH8AUyRvBHcgzb23DLRiQWJZxrQA1uKtQ+U/VbFKyATxQTzUVBnYXBUcm1sXdA==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-select@9.5.6':
+    resolution: {integrity: sha512-s5I2W57ec/CcFBAlLiU6lg3E1q3sT4xLw6/pyrhe8XWILNUdBR46CTSIK/FjSLNErg0bvgdQBttqe8CxCslqZw==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-shared-contexts@9.26.4':
+    resolution: {integrity: sha512-E+wR4q33GdhIHXp5C0gxhWbwr7g5AosK+wYtKcQPZDNkQogWQsOlSuTP++lITYmBVmkxODfTpu64KpSVlRA/TA==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-skeleton@9.7.6':
+    resolution: {integrity: sha512-ornj9AdzFZJIlP1IBySpg37F/oflC6hDq44w1Ii8Nae/eCDPDZ58o7OUksnB++ayOzAeuGcvVVRZEIWU9XUYbw==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-slider@9.6.6':
+    resolution: {integrity: sha512-zJJYdXUnN8WyPf7Fp23UQx5Y7vcqoprTCXjIn52fb6XlH9Hfjy4lOTma7RFRzgguu42ARPXX866ED6ofHSwpCQ==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-spinbutton@9.6.7':
+    resolution: {integrity: sha512-auz5rXLGpzbikmAR/TNk5hVuD5p/YjMlbV6WoI26gl8U6NTMJu106MMtpvBNw0/nrXx9eZRFG1qOu7OJDhOgXg==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-spinner@9.8.6':
+    resolution: {integrity: sha512-H106eFLacZGwFe6Fdx4UVRA01J3pfCJkXvKWA3Hyz2LuLpPerZDrKnd/ILJ3BSC0Cv9nj6iLI+q8XTErmLb5EQ==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-swatch-picker@9.6.2':
+    resolution: {integrity: sha512-ytqquh7zHpFvv90wpMTDPPo6nlN4mG4htw08Ykz3Ns2D8WAdXl0dkq8k3gCzqDWBGjjqvoPnQkMu7H6nAkkA5w==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-switch@9.7.6':
+    resolution: {integrity: sha512-LOlmA+bCo4i6B6Zlfh6JsI/LkNJUl2U0giknyMKpMkVP9oKPz5ZEm1UknzkumOtaKaEFLX6TnPvY94LHWF++Pg==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-table@9.19.22':
+    resolution: {integrity: sha512-razzijV+T1XJmcuyU6/wmo9QG8CGsvHOAHKIZOQiWy/A0jNPan7N4fnB80xDL5KSH+rEsbfTTpsO0F6w1oq2Hw==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-tabs@9.12.5':
+    resolution: {integrity: sha512-dALBuwRw8zuK/eAuAqjKduBfzok7ZOfJsKYhUqPcdjSXRAwrQcshYUFarNGjPmM714wZq3HUgBS4wktDnUbruA==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-tabster@9.26.18':
+    resolution: {integrity: sha512-TpkrEEKeB5hkT4/aHEg9e1zBx17jy9GkjD+slHUf+Ws/MhEyWypnlUQo/1ggNtxpt8dpZ8VuudOj3HBcEhGkjw==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-tag-picker@9.10.5':
+    resolution: {integrity: sha512-F3UupuzIUTR6WmbHfoeEOq0v/hfce5/2hAKim64etSG4jZkSaNM0ExkQy8+l9ZRW/Lk3FZ4G6DJStxWcUKHYfg==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+      react-dom: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-tags@9.9.7':
+    resolution: {integrity: sha512-GeP6J9MoToRy/0uJBiIoig7CvthN56JeKTQGnStlHnyH5RR6hzG4Jh7wPyGcHZSx3zfiJZK2GnUmMI/mBTK4Gg==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-teaching-popover@9.7.7':
+    resolution: {integrity: sha512-cXNSl1IsHiPcgkU0t9EsYX1kGFzjoGHf7KPzT9i+S7pZoF8NHQWoXl88oqOuejG/h6CfC5nPlC/xMQ4/b1BfjQ==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-text@9.6.20':
+    resolution: {integrity: sha512-q0+djeyNnm//dtOQHtFBJRgIInZKPlqAbfPM3n3KtjfQfAh7wKOi5APYqGTsMU7UDahrCCUNru8SLZy9DgCo3A==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-textarea@9.7.7':
+    resolution: {integrity: sha512-GcyNlgYFfjwMaOh1AMb5A30fXSrE9a0kMbua7mrvvOLyMFqQz2kXAZ2IcrtsSyYJVY++PnEMMhDOxg+iILLPyw==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-theme@9.2.2':
+    resolution: {integrity: sha512-yUQMQkMLGvo6+Q/RITxpLh00STvI299gnk1IV/QHc2DW5EKiCcmIp9xma7+lJzfLACfDkwJDy5hZSl+7MIYf9w==}
+
+  '@fluentui/react-toast@9.8.4':
+    resolution: {integrity: sha512-QNCSk6CoOh+re24PU5LdRY0c0QVdUXnBqxm8/j1+5gp5JFALUO3p8wTS5ZWVjCS/2lOUp4QMM8jGmuXnKtMiCQ==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-toolbar@9.8.5':
+    resolution: {integrity: sha512-eelOaFyUnP8uPFiBpb+++NcJoVrZks7fC+3VyouFGsdeg0qvB6xpGx3v354GM3WJLPZr0pv70mVVzs3X/pC7+A==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-tooltip@9.10.7':
+    resolution: {integrity: sha512-ERV2ZdNI5qE4iUbno/JTHSSC11uqOsGhUTldNgSY4knJ5GUObVBp6Uxu8HPlKC6NJiA4KnqvYBqWJm2SNd+rOQ==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-tree@9.16.8':
+    resolution: {integrity: sha512-Nf2mVcFVMzWLyrgbQhiSg2U7r6NCPwYNvB0n4JtK+Y7JPfbc1Ep1RF5pnR0XvnWFKqchQhZPBKUg2vXaiov3qw==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+      react-dom: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-utilities@9.26.7':
+    resolution: {integrity: sha512-OXbeacOthwAg3FkNojWE4L8uhiWOcKuI7V2NHbndgDHZRftu/ZDUTW6ykma3bh5t/SlJ5JuHlzC+rWd8UfEMcA==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/react-virtualizer@9.0.0-alpha.116':
+    resolution: {integrity: sha512-cANu8ImQh99D0Pdl33ZIhiAki9grvO6e1x4grCVjDYM3/1WLKmKAVfXHwEeGv7u0XUydCX98bfEUS8wTVE5Mfw==}
+    peerDependencies:
+      '@types/react': '>=16.14.0 <20.0.0'
+      react: '>=16.14.0 <20.0.0'
+      react-dom: '>=16.14.0 <20.0.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+
+  '@fluentui/tokens@1.0.0-alpha.24':
+    resolution: {integrity: sha512-YrjGQfnxBR+9o8wXyTflON3Ohsv7OrZWYLVRU+7RaiFO1gcu36iDm3WjudlVmYuWRLDO0Gmxotm6RQNhbZuEQQ==}
+
+  '@griffel/core@1.21.4':
+    resolution: {integrity: sha512-Pt6tjaBCOYYC76L7U5yl3r+UqOGXEbeskvYuqUsUzaVQR2ueoMErA2+bRjvVPFr8NvvhPVU+QNBqd9Deg5st2A==}
+
+  '@griffel/react@1.7.8':
+    resolution: {integrity: sha512-kTegyzZoRqpRNUQ8Fd6QWLC8MUqSyO+/GDC/ffbEG8Y6JDole98rBrOVA/NN9PDD61/ktsd2UqtsTNwtAG6q3w==}
+    peerDependencies:
+      react: '>=16.14.0 <20.0.0'
+
+  '@griffel/style-types@1.4.3':
+    resolution: {integrity: sha512-sFxMK19oFUPQSmyCKT1Pvj5Nu/ODvhMczqhGjVAoksDTXUj1za40WA0CXqV3o+xxKWPec+K/rbS78jJLmomsQA==}
+
+  '@laihoe/demoparser2-android-arm-eabi@0.42.0':
+    resolution: {integrity: sha512-FMNCMu7vtCPEqE9/yMOlZLKd5DEvnK9O6zPK8m2R0Vxma4sVeNMNqaox99Z9uAEuDh9HUTSNxhu2b8d4U0cAfQ==}
+    engines: {node: '>= 10'}
+    cpu: [arm]
+    os: [android]
+
+  '@laihoe/demoparser2-android-arm64@0.42.0':
+    resolution: {integrity: sha512-zaHWPD581v46lTWUHcl379yjHW/x+1GFf/iU7OlWUWUkoblQlsFRE+WC9qYtrNrz8vO9HD+YNkNxGFAnhzmXmQ==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [android]
+
+  '@laihoe/demoparser2-darwin-arm64@0.42.0':
+    resolution: {integrity: sha512-vZGlPcnYVb75LsitDSBdNkp+g1gZxyHAQxhdowRR452BGQITwEMrRaGP9efo7oId78nX9KjfSy6kjaCiU070PQ==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@laihoe/demoparser2-linux-arm-gnueabihf@0.42.0':
+    resolution: {integrity: sha512-Md9rioYT6Hb7Jr2Ob+0VZGFs5w9kD3iRd9Lh0lYvBdIGwG94KwNkmINQI79FtCf5WC0kAiQsXIRakiZM49Fh4Q==}
+    engines: {node: '>= 10'}
+    cpu: [arm]
+    os: [linux]
+
+  '@laihoe/demoparser2-linux-arm64-gnu@0.42.0':
+    resolution: {integrity: sha512-Ng3TfUXqhjBufjU+8CaVoc2MxthaABS3gkZPfbZVb/UBdA74HguVuzmeioNYDa4mJkN3oau4FcXxoxQd9jkD9A==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [linux]
+
+  '@laihoe/demoparser2-linux-arm64-musl@0.42.0':
+    resolution: {integrity: sha512-mV1HWvUw7H/9NCS6AfgNEzAxKunyDsxG2e+CtBo57ArzIYvpKWVO8nMtf9UH1XTciHHelpji9VqWwusP3ZbfPg==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [linux]
+
+  '@laihoe/demoparser2-linux-x64-gnu@0.42.0':
+    resolution: {integrity: sha512-mhU7QEZuwXKEYH5Kx0O2R3zd2zWT5XdTzBLpfUwo7bDPhZVgP3n4p7GU6IAf2ckN+zmX4tn8N93fyPTi0hiTSw==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [linux]
+
+  '@laihoe/demoparser2-linux-x64-musl@0.42.0':
+    resolution: {integrity: sha512-8MSt652uyVFoXvEZbXRY1Nesc9IDol6o8rO5unEX7X7mPTRyFkj2lu+XnPOY8r0KvY8a/jkvwuqmHtNH3ojQQA==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [linux]
+
+  '@laihoe/demoparser2-win32-arm64-msvc@0.42.0':
+    resolution: {integrity: sha512-q4o/Z5XKhURus4AZ8L9EHTaV9JfXICeUnGdCuXrhXkqLrYCOroxy6zxL3r4QD9p55XwWVY59Kh6tICj7PdfJDQ==}
+    engines: {node: '>= 10'}
+    cpu: [arm64]
+    os: [win32]
+
+  '@laihoe/demoparser2-win32-x64-msvc@0.42.0':
+    resolution: {integrity: sha512-6qLCtvtrB/rRoqWm9aFFT77B87LPkDoMQXmkch/2QTJreYaszi0sULiQNMNStQWhnJhs2CuBWkaoleUO+3It5A==}
+    engines: {node: '>= 10'}
+    cpu: [x64]
+    os: [win32]
+
+  '@laihoe/demoparser2@0.42.0':
+    resolution: {integrity: sha512-W1O/7RxKIum/HdUqXnpW/33tfiuVC4qVMQwJjMOklAr9AsxGkf5Tn7MzT3hOQ8QsTCB6M6bBYxxRMnodbeF4lw==}
+    engines: {node: '>= 10'}
+
+  '@oxc-project/types@0.152.0':
+    resolution: {integrity: sha512-oM/5rLBm2tPkg0iBgkH/FOeR3PCDpY19GTgAZjMFM8h9WI9VW7cLgzp6nwtarYKmovavIQZ+Fe/RKX/8C8O/Rw==}
+
+  '@rolldown/binding-android-arm-eabi@1.2.12':
+    resolution: {integrity: sha512-dB/a1214qKfHMXCpgqR4OZT+jS4kTyEXbQGJPqzobt5EwH5rX080pxE37alt3RzvR1bf1Yz/yGqRfrYAxuPw0A==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [arm]
+    os: [android]
+
+  '@rolldown/binding-android-arm64@1.2.12':
+    resolution: {integrity: sha512-7KHFgQ5VJxIHcLlrwrc3Xbds7oTNQT7Pgi9gQCJKrd2VGab/UksIOYp6VD8MzCstGxOKMgNamPwUCfxPdP1OHg==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [arm64]
+    os: [android]
+
+  '@rolldown/binding-darwin-arm64@1.2.12':
+    resolution: {integrity: sha512-3YIhqHD96nA5SaYNRBR16HnGv4oavZvXfD/ayHM+oYZ0WD/8lBAtf6zQua4kEyAvpqrluKXl0lnOBoiNby7x9w==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@rolldown/binding-darwin-x64@1.2.12':
+    resolution: {integrity: sha512-UuuJ35MFw4gmFOrE9pEqIV+K3syIKveph+Qc1/ljHZVdoDW4pz/JHR/eMVom+TZGl/5OOvGJOWaOCVt3ZfqhxA==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [x64]
+    os: [darwin]
+
+  '@rolldown/binding-freebsd-x64@1.2.12':
+    resolution: {integrity: sha512-uMvssit0a4W+/7D8CbHUvG719mH3R2jwXAlh/XcPvuHTE0g++LymF88DCGNX0HM2rBOn0xrzgXktIB6fLSJBTQ==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [x64]
+    os: [freebsd]
+
+  '@rolldown/binding-linux-arm-gnueabihf@1.2.12':
+    resolution: {integrity: sha512-XcFu0R0xWnwzSf4IQgFH1rJIckPN1pLy2R+4r9IDB7Yfu/ys9cVqfa4pBrMHj7a3gl8mIR4nRNPg0e5IvEVs6g==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [arm]
+    os: [linux]
+
+  '@rolldown/binding-linux-arm64-gnu@1.2.12':
+    resolution: {integrity: sha512-260UrKgn8tz39ak+SMDOirKzr7V04M9dWPw5llW00SwBivCZoWcRBKV1d8cXnRkUmSZA3BdiUmBHWk7734Ulpw==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [arm64]
+    os: [linux]
+
+  '@rolldown/binding-linux-arm64-musl@1.2.12':
+    resolution: {integrity: sha512-5YK1I9SqDkbPgc1IA8BgDl34suqUS2q0KWnBrirm0E51YjOs6eo6dV6jbQfNE/argHRSvd0QUGgtpIoYx+WWpw==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [arm64]
+    os: [linux]
+
+  '@rolldown/binding-linux-ppc64-gnu@1.2.12':
+    resolution: {integrity: sha512-Rkcrmp7eFRg74yL5fXEU91JEWbdEPLevWwGtXpmhbjlD1StScbWTmO94Bhly+Mo+ketKYkdmM1vNUKeWSlx8cQ==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [ppc64]
+    os: [linux]
+
+  '@rolldown/binding-linux-s390x-gnu@1.2.12':
+    resolution: {integrity: sha512-qvK4DuAsQc2BSjlx+Xr+IzOIvvxbGZqxFwdWfG6F518Erj0GGISyQbJ6pIappnOxlNPzNHvo/L0BwB30GZ+zVw==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [s390x]
+    os: [linux]
+
+  '@rolldown/binding-linux-x64-gnu@1.2.12':
+    resolution: {integrity: sha512-Q9uLBO53Xd4QIq1WOycVQyPP1O4HhraEV2qqb3uTrnVw6QZih9duY4vNXOivL1xoUS1/z+W8eF4NMfl2a8Sdjw==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [x64]
+    os: [linux]
+
+  '@rolldown/binding-linux-x64-musl@1.2.12':
+    resolution: {integrity: sha512-3IBxWFMjbOZskDPKv8Lf9BCnahlKuHthWkYnyIxOH/QcJrFcS4EmcenthApkwr/5+nEqZlLzeYbxeMaX7A5u4g==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [x64]
+    os: [linux]
+
+  '@rolldown/binding-openharmony-arm64@1.2.12':
+    resolution: {integrity: sha512-xtX61xg4LKPkPWilZU1ynKClz5Gj4bf74LML4r3eVLWumKnGjoEr1OSHQhMdbBDoYTi+yjrujvpZe2pUnqCrrA==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [arm64]
+    os: [openharmony]
+
+  '@rolldown/binding-win32-arm64-msvc@1.2.12':
+    resolution: {integrity: sha512-At7fPB6PCaIjzgIhEZFxuT+BBFqiQibJDT4d3PhiR3f4E7bbMZF4aKblbFfEM3sETRDd1YiQx/+U/g/B/ou5Ew==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [arm64]
+    os: [win32]
+
+  '@rolldown/binding-win32-x64-msvc@1.2.12':
+    resolution: {integrity: sha512-WIw2haVKwjuYdXkHaoC0mF8Le71TuCBxjrdKqLbJGctbBABj+ClfmNvtbOnzpq3RokNo5+V1qhtSzJyXorsklQ==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    cpu: [x64]
+    os: [win32]
+
+  '@rolldown/pluginutils@1.0.1':
+    resolution: {integrity: sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw==}
+
+  '@swc/helpers@0.5.23':
+    resolution: {integrity: sha512-5lSsMOTXURePglDfvuAQUqkGek9Hg2kksOYay2m0+XR++b2NWYL/4sWyuvVBIs8oKnJaxkdi9whaL/sqN13afw==}
+
+  '@types/node@24.19.0':
+    resolution: {integrity: sha512-zY+5tKxXdhGh1PYI0ac+7juvEu4OI6vWtVVoj5i2m42jxAY1U+zHGt6QCyOFwykdP62sM3MJ9stoYYUw5aCWew==}
+
+  '@typescript/typescript-aix-ppc64@7.0.2':
+    resolution: {integrity: sha512-MTKKkWB7p/0E9xi1d1tHtZ5PiLkGEMIq88pK2CubZjOsLtYTLqhgIgi6zepFa+9GHZ6h05NMCkQxGKiPXMxXtQ==}
+    engines: {node: '>=16.20.0'}
+    cpu: [ppc64]
+    os: [aix]
+
+  '@typescript/typescript-darwin-arm64@7.0.2':
+    resolution: {integrity: sha512-gowzar9MwS/aRWp6f3a4KUqzRjAZjOsmGNCM6LcTgXum+dBfgsBVMN+AgvOCCbguXyick6LJhpBszxMebJ8syA==}
+    engines: {node: '>=16.20.0'}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@typescript/typescript-darwin-x64@7.0.2':
+    resolution: {integrity: sha512-SZ9xZInqApNlNGc9s0W1VSsktYSOe9cFqNOIqmN1Gs8SmkjKZYFt017G4VwPxASInODuAdbTW7sXiFUf893RgA==}
+    engines: {node: '>=16.20.0'}
+    cpu: [x64]
+    os: [darwin]
+
+  '@typescript/typescript-freebsd-arm64@7.0.2':
+    resolution: {integrity: sha512-W5NH4y/J0plIIS5b2xvTEkU7JFxyqdMAOgf+Ilhl0vHQXKO5dZoxd+C/jEtq56c4F3wk71RB4BMRQ2XdI+bwYQ==}
+    engines: {node: '>=16.20.0'}
+    cpu: [arm64]
+    os: [freebsd]
+
+  '@typescript/typescript-freebsd-x64@7.0.2':
+    resolution: {integrity: sha512-UMGDx5sTpzNw3WiPebH7l90IWfJggEd+egHt/q6p7/Cm3zqoV7VxkGXt+3DxPIw8CcmvAB0j3sVVfbhX+M4Tpw==}
+    engines: {node: '>=16.20.0'}
+    cpu: [x64]
+    os: [freebsd]
+
+  '@typescript/typescript-linux-arm64@7.0.2':
+    resolution: {integrity: sha512-Qh4eU4/y3yDjnfjjyPYihMj5/ODIlmt+Bzu17OI+fiSRDW57QmU5SiN63exPRNJPKUzcc1INa1NXdrJ+MqHjUQ==}
+    engines: {node: '>=16.20.0'}
+    cpu: [arm64]
+    os: [linux]
+
+  '@typescript/typescript-linux-arm@7.0.2':
+    resolution: {integrity: sha512-gffT3xPz9sR7j/YJExkyPntrI0P2EP9XbOyWzth2/Gs0RstK+90RBcO0ncXoXy/beYll1SXw846Nf2zdnEz0QQ==}
+    engines: {node: '>=16.20.0'}
+    cpu: [arm]
+    os: [linux]
+
+  '@typescript/typescript-linux-loong64@7.0.2':
+    resolution: {integrity: sha512-uEHck9i8hoAzXPiYRib1O7miOnz23SxIeVl6F4LXox+qov1K35jHcEW6VHKvZI+pyvl7fZEP4MCU5LYvIq1GuQ==}
+    engines: {node: '>=16.20.0'}
+    cpu: [loong64]
+    os: [linux]
+
+  '@typescript/typescript-linux-mips64el@7.0.2':
+    resolution: {integrity: sha512-R4KvAMnE43W5Qeqb0Ly56O3mWMWIAgsMyz36DCaycd5nbg/9kzm0liw3JocfRqyJY0KPmzFjbswozXyW0DnIYA==}
+    engines: {node: '>=16.20.0'}
+    cpu: [mips64el]
+    os: [linux]
+
+  '@typescript/typescript-linux-ppc64@7.0.2':
+    resolution: {integrity: sha512-DORx5b3sd/4S7eayxm4FQv+A7CrkUIGRaHiwI8oiHTAI1fAPWhF4J0vAlkC8biAlHSVVwxMQ3tjZ2/DVbnQiiA==}
+    engines: {node: '>=16.20.0'}
+    cpu: [ppc64]
+    os: [linux]
+
+  '@typescript/typescript-linux-riscv64@7.0.2':
+    resolution: {integrity: sha512-wf0jqEDOjrPRnKwYRyyJDRo11KMbvMFrU+q4zqKyChODBzvlkbhNQfKvLxQCcwTpdDaXSHZTVuh0JoCrKCUMHQ==}
+    engines: {node: '>=16.20.0'}
+    cpu: [riscv64]
+    os: [linux]
+
+  '@typescript/typescript-linux-s390x@7.0.2':
+    resolution: {integrity: sha512-IkwJc3L7yhytWd/ewjyxNDfOmswCm9GWMJT/ue/dU4aZNbwZeYAetq42VyLmsmSjvoX7z74X6ZaYCtzAr0EuGw==}
+    engines: {node: '>=16.20.0'}
+    cpu: [s390x]
+    os: [linux]
+
+  '@typescript/typescript-linux-x64@7.0.2':
+    resolution: {integrity: sha512-EYdf2cNg7rgCWJnxCdJ+F3V39O8ihb37eHAu1LK8oAFizgTQbPOK7zHHXbPt8rX24COqODXeI3sIf0fCXG7H/A==}
+    engines: {node: '>=16.20.0'}
+    cpu: [x64]
+    os: [linux]
+
+  '@typescript/typescript-netbsd-arm64@7.0.2':
+    resolution: {integrity: sha512-+polYF4MF04aPpO5FTkHran9yUQDSXqy5GiSDKpsll5jy3l3+g9QLhpf39T+ePtefhXLOGrLl0QIjkQP6VnelA==}
+    engines: {node: '>=16.20.0'}
+    cpu: [arm64]
+    os: [netbsd]
+
+  '@typescript/typescript-netbsd-x64@7.0.2':
+    resolution: {integrity: sha512-8YIT0EHM/3dq10ZOVF/A7pc/YSMtbcecct4rWtexrnSCHOPcpC2KTLXfTCR6vDpnSiY12heNb1GiN/wu+T/FyA==}
+    engines: {node: '>=16.20.0'}
+    cpu: [x64]
+    os: [netbsd]
+
+  '@typescript/typescript-openbsd-arm64@7.0.2':
+    resolution: {integrity: sha512-APT8+ClYnuYm1u9+kgGXoMj2VzWzcymwh2gNSQVySHfkRDGOTVkoWLjCmOQSaO+PoqQ57B0flRp9SA+7GnnkzQ==}
+    engines: {node: '>=16.20.0'}
+    cpu: [arm64]
+    os: [openbsd]
+
+  '@typescript/typescript-openbsd-x64@7.0.2':
+    resolution: {integrity: sha512-yX7s+Q0Dln0Dt9tEzZsAjXXR/+ytBM7AlglaqyeMPxQszJ1JhlJdZ6jLA+IzldHtflX81em7lDao1xXu+aRRkg==}
+    engines: {node: '>=16.20.0'}
+    cpu: [x64]
+    os: [openbsd]
+
+  '@typescript/typescript-sunos-x64@7.0.2':
+    resolution: {integrity: sha512-dLJDGaLZ1D4HPQn62u1n8mBDkJREwMsAkCdkwd4Ieqw+x3TUyTsqY0YiBCtE6H6OzzgGk3iuZ3vFWRS+E8/d1g==}
+    engines: {node: '>=16.20.0'}
+    cpu: [x64]
+    os: [sunos]
+
+  '@typescript/typescript-win32-arm64@7.0.2':
+    resolution: {integrity: sha512-Gyl1Vy6OsWesLzmq+EP0Fb7b4Nid5232AvcA2SFcdYreldpNtYFFofPjnt62y9hQy7VTaZp65ICJjuAQRaVcIQ==}
+    engines: {node: '>=16.20.0'}
+    cpu: [arm64]
+    os: [win32]
+
+  '@typescript/typescript-win32-x64@7.0.2':
+    resolution: {integrity: sha512-0BQ3HkAHHlKLSp1qRvf3SUhGpGsDuhB/jgFw75guyqbxJqEaS0Cw/VFO8i2nHglJUzQCRtMMR/IBAKE3ETMC4g==}
+    engines: {node: '>=16.20.0'}
+    cpu: [x64]
+    os: [win32]
+
+  csstype@3.2.3:
+    resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
+
+  debug@4.4.3:
+    resolution: {integrity: sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA==}
+    engines: {node: '>=6.0'}
+    peerDependencies:
+      supports-color: '*'
+    peerDependenciesMeta:
+      supports-color:
+        optional: true
+
+  detect-libc@2.1.2:
+    resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
+    engines: {node: '>=8'}
+
+  electron@44.5.1:
+    resolution: {integrity: sha512-lx7AYoFIiyvEvgvpyWO9kOC60xtNPpiPZAth6Fmg9NutzpCAMLwpUlaBY2EXfZyIgUdzEmLMj9KvK0Vrokl1yQ==}
+    engines: {node: '>= 22.12.0'}
+    hasBin: true
+
+  embla-carousel-autoplay@8.6.0:
+    resolution: {integrity: sha512-OBu5G3nwaSXkZCo1A6LTaFMZ8EpkYbwIaH+bPqdBnDGQ2fh4+NbzjXjs2SktoPNKCtflfVMc75njaDHOYXcrsA==}
+    peerDependencies:
+      embla-carousel: 8.6.0
+
+  embla-carousel-fade@8.6.0:
+    resolution: {integrity: sha512-qaYsx5mwCz72ZrjlsXgs1nKejSrW+UhkbOMwLgfRT7w2LtdEB03nPRI06GHuHv5ac2USvbEiX2/nAHctcDwvpg==}
+    peerDependencies:
+      embla-carousel: 8.6.0
+
+  embla-carousel@8.6.0:
+    resolution: {integrity: sha512-SjWyZBHJPbqxHOzckOfo8lHisEaJWmwd23XppYFYVh10bU66/Pn5tkVkbkCMZVdbUE5eTCI2nD8OyIP4Z+uwkA==}
+
+  env-paths@3.0.0:
+    resolution: {integrity: sha512-dtJUTepzMW3Lm/NPxRf3wP4642UWhjL2sQxc+ym2YMj1m/H2zDNQOlezafzkHwn6sMstjHTwG6iQQsctDW/b1A==}
+    engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
+
+  fdir@6.5.0:
+    resolution: {integrity: sha512-tIbYtZbucOs0BRGqPJkshJUYdL+SDH7dVM8gjy+ERp3WAUjLEFJE+02kanyHtwjWOnwrKYBiwAmM0p4kLJAnXg==}
+    engines: {node: '>=12.0.0'}
+    peerDependencies:
+      picomatch: ^3 || ^4
+    peerDependenciesMeta:
+      picomatch:
+        optional: true
+
+  fsevents@2.3.3:
+    resolution: {integrity: sha512-5xoDfX+fL7faATnagmWPpbFtwh/R77WmMMqqHGS65C3vvB0YHrgF+B1YmZ3441tMj5n63k0212XNoJwzlhffQw==}
+    engines: {node: ^8.16.0 || ^10.6.0 || >=11.0.0}
+    os: [darwin]
+
+  graceful-fs@4.2.11:
+    resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
+
+  keyborg@2.14.1:
+    resolution: {integrity: sha512-/WmmVBa6Me3hIKAOIyIq1sql+6oydQZzGMBDLNfOcJ8710byMsq3KSLS8GQhBJHOMtvnXnUBrDAIbABcZVipcg==}
+
+  keyborg@3.498.0:
+    resolution: {integrity: sha512-EM963ckIg3nCaqF631tWKfy5+t3Lc5/zQ6bj0zucaZnChzeJbXa69W0cE7j09erYZO7s5/dupxyVqPSL8mdxEQ==}
+
+  lightningcss-android-arm64@1.33.0:
+    resolution: {integrity: sha512-gEpRTalKdosp4Bb8qWtc2iOgE5SeIHlpS1up9bFq2wAyYhl1UdTObYiHe98zEM9SQvSoqQZ1IQD0JNpg3Ml5pg==}
+    engines: {node: '>= 12.0.0'}
+    cpu: [arm64]
+    os: [android]
+
+  lightningcss-darwin-arm64@1.33.0:
+    resolution: {integrity: sha512-Sciaz8eenNTKn9b3t7+xr0ipTp9YxKQY4npwQ3mrRuL0BAVHBLyZxofhaKBAVtzmtRZ/zTyo0/to4B1uWG/Djg==}
+    engines: {node: '>= 12.0.0'}
+    cpu: [arm64]
+    os: [darwin]
+
+  lightningcss-darwin-x64@1.33.0:
+    resolution: {integrity: sha512-Z5UPAxzrjlWNNyGy6i65cJzzvgJ5D3T6wMvs+gWpY9d7qRhANrxqAp6LhxIgZhWEw18RfJTGcRxjuLIBr+m8XQ==}
+    engines: {node: '>= 12.0.0'}
+    cpu: [x64]
+    os: [darwin]
+
+  lightningcss-freebsd-x64@1.33.0:
+    resolution: {integrity: sha512-QQM/Ti/hQajJwCY+RiWuCZ9sdtI/XQk7nDK5vC8kkdwixezOlDgvDx7+RT+QjK6FcFT4MpsuoBnHIo/O3StRRg==}
+    engines: {node: '>= 12.0.0'}
+    cpu: [x64]
+    os: [freebsd]
+
+  lightningcss-linux-arm-gnueabihf@1.33.0:
+    resolution: {integrity: sha512-N7FVBe6iS24MlM6R/4RBTxGhQheZGs7tiQ9U32UtF75NzP5Q7xWPRqLBCKxlRQRk3rY1jCIPLzx7WzOhuUIRLQ==}
+    engines: {node: '>= 12.0.0'}
+    cpu: [arm]
+    os: [linux]
+
+  lightningcss-linux-arm64-gnu@1.33.0:
+    resolution: {integrity: sha512-j2v/itmy4HlNxlc6voKXYgBqNi0Ng2LShg4z7GufpEgs05P+2suBVyi9I6YHq5uoVFx9ETin3eCEhLVyXGQnKg==}
+    engines: {node: '>= 12.0.0'}
+    cpu: [arm64]
+    os: [linux]
+
+  lightningcss-linux-arm64-musl@1.33.0:
+    resolution: {integrity: sha512-yiO5ROMuYQgXbC60yjZU5CYSFZGKXL0HFATXt9mHJn1+zW55oCtMI9NfcVhYLMFDL7gV7oBPon/EmMMGg2OvtQ==}
+    engines: {node: '>= 12.0.0'}
+    cpu: [arm64]
+    os: [linux]
+
+  lightningcss-linux-x64-gnu@1.33.0:
+    resolution: {integrity: sha512-ar+Ju7LmcN0Jo4FpL4hpFybwNG9/3A/Br5KW2n2jyODg3MEZXaDYADdemoNS+BDNfMgKvylJLj4S5tyRActuAg==}
+    engines: {node: '>= 12.0.0'}
+    cpu: [x64]
+    os: [linux]
+
+  lightningcss-linux-x64-musl@1.33.0:
+    resolution: {integrity: sha512-RYiYbkokw0trfKqqzfF55lginwEPrD3OJDfTuJzFs1MK6iFnDenaz1fqLLtX4ITG3OktJQXOeTaw1awrBAlZPw==}
+    engines: {node: '>= 12.0.0'}
+    cpu: [x64]
+    os: [linux]
+
+  lightningcss-win32-arm64-msvc@1.33.0:
+    resolution: {integrity: sha512-1K+MPfLSFVpphzpdbfkhlWk6wBrTObBzS2T6db10PNOZgR9GoVsAWzwNyuhUYYbTp23j+4RrncfujZ4uAzXvwA==}
+    engines: {node: '>= 12.0.0'}
+    cpu: [arm64]
+    os: [win32]
+
+  lightningcss-win32-x64-msvc@1.33.0:
+    resolution: {integrity: sha512-OlEICDx/Xl0FqSp4bry8zFnCvGpig3Gl4gCquvYwHuqJKEC1+n9NgDniFvqHGmMv1ZkqDJrDqKKSykTDX+ehuA==}
+    engines: {node: '>= 12.0.0'}
+    cpu: [x64]
+    os: [win32]
+
+  lightningcss@1.33.0:
+    resolution: {integrity: sha512-WkUDrojuJs0xkgGf2udWxa3yGBRxPtxUkB79i6aCZLRgc7PM8fZe9TosfPDcvEpQZbuFASnHYmRLBLUbmLOIIA==}
+    engines: {node: '>= 12.0.0'}
+
+  ms@2.1.3:
+    resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
+
+  nanoid@3.3.19:
+    resolution: {integrity: sha512-Y2tUNy4ouw6tq5oDSKeQYGOyhkUBhNOcGV/02KC+6kd9eDGqdZd++mjMiIDilrBYvjEnCYvVtsuHCuP+okSfug==}
+    engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
+    hasBin: true
+
+  picocolors@1.1.1:
+    resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
+
+  picomatch@4.0.7:
+    resolution: {integrity: sha512-qcJu88Q2IWqJsDD529JKMdwGm/dvInW4HvQnRwiH9JtihJvzGOscDtHE3x1pBKeUOTysQ8kVmLnJ2kJu7yhcGA==}
+    engines: {node: '>=12'}
+
+  postcss@8.5.28:
+    resolution: {integrity: sha512-RRuzqDtt5Y9h3quz5hWhK+TPnsmVs6WwSU6LkJMeY4HstUEDuYTG8UJSdawMRzmzAtV+KEoG8N3Qg2qLy5vM/A==}
+    engines: {node: ^10 || ^12 || >=14}
+
+  progress@2.0.3:
+    resolution: {integrity: sha512-7PiHtLll5LdnKIMw100I+8xJXR5gW2QwWYkT6iJva0bXitZKa/XMrSbdmg3r2Xnaidz9Qumd0VPaMrZlF9V9sA==}
+    engines: {node: '>=0.4.0'}
+
+  react-dom@19.3.0:
+    resolution: {integrity: sha512-JDk8dgif51OjFoDE70+OT9ICyYr+69HlmihNwp1+Nsfbna3t5sIiCa9ZJktDmQ4/1b/rn26hIAR2uYXDMr5r0Q==}
+    peerDependencies:
+      react: ^19.3.0
+
+  react@19.3.0:
+    resolution: {integrity: sha512-E8LUcbtBWt20bbl2YoHfx4ZDBdxVTfOKtCZn9cDSJ4l6/nuoApcpIBcj47t2wZoVX8g2ZHuMHbiShgCR1T5Sog==}
+    engines: {node: '>=0.10.0'}
+
+  rolldown@1.2.12:
+    resolution: {integrity: sha512-8wafseiaG80xmXSfqidUNqZcylTlhmPZZt+za2m+js2sFZ8dTNlhIOV2WcbIPx2hgwPBJpEUGFAMZ9bgBBLTSQ==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    hasBin: true
+
+  rtl-css-js@1.16.1:
+    resolution: {integrity: sha512-lRQgou1mu19e+Ya0LsTvKrVJ5TYUbqCVPAiImX3UfLTenarvPUl1QFdvu5Z3PYmHT9RCcwIfbjRQBntExyj3Zg==}
+
+  scheduler@0.28.0:
+    resolution: {integrity: sha512-juorfCmIkIw8tT+p5BXSm6PJjQF/ycEYmKyzURCIt/RaZIhL+PulbQ9Yu2z1HdOJDdqDTlxA1+xKBmHXJsczAw==}
+
+  semver@7.8.5:
+    resolution: {integrity: sha512-Y7/KDsb8LjooZpwaqGyulO6DQlksgCncchHGk+sZIY4SBvUocMBEFH5Ur1fI4dV+Jvl0w6cjvucaIi40puRioA==}
+    engines: {node: '>=10'}
+    hasBin: true
+
+  source-map-js@1.2.2:
+    resolution: {integrity: sha512-KGj/8Y43x35aZVDtt+J4mK1hoLGHULMYfSkODJNQjNDC3oW1PqPoxMwo0pLUsWM/UEGzON/NxeHywEfNXNP3Vw==}
+    engines: {node: '>=0.10.0'}
+
+  stylis@4.4.0:
+    resolution: {integrity: sha512-5Z9ZpRzfuH6l/UAvCPAPUo3665Nk2wLaZU3x+TLHKVzIz33+sbJqbtrYoC3KD4/uVOr2Zp+L0LySezP9OHV9yA==}
+
+  sumchecker@3.0.1:
+    resolution: {integrity: sha512-MvjXzkz/BOfyVDkG0oFOtBxHX2u3gKbMHIF/dXblZsgD3BWOFLmHovIpZY7BykJdAjcqRCBi1WYBNdEC9yI7vg==}
+    engines: {node: '>= 8.0'}
+
+  tabster@8.8.1:
+    resolution: {integrity: sha512-MVwqtSeuwcwGFM4V/TXRN93IGoxhaAQek+highHWZRcDecPy2WlsohvAnngu06EI2qtu3OQZC08Cg+vx78we9Q==}
+
+  tinyglobby@0.2.17:
+    resolution: {integrity: sha512-wXR/dYpcqKmfWpEdZjiKJOwCNFndD0DMnrW/cYjVGttEkBfVgcLFHoNrlj47mjOVic9yyNu65alsgF4NQyTa2g==}
+    engines: {node: '>=12.0.0'}
+
+  tslib@2.8.1:
+    resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
+
+  typescript@7.0.2:
+    resolution: {integrity: sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA==}
+    engines: {node: '>=16.20.0'}
+    hasBin: true
+
+  undici-types@7.24.6:
+    resolution: {integrity: sha512-WRNW+sJgj5OBN4/0JpHFqtqzhpbnV0GuB+OozA9gCL7a993SmU+1JBZCzLNxYsbMfIeDL+lTsphD5jN5N+n0zg==}
+
+  undici@7.30.0:
+    resolution: {integrity: sha512-dkrQXeHSaoamnItlYbmzG0wFYrM0ZwDxCIg0A7aKjTyyhh9svRzCNFEzV+Vm05/yehjCzjDZ31KXfGEjYSztDQ==}
+    engines: {node: '>=20.18.1'}
+
+  use-sync-external-store@1.7.0:
+    resolution: {integrity: sha512-6L+EeigHMQhdaIPNIFUKwfWJSwWFQ8gJbJ2DLOs5sDIegTwR9fRxvnM3uciHKjIZhFz+KAv2emhWMRvDmMcY8A==}
+    peerDependencies:
+      react: ^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0
+
+  vite@8.3.2:
+    resolution: {integrity: sha512-SQr1x6W5vVSbROg7vsyXIaxK9b0G7zsT68acdWWRmnBUsgDieLCRG+Rep9WdZgcposvv/GSnr4GUUBqB3vXq6w==}
+    engines: {node: ^20.19.0 || >=22.12.0}
+    hasBin: true
+    peerDependencies:
+      '@types/node': ^20.19.0 || >=22.12.0
+      '@vitejs/devtools': ^0.7.1
+      esbuild: ^0.27.0 || ^0.28.0
+      jiti: '>=1.21.0'
+      less: ^4.0.0
+      sass: ^1.70.0
+      sass-embedded: ^1.70.0
+      stylus: '>=0.54.8'
+      sugarss: ^5.0.0
+      terser: ^5.16.0
+      tsx: ^4.8.1
+      yaml: ^2.4.2
+    peerDependenciesMeta:
+      '@types/node':
+        optional: true
+      '@vitejs/devtools':
+        optional: true
+      esbuild:
+        optional: true
+      jiti:
+        optional: true
+      less:
+        optional: true
+      sass:
+        optional: true
+      sass-embedded:
+        optional: true
+      stylus:
+        optional: true
+      sugarss:
+        optional: true
+      terser:
+        optional: true
+      tsx:
+        optional: true
+      yaml:
+        optional: true
+
+  zustand@5.0.15:
+    resolution: {integrity: sha512-MpSEjRiBkA9crSYeOUH32rJC7SVqAbm0Fqcqge/bUi2PPoLcBWKOsG+C8mevmpr8TwXHBVkChbbJiyvkE+i/3A==}
+    engines: {node: '>=12.20.0'}
+    peerDependencies:
+      '@types/react': '>=18.0.0'
+      immer: '>=9.0.6'
+      react: '>=18.0.0'
+      use-sync-external-store: '>=1.2.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      immer:
+        optional: true
+      react:
+        optional: true
+      use-sync-external-store:
+        optional: true
+
+snapshots:
+
+  '@babel/runtime@7.29.7': {}
+
+  '@electron-internal/extract-zip@1.0.5': {}
+
+  '@electron/get@5.1.0':
+    dependencies:
+      debug: 4.4.3
+      env-paths: 3.0.0
+      graceful-fs: 4.2.11
+      progress: 2.0.3
+      semver: 7.8.5
+      sumchecker: 3.0.1
+    optionalDependencies:
+      undici: 7.30.0
+    transitivePeerDependencies:
+      - supports-color
+
+  '@emotion/hash@0.9.2': {}
+
+  '@floating-ui/core@1.8.0':
+    dependencies:
+      '@floating-ui/utils': 0.2.12
+
+  '@floating-ui/devtools@0.2.3(@floating-ui/dom@1.8.0)':
+    dependencies:
+      '@floating-ui/dom': 1.8.0
+
+  '@floating-ui/dom@1.8.0':
+    dependencies:
+      '@floating-ui/core': 1.8.0
+      '@floating-ui/utils': 0.2.12
+
+  '@floating-ui/utils@0.2.12': {}
+
+  '@fluentui/keyboard-keys@9.0.9':
+    dependencies:
+      '@swc/helpers': 0.5.23
+
+  '@fluentui/priority-overflow@9.4.3':
+    dependencies:
+      '@swc/helpers': 0.5.23
+
+  '@fluentui/react-accordion@9.12.4(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/react-aria': 9.17.15(react@19.3.0)
+      '@fluentui/react-context-selector': 9.2.20(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-icons': 2.0.343(react@19.3.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-motion': 9.16.4(react@19.3.0)
+      '@fluentui/react-motion-components-preview': 0.15.9(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+    transitivePeerDependencies:
+      - scheduler
+
+  '@fluentui/react-alert@9.0.2-beta.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/react-avatar': 9.11.8(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-button': 9.11.1(react@19.3.0)
+      '@fluentui/react-icons': 2.0.343(react@19.3.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+    transitivePeerDependencies:
+      - react-dom
+      - scheduler
+
+  '@fluentui/react-aria@9.17.15(react@19.3.0)':
+    dependencies:
+      '@fluentui/keyboard-keys': 9.0.9
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+
+  '@fluentui/react-avatar@9.11.8(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/react-badge': 9.5.6(react@19.3.0)
+      '@fluentui/react-context-selector': 9.2.20(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-icons': 2.0.343(react@19.3.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-popover': 9.14.9(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-tooltip': 9.10.7(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+    transitivePeerDependencies:
+      - react-dom
+      - scheduler
+
+  '@fluentui/react-badge@9.5.6(react@19.3.0)':
+    dependencies:
+      '@fluentui/react-icons': 2.0.343(react@19.3.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+
+  '@fluentui/react-breadcrumb@9.4.6(react@19.3.0)':
+    dependencies:
+      '@fluentui/react-aria': 9.17.15(react@19.3.0)
+      '@fluentui/react-button': 9.11.1(react@19.3.0)
+      '@fluentui/react-icons': 2.0.343(react@19.3.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-link': 9.8.5(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+
+  '@fluentui/react-button@9.11.1(react@19.3.0)':
+    dependencies:
+      '@fluentui/keyboard-keys': 9.0.9
+      '@fluentui/react-aria': 9.17.15(react@19.3.0)
+      '@fluentui/react-icons': 2.0.343(react@19.3.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+
+  '@fluentui/react-card@9.7.3(react@19.3.0)':
+    dependencies:
+      '@fluentui/keyboard-keys': 9.0.9
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-text': 9.6.20(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+
+  '@fluentui/react-carousel@9.9.14(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/react-aria': 9.17.15(react@19.3.0)
+      '@fluentui/react-button': 9.11.1(react@19.3.0)
+      '@fluentui/react-context-selector': 9.2.20(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-icons': 2.0.343(react@19.3.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-tooltip': 9.10.7(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      embla-carousel: 8.6.0
+      embla-carousel-autoplay: 8.6.0(embla-carousel@8.6.0)
+      embla-carousel-fade: 8.6.0(embla-carousel@8.6.0)
+      react: 19.3.0
+    transitivePeerDependencies:
+      - react-dom
+      - scheduler
+
+  '@fluentui/react-checkbox@9.6.5(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/react-field': 9.5.5(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-icons': 2.0.343(react@19.3.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-label': 9.4.5(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+    transitivePeerDependencies:
+      - scheduler
+
+  '@fluentui/react-color-picker@9.3.1(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/react-context-selector': 9.2.20(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+    transitivePeerDependencies:
+      - scheduler
+
+  '@fluentui/react-combobox@9.17.7(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/keyboard-keys': 9.0.9
+      '@fluentui/react-aria': 9.17.15(react@19.3.0)
+      '@fluentui/react-context-selector': 9.2.20(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-field': 9.5.5(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-icons': 2.0.343(react@19.3.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-portal': 9.8.16(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@fluentui/react-positioning': 9.23.3(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+      react-dom: 19.3.0(react@19.3.0)
+    transitivePeerDependencies:
+      - scheduler
+
+  '@fluentui/react-components@9.74.9(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/react-accordion': 9.12.4(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-alert': 9.0.2-beta.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-aria': 9.17.15(react@19.3.0)
+      '@fluentui/react-avatar': 9.11.8(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-badge': 9.5.6(react@19.3.0)
+      '@fluentui/react-breadcrumb': 9.4.6(react@19.3.0)
+      '@fluentui/react-button': 9.11.1(react@19.3.0)
+      '@fluentui/react-card': 9.7.3(react@19.3.0)
+      '@fluentui/react-carousel': 9.9.14(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-checkbox': 9.6.5(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-color-picker': 9.3.1(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-combobox': 9.17.7(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-dialog': 9.18.5(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-divider': 9.7.5(react@19.3.0)
+      '@fluentui/react-drawer': 9.13.4(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-field': 9.5.5(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-image': 9.4.5(react@19.3.0)
+      '@fluentui/react-infobutton': 9.0.1-beta.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-infolabel': 9.4.27(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-input': 9.8.7(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-label': 9.4.5(react@19.3.0)
+      '@fluentui/react-link': 9.8.5(react@19.3.0)
+      '@fluentui/react-list': 9.6.19(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-menu': 9.25.6(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-message-bar': 9.7.7(react@19.3.0)
+      '@fluentui/react-motion': 9.16.4(react@19.3.0)
+      '@fluentui/react-nav': 9.4.7(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-overflow': 9.9.4(react@19.3.0)
+      '@fluentui/react-persona': 9.7.10(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-popover': 9.14.9(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-portal': 9.8.16(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@fluentui/react-positioning': 9.23.3(react@19.3.0)
+      '@fluentui/react-progress': 9.5.6(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-provider': 9.22.21(react@19.3.0)
+      '@fluentui/react-radio': 9.6.6(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-rating': 9.4.6(react@19.3.0)
+      '@fluentui/react-search': 9.4.7(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-select': 9.5.6(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-skeleton': 9.7.6(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-slider': 9.6.6(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-spinbutton': 9.6.7(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-spinner': 9.8.6(react@19.3.0)
+      '@fluentui/react-swatch-picker': 9.6.2(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-switch': 9.7.6(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-table': 9.19.22(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-tabs': 9.12.5(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-tag-picker': 9.10.5(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-tags': 9.9.7(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-teaching-popover': 9.7.7(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-text': 9.6.20(react@19.3.0)
+      '@fluentui/react-textarea': 9.7.7(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-toast': 9.8.4(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@fluentui/react-toolbar': 9.8.5(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-tooltip': 9.10.7(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@fluentui/react-tree': 9.16.8(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@fluentui/react-virtualizer': 9.0.0-alpha.116(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+    transitivePeerDependencies:
+      - react-dom
+      - scheduler
+
+  '@fluentui/react-context-selector@9.2.20(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+      scheduler: 0.28.0
+
+  '@fluentui/react-dialog@9.18.5(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/keyboard-keys': 9.0.9
+      '@fluentui/react-aria': 9.17.15(react@19.3.0)
+      '@fluentui/react-context-selector': 9.2.20(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-icons': 2.0.343(react@19.3.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-motion': 9.16.4(react@19.3.0)
+      '@fluentui/react-motion-components-preview': 0.15.9(react@19.3.0)
+      '@fluentui/react-portal': 9.8.16(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+    transitivePeerDependencies:
+      - react-dom
+      - scheduler
+
+  '@fluentui/react-divider@9.7.5(react@19.3.0)':
+    dependencies:
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+
+  '@fluentui/react-drawer@9.13.4(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/react-dialog': 9.18.5(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-motion': 9.16.4(react@19.3.0)
+      '@fluentui/react-motion-components-preview': 0.15.9(react@19.3.0)
+      '@fluentui/react-portal': 9.8.16(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+    transitivePeerDependencies:
+      - react-dom
+      - scheduler
+
+  '@fluentui/react-field@9.5.5(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/react-context-selector': 9.2.20(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-icons': 2.0.343(react@19.3.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-label': 9.4.5(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+    transitivePeerDependencies:
+      - scheduler
+
+  '@fluentui/react-icons@2.0.343(react@19.3.0)':
+    dependencies:
+      '@griffel/react': 1.7.8(react@19.3.0)
+      react: 19.3.0
+      tslib: 2.8.1
+
+  '@fluentui/react-image@9.4.5(react@19.3.0)':
+    dependencies:
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+
+  '@fluentui/react-infobutton@9.0.1-beta.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/react-icons': 2.0.343(react@19.3.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-label': 9.4.5(react@19.3.0)
+      '@fluentui/react-popover': 9.14.9(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+    transitivePeerDependencies:
+      - react-dom
+      - scheduler
+
+  '@fluentui/react-infolabel@9.4.27(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/react-icons': 2.0.343(react@19.3.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-label': 9.4.5(react@19.3.0)
+      '@fluentui/react-popover': 9.14.9(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+    transitivePeerDependencies:
+      - react-dom
+      - scheduler
+
+  '@fluentui/react-input@9.8.7(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/react-field': 9.5.5(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+    transitivePeerDependencies:
+      - scheduler
+
+  '@fluentui/react-jsx-runtime@9.4.6(react@19.3.0)':
+    dependencies:
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+
+  '@fluentui/react-label@9.4.5(react@19.3.0)':
+    dependencies:
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+
+  '@fluentui/react-link@9.8.5(react@19.3.0)':
+    dependencies:
+      '@fluentui/keyboard-keys': 9.0.9
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+
+  '@fluentui/react-list@9.6.19(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/keyboard-keys': 9.0.9
+      '@fluentui/react-checkbox': 9.6.5(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-context-selector': 9.2.20(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+    transitivePeerDependencies:
+      - scheduler
+
+  '@fluentui/react-menu@9.25.6(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/keyboard-keys': 9.0.9
+      '@fluentui/react-aria': 9.17.15(react@19.3.0)
+      '@fluentui/react-context-selector': 9.2.20(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-icons': 2.0.343(react@19.3.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-motion': 9.16.4(react@19.3.0)
+      '@fluentui/react-motion-components-preview': 0.15.9(react@19.3.0)
+      '@fluentui/react-portal': 9.8.16(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@fluentui/react-positioning': 9.23.3(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+    transitivePeerDependencies:
+      - react-dom
+      - scheduler
+
+  '@fluentui/react-message-bar@9.7.7(react@19.3.0)':
+    dependencies:
+      '@fluentui/react-button': 9.11.1(react@19.3.0)
+      '@fluentui/react-icons': 2.0.343(react@19.3.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-link': 9.8.5(react@19.3.0)
+      '@fluentui/react-motion': 9.16.4(react@19.3.0)
+      '@fluentui/react-motion-components-preview': 0.15.9(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+
+  '@fluentui/react-motion-components-preview@0.15.9(react@19.3.0)':
+    dependencies:
+      '@fluentui/react-motion': 9.16.4(react@19.3.0)
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+
+  '@fluentui/react-motion@9.16.4(react@19.3.0)':
+    dependencies:
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+
+  '@fluentui/react-nav@9.4.7(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/react-aria': 9.17.15(react@19.3.0)
+      '@fluentui/react-button': 9.11.1(react@19.3.0)
+      '@fluentui/react-context-selector': 9.2.20(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-divider': 9.7.5(react@19.3.0)
+      '@fluentui/react-drawer': 9.13.4(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-icons': 2.0.343(react@19.3.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-motion': 9.16.4(react@19.3.0)
+      '@fluentui/react-motion-components-preview': 0.15.9(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-tooltip': 9.10.7(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+    transitivePeerDependencies:
+      - react-dom
+      - scheduler
+
+  '@fluentui/react-overflow@9.9.4(react@19.3.0)':
+    dependencies:
+      '@fluentui/priority-overflow': 9.4.3
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+
+  '@fluentui/react-persona@9.7.10(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/react-avatar': 9.11.8(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-badge': 9.5.6(react@19.3.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+    transitivePeerDependencies:
+      - react-dom
+      - scheduler
+
+  '@fluentui/react-popover@9.14.9(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/keyboard-keys': 9.0.9
+      '@fluentui/react-aria': 9.17.15(react@19.3.0)
+      '@fluentui/react-context-selector': 9.2.20(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-motion': 9.16.4(react@19.3.0)
+      '@fluentui/react-motion-components-preview': 0.15.9(react@19.3.0)
+      '@fluentui/react-portal': 9.8.16(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@fluentui/react-positioning': 9.23.3(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+    transitivePeerDependencies:
+      - react-dom
+      - scheduler
+
+  '@fluentui/react-portal@9.8.16(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
+    dependencies:
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+      react-dom: 19.3.0(react@19.3.0)
+
+  '@fluentui/react-positioning@9.23.3(react@19.3.0)':
+    dependencies:
+      '@floating-ui/devtools': 0.2.3(@floating-ui/dom@1.8.0)
+      '@floating-ui/dom': 1.8.0
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+      use-sync-external-store: 1.7.0(react@19.3.0)
+
+  '@fluentui/react-progress@9.5.6(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/react-field': 9.5.5(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-motion': 9.16.4(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+    transitivePeerDependencies:
+      - scheduler
+
+  '@fluentui/react-provider@9.22.21(react@19.3.0)':
+    dependencies:
+      '@fluentui/react-icons': 2.0.343(react@19.3.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/core': 1.21.4
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+
+  '@fluentui/react-radio@9.6.6(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/react-field': 9.5.5(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-label': 9.4.5(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+    transitivePeerDependencies:
+      - scheduler
+
+  '@fluentui/react-rating@9.4.6(react@19.3.0)':
+    dependencies:
+      '@fluentui/react-icons': 2.0.343(react@19.3.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+
+  '@fluentui/react-search@9.4.7(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/react-icons': 2.0.343(react@19.3.0)
+      '@fluentui/react-input': 9.8.7(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+    transitivePeerDependencies:
+      - scheduler
+
+  '@fluentui/react-select@9.5.6(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/react-field': 9.5.5(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-icons': 2.0.343(react@19.3.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+    transitivePeerDependencies:
+      - scheduler
+
+  '@fluentui/react-shared-contexts@9.26.4(react@19.3.0)':
+    dependencies:
+      '@fluentui/react-theme': 9.2.2
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+
+  '@fluentui/react-skeleton@9.7.6(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/react-field': 9.5.5(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+    transitivePeerDependencies:
+      - scheduler
+
+  '@fluentui/react-slider@9.6.6(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/react-field': 9.5.5(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+    transitivePeerDependencies:
+      - scheduler
+
+  '@fluentui/react-spinbutton@9.6.7(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/keyboard-keys': 9.0.9
+      '@fluentui/react-field': 9.5.5(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-icons': 2.0.343(react@19.3.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+    transitivePeerDependencies:
+      - scheduler
+
+  '@fluentui/react-spinner@9.8.6(react@19.3.0)':
+    dependencies:
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-label': 9.4.5(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+
+  '@fluentui/react-swatch-picker@9.6.2(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/react-context-selector': 9.2.20(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-field': 9.5.5(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-icons': 2.0.343(react@19.3.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+    transitivePeerDependencies:
+      - scheduler
+
+  '@fluentui/react-switch@9.7.6(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/react-field': 9.5.5(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-icons': 2.0.343(react@19.3.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-label': 9.4.5(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+    transitivePeerDependencies:
+      - scheduler
+
+  '@fluentui/react-table@9.19.22(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/keyboard-keys': 9.0.9
+      '@fluentui/react-aria': 9.17.15(react@19.3.0)
+      '@fluentui/react-avatar': 9.11.8(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-checkbox': 9.6.5(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-context-selector': 9.2.20(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-icons': 2.0.343(react@19.3.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-radio': 9.6.6(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+    transitivePeerDependencies:
+      - react-dom
+      - scheduler
+
+  '@fluentui/react-tabs@9.12.5(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/react-context-selector': 9.2.20(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+    transitivePeerDependencies:
+      - scheduler
+
+  '@fluentui/react-tabster@9.26.18(react@19.3.0)':
+    dependencies:
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      keyborg: 2.14.1
+      react: 19.3.0
+      tabster: 8.8.1
+
+  '@fluentui/react-tag-picker@9.10.5(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/keyboard-keys': 9.0.9
+      '@fluentui/react-aria': 9.17.15(react@19.3.0)
+      '@fluentui/react-combobox': 9.17.7(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-context-selector': 9.2.20(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-field': 9.5.5(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-icons': 2.0.343(react@19.3.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-portal': 9.8.16(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@fluentui/react-positioning': 9.23.3(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-tags': 9.9.7(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+      react-dom: 19.3.0(react@19.3.0)
+    transitivePeerDependencies:
+      - scheduler
+
+  '@fluentui/react-tags@9.9.7(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/keyboard-keys': 9.0.9
+      '@fluentui/react-aria': 9.17.15(react@19.3.0)
+      '@fluentui/react-avatar': 9.11.8(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-icons': 2.0.343(react@19.3.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+    transitivePeerDependencies:
+      - react-dom
+      - scheduler
+
+  '@fluentui/react-teaching-popover@9.7.7(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/react-aria': 9.17.15(react@19.3.0)
+      '@fluentui/react-button': 9.11.1(react@19.3.0)
+      '@fluentui/react-context-selector': 9.2.20(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-icons': 2.0.343(react@19.3.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-popover': 9.14.9(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+      use-sync-external-store: 1.7.0(react@19.3.0)
+    transitivePeerDependencies:
+      - react-dom
+      - scheduler
+
+  '@fluentui/react-text@9.6.20(react@19.3.0)':
+    dependencies:
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+
+  '@fluentui/react-textarea@9.7.7(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/react-field': 9.5.5(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+    transitivePeerDependencies:
+      - scheduler
+
+  '@fluentui/react-theme@9.2.2':
+    dependencies:
+      '@fluentui/tokens': 1.0.0-alpha.24
+      '@swc/helpers': 0.5.23
+
+  '@fluentui/react-toast@9.8.4(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
+    dependencies:
+      '@fluentui/keyboard-keys': 9.0.9
+      '@fluentui/react-aria': 9.17.15(react@19.3.0)
+      '@fluentui/react-icons': 2.0.343(react@19.3.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-motion': 9.16.4(react@19.3.0)
+      '@fluentui/react-motion-components-preview': 0.15.9(react@19.3.0)
+      '@fluentui/react-portal': 9.8.16(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+    transitivePeerDependencies:
+      - react-dom
+
+  '@fluentui/react-toolbar@9.8.5(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/react-button': 9.11.1(react@19.3.0)
+      '@fluentui/react-context-selector': 9.2.20(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-divider': 9.7.5(react@19.3.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-radio': 9.6.6(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+    transitivePeerDependencies:
+      - scheduler
+
+  '@fluentui/react-tooltip@9.10.7(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
+    dependencies:
+      '@fluentui/keyboard-keys': 9.0.9
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-portal': 9.8.16(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@fluentui/react-positioning': 9.23.3(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+    transitivePeerDependencies:
+      - react-dom
+
+  '@fluentui/react-tree@9.16.8(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)':
+    dependencies:
+      '@fluentui/keyboard-keys': 9.0.9
+      '@fluentui/react-aria': 9.17.15(react@19.3.0)
+      '@fluentui/react-avatar': 9.11.8(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-button': 9.11.1(react@19.3.0)
+      '@fluentui/react-checkbox': 9.6.5(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-context-selector': 9.2.20(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-icons': 2.0.343(react@19.3.0)
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-motion': 9.16.4(react@19.3.0)
+      '@fluentui/react-motion-components-preview': 0.15.9(react@19.3.0)
+      '@fluentui/react-radio': 9.6.6(react@19.3.0)(scheduler@0.28.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-tabster': 9.26.18(react@19.3.0)
+      '@fluentui/react-theme': 9.2.2
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+      react-dom: 19.3.0(react@19.3.0)
+    transitivePeerDependencies:
+      - scheduler
+
+  '@fluentui/react-utilities@9.26.7(react@19.3.0)':
+    dependencies:
+      '@fluentui/keyboard-keys': 9.0.9
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+
+  '@fluentui/react-virtualizer@9.0.0-alpha.116(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
+    dependencies:
+      '@fluentui/react-jsx-runtime': 9.4.6(react@19.3.0)
+      '@fluentui/react-shared-contexts': 9.26.4(react@19.3.0)
+      '@fluentui/react-utilities': 9.26.7(react@19.3.0)
+      '@griffel/react': 1.7.8(react@19.3.0)
+      '@swc/helpers': 0.5.23
+      react: 19.3.0
+      react-dom: 19.3.0(react@19.3.0)
+
+  '@fluentui/tokens@1.0.0-alpha.24':
+    dependencies:
+      '@swc/helpers': 0.5.23
+
+  '@griffel/core@1.21.4':
+    dependencies:
+      '@emotion/hash': 0.9.2
+      '@griffel/style-types': 1.4.3
+      csstype: 3.2.3
+      rtl-css-js: 1.16.1
+      stylis: 4.4.0
+      tslib: 2.8.1
+
+  '@griffel/react@1.7.8(react@19.3.0)':
+    dependencies:
+      '@griffel/core': 1.21.4
+      react: 19.3.0
+      tslib: 2.8.1
+
+  '@griffel/style-types@1.4.3':
+    dependencies:
+      csstype: 3.2.3
+
+  '@laihoe/demoparser2-android-arm-eabi@0.42.0':
+    optional: true
+
+  '@laihoe/demoparser2-android-arm64@0.42.0':
+    optional: true
+
+  '@laihoe/demoparser2-darwin-arm64@0.42.0':
+    optional: true
+
+  '@laihoe/demoparser2-linux-arm-gnueabihf@0.42.0':
+    optional: true
+
+  '@laihoe/demoparser2-linux-arm64-gnu@0.42.0':
+    optional: true
+
+  '@laihoe/demoparser2-linux-arm64-musl@0.42.0':
+    optional: true
+
+  '@laihoe/demoparser2-linux-x64-gnu@0.42.0':
+    optional: true
+
+  '@laihoe/demoparser2-linux-x64-musl@0.42.0':
+    optional: true
+
+  '@laihoe/demoparser2-win32-arm64-msvc@0.42.0':
+    optional: true
+
+  '@laihoe/demoparser2-win32-x64-msvc@0.42.0':
+    optional: true
+
+  '@laihoe/demoparser2@0.42.0':
+    optionalDependencies:
+      '@laihoe/demoparser2-android-arm-eabi': 0.42.0
+      '@laihoe/demoparser2-android-arm64': 0.42.0
+      '@laihoe/demoparser2-darwin-arm64': 0.42.0
+      '@laihoe/demoparser2-linux-arm-gnueabihf': 0.42.0
+      '@laihoe/demoparser2-linux-arm64-gnu': 0.42.0
+      '@laihoe/demoparser2-linux-arm64-musl': 0.42.0
+      '@laihoe/demoparser2-linux-x64-gnu': 0.42.0
+      '@laihoe/demoparser2-linux-x64-musl': 0.42.0
+      '@laihoe/demoparser2-win32-arm64-msvc': 0.42.0
+      '@laihoe/demoparser2-win32-x64-msvc': 0.42.0
+
+  '@oxc-project/types@0.152.0': {}
+
+  '@rolldown/binding-android-arm-eabi@1.2.12':
+    optional: true
+
+  '@rolldown/binding-android-arm64@1.2.12':
+    optional: true
+
+  '@rolldown/binding-darwin-arm64@1.2.12':
+    optional: true
+
+  '@rolldown/binding-darwin-x64@1.2.12':
+    optional: true
+
+  '@rolldown/binding-freebsd-x64@1.2.12':
+    optional: true
+
+  '@rolldown/binding-linux-arm-gnueabihf@1.2.12':
+    optional: true
+
+  '@rolldown/binding-linux-arm64-gnu@1.2.12':
+    optional: true
+
+  '@rolldown/binding-linux-arm64-musl@1.2.12':
+    optional: true
+
+  '@rolldown/binding-linux-ppc64-gnu@1.2.12':
+    optional: true
+
+  '@rolldown/binding-linux-s390x-gnu@1.2.12':
+    optional: true
+
+  '@rolldown/binding-linux-x64-gnu@1.2.12':
+    optional: true
+
+  '@rolldown/binding-linux-x64-musl@1.2.12':
+    optional: true
+
+  '@rolldown/binding-openharmony-arm64@1.2.12':
+    optional: true
+
+  '@rolldown/binding-win32-arm64-msvc@1.2.12':
+    optional: true
+
+  '@rolldown/binding-win32-x64-msvc@1.2.12':
+    optional: true
+
+  '@rolldown/pluginutils@1.0.1': {}
+
+  '@swc/helpers@0.5.23':
+    dependencies:
+      tslib: 2.8.1
+
+  '@types/node@24.19.0':
+    dependencies:
+      undici-types: 7.24.6
+
+  '@typescript/typescript-aix-ppc64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-darwin-arm64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-darwin-x64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-freebsd-arm64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-freebsd-x64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-linux-arm64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-linux-arm@7.0.2':
+    optional: true
+
+  '@typescript/typescript-linux-loong64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-linux-mips64el@7.0.2':
+    optional: true
+
+  '@typescript/typescript-linux-ppc64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-linux-riscv64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-linux-s390x@7.0.2':
+    optional: true
+
+  '@typescript/typescript-linux-x64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-netbsd-arm64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-netbsd-x64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-openbsd-arm64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-openbsd-x64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-sunos-x64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-win32-arm64@7.0.2':
+    optional: true
+
+  '@typescript/typescript-win32-x64@7.0.2':
+    optional: true
+
+  csstype@3.2.3: {}
+
+  debug@4.4.3:
+    dependencies:
+      ms: 2.1.3
+
+  detect-libc@2.1.2: {}
+
+  electron@44.5.1:
+    dependencies:
+      '@electron-internal/extract-zip': 1.0.5
+      '@electron/get': 5.1.0
+      '@types/node': 24.19.0
+    transitivePeerDependencies:
+      - supports-color
+
+  embla-carousel-autoplay@8.6.0(embla-carousel@8.6.0):
+    dependencies:
+      embla-carousel: 8.6.0
+
+  embla-carousel-fade@8.6.0(embla-carousel@8.6.0):
+    dependencies:
+      embla-carousel: 8.6.0
+
+  embla-carousel@8.6.0: {}
+
+  env-paths@3.0.0: {}
+
+  fdir@6.5.0(picomatch@4.0.7):
+    optionalDependencies:
+      picomatch: 4.0.7
+
+  fsevents@2.3.3:
+    optional: true
+
+  graceful-fs@4.2.11: {}
+
+  keyborg@2.14.1: {}
+
+  keyborg@3.498.0: {}
+
+  lightningcss-android-arm64@1.33.0:
+    optional: true
+
+  lightningcss-darwin-arm64@1.33.0:
+    optional: true
+
+  lightningcss-darwin-x64@1.33.0:
+    optional: true
+
+  lightningcss-freebsd-x64@1.33.0:
+    optional: true
+
+  lightningcss-linux-arm-gnueabihf@1.33.0:
+    optional: true
+
+  lightningcss-linux-arm64-gnu@1.33.0:
+    optional: true
+
+  lightningcss-linux-arm64-musl@1.33.0:
+    optional: true
+
+  lightningcss-linux-x64-gnu@1.33.0:
+    optional: true
+
+  lightningcss-linux-x64-musl@1.33.0:
+    optional: true
+
+  lightningcss-win32-arm64-msvc@1.33.0:
+    optional: true
+
+  lightningcss-win32-x64-msvc@1.33.0:
+    optional: true
+
+  lightningcss@1.33.0:
+    dependencies:
+      detect-libc: 2.1.2
+    optionalDependencies:
+      lightningcss-android-arm64: 1.33.0
+      lightningcss-darwin-arm64: 1.33.0
+      lightningcss-darwin-x64: 1.33.0
+      lightningcss-freebsd-x64: 1.33.0
+      lightningcss-linux-arm-gnueabihf: 1.33.0
+      lightningcss-linux-arm64-gnu: 1.33.0
+      lightningcss-linux-arm64-musl: 1.33.0
+      lightningcss-linux-x64-gnu: 1.33.0
+      lightningcss-linux-x64-musl: 1.33.0
+      lightningcss-win32-arm64-msvc: 1.33.0
+      lightningcss-win32-x64-msvc: 1.33.0
+
+  ms@2.1.3: {}
+
+  nanoid@3.3.19: {}
+
+  picocolors@1.1.1: {}
+
+  picomatch@4.0.7: {}
+
+  postcss@8.5.28:
+    dependencies:
+      nanoid: 3.3.19
+      picocolors: 1.1.1
+      source-map-js: 1.2.2
+
+  progress@2.0.3: {}
+
+  react-dom@19.3.0(react@19.3.0):
+    dependencies:
+      react: 19.3.0
+      scheduler: 0.28.0
+
+  react@19.3.0: {}
+
+  rolldown@1.2.12:
+    dependencies:
+      '@oxc-project/types': 0.152.0
+      '@rolldown/pluginutils': 1.0.1
+    optionalDependencies:
+      '@rolldown/binding-android-arm-eabi': 1.2.12
+      '@rolldown/binding-android-arm64': 1.2.12
+      '@rolldown/binding-darwin-arm64': 1.2.12
+      '@rolldown/binding-darwin-x64': 1.2.12
+      '@rolldown/binding-freebsd-x64': 1.2.12
+      '@rolldown/binding-linux-arm-gnueabihf': 1.2.12
+      '@rolldown/binding-linux-arm64-gnu': 1.2.12
+      '@rolldown/binding-linux-arm64-musl': 1.2.12
+      '@rolldown/binding-linux-ppc64-gnu': 1.2.12
+      '@rolldown/binding-linux-s390x-gnu': 1.2.12
+      '@rolldown/binding-linux-x64-gnu': 1.2.12
+      '@rolldown/binding-linux-x64-musl': 1.2.12
+      '@rolldown/binding-openharmony-arm64': 1.2.12
+      '@rolldown/binding-win32-arm64-msvc': 1.2.12
+      '@rolldown/binding-win32-x64-msvc': 1.2.12
+
+  rtl-css-js@1.16.1:
+    dependencies:
+      '@babel/runtime': 7.29.7
+
+  scheduler@0.28.0: {}
+
+  semver@7.8.5: {}
+
+  source-map-js@1.2.2: {}
+
+  stylis@4.4.0: {}
+
+  sumchecker@3.0.1:
+    dependencies:
+      debug: 4.4.3
+    transitivePeerDependencies:
+      - supports-color
+
+  tabster@8.8.1:
+    dependencies:
+      keyborg: 3.498.0
+      tslib: 2.8.1
+
+  tinyglobby@0.2.17:
+    dependencies:
+      fdir: 6.5.0(picomatch@4.0.7)
+      picomatch: 4.0.7
+
+  tslib@2.8.1: {}
+
+  typescript@7.0.2:
+    optionalDependencies:
+      '@typescript/typescript-aix-ppc64': 7.0.2
+      '@typescript/typescript-darwin-arm64': 7.0.2
+      '@typescript/typescript-darwin-x64': 7.0.2
+      '@typescript/typescript-freebsd-arm64': 7.0.2
+      '@typescript/typescript-freebsd-x64': 7.0.2
+      '@typescript/typescript-linux-arm': 7.0.2
+      '@typescript/typescript-linux-arm64': 7.0.2
+      '@typescript/typescript-linux-loong64': 7.0.2
+      '@typescript/typescript-linux-mips64el': 7.0.2
+      '@typescript/typescript-linux-ppc64': 7.0.2
+      '@typescript/typescript-linux-riscv64': 7.0.2
+      '@typescript/typescript-linux-s390x': 7.0.2
+      '@typescript/typescript-linux-x64': 7.0.2
+      '@typescript/typescript-netbsd-arm64': 7.0.2
+      '@typescript/typescript-netbsd-x64': 7.0.2
+      '@typescript/typescript-openbsd-arm64': 7.0.2
+      '@typescript/typescript-openbsd-x64': 7.0.2
+      '@typescript/typescript-sunos-x64': 7.0.2
+      '@typescript/typescript-win32-arm64': 7.0.2
+      '@typescript/typescript-win32-x64': 7.0.2
+
+  undici-types@7.24.6: {}
+
+  undici@7.30.0:
+    optional: true
+
+  use-sync-external-store@1.7.0(react@19.3.0):
+    dependencies:
+      react: 19.3.0
+
+  vite@8.3.2(@types/node@24.19.0):
+    dependencies:
+      lightningcss: 1.33.0
+      picomatch: 4.0.7
+      postcss: 8.5.28
+      rolldown: 1.2.12
+      tinyglobby: 0.2.17
+    optionalDependencies:
+      '@types/node': 24.19.0
+      fsevents: 2.3.3
+
+  zustand@5.0.15(react@19.3.0)(use-sync-external-store@1.7.0(react@19.3.0)):
+    optionalDependencies:
+      react: 19.3.0
+      use-sync-external-store: 1.7.0(react@19.3.0)

@@ -4,6 +4,6 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@laihoe/demoparser2": "^0.0.1"
+    "@laihoe/demoparser2": "^0.42.0"
   }
 }
