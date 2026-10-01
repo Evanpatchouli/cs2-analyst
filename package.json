@@ -3,8 +3,17 @@
   "private": true,
   "version": "0.1.0",
   "packageManager": "pnpm@10.0.0",
+  "pnpm": {
+    "onlyBuiltDependencies": ["esbuild"]
+  },
   "scripts": {
-    "dev": "pnpm --filter @cs2-coach/desktop dev",
-    "build": "pnpm -r build"
+    "dev": "turbo run dev",
+    "start": "turbo run start",
+    "typecheck": "turbo run typecheck",
+    "test:smoke": "turbo run test:smoke",
+    "build": "turbo run build"
+  },
+  "devDependencies": {
+    "turbo": "^2.11.6"
   }
 }

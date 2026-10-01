@@ -1,6 +1,22 @@
 {
   "$schema": "https://turbo.build/schema.json",
+  "globalDependencies": ["tsconfig.base.json"],
   "tasks": {
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "passThroughEnv": ["ELECTRON_*", "electron_*", "npm_config_*"]
+    },
+    "start": {
+      "dependsOn": ["build"],
+      "cache": false,
+      "persistent": true,
+      "passThroughEnv": ["ELECTRON_*", "electron_*", "npm_config_*"]
+    },
+    "test:smoke": {
+      "cache": false,
+      "passThroughEnv": ["ELECTRON_*", "electron_*", "npm_config_*"]
+    },
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]

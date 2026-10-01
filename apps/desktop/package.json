@@ -5,18 +5,26 @@
   "type": "module",
   "main": "dist/electron/main.js",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build"
+    "dev": "install-electron && electron-vite dev",
+    "start": "install-electron && electron-vite preview --skipBuild",
+    "typecheck": "tsc --noEmit",
+    "test:smoke": "pnpm typecheck && install-electron && node ../../scripts/desktop-smoke.mjs",
+    "build": "pnpm typecheck && electron-vite build"
   },
   "dependencies": {
-    "@fluentui/react-components": "latest",
-    "react": "latest",
-    "react-dom": "latest",
-    "zustand": "latest"
+    "@fluentui/react-components": "^9.74.9",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "zustand": "^5.0.15"
   },
   "devDependencies": {
-    "electron": "latest",
-    "typescript": "latest",
-    "vite": "latest"
+    "@types/node": "^24.19.0",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^5.2.0",
+    "electron": "^44.5.1",
+    "electron-vite": "^5.0.0",
+    "typescript": "^7.0.2",
+    "vite": "^7.3.6"
   }
 }
