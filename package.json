@@ -1,0 +1,10 @@
+{
+  "name": "cs2-coach",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.0.0",
+  "scripts": {
+    "dev": "pnpm --filter @cs2-coach/desktop dev",
+    "build": "pnpm -r build"
+  }
+}
