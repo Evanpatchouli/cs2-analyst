@@ -1,15 +1,14 @@
 # Analysis Rules
 
-CS2 Coach findings are evidence-driven.
+Findings must be generated from evidence.
 
-Initial catalog:
+AI is responsible for explanation, not detection.
 
-- low impact round
-- untradeable death
-- opening duel pattern
-- moving first shot
+Initial rule categories:
+
+- low impact rounds
+- untradeable deaths
+- opening duel performance
+- movement and first shot behavior
 - utility efficiency
-- CT/T performance gap
 - clutch behavior
-
-Rules generate evidence. AI only explains the evidence.
