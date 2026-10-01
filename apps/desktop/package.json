@@ -2,6 +2,21 @@
   "name": "@cs2-coach/desktop",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "main": "dist/electron/main.js",
-  "type": "module"
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build"
+  },
+  "dependencies": {
+    "@fluentui/react-components": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "zustand": "latest"
+  },
+  "devDependencies": {
+    "electron": "latest",
+    "typescript": "latest",
+    "vite": "latest"
+  }
 }
