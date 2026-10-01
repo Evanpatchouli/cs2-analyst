@@ -1,5 +1,5 @@
-import type { Player } from "./player";
-import type { Round } from "./round";
+import type { Player } from "./player.js";
+import type { Round } from "./round.js";
 
 export interface Match {
   id: string;

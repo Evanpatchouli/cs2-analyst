@@ -1,4 +1,4 @@
-export type { Player, TeamSide } from "./player";
-export type { MatchEvent, KillEvent, MatchEventType } from "./event";
-export type { Round, RoundWinner } from "./round";
-export type { Match } from "./match";
+export type { Player, TeamSide } from "./player.js";
+export type { MatchEvent, KillEvent, MatchEventType } from "./event.js";
+export type { Round, RoundWinner } from "./round.js";
+export type { Match } from "./match.js";

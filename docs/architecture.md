@@ -11,6 +11,8 @@ CS2 Coach is structured as a desktop application with a deterministic analysis c
 - `analytics`: deterministic metrics calculation
 - `findings`: pattern detection and coaching evidence
 
+The DEM implementation routes native demoparser2 results through an internal adapter and converter before returning `Match`. Native APIs are not exported by the package. See [DEM parsing](./dem-parser.md) for the current mappings and limitations.
+
 ## Principles
 
 DEM parsing, analysis logic and UI presentation must remain independent.

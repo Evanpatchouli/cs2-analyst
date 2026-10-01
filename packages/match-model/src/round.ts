@@ -1,4 +1,4 @@
-import type { MatchEvent } from "./event";
+import type { MatchEvent } from "./event.js";
 
 export type RoundWinner = "CT" | "T" | null;
 

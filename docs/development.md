@@ -17,6 +17,8 @@ pnpm build
 pnpm start
 ```
 
+DEM parser 的安装、调用与测试见 [DEM 解析（P1.5）](./dem-parser.md)。核心包 `match-model` 和 `dem-parser` 已纳入根目录构建与类型检查；运行 parser 的最小测试使用 `pnpm --filter @cs2-coach/dem-parser test`。
+
 `pnpm test:smoke` 会构建应用，并通过 Electron 调试协议验证开发模式和本地生产模式的 React 页面、preload 桥接、资源加载及窗口关闭。测试会临时打开桌面窗口，结束后清理测试进程。
 
 构建产物位于 `apps/desktop/dist/`，包含 `electron/main.js`、`preload/index.cjs` 和 `renderer/index.html`。`pnpm start` 先通过 Turbo 完成构建或恢复构建缓存，再运行本地页面，无需启动开发服务器。当前构建生成可运行的应用代码，不生成安装包。

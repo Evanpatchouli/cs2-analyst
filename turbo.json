@@ -22,7 +22,7 @@
       "outputs": ["dist/**"]
     },
     "typecheck": {
-      "dependsOn": ["^typecheck"]
+      "dependsOn": ["^build", "^typecheck"]
     },
     "lint": {
       "dependsOn": ["^lint"]
