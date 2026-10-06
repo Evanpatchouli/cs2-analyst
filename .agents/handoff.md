@@ -1,5 +1,17 @@
 # Agent Handoff
 
+## 2026-10-06 — P3 Analytics Final Acceptance PASS（contracts frozen for P4）
+
+- 基线 `1d6666b`。本轮只做 `packages/analytics` 的最终一致性验收与真实 bug 修复：未进入 P4 Findings，未加新 Analytics 功能、CT/T 拆分、地图/位置分析、parser/domain 变更、UI/AI 或大重构。
+- **真实 bug 1 — trade 1:1 只在参与状态一致时成立**：`resolveRoundTrades()` 的 trade 只依赖 roster 存活基线，而 `summarizeTrade()` 按玩家 `playsIn()` 过滤；当某回合 trader 与 `tradedVictim` 的 `participant` 不一致时，trade kill 与 traded death 会单向计数。修复：trade 要求双方都确认参与，`tradeableDeaths` 同样只登记确认参与的死亡，`Σ tradeKills === Σ tradedDeaths` 由结构保证。新增 regression（参与不一致 + 正常对照）。
+- **真实 bug 2 — 降级名单仍发布 complete trade rate**：`timeline.degraded`（freeze_end 不可用回退 start）时，Trade 仍 `complete = true`、`tradeRate` 为数值，与 KAST `complete = false`、文档“KAST/Trade 以 degraded 计数”矛盾，违反“coverage 不完整不得伪装完整结论”。修复：`RoundTradeResolution` 增加 `degraded`，`TradeMetrics` 增加 `degradedRounds` 并计入 `complete`；trade 计数仍可观测，但 rate 归 null。新增 regression。
+- **真实 bug 3 — 非法 `tradeWindowSeconds` 静默取消时间上界**：`NaN` / `Infinity` 产生不可比较的 `windowTicks` 且 `available = true`，交易不再受窗口约束；`0` / 负值被静默钳到 1 tick。修复：非有限或非正即抛 `RangeError`，与既有 `effectiveFlashThresholdSeconds` 校验一致。新增 regression。
+- **Final Acceptance tests**（`tests/acceptance.test.mjs`，6 个）：trade 1:1 参与不一致、降级 trade completeness、非法窗口、`PlayerCoverage` 回合闭合与 `kast.playedRounds === roundsPlayed`、utility 有效伤害 ⊆ 玩家 `effectiveDamage` 且逐发 evidence 可解释、真实 demo1.dem 全场跨指标 invariant（含 side 分区、CT/T 击杀-死亡交叉恒等、无 unexpected unavailable/ambiguous、deterministic）。
+- **API**：仅 additive —— `RoundTradeResolution.degraded`、`TradeMetrics.degradedRounds`；外加更严格 option 校验。`MatchAnalytics` / `PlayerMetrics` / `SideMetrics` / KAST / Clutch / Utility 既有字段语义未变。P3 Analytics public contracts 现已冻结，供 P4 Findings 使用。
+- **Golden 保持**：demo1 twinkle 25/20/4、reported ADR 110.17、ADR 91.38、KAST 18/24=75%、trade 6/4/18=22.2%、R24 1v3 win、utility Flash23/Smoke14/HE10/Incendiary9/Molotov2/Decoy1、HE effective 96、fire 54、enemy19/team10/self15、flash assist 1 全部不变，无硬编码。
+- **验证**：analytics **53/53 PASS**、dem-parser **28/28 PASS**（真实 DEM 全部执行、0 skipped）、`pnpm typecheck`、`pnpm build` 全 PASS。
+- 文档：`docs/analytics-metrics.md`（trade 口径 + FINAL PASS banner）、`docs/utility-analytics.md`、`docs/roadmap.md`、`.agents/current-task.md` 已同步。可以正式进入 P4 Findings。
+
 ## 2026-10-06 — P3.3 Utility Analytics PASS
 
 - 基于 `d73e05b` 完成 analytics utility work unit，`utility.ts` + metrics/index 集成；不改 parser、领域契约和生产包依赖，仅 analytics 依赖 match-model。

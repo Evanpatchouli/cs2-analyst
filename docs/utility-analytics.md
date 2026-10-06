@@ -66,4 +66,6 @@ twinkle 正 duration 44 行；possible overlap 6 行：R4 team tick17194；R5 te
 
 `pnpm --filter @cs2-coach/dem-parser test`、`pnpm typecheck`、`pnpm build` 为最终验收。未进入 Findings/UI/AI。
 
-最终结果：analytics **47/47 PASS**（原37 + 新9 synthetic + 新1 DEM golden），dem-parser **28/28 PASS**，真实 DEM 均执行且 **0 skipped**；`pnpm typecheck`、`pnpm build` PASS，未变包使用 Turbo cache。独立审查提出的 unidentified roster 与缺失 flash assister 门控均已修复并加 regression。
+P3 Final Acceptance 追加跨模块 invariant 后，analytics **53/53 PASS**（P3.3 47 + Final Acceptance 5 synthetic + 1 real-demo cross-metric），dem-parser **28/28 PASS**，真实 DEM 均执行且 **0 skipped**；`pnpm typecheck`、`pnpm build` PASS，未变包使用 Turbo cache。独立审查提出的 unidentified roster 与缺失 flash assister 门控均已修复并加 regression。
+
+Final Acceptance 下 utility 的既有 golden 不变：release counts、HE/fire effective、flash counts/duration、flash assist 均保持；新增 invariant 验证 HE/fire 有效伤害是玩家 `effectiveDamage` 的子集，且每一发的 `effectiveLoss` 之和等于 `resolvedEnemyDamage`。P3 Analytics Engine 至此 FINAL PASS，Analytics public contracts 冻结供 P4 Findings 使用。详见 [P3 核心指标文档](./analytics-metrics.md)。

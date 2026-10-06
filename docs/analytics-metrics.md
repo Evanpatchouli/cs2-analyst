@@ -1,5 +1,10 @@
 # P3 核心指标、KAST / Trade / Clutch 与覆盖机制
 
+```text
+P3 Analytics Engine — FINAL PASS
+Analytics public contracts frozen for P4 Findings
+```
+
 本文记录 P3 确定性指标的**计算口径**、统一的 **coverage / eligibility** 规则，以及真实 `demo1.dem` 的 golden 结果与人工复盘对比。实现位于 `packages/analytics`，只依赖 `match-model` 领域类型，不引用 demoparser2 原始类型。
 
 范围（P3.1）：K / D / A、K/D、HS%、rounds played、reported damage / reported ADR、effective damage / 标准 ADR、CT/T split、multi-kill、opening kill / opening death。
@@ -117,9 +122,12 @@ pnpm --filter @cs2-coach/analytics test
 - 同一 `tradedKiller` 在窗口内多次击杀队友时，取**最晚**的一次；最晚 tick 有并列候选时记 `trade-candidate-ambiguous`，不归属。
 - 死亡与复仇击杀同 tick 时不声称 subtick 先后，记 `trade-same-tick-ambiguous`，不归属（沿用 opening / 同 tick 伤害策略）。
 - `tradeableDeaths`：死亡是可识别敌方击杀，且死亡发生时至少有 1 名队友仍存活。
-- `tradeRate = tradedDeaths / tradeableDeaths × 100`；仅在 tick rate 可用、回合上下文完整、且该玩家没有被 ambiguous 命中的候选时为数值，否则为 `null`。
+- `tradeRate = tradedDeaths / tradeableDeaths × 100`；仅在 tick rate 可用、回合上下文完整（未降级）、且该玩家没有被 ambiguous 命中的候选时为数值，否则为 `null`。
 - 排除：teamkill、`world` 死亡、任一方 side 未知。
-- `timeline.endStateSuspect === true` 时整个回合返回 `resolved = false`，不生成 trade kill / traded death，也不计入 `tradeableDeaths`。`summarizeTrade()` 对确认参与者增加 `unavailableRounds`，令 `complete = false`、`tradeRate = null`；原因复用 `survival-end-state-conflict`。`available` 仍表示 trade 时钟可用性，回合可靠性由 `unavailableRounds` / `complete` 表达。
+- **参与范围一致性（1:1 的结构保证）**：trade 是两个确认参与者之间的关系。`resolveRoundTrades()` 要求 trader 与 `tradedVictim` 都在该回合 `playsIn()`（正式窗口且 `participant === true`）才生成 trade；`tradeableDeaths` 同样只登记确认参与的死亡。由于 `summarizeTrade()` 按玩家 `playsIn` 过滤，若只对一方加门槛，参与状态不一致的回合会让 trader 记 trade kill 而 victim 不记 traded death（或相反），破坏全场 1:1；两端同时要求即从结构上保证 `Σ tradeKills === Σ tradedDeaths`。
+- `timeline.endStateSuspect === true` 时整个回合返回 `resolved = false`，不生成 trade kill / traded death，也不计入 `tradeableDeaths`。`summarizeTrade()` 对确认参与者增加 `unavailableRounds`，令 `complete = false`、`tradeRate = null`；原因复用 `survival-end-state-conflict`。`available` 仍表示 trade 时钟可用性，回合可靠性由 `unavailableRounds` / `degradedRounds` / `complete` 表达。
+- **降级名单（start 回退）**：`timeline.degraded === true` 时 `RoundTradeResolution.degraded = true`。trade 计数仍作为可观测证据输出，但 `summarizeTrade()` 增加逐玩家 `degradedRounds`，令 `complete = false`、`tradeRate = null`（`degradedRounds` 与 KAST 的同名字段语义一致）；不允许用降级名单发布完整 trade rate。名单含 unidentified 时回合已在更早的分支返回 `resolved = false`。
+- `AnalyzeOptions.tradeWindowSeconds` 必须是有限正数；否则 `analyzeMatch` 抛 `RangeError`。（此前 `NaN` / `Infinity` 会得到无法比较的窗口并静默取消时间上界。）
 
 ### Clutch
 
@@ -306,7 +314,7 @@ P3.2 新增的降级/跳过路径（合成测试覆盖）：
 - 同 tick trade 或并列候选：不归属并记 `trade-same-tick-ambiguous` / `trade-candidate-ambiguous`，受影响玩家的 `tradeRate` 为 `null`。
 - winner 未知：clutch opportunity 仍记录，`won = null`，记 `clutch-winner-unknown`。
 
-## P3.3 前仍缺什么
+## P3 已知边界与后续样本需求
 
 - **Utility advanced**：需要投掷物类型归一（molotov vs incendiary）、stage 去重（release vs detonate）、闪光重叠解析；entity index 可复用，必须结合回合与 tick。
 - **生存/连接状态**：`participant` 不是连接标志；断连/重连枚举语义仍未验证，跨回合连接状态机需要更多真实样本。本样本的 disconnect 全部在末回合 end 之后，回合内断连路径只有合成测试覆盖。
@@ -324,4 +332,18 @@ pnpm typecheck
 pnpm build
 ```
 
-analytics 测试当前 **37/37 PASS**（P3.1 合成 19、P3.2 combat 15、真实 DEM 3；无跳过），dem-parser **28/28 PASS** 无回归，`pnpm typecheck` 与 `pnpm build` 全 PASS。`model-contracts.test.ts` 额外对 KAST / Trade / Clutch 类型契约做编译期断言。
+analytics 测试当前 **53/53 PASS**（P3.1 合成 19、P3.2 combat 15、P3.3 utility 9、Final Acceptance 5 合成 + 1 真实 DEM 跨模块 invariant、真实 DEM golden 4；真实 DEM 全部执行，0 skipped），dem-parser **28/28 PASS** 无回归，`pnpm typecheck` 与 `pnpm build` 全 PASS。`model-contracts.test.ts` 额外对 KAST / Trade / Clutch / Utility 类型契约做编译期断言。
+
+Final Acceptance（`tests/acceptance.test.mjs`）只增加跨模块 invariant，不重复既有单元测试：
+
+- trade kill 与 traded death 在参与状态不一致的回合仍保持全场 1:1（含正常对照与修复前必失败的 regression）；
+- 降级名单 never 发布 `complete` 的 trade rate；
+- 非正 / 非有限 `tradeWindowSeconds` 抛错而不是静默取消窗口；
+- `PlayerCoverage` 与回合总数闭合（`eligibleRounds = countedRounds + skippedUnconfirmedParticipation`，`eligibleRounds + skippedMissingWindow = totalRounds`），且 `kast.playedRounds === roundsPlayed`；
+- utility HE/fire 有效伤害是玩家 `effectiveDamage` 的子集，并可由逐发 evidence 完全解释；
+- 真实 demo1.dem 的全场跨指标 invariant（trade 1:1、逐玩家 side 分区等于玩家总计、CT/T 击杀-死亡交叉恒等、utility 子集、无 unexpected unavailable/ambiguous、deterministic）。
+
+```text
+P3 Analytics Engine — FINAL PASS
+Analytics public contracts frozen for P4 Findings
+```

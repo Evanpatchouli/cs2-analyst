@@ -70,7 +70,12 @@ export interface OpeningMetrics {
 }
 
 export interface PlayerCoverage {
-  /** Rounds with a complete start/end window available to this player. */
+  /**
+   * Match-wide count of rounds with a complete start/end window. This is the
+   * same for every player; it is not a per-player denominator. Accounting:
+   * eligibleRounds = countedRounds + skippedUnconfirmedParticipation, and
+   * totalRounds = eligibleRounds + skippedMissingWindow.
+   */
   eligibleRounds: number;
   /** Rounds counted for roundsPlayed / ADR / side split. */
   countedRounds: number;
@@ -409,6 +414,9 @@ export function analyzeMatch(match: Match, options: AnalyzeOptions = {}): MatchA
   }
 
   const tradeWindowSeconds = options.tradeWindowSeconds ?? defaultTradeWindowSeconds;
+  if (!Number.isFinite(tradeWindowSeconds) || tradeWindowSeconds <= 0) {
+    throw new RangeError("tradeWindowSeconds must be finite and positive");
+  }
   const tickRate = match.tickRate;
   const reliableTickRate = typeof tickRate === "number" && Number.isFinite(tickRate) && tickRate > 0;
   const tradeWindow: TradeWindow = {

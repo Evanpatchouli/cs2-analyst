@@ -32,8 +32,9 @@ function kastFields(kast: KastMetrics): [number, number, number | null, boolean]
   return [kast.rounds, kast.eligibleRounds, kast.percentage, kast.complete];
 }
 
-function tradeFields(trade: TradeMetrics): [number, number, number, number | null] {
-  return [trade.tradeKills, trade.tradedDeaths, trade.tradeableDeaths, trade.tradeRate];
+function tradeFields(trade: TradeMetrics): [number, number, number, number | null, number, boolean] {
+  return [trade.tradeKills, trade.tradedDeaths, trade.tradeableDeaths, trade.tradeRate,
+    trade.degradedRounds, trade.complete];
 }
 
 function clutchFields(clutch: ClutchMetrics): [number, number, number] {

@@ -25,6 +25,8 @@ P2.2 Round Participation & Player State 已完成：精确 start / freeze end / 
 
 ## P3 Analytics Engine
 
+> **P3 Analytics Engine — FINAL PASS。** Analytics public contracts frozen for P4 Findings。跨指标一致性、coverage contract、API 稳定性与 demo1 golden 已通过 Final Acceptance；invariant tests 见 `packages/analytics/tests/acceptance.test.mjs`，完整定义见 [P3 核心指标、KAST / Trade / Clutch 与覆盖机制](./analytics-metrics.md)。
+
 P3.1 Core Player Metrics & Coverage 已完成：K/D/A、K/D、HS%、rounds played、reported damage / effective damage、reported ADR / 标准 ADR、CT/T split、multi-kill、opening kill/death，配套统一 coverage/eligibility 与伤害 HP 轨迹确认机制。
 
 P3.2 Combat Metrics（KAST / Trade / Clutch）已完成：基于 freeze_end 名单快照 + 正式回合窗口 + 死亡事件 + end 快照核验的统一存活时间线；KAST（K/A/S/T，缺证据退分母而不是猜 miss）；trade kill / traded death / tradeable death 与 5 秒 tick 窗口（tick rate 不可靠时抑制时间型结论，同 tick 记 ambiguous）；clutch opportunity / clutch win 与 lifecycle 异常整回合不输出。coverage issue 按 unavailable / ambiguous / degraded / informational 分类。

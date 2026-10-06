@@ -39,14 +39,21 @@ export interface TradeAmbiguity {
 export interface RoundTradeResolution {
   /** False when the round's timeline is unusable for trade evidence. */
   readonly resolved: boolean;
+  /**
+   * Trade evidence was produced from a degraded survival context (start-boundary
+   * roster fallback). Counts remain observable, but no complete rate may be
+   * published from them.
+   */
+  readonly degraded: boolean;
   readonly trades: readonly TradeKill[];
-  /** Tradeable deaths this round keyed by victim: an identified enemy kill with a living teammate. */
+  /** Tradeable deaths among confirmed participants keyed by victim: an identified enemy kill with a living teammate. */
   readonly tradeableDeaths: ReadonlyMap<string, number>;
   readonly ambiguities: readonly TradeAmbiguity[];
 }
 
 const unresolved: RoundTradeResolution = Object.freeze({
   resolved: false,
+  degraded: false,
   trades: Object.freeze([]) as readonly TradeKill[],
   tradeableDeaths: new Map<string, number>(),
   ambiguities: Object.freeze([]) as readonly TradeAmbiguity[],
@@ -75,6 +82,9 @@ export function resolveRoundTrades(
   const tradeableDeaths = new Map<string, number>();
   for (const death of kills) {
     if (!isIdentifiedEnemyKill(death)) continue;
+    // Metrics are participation-scoped, so a death without confirmed
+    // participation is never a tradeable death in this resolution either.
+    if (!round.playsIn(death.victim)) continue;
     const victimState = timeline.state(death.victim);
     if (victimState.side === null) continue;
     for (const mate of timeline.states) {
@@ -88,7 +98,7 @@ export function resolveRoundTrades(
   }
 
   if (windowTicks === null) {
-    return { resolved: true, trades: [], tradeableDeaths, ambiguities: [] };
+    return { resolved: true, degraded: timeline.degraded, trades: [], tradeableDeaths, ambiguities: [] };
   }
 
   const trades: TradeKill[] = [];
@@ -96,12 +106,18 @@ export function resolveRoundTrades(
   for (const avenger of kills) {
     if (!isIdentifiedEnemyKill(avenger)) continue;
     const trader = avenger.killer;
+    // A trade is a relationship between two confirmed participants. Gating both
+    // parties (trader here, victim in the candidate filter) keeps the global
+    // tradeKills -> tradedDeaths mapping one-to-one even when participation is
+    // not uniform across a round's roster.
+    if (!round.playsIn(trader)) continue;
     const traderState = timeline.state(trader);
     if (traderState.side === null || traderState.aliveAtBaseline !== true) continue;
     // A trader who is already dead cannot fire the revenge kill.
     if (traderState.deathTick !== null && traderState.deathTick <= avenger.tick) continue;
     const candidates = kills.filter(death => {
       if (!isIdentifiedEnemyKill(death)) return false;
+      if (!round.playsIn(death.victim)) return false;      // victim must be a confirmed participant
       if (death.killer !== avenger.victim) return false;   // the avenged killer is this kill's victim
       if (death.victim === trader) return false;           // cannot avenge your own death
       if (death.tick > avenger.tick) return false;
@@ -135,7 +151,7 @@ export function resolveRoundTrades(
     });
   }
 
-  return { resolved: true, trades, tradeableDeaths, ambiguities };
+  return { resolved: true, degraded: timeline.degraded, trades, tradeableDeaths, ambiguities };
 }
 
 export interface TradeMetrics {
@@ -161,9 +177,11 @@ export interface TradeMetrics {
   readonly ambiguousDeaths: number;
   /** This player's kills that were unprovable trade candidates. */
   readonly ambiguousTradeKills: number;
+  /** Participating rounds whose trade evidence came from a degraded survival context. */
+  readonly degradedRounds: number;
   /** Participating rounds skipped because the round context was unusable. */
   readonly unavailableRounds: number;
-  /** Every denominator and window needed for the rate was available. */
+  /** Every denominator and window needed for the rate was available, with no degraded or ambiguous round. */
   readonly complete: boolean;
 }
 
@@ -186,6 +204,7 @@ export function summarizeTrade(
   let tradeableDeaths = 0;
   let ambiguousDeaths = 0;
   let ambiguousTradeKills = 0;
+  let degradedRounds = 0;
   let unavailableRounds = 0;
   for (const round of coverage.rounds) {
     if (!round.playsIn(steamId)) continue;
@@ -194,6 +213,7 @@ export function summarizeTrade(
       unavailableRounds++;
       continue;
     }
+    if (resolution.degraded) degradedRounds++;
     tradeableDeaths += resolution.tradeableDeaths.get(steamId) ?? 0;
     for (const trade of resolution.trades) {
       if (trade.trader === steamId) tradeKills++;
@@ -205,7 +225,7 @@ export function summarizeTrade(
     }
   }
   const available = options.windowTicks !== null;
-  const complete = available && unavailableRounds === 0
+  const complete = available && unavailableRounds === 0 && degradedRounds === 0
     && ambiguousDeaths === 0 && ambiguousTradeKills === 0;
   return {
     available,
@@ -217,6 +237,7 @@ export function summarizeTrade(
     windowTicks: options.windowTicks,
     ambiguousDeaths,
     ambiguousTradeKills,
+    degradedRounds,
     unavailableRounds,
     complete,
   };

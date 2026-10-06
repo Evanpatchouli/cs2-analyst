@@ -1,6 +1,18 @@
 # Current Task
 
-Status: complete — P3.3 Utility Analytics PASS
+Status: complete — P3 Analytics Final Acceptance PASS（contracts frozen for P4）
+
+- 基线 `1d6666b`。本轮只做 P3 Analytics 最终一致性验收与真实 bug 修复，未进入 P4 Findings，未加新 Analytics 功能、CT/T KAST/Trade/Clutch、地图/位置、parser/domain、UI/AI，无大重构。
+- **修复 1（trade 1:1 结构保证）**：`resolveRoundTrades()` 现在要求 trader 与 `tradedVictim` 都在该回合 `playsIn()`（确认参与），`tradeableDeaths` 同样只登记确认参与的死亡。此前 `summarizeTrade()` 的逐玩家 `playsIn` 过滤在参与状态不一致时会单向计数，破坏全场 `Σ tradeKills === Σ tradedDeaths`；修复后该恒等式由结构保证。
+- **修复 2（降级名单不得发布 complete trade rate）**：`RoundTradeResolution` 新增 `degraded`，`TradeMetrics` 新增 `degradedRounds`；start 回退（`timeline.degraded`）时 trade 计数仍输出，但 `complete = false`、`tradeRate = null`，与 KAST `degradedRounds` 语义一致。此前降级回合 `complete = true` 且 `tradeRate` 为数值，违反 coverage contract。
+- **修复 3（tradeWindowSeconds 校验）**：`AnalyzeOptions.tradeWindowSeconds` 必须有限正数，否则 `RangeError`。此前 `NaN` / `Infinity` 会得到不可比较的 `windowTicks` 并静默取消时间上界，`0` / 负值被静默钳到 1 tick。
+- **Final Acceptance tests**：新增 `tests/acceptance.test.mjs`，只加跨模块 invariant、不重复既有单元测试：trade 1:1（参与不一致 + 正常对照）、降级 trade completeness、非法窗口、`PlayerCoverage` 回合闭合 + `kast.playedRounds === roundsPlayed`、utility 有效伤害 ⊆ 玩家 `effectiveDamage` 且逐发 evidence 可解释、真实 demo1.dem 全场跨指标 invariant。
+- **API 变更（additive）**：`RoundTradeResolution.degraded: boolean`、`TradeMetrics.degradedRounds: number`；另有更严格的 option 校验。`MatchAnalytics` / `PlayerMetrics` / `SideMetrics` / KAST / Clutch / Utility 的既有字段与语义未变。完成后 P3 Analytics public contracts 冻结。
+- **Golden 保持**：demo1.dem twinkle 25/20/4、reported 2644 / reportedAdr 110.17、effective 2193 / ADR 91.38、KAST 18/24 = 75%、trade 6/4/18 = 22.2%、R24 1v3 win、utility Flash23/Smoke14/HE10/Incendiary9/Molotov2/Decoy1、HE effective 96、fire 54、enemy19/team10/self15、flash assist 1 全部不变；未硬编码。
+- **验证**：analytics **53/53 PASS**、dem-parser **28/28 PASS**（真实 DEM 均执行、0 skipped）、`pnpm typecheck`、`pnpm build` 全 PASS。
+- 文档：`docs/analytics-metrics.md` 增加 trade 参与/降级/校验口径与 `P3 Analytics Engine — FINAL PASS`；`docs/utility-analytics.md`、`docs/roadmap.md`、current-task/handoff 已同步。
+
+以下为 P3.3 Utility Analytics 历史记录：
 
 - 基线：`d73e05b`；实现 `packages/analytics/src/utility.ts`，`analyzeMatch().players[].utility` 对外输出；未改 parser/domain、Findings/UI/AI、依赖和无关代码。
 - throws 唯一口径为正式窗口内 grenade weapon_fire release；effect 生命周期独立保留，不补推、不相加。同玩家/tick/归一类型多 release 无唯一身份则该类型 null；Molotov/Incendiary 合并 fire，同时保留分项与原始 weapon evidence。
