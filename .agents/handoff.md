@@ -1,5 +1,20 @@
 # Agent Handoff
 
+## 2026-10-07 — P5.2.1 Product Polish PASS
+
+- 基线 `58a7abd`（P5.2 PASS）。本轮只做发布目录规范 + 中文产品化文案：不改 Analytics、不改 Findings 阈值/排序/契约、不改 UI 结构与功能，未引入新规则、timeline、历史、自动扫描或 AI。
+- 发布目录：`build-installer.mjs` 把生产安装包复制到项目根 `release/<version>/`（版本取自 `apps/desktop/package.json`，当前 `release/0.1.0/CS2-Coach-Setup-0.1.0.exe`），测试 seam 产物改投 `.tmp/test-output/<version>/`，两者不再共用 `apps/desktop/release`。`installed-app-smoke.mjs` 的产物路径、`.gitignore` 注释与文档同步。
+- Windows-only：roadmap / architecture / windows-packaging 三处明确 **Supported platform: Windows x64 only**；`prepare-pack.mjs` 删除 TRIPLES 映射，固定 `win32-x64-msvc`，非 win32-x64 抛错。不再把 macOS/Linux 当未来默认目标。
+- UI 术语：展示层加中文解释（HS%（爆头率）、KAST（回合贡献率）、Trade rate（死亡后队友补枪率）、Trade kills（补枪击杀）、Opening（首杀对决）、Clutch（残局）），ADR hint 改为“每回合平均有效伤害”，严重度徽章改为 高/中/低/亮点。底层字段名与 API 未变。
+- 道具区：`Utility → 道具`、`Flash/Smoke/HE/Incendiary/Molotov/Decoy → 闪光弹/烟雾弹/高爆手雷/燃烧弹/燃烧瓶/诱饵弹`、`HE 敌伤/燃烧敌伤 → 高爆手雷对敌伤害/燃烧伤害`（单位改“点”）、受闪说明改为不含 `duration` 的自然中文；残局面板标题改“残局”，`win/loss → 成功/失败`，未加“惜败”。
+- Trade 文案：指标卡不再显示“可交易死亡”，改为“死亡时仍有队友存活：18 / 队友成功补枪：4”；`trade.low-rate` 标题改为“死亡后队友补枪偏少”，summary 采用“N 次死亡时仍有存活队友、其中 M 次在 5 秒内完成补枪、补枪率 X%……存活并不代表具备补枪位置，该指标用于发现值得复盘的回合”。
+- Findings 文案：只改 title/summary —— `side-impact.*` → “X 方 ADR 明显低于 Y 方”，utility 伤害/闪光与 team-flash 去掉 HE/燃烧直译、`duration`、`非零` 等；`ruleId`、`findingThresholds`、排序、evidence 结构与数值全部不变（findings 测试与 demo1 golden 未改一行断言）。
+- Findings 证据展示层：新增 metric 路径 → 中文指标名、unit → 中文单位（flag→是/否、ratio/percent→%）的映射，仅影响渲染，contract 未变。
+- 覆盖告警：`report.ts` coverage notes 去掉 `ADR` / `KAST / Trade / Clutch` 直译。
+- 验证：`pnpm typecheck`、`pnpm build`、analytics 53/53、findings 17/17、dem-parser 28/28、desktop Node 集成 3/3、desktop `test:report`（真实/损坏/非 .dem）、`pnpm test:smoke`（dev+preview）、installed-app smoke（安装 → demo1 报告 → 无残留 worker → 损坏 DEM → 卸载）全 PASS。
+- 实测：安装包 `release/0.1.0/CS2-Coach-Setup-0.1.0.exe`（107.3 MB）、测试 seam `.tmp/test-output/0.1.0/CS2-Coach-TestSeam-Setup-0.1.0.exe`；安装版 twinkle 25/20/4、ADR 91.38、KAST 75%、Trade 22.2%、R24 1v3 win、5 条 Findings 与开发环境一致。
+- 本 work unit focused commit 后交接；下一工作按用户新需求确定。
+
 ## 2026-10-07 — P5.2 Windows Packaging & Installable MVP PASS
 
 - 基线 `58b0dc0`（P5.1 PASS）。本轮不改 P3 Analytics 语义、P4 Findings 阈值与 P5.1 报告 UI/DTO；未引入签名、自动更新、GitHub Release、CI 发布、macOS/Linux。

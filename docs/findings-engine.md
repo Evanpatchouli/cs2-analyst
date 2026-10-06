@@ -44,13 +44,13 @@ positive 另外保留最多 2 条：clutch 优先（对手数降序，同对手�
 
 ## demo1 / twinkle
 
-真实 golden 只锁 match hash、稳定 ID、数值和回合/tick 证据，不锁标题/summary。
+真实 golden 只锁 match hash、稳定 ID、数值和回合/tick 证据，不锁标题/summary。P5.2.1 只改写用户可见的中文标题与 summary（去掉 trade/traded/tradeable、duration、win/loss 等直译），ruleId、阈值、排序、evidence 结构与数值完全不变。
 
 | 默认顺序 | Finding | 稳定证据 |
 | --- | --- | --- |
-| 1 | CT 方伤害影响明显低于 T 方 | CT 68.25 ADR，10/10 K/D；T 114.50 ADR，15/10 K/D；各12回合 |
-| 2 | 本场死亡被交易比例偏低 | 4/18 =22.222…%，完整 coverage，5秒窗口 |
-| 3 | 本场多次闪到队友 | 23 次 throws，10 条非零 teammate effects；R4/5/6/8/12/16/24 |
+| 1 | CT 方 ADR 明显低于 T 方 | CT 68.25 ADR，10/10 K/D；T 114.50 ADR，15/10 K/D；各12回合 |
+| 2 | 死亡后队友补枪偏少 | 18 → 4 次补枪 =22.222…%，完整 coverage，5秒补枪窗口 |
+| 3 | 本场多次闪到队友 | 23 次闪光投掷，10 次明确闪到队友；R4/5/6/8/12/16/24 |
 | 4 | R24 1v3 残局获胜 | 形成 tick135415，T，opponents3，won=true |
 | 5 | 本场首杀对决贡献突出 | kills4/deaths0，duels4，winRate1 |
 

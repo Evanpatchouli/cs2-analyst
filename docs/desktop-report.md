@@ -89,15 +89,15 @@ idle → selecting → parsing → analyzing → success
 4. **空状态**：引导选择 DEM；文件只在本机处理。
 5. **报告页**
    - 比赛头：地图、比分（开局 CT 队 / 开局 T 队）、回合数、文件名，以及目标玩家 `Dropdown`。
-   - 玩家指标网格：K / D / A、ADR、HS%、KAST、Trade rate、Trade kills、Opening、Clutch（KAST/Trade 附证据完整性提示）。
-   - 证据告警：仅当展示的数值受不完整证据影响时显示（参与、伤害归属、KAST/Trade/Clutch、道具计数/伤害/助攻）。
-   - Findings（视觉重点，左侧宽栏）：最多 3 个问题 + 2 个亮点，显示 severity 徽章、标题、summary 与可展开的逐条 evidence（metric / value / unit，event 证据附 round/tick）。
-   - 道具与残局（右侧）：投掷计数、HE/燃烧敌伤、敌我受闪效果、闪光助攻，以及已证明的 Clutch 回合列表；明确标注受闪效果不等于实际致盲时长。
+   - 玩家指标网格：K / D / A、ADR（每回合平均有效伤害）、HS%（爆头率）、KAST（回合贡献率）、Trade rate（死亡后队友补枪率）、Trade kills（补枪击杀）、Opening（首杀对决）、Clutch（残局）。Trade 卡片直接展示“死亡时仍有队友存活 / 队友成功补枪”，KAST 与 Trade 附证据完整性提示。
+   - 证据告警：仅当展示的数值受不完整证据影响时显示（参与、伤害归属、回合贡献率 / 补枪 / 残局、道具计数/伤害/助攻）。
+   - Findings（视觉重点，左侧宽栏）：最多 3 个问题 + 2 个亮点，显示中文严重度徽章、标题、summary 与可展开的逐条证据。证据行只做展示层中文化（中文指标名与中文单位），数据仍然是契约里的 metric / value / unit，event 证据附 round/tick。
+   - 道具与残局（右侧）：闪光弹 / 烟雾弹 / 高爆手雷 / 燃烧弹 / 燃烧瓶 / 诱饵弹计数、高爆手雷与燃烧对敌伤害、敌我受闪效果、闪光助攻，以及已证明的残局回合列表（成功 / 失败）；明确标注受闪次数不等于有效闪光次数或实际致盲时长。
 
 ## 验证
 
-- 真实 `demo1.dem`（267MB）经完整 Electron 链路：twinkle 25/20/4、ADR 91.375、KAST 75%、Trade 22.2%、R24 1v3 win。
-- Findings 默认输出：CT/T 落差、trade.low-rate、team flash、R24 clutch、opening positive。
+- 真实 `demo1.dem`（267MB）经完整 Electron 链路：twinkle 25/20/4、ADR 91.375、KAST 75%、Trade 22.2%、R24 1v3 残局获胜。
+- Findings 默认输出（ruleId 顺序不变）：`side-impact.ct-gap` 中文化标题“CT 方 ADR 明显低于 T 方”、`trade.low-rate`“死亡后队友补枪偏少”、`team-flash.frequent-effects`“本场多次闪到队友”、`clutch.win.r24`“R24 1v3 残局获胜”、`opening.positive`“本场首杀对决贡献突出”。
 - 损坏 DEM：错误提示 + 可重新选择，不白屏。
 - 测试：桌面 Node 集成测试 3/3；桌面 Electron 端到端 smoke（真实 DEM + 损坏 DEM）通过；analytics 53/53、findings 17/17、dem-parser 28/28；`pnpm typecheck`、`pnpm build`、现有 UI `test:smoke` 通过。
 - 命令：`pnpm --filter @cs2-coach/desktop test`（Node 集成）、`pnpm --filter @cs2-coach/desktop test:report`（Electron 端到端）、`pnpm test:smoke`（UI/preload/构建）。

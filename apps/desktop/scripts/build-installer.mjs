@@ -8,8 +8,9 @@ import { fileURLToPath } from 'node:url';
 /**
  * Builds a Windows x64 NSIS installer.
  *
- *   node scripts/build-installer.mjs production   CS2-Coach-Setup-<version>.exe
- *   node scripts/build-installer.mjs test-seam    test-only build that accepts
+ *   node scripts/build-installer.mjs production   release/<version>/CS2-Coach-Setup-<version>.exe
+ *   node scripts/build-installer.mjs test-seam    .tmp/test-output/<version>/… — a
+ *                                                 test-only build that accepts
  *                                                 CS2_COACH_TEST_DEM_PATH so the
  *                                                 installed-app E2E can import a
  *                                                 DEM without the native dialog.
@@ -25,11 +26,17 @@ if (variant !== 'production' && variant !== 'test-seam') {
 const testSeam = variant === 'test-seam';
 
 const desktopDir = fileURLToPath(new URL('../', import.meta.url));
+const projectRoot = join(desktopDir, '..', '..');
+const { version } = JSON.parse(readFileSync(join(desktopDir, 'package.json'), 'utf8'));
 const require = createRequire(import.meta.url);
 // Stage outside the workspace: workspace file watchers hold packaged archives open,
 // which blocks electron-builder when it resets the output directory.
 const stagingDir = join(tmpdir(), 'cs2-coach-packaging', variant);
-const releaseDir = join(desktopDir, testSeam ? 'release/test-seam' : 'release');
+// Production installers are archived under release/<version>/. The test seam build is a
+// test artifact, so it stays out of the release tree.
+const releaseDir = testSeam
+  ? join(projectRoot, '.tmp', 'test-output', version)
+  : join(projectRoot, 'release', version);
 const env = {
   ...process.env,
   CS2_COACH_TEST_SEAM: testSeam ? '1' : '0',

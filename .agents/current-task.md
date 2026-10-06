@@ -1,16 +1,18 @@
 # Current Task
 
-Status: complete — P5.2 Windows Packaging & Installable MVP PASS
+Status: complete — P5.2.1 Product Polish PASS
 
-基线：`58b0dc0`（P5.1 End-to-End Desktop Report PASS）；P3 Analytics 契约、P4 Findings 阈值与 P5.1 报告 UI 未改动。
+基线：`58a7abd`（P5.2 Windows Packaging & Installable MVP PASS）；不改 Analytics、不改 Findings 阈值/排序/契约、不做 UI 结构或功能改动。
 
-- 打包：`apps/desktop` 接入 electron-builder 26 + NSIS；Windows x64、per-user、可选安装目录、桌面与开始菜单快捷方式、独立卸载器；应用名 `CS2 Coach`，版本沿用 `0.1.0`。配置 `apps/desktop/electron-builder.config.cjs`，流程编排 `apps/desktop/scripts/build-installer.mjs`。
-- 产物：`apps/desktop/release/CS2-Coach-Setup-0.1.0.exe`（107.3 MB）；仅测试构建 `apps/desktop/release/test-seam/CS2-Coach-TestSeam-Setup-0.1.0.exe`。打包在系统临时目录完成，仓库只保留安装包。
-- Utility Process 依赖：打包构建（`CS2_COACH_PACK=1`）把 5 个 `@cs2-coach/*` 包 inline 进 `dist/electron/report-worker.js`（75 kB），`@laihoe/demoparser2` 保持 external；`scripts/prepare-pack.mjs` 把 loader 与平台原生包复制到 `dist/electron/node_modules`，`asarUnpack: ["**/*.node"]` 让 3.9 MB `.node` 落到 `app.asar.unpacked`。非打包构建保持 external，`pnpm dev` / `start` / `test:report` 仍走 workspace symlink。
-- 路径：report-worker / preload / renderer / native 全部相对 bundle 位置解析，兼容 `app.isPackaged === true`；构建期校验 worker 无 workspace external、生产 `main.js` 无 seam 变量。
-- seam：`CS2_COACH_DEM_PATH` 仅非打包构建；`CS2_COACH_TEST_DEM_PATH` 仅 `CS2_COACH_TEST_SEAM=1` 构建，生产包中该分支被 define 消除并被构建脚本断言不存在。
-- 安装版 E2E `scripts/installed-app-smoke.mjs`：静默安装/卸载、asar 条目白名单（仅 `dist/**` 与 `package.json`）、原生 unpacked、Renderer 无 Node、启动关闭、注入无效、demo1 报告、分析中途关闭无残留 worker、损坏 DEM 不白屏。
-- 验证：`pnpm typecheck`、`pnpm build`、analytics 53/53、findings 17/17、dem-parser 28/28、desktop Node 集成 3/3、desktop `test:report`、`pnpm test:smoke`、installed-app smoke 全 PASS。
-- 文档：新增 `docs/windows-packaging.md`；同步 roadmap、architecture、development、desktop-report、current-task、handoff。
-- 非目标保持：代码签名、自动更新、GitHub Release、CI 发布、macOS/Linux、拖拽、timeline、图表、AI Coach 均未开始。
-- focused commit 后交接；方案、安装包内容、路径与限制见 [Windows 打包与安装](../docs/windows-packaging.md)。
+- 发布目录：安装包统一归档到 `release/<version>/`（当前 `release/0.1.0/CS2-Coach-Setup-0.1.0.exe`），版本号取自 `apps/desktop/package.json`；测试 seam 产物移到 `.tmp/test-output/<version>/`，不再混入正式 release。`build-installer.mjs`、`installed-app-smoke.mjs`、`.gitignore` 与文档同步。
+- 平台约束：roadmap / architecture / windows-packaging 明确 **Supported platform: Windows x64 only**；`prepare-pack.mjs` 移除 darwin/linux/arm64 triple 映射，非 win32-x64 直接报错，不再保留跨平台 packaging 逻辑。
+- UI 术语中文化（纯展示层）：ADR（每回合平均有效伤害）、HS%（爆头率）、KAST（回合贡献率）、Trade rate（死亡后队友补枪率）、Trade kills（补枪击杀）、Opening（首杀对决）、Clutch（残局）；严重度徽章 high/medium/low/positive → 高/中/低/亮点。
+- 道具区：Utility/Flash/Smoke/HE/Incendiary/Molotov/Decoy → 道具/闪光弹/烟雾弹/高爆手雷/燃烧弹/燃烧瓶/诱饵弹；HE 敌伤/燃烧敌伤 → 高爆手雷对敌伤害/燃烧伤害（单位改为“点”）；受闪说明改写为不含 duration 的自然中文。
+- 残局面板标题改为“残局”，结果只显示“成功 / 失败 / 结果未知”，未新增“惜败”推断。
+- Trade 文案：指标卡改为“死亡时仍有队友存活：18 / 队友成功补枪：4”，不再出现“可交易死亡”；`trade.low-rate` 标题改为“死亡后队友补枪偏少”，summary 改为自然中文并附“存活不等于具备补枪位置”的解释。
+- Findings 文案：只改 title/summary；`side-impact.*` 改为“X 方 ADR 明显低于 Y 方”，utility 伤害/闪光与 team-flash 的直译（HE、duration、非零等）全部改写；ruleId、阈值、排序、evidence 结构、数值不变。
+- Findings 证据展示层中文化：metric 路径映射为中文指标名，unit 映射为中文单位（flag → 是/否，ratio/percent → %），数据契约不变。
+- 覆盖告警文案：`apps/desktop/electron/report.ts` 的 coverage notes 去掉 ADR / KAST / Trade / Clutch 直译。
+- 验证：`pnpm typecheck`、`pnpm build`、analytics 53/53、findings 17/17、dem-parser 28/28、desktop Node 集成 3/3、desktop `test:report`、`pnpm test:smoke`、installed-app smoke 全 PASS；twinkle demo1 数值与 Findings ruleId 完全不变。
+- 非目标保持：不改 Analytics、不加新规则、不加“惜败”判定、不做 timeline/历史/自动扫描/AI、无 UI 大改版。
+- focused commit 后交接；发布目录与平台约束见 [Windows 打包与安装](../docs/windows-packaging.md)。

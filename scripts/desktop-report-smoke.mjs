@@ -16,6 +16,12 @@ const electron = require('electron');
 assert.ok(existsSync(demo), `缺少测试 DEM：${demo}`);
 assert.ok(existsSync(join(desktop, 'dist/electron/main.js')), '请先构建桌面应用（electron-vite build）');
 
+/** P5.2.1 product polish: these tokens must never reach the rendered UI. */
+const STIFF_ENGLISH = [/\bUtility\b/, /\bFlash\b/, /\bSmoke\b/, /\bHE\b/, /\bIncendiary\b/, /\bMolotov\b/, /\bDecoy\b/, /\bduration\b/i, /\btraded\b/i, /\btradeable\b/i, /可交易/, /被交易/, /\bwin\b/, /\bloss\b/];
+function assertNoStiffEnglish(text) {
+  for (const pattern of STIFF_ENGLISH) assert.ok(!pattern.test(text), 'UI 出现生硬英文或旧术语：' + pattern);
+}
+
 async function freePort() {
   const server = createServer();
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
@@ -106,6 +112,7 @@ async function scenario({ label, demPath, ready, assertReport }) {
       return ready(text) ? text : null;
     }, 120_000, label);
     assertReport(body);
+    assertNoStiffEnglish(body);
     assert.deepEqual(errors, [], '页面存在未捕获异常');
     console.log(`${label}：通过`);
 
@@ -130,7 +137,7 @@ await scenario({
   ready: text => text.includes('twinkle') && text.includes('25 / 20 / 4'),
   assertReport: text => {
     for (const expected of ['de_dust2', '13 : 11', 'twinkle', '25 / 20 / 4', '91.38', '75%', '22.2%',
-      'CT 方伤害影响明显低于 T 方', '本场死亡被交易比例偏低', '本场多次闪到队友',
+      'CT 方 ADR 明显低于 T 方', '死亡后队友补枪偏少', '本场多次闪到队友',
       'R24 1v3 残局获胜', '本场首杀对决贡献突出', '重新选择 DEM']) {
       assert.ok(text.includes(expected), `报告缺少内容：${expected}`);
     }

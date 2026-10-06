@@ -12,6 +12,9 @@ import { fileURLToPath } from 'node:url';
  * The loader resolves its sibling .node first and falls back to
  * require('@laihoe/demoparser2-<triple>'); staging the fallback package keeps the
  * exact code path that runs in the dev workspace.
+ *
+ * Supported platform: Windows x64 only. CS2 Coach does not ship for other
+ * platforms, so this script fails instead of staging anything else.
  */
 
 const desktopDir = fileURLToPath(new URL('../', import.meta.url));
@@ -21,20 +24,10 @@ const WORKER_NODE_MODULES = join(desktopDir, 'dist', 'electron', 'node_modules')
 const LOADER_PACKAGE = '@laihoe/demoparser2';
 const LOADER_FILES = ['index.js', 'index.d.ts', 'package.json'];
 
-/** napi-rs triple used by the optional platform package name. */
-const TRIPLES = {
-  'win32-x64': 'win32-x64-msvc',
-  'win32-arm64': 'win32-arm64-msvc',
-  'darwin-x64': 'darwin-x64',
-  'darwin-arm64': 'darwin-arm64',
-  'linux-x64': 'linux-x64-gnu',
-};
-
-const platform = process.env.CS2_COACH_PACK_PLATFORM || process.platform;
-const arch = process.env.CS2_COACH_PACK_ARCH || process.arch;
-const triple = TRIPLES[`${platform}-${arch}`];
-if (!triple) {
-  throw new Error(`native parser packaging does not support ${platform}-${arch}; supported: ${Object.keys(TRIPLES).join(', ')}`);
+/** Windows x64 is the only supported product platform: the napi-rs triple is fixed. */
+const triple = 'win32-x64-msvc';
+if (process.platform !== 'win32' || process.arch !== 'x64') {
+  throw new Error(`CS2 Coach only ships Windows x64; cannot stage the native parser for ${process.platform}-${process.arch}`);
 }
 
 const loaderDir = dirname(parserRequire.resolve(`${LOADER_PACKAGE}/package.json`));

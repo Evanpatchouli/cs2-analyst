@@ -11,7 +11,23 @@ Windows installer
 → 与开发环境一致的报告
 ```
 
-不引入发布系统：不签名、不自动更新、不做 GitHub Release、不构建 macOS/Linux。
+不引入发布系统：不签名、不自动更新、不做 GitHub Release。
+
+> **Supported platform: Windows x64 only.** CS2 Coach 只面向 Windows x64 构建、验证与分发。macOS / Linux 不是保留的默认目标，packaging 脚本不包含跨平台分支：`prepare-pack.mjs` 在非 win32-x64 上直接报错。
+
+## 发布目录
+
+安装包统一归档到项目根目录，并按版本分目录：
+
+```text
+release/
+└── 0.1.0/
+    └── CS2-Coach-Setup-0.1.0.exe
+```
+
+- 版本号取自 `apps/desktop/package.json`，因此 `0.2.0` 会落到 `release/0.2.0/`。
+- 测试 seam 产物是测试件，不进入正式 release 目录，放在 `.tmp/test-output/<version>/`（`.tmp` 已忽略）。
+- 打包中间产物（`win-unpacked`）在系统临时目录，仓库里只保留最终安装包。
 
 ## 方案
 
@@ -20,7 +36,7 @@ Windows installer
 - 应用名 `CS2 Coach`，版本沿用 `apps/desktop/package.json`（`0.1.0`），appId `com.evanpatchouli.cs2coach`。
 - 桌面与开始菜单快捷方式、独立卸载器（`Uninstall CS2 Coach.exe`）。
 - 复用工作区已安装的 Electron 运行时（`electronDist` 指向 `node_modules/electron/dist`），首次打包只需联网获取 NSIS 组件。
-- 打包在系统临时目录完成，只把最终安装包复制到 `apps/desktop/release/`：工作区文件 watcher 会占用新建的 `app.asar`，在仓库内原地重建会让 electron-builder 无法重置输出目录。
+- 打包在系统临时目录完成，只把最终安装包复制到 `release/<version>/`：工作区文件 watcher 会占用新建的 `app.asar`，在仓库内原地重建会让 electron-builder 无法重置输出目录。
 
 ```powershell
 pnpm --filter @cs2-coach/desktop pack:win        # 生产安装包
@@ -94,8 +110,8 @@ Renderer bundle 不含 `demoparser2` / `laihoe` / `@cs2-coach/*`，桌面与开�
 
 | 项目 | 结果 |
 | --- | --- |
-| 生产安装包 | `apps/desktop/release/CS2-Coach-Setup-0.1.0.exe`，107.3 MB |
-| 测试 seam 安装包 | `apps/desktop/release/test-seam/CS2-Coach-TestSeam-Setup-0.1.0.exe`，107.3 MB |
+| 生产安装包 | `release/0.1.0/CS2-Coach-Setup-0.1.0.exe`，107.3 MB |
+| 测试 seam 安装包 | `.tmp/test-output/0.1.0/CS2-Coach-TestSeam-Setup-0.1.0.exe`，107.3 MB |
 | 安装目录（本项目 smoke 使用） | `E:\cs2-coach\.tmp\installed-smoke\app-production` / `app-test-seam`；默认安装位置为 `%LOCALAPPDATA%\Programs\CS2 Coach` |
 | `app.asar` | 1.26 MB，10 个条目，全部为 `dist/**` 与 `package.json` |
 | 原生 parser | `resources/app.asar.unpacked/dist/electron/node_modules/@laihoe/demoparser2-win32-x64-msvc/demoparser2.win32-x64-msvc.node`，3.9 MB |
@@ -112,6 +128,6 @@ Renderer bundle 不含 `demoparser2` / `laihoe` / `@cs2-coach/*`，桌面与开�
 ## 已知限制
 
 - 安装包未签名，首次运行可能触发 SmartScreen 提示。
-- 只验证 Windows x64；`prepare-pack.mjs` 已列出 darwin/linux/arm64 的 triple 映射，但未实测。
+- 仅支持 Windows x64：`prepare-pack.mjs` 固定 `win32-x64-msvc`，其他平台直接失败；NSIS 目标也只声明 `x64`。
 - `disableAsarIntegrity: true`：electron-builder 的 ASAR integrity 重写会在 Electron 可执行文件刚复制完成时重写约 234 MB，与杀毒扫描竞争而间歇失败；Electron 只有在启用对应 fuse 时才校验该资源，本轮 unsigned 本地 MVP 关闭。
 - 打包中间产物（`win-unpacked`）在系统临时目录，不进入仓库；仓库只保留 `installer`。

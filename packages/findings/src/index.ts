@@ -61,8 +61,8 @@ function candidates(a: MatchAnalytics, p: PlayerMetrics): Finding[] {
     const weak = ct.adr < ts.adr ? "CT" : "T", strong = weak === "CT" ? "T" : "CT";
     const lo = p.side[weak].adr!, hi = p.side[strong].adr!;
     if (hi - lo >= t.sideAdrGap && lo <= hi * t.sideAdrRatio) {
-      emit(`side-impact.${weak.toLowerCase()}-gap`, "side-impact", "medium", `${weak} 方伤害影响明显低于 ${strong} 方`,
-        `本场 ${weak} ADR ${lo.toFixed(2)}，${strong} ADR ${hi.toFixed(2)}；两侧伤害贡献有明显落差，值得优先复盘较弱一侧回合。`,
+      emit(`side-impact.${weak.toLowerCase()}-gap`, "side-impact", "medium", `${weak} 方 ADR 明显低于 ${strong} 方`,
+        `本场 ${weak} 方 ADR ${lo.toFixed(2)}，${strong} 方 ADR ${hi.toFixed(2)}；两侧输出有明显落差，值得优先复盘较弱一侧的回合。`,
         (["CT", "T"] as const).flatMap(side => {
           const s = p.side[side];
           return [metric(`side.${side}.adr`, s.adr!, "hp/round"), metric(`side.${side}.roundsPlayed`, s.roundsPlayed, "count"),
@@ -73,8 +73,8 @@ function candidates(a: MatchAnalytics, p: PlayerMetrics): Finding[] {
   const trade = p.trade;
   if (participationComplete && trade.complete && trade.available && finite(trade.tradeRate)
     && trade.tradeableDeaths >= t.tradeDeaths && trade.tradeRate < t.tradeRate) {
-    emit("trade.low-rate", "trade", "medium", "本场死亡被交易比例偏低",
-      `${trade.tradeableDeaths} 次死亡时仍有存活队友，其中 ${trade.tradedDeaths} 次在 ${a.tradeWindow.seconds} 秒内被交易（${trade.tradeRate.toFixed(1)}%）；多数此类死亡未被及时回收。存活队友不代表有补枪位置，原因需回合复盘。`,
+    emit("trade.low-rate", "trade", "medium", "死亡后队友补枪偏少",
+      `你有 ${trade.tradeableDeaths} 次死亡发生时队伍仍有存活队友，其中 ${trade.tradedDeaths} 次在 ${a.tradeWindow.seconds} 秒内由队友完成补枪，补枪率为 ${trade.tradeRate.toFixed(1)}%。多数此类死亡没有及时转化为人数交换，建议重点复盘这些回合。队友当时存活并不代表一定具备补枪位置，因此该指标用于发现值得复盘的回合，不直接判断是谁的站位或配合有问题。`,
       [metric("trade.tradeableDeaths", trade.tradeableDeaths, "count"), metric("trade.tradedDeaths", trade.tradedDeaths, "count"),
         metric("trade.tradeRate", trade.tradeRate, "percent"), metric("trade.complete", true, "flag"),
         metric("tradeWindow.seconds", a.tradeWindow.seconds, "seconds")]);
@@ -87,7 +87,7 @@ function candidates(a: MatchAnalytics, p: PlayerMetrics): Finding[] {
     const positive = o.winRate >= t.openingHigh;
     emit(`opening.${positive ? "positive" : "negative"}`, "opening", positive ? "positive" : "medium",
       positive ? "本场首杀对决贡献突出" : "本场首杀对决失利较多",
-      `参与 ${o.duels} 次可归属首杀对决，取得 ${o.kills} 次首杀、${o.deaths} 次首死；${positive ? "多次为队伍取得开局人数优势" : "多次使队伍开局减员，值得复盘这些对决"}。`,
+      `本场参与 ${o.duels} 次首杀对决，取得 ${o.kills} 次首杀、${o.deaths} 次首死；${positive ? "多次为队伍拿到开局人数优势" : "多次让队伍开局减员，值得复盘这些对决"}。`,
       [metric("opening.kills", o.kills, "count"), metric("opening.deaths", o.deaths, "count"),
         metric("opening.duels", o.duels, "count"), metric("opening.winRate", o.winRate, "ratio")]);
   }
@@ -99,8 +99,8 @@ function candidates(a: MatchAnalytics, p: PlayerMetrics): Finding[] {
     if (throws >= t.damageThrows && (perThrow < t.utilityLowDamagePerThrow || perThrow >= t.utilityHighDamagePerThrow)) {
       const positive = perThrow >= t.utilityHighDamagePerThrow;
       emit(`utility.damage-${positive ? "high" : "low"}`, "utility", positive ? "positive" : "low",
-        positive ? "伤害道具取得较高敌方 HP 收益" : "伤害道具的直接敌伤收益偏低",
-        `本场投出 ${throws} 枚 HE/燃烧道具，造成 ${damage} 点有效敌伤，平均每枚 ${perThrow.toFixed(1)} 点。${positive ? "提供了可确认的伤害贡献" : "可检查直接命中收益；伤害不衡量封路、拖延等战术价值"}。`,
+        positive ? "伤害道具的敌方伤害收益较高" : "伤害道具的直接敌方伤害偏低",
+        `本场投出 ${throws} 枚高爆手雷与燃烧道具，造成 ${damage} 点有效敌方伤害，平均每枚 ${perThrow.toFixed(1)} 点。${positive ? "提供了可确认的伤害贡献。" : "可以从直接命中收益入手复盘；该数值不衡量封路、拖延等战术价值。"}`,
         [metric("utility.throws.counts.hegrenade", heThrows, "count"), metric("utility.throws.counts.fire", fireThrows, "count"),
           metric("utility.he.enemyDamage", u.he.enemyDamage, "hp"), metric("utility.fire.enemyDamage", u.fire.enemyDamage, "hp")]);
     }
@@ -110,7 +110,7 @@ function candidates(a: MatchAnalytics, p: PlayerMetrics): Finding[] {
     && finite(u.flash.assists) && u.flash.assists >= t.flashAssists
     && u.flash.enemy.count >= t.flashEnemyEffects && u.flash.enemy.count / flashes >= t.flashEffectsPerThrow) {
     emit("utility.flash-high", "utility", "positive", "本场闪光提供明确击杀支援",
-      `${flashes} 次投掷记录到 ${u.flash.enemy.count} 条敌方受闪效果及 ${u.flash.assists} 次事件确认的闪光助攻；有可验证的队友击杀支援。效果数包含零 duration 行，不代表实际致盲时间。`,
+      `本场 ${flashes} 次闪光弹投掷记录到 ${u.flash.enemy.count} 次敌人受闪效果与 ${u.flash.assists} 次由事件确认的闪光助攻，可以证明闪光为队友创造了击杀机会。受闪次数按游戏记录到的受闪事件统计，可能包含几乎未产生实际致盲效果的记录，不能直接理解为有效闪光次数或实际致盲时长。`,
       [metric("utility.throws.counts.flashbang", flashes, "count"), metric("utility.flash.enemy.count", u.flash.enemy.count, "count"),
         metric("utility.flash.assists", u.flash.assists, "count")]);
   }
@@ -121,7 +121,7 @@ function candidates(a: MatchAnalytics, p: PlayerMetrics): Finding[] {
   if (finite(flashes) && flashes >= t.teamFlashThrows && u.flash.teammate.complete
     && effects.length >= t.teamFlashEffects && effects.length / flashes >= t.teamFlashEffectsPerThrow) {
     emit("team-flash.frequent-effects", "discipline", "medium", "本场多次闪到队友",
-      `${flashes} 次闪光投掷中记录到 ${effects.length} 条非零队友受闪效果；可能干扰队友交战，值得检查投掷时机。一次投掷可影响多人，不能计算误闪投掷率或实际致盲时间。`,
+      `本场 ${flashes} 次闪光弹投掷中有 ${effects.length} 次明确闪到队友；可能干扰队友交战，值得检查投掷时机。一次投掷可能影响多名队友，因此无法据此计算误闪投掷率或实际致盲时长。`,
       [metric("utility.throws.counts.flashbang", flashes, "count"), metric("utility.flash.teammate.nonzeroEffects", effects.length, "count"),
         ...effects.flatMap(e => [
           { ...metric("utility.flash.teammate.evidence.victim", e.event.victim, "player-id"), round: e.round, tick: e.event.tick },

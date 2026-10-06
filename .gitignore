@@ -2,5 +2,7 @@ node_modules
 dist
 .turbo
 .demo
+
+# local packaging output: release/<version>/ and test artifacts under .tmp/
 .tmp
 release

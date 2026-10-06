@@ -35,15 +35,21 @@ const NATIVE_TRIPLE = 'win32-x64-msvc';
 const variants = {
   production: {
     label: '生产安装包',
-    installer: join(desktopDir, 'release', 'CS2-Coach-Setup-' + version + '.exe'),
+    installer: join(root, 'release', version, 'CS2-Coach-Setup-' + version + '.exe'),
     installDir: join(workDir, 'app-production'),
   },
   'test-seam': {
     label: '测试 seam 安装包',
-    installer: join(desktopDir, 'release/test-seam', 'CS2-Coach-TestSeam-Setup-' + version + '.exe'),
+    installer: join(root, '.tmp/test-output', version, 'CS2-Coach-TestSeam-Setup-' + version + '.exe'),
     installDir: join(workDir, 'app-test-seam'),
   },
 };
+
+/** P5.2.1 product polish: these tokens must never reach the rendered UI. */
+const STIFF_ENGLISH = [/\bUtility\b/, /\bFlash\b/, /\bSmoke\b/, /\bHE\b/, /\bIncendiary\b/, /\bMolotov\b/, /\bDecoy\b/, /\bduration\b/i, /\btraded\b/i, /\btradeable\b/i, /可交易/, /被交易/, /\bwin\b/, /\bloss\b/];
+function assertNoStiffEnglish(text) {
+  for (const pattern of STIFF_ENGLISH) assert.ok(!pattern.test(text), 'UI 出现生硬英文或旧术语：' + pattern);
+}
 
 // ---------------------------------------------------------------- process helpers
 
@@ -343,12 +349,13 @@ async function testSeamScenario() {
       return text?.includes('25 / 20 / 4') ? text : null;
     }, 300_000, variant.label + ' demo1 报告');
     for (const expected of ['de_dust2', '13 : 11', 'twinkle', '25 / 20 / 4', '91.38', '75%', '22.2%',
-      'CT 方伤害影响明显低于 T 方', '本场死亡被交易比例偏低', '本场多次闪到队友', 'R24 1v3 残局获胜',
+      'CT 方 ADR 明显低于 T 方', '死亡后队友补枪偏少', '本场多次闪到队友', 'R24 1v3 残局获胜',
       '本场首杀对决贡献突出', '重新选择 DEM']) {
       assert.ok(body.includes(expected), '报告缺少内容：' + expected);
     }
     const findingCount = await session.evaluate("document.querySelectorAll('[data-rule]').length");
     assert.equal(findingCount, 5, 'twinkle 应显示 5 条 Findings');
+    assertNoStiffEnglish(body);
     assert.deepEqual(session.errors, [], '页面存在未捕获异常');
     const exitCode = await closeGracefully(session);
     assert.equal(exitCode, 0, '关闭窗口后应用未正常退出');
@@ -379,6 +386,7 @@ async function testSeamScenario() {
     }, 90_000, variant.label + ' 损坏 DEM 错误');
     assert.ok(errorText.includes('重新选择 DEM'), '错误后应保留重新选择入口');
     assert.ok(errorText.includes('CS2 Coach'), '错误后页面不应白屏');
+    assertNoStiffEnglish(errorText);
     await closeGracefully(broken);
     console.log(variant.label + '：损坏 DEM 显示错误且不白屏');
   } finally {

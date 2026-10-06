@@ -32,8 +32,8 @@ function coverageNotes(player: PlayerMetrics, clutchIneligible: boolean): string
   const notes: string[] = [];
   const c = player.coverage;
   if (c.skippedMissingWindow > 0 || c.skippedUnconfirmedParticipation > 0) notes.push('部分回合参与数据不完整。');
-  if (c.effectiveDamageUnresolved > 0 || c.damageWithoutKnownSides > 0) notes.push('部分伤害证据不可归属，ADR 可能不可用。');
-  if (!player.kast.complete || !player.trade.complete || clutchIneligible) notes.push('部分 KAST / Trade / Clutch 证据不完整。');
+  if (c.effectiveDamageUnresolved > 0 || c.damageWithoutKnownSides > 0) notes.push('部分伤害证据无法归属，每回合平均有效伤害可能不可用。');
+  if (!player.kast.complete || !player.trade.complete || clutchIneligible) notes.push('部分回合贡献率、补枪或残局证据不完整。');
   const u = player.utility;
   if (!u.throws.complete || !u.he.complete || !u.fire.complete
     || !u.flash.enemy.complete || !u.flash.teammate.complete || !u.flash.assistsComplete) {
