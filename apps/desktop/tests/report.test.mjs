@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { analyzeDemoFile } from '../electron/report.ts';
+import { analyzeDemoFile, buildDesktopReport } from '../electron/report.ts';
 
 const demo = process.env.DEM_TEST_FILE ?? fileURLToPath(new URL('../../../.demo/demo1.dem', import.meta.url));
 const hasDemo = existsSync(demo);
@@ -15,7 +15,7 @@ test('real demo flows through parser -> analytics -> findings into a serializabl
   const report = result.report;
 
   // Renderer-facing shape: JSON only, no domain events or native objects.
-  assert.deepEqual(Object.keys(report), ['schemaVersion', 'match', 'selectedPlayer', 'players', 'analytics', 'findings']);
+  assert.deepEqual(Object.keys(report), ['schemaVersion', 'match', 'selectedPlayer', 'players', 'analytics', 'findings', 'timeline']);
   assert.deepEqual(JSON.parse(JSON.stringify(report)), report);
 
   assert.equal(report.match.map, 'de_dust2');
@@ -66,6 +66,71 @@ test('real demo flows through parser -> analytics -> findings into a serializabl
   assert.ok(r4, 'R4 teammate-flash evidence is present');
   assert.ok(Math.abs(r4.roundTimeSeconds - (17120 - 15416) / 64) < 1e-9,
     'R4 flash round time equals (eventTick - roundStartTick) / tickRate');
+
+  // Round Timeline is a read-only projection of the same Match facts, one entry per player.
+  assert.equal(report.timeline.length, report.players.length);
+  const timeline = report.timeline.find(t => t.playerId === twinkle.id);
+  assert.equal(timeline.rounds.length, 24);
+  const nicknameOf = id => report.players.find(p => p.id === id)?.nickname;
+  const allowedTypes = new Set([
+    'kill', 'death', 'bomb-plant-start', 'bomb-planted',
+    'bomb-defuse-start', 'bomb-defused', 'bomb-exploded', 'clutch-start',
+  ]);
+  for (const entry of report.timeline) {
+    assert.deepEqual(entry.rounds.map(r => r.round), Array.from({ length: 24 }, (_, i) => i + 1));
+    for (const r of entry.rounds) {
+      for (const e of r.events) {
+        assert.ok(allowedTypes.has(e.type), `unexpected timeline event type ${e.type}`);
+        assert.equal(typeof e.roundTimeSeconds, 'number', `timeline event ${e.id} lost its round time`);
+        assert.ok(e.roundTimeSeconds >= 0 && e.roundTimeSeconds < e.tick / 64, 'time is relative to the round start');
+        assert.ok(!/tick \d+/.test(e.description) && !e.description.includes(String(e.tick)), 'raw tick never leaks into the description');
+        if (e.actorId) assert.equal(e.actorName, nicknameOf(e.actorId), 'actor is presented by nickname');
+        if (e.targetId) assert.equal(e.targetName, nicknameOf(e.targetId), 'target is presented by nickname');
+      }
+    }
+  }
+
+  // R24 golden: T side, win, 13 : 11, clutch start, bomb lifecycle and twinkle kills.
+  const r24 = timeline.rounds.find(r => r.round === 24);
+  assert.equal(r24.side, 'T');
+  assert.equal(r24.result, 'win');
+  assert.deepEqual(r24.scoreAfter, { initialCT: 13, initialT: 11 });
+  assert.equal(r24.startTick, 131657);
+  const clutch = r24.events.find(e => e.type === 'clutch-start');
+  assert.ok(clutch, 'R24 shows the proven 1v3 clutch start');
+  assert.equal(clutch.opponents, 3);
+  assert.equal(clutch.description, '进入 1v3 残局');
+  assert.ok(Math.abs(clutch.roundTimeSeconds - (135415 - 131657) / 64) < 1e-9);
+  assert.ok(r24.events.some(e => e.type === 'bomb-plant-start'));
+  assert.ok(r24.events.some(e => e.type === 'bomb-planted'));
+  const r24Kills = r24.events.filter(e => e.type === 'kill');
+  assert.ok(r24Kills.length >= 4, 'R24 keeps every twinkle kill');
+  assert.ok(r24Kills.every(e => e.actorName === 'twinkle'));
+  const r24Time = r24.events.find(e => e.type === 'kill' && e.tick === 138685);
+  assert.ok(Math.abs(r24Time.roundTimeSeconds - (138685 - 131657) / 64) < 1e-9,
+    'timeline time comes from the real tick and round start, never a hardcoded value');
+  const r24Weapons = r24Kills.map(e => e.weapon).filter(Boolean);
+  assert.ok(r24Weapons.includes('ak47'), 'kill weapons come from the event');
+
+  // R7: twinkle 3K plus a proven defuse.
+  const r7 = timeline.rounds.find(r => r.round === 7);
+  assert.equal(r7.side, 'CT');
+  assert.equal(r7.result, 'win');
+  const r7Kills = r7.events.filter(e => e.type === 'kill');
+  assert.equal(r7Kills.length, 3, 'R7 is a twinkle 3K');
+  assert.ok(r7Kills.every(e => e.actorName === 'twinkle' && e.targetName));
+  assert.ok(r7.events.some(e => e.type === 'bomb-defuse-start'));
+  assert.ok(r7.events.some(e => e.type === 'bomb-defused'));
+
+  // R22: the posthumous kill is a legal death of the target and must not be dropped.
+  const r22 = timeline.rounds.find(r => r.round === 22);
+  assert.equal(r22.side, 'T');
+  assert.equal(r22.result, 'loss');
+  const posthumous = r22.events.find(e => e.type === 'death' && e.tick === 121153);
+  assert.ok(posthumous, 'posthumous kill by an already-dead killer is preserved');
+  assert.equal(posthumous.actorName, 'tarkz');
+  assert.equal(posthumous.targetName, 'twinkle');
+  assert.ok(r22.events.some(e => e.type === 'kill' && e.tick === 121075), 'the victim-side kill is still shown');
 });
 
 test('an unreadable DEM returns an error result instead of throwing', async () => {
@@ -85,4 +150,121 @@ test('a missing DEM path returns an error result instead of throwing', async () 
   const result = await analyzeDemoFile(join(tmpdir(), 'cs2-coach-missing', 'gone.dem'));
   assert.equal(result.kind, 'error');
   assert.match(result.message, /无法分析此 DEM/);
+});
+
+/**
+ * Minimal one-round match with enough evidence for a valid report. The event list
+ * deliberately mixes low-value events (weapon fire, damage, utility, flash, bomb
+ * pickup) that the Round Timeline must never surface.
+ */
+function syntheticMatch() {
+  const state = (boundary, tick, ctAlive, tAlive) => ({
+    boundary, tick, availability: 'observed', unidentifiedPlayerCount: 0,
+    players: [
+      { steamId: '1', side: 'CT', alive: ctAlive, participant: true },
+      { steamId: '2', side: 'T', alive: tAlive, participant: true },
+    ],
+  });
+  return {
+    id: 'synthetic', map: 'de_test', tickRate: 64,
+    players: [
+      { steamId: '1', nickname: 'Alice', team: 'CT' },
+      { steamId: '2', nickname: 'Bob', team: 'T' },
+    ],
+    rounds: [{
+      number: 1, winner: 'CT', startTick: 1000, freezeEndTick: 1064, endTick: 2000,
+      stateSnapshots: [state('start', 1000, true, true), state('freeze_end', 1064, true, true), state('end', 2000, true, false)],
+      events: [
+        { type: 'weapon_fire', tick: 1090, shooter: '1', shooterSide: 'CT', weapon: 'ak47' },
+        { type: 'damage', tick: 1095, attacker: '1', victim: '2', attackerSide: 'CT', victimSide: 'T', healthDamage: 100, armorDamage: 0, healthRemaining: 0, armorRemaining: 0 },
+        { type: 'kill', tick: 1100, killer: '1', victim: '2', weapon: 'ak47', headshot: false, killerSide: 'CT', victimSide: 'T', teamkill: false },
+        { type: 'utility', tick: 1200, utility: 'smoke', action: 'detonate', thrower: '1', throwerSide: 'CT' },
+        { type: 'flash', tick: 1250, attacker: '1', victim: '2', attackerSide: 'CT', victimSide: 'T', blindDurationSeconds: 1 },
+        { type: 'bomb', tick: 1400, action: 'pickup', player: '2', playerSide: 'T' },
+        { type: 'bomb', tick: 1500, action: 'plant_start', player: '2', playerSide: 'T' },
+        { type: 'bomb', tick: 1700, action: 'planted', player: '2', playerSide: 'T' },
+      ],
+    }],
+  };
+}
+
+test('timeline filters to high-value events, maps nicknames and computes round time', () => {
+  const match = syntheticMatch();
+  const report = buildDesktopReport(match, 'synthetic.dem');
+  assert.deepEqual(Object.keys(report), ['schemaVersion', 'match', 'selectedPlayer', 'players', 'analytics', 'findings', 'timeline']);
+  assert.deepEqual(report.match.score, { initialCT: 1, initialT: 0 });
+
+  const alice = report.timeline.find(t => t.playerId === '1').rounds[0];
+  assert.equal(alice.side, 'CT');
+  assert.equal(alice.result, 'win');
+  assert.deepEqual(alice.scoreAfter, { initialCT: 1, initialT: 0 });
+  assert.equal(alice.startTick, 1000);
+  // The proven 1v1 clutch, the kill and the plant lifecycle survive; weapon fire,
+  // damage, utility, flash and the bomb pickup never become timeline events.
+  assert.deepEqual(alice.events.map(e => e.type), ['clutch-start', 'kill', 'bomb-plant-start', 'bomb-planted']);
+  assert.deepEqual(alice.events[0], {
+    id: '1:clutch-start:1064:1:-', type: 'clutch-start', tick: 1064, roundTimeSeconds: 1,
+    actorId: '1', actorName: 'Alice', opponents: 1, description: '进入 1v1 残局',
+  });
+  const kill = alice.events[1];
+  assert.equal(kill.actorName, 'Alice');
+  assert.equal(kill.targetName, 'Bob');
+  assert.equal(kill.description, 'Alice → Bob');
+  assert.equal(kill.weapon, 'ak47');
+  assert.ok(Math.abs(kill.roundTimeSeconds - (1100 - 1000) / 64) < 1e-9);
+  assert.equal(alice.events[2].description, '开始安放炸弹');
+  assert.equal(alice.events[2].actorName, 'Bob');
+  assert.equal(alice.events[3].description, '炸弹安放完成');
+
+  // The victim sees the death and the same bomb events, but no kill of their own.
+  const bob = report.timeline.find(t => t.playerId === '2').rounds[0];
+  assert.equal(bob.side, 'T');
+  assert.equal(bob.result, 'loss');
+  assert.deepEqual(bob.events.map(e => e.type), ['clutch-start', 'death', 'bomb-plant-start', 'bomb-planted']);
+  assert.equal(bob.events[1].description, 'Alice → Bob');
+
+  assert.deepEqual(JSON.parse(JSON.stringify(report)), report, 'timeline DTO is JSON-only');
+  assert.deepEqual(buildDesktopReport(match, 'synthetic.dem'), report, 'same input yields the same timeline');
+});
+
+test('timeline omits round time instead of guessing when the tick rate is unknown', () => {
+  const match = syntheticMatch();
+  delete match.tickRate;
+  const report = buildDesktopReport(match, 'synthetic.dem');
+  for (const entry of report.timeline) {
+    for (const round of entry.rounds) {
+      assert.ok(round.events.length > 0, 'events are still listed');
+      for (const event of round.events) {
+        assert.equal('roundTimeSeconds' in event, false, 'no time is invented without a tick rate');
+      }
+    }
+  }
+});
+
+test('timeline yields no events when the formal round window is incomplete', () => {
+  const match = syntheticMatch();
+  const incomplete = { ...match.rounds[0], number: 2 };
+  delete incomplete.startTick;
+  match.rounds = [match.rounds[0], incomplete];
+  const report = buildDesktopReport(match, 'synthetic.dem');
+  const [completeRound, incompleteRound] = report.timeline[0].rounds;
+  assert.ok(completeRound.events.length > 0);
+  assert.equal(incompleteRound.startTick, null);
+  assert.deepEqual(incompleteRound.events, []);
+});
+
+test('timeline keeps side, result and score unknown instead of guessing', () => {
+  const match = syntheticMatch();
+  match.rounds[0].winner = null;
+  for (const snapshot of match.rounds[0].stateSnapshots) {
+    for (const player of snapshot.players) player.side = 'Unknown';
+  }
+  const report = buildDesktopReport(match, 'synthetic.dem');
+  const round = report.timeline[0].rounds[0];
+  assert.equal(round.side, 'Unknown');
+  assert.equal(round.result, 'unknown');
+  assert.equal(round.scoreAfter, null);
+  assert.equal(report.match.score, null);
+  // Events themselves are not gated on the side; only the labels stay unknown.
+  assert.ok(round.events.some(e => e.type === 'kill'));
 });

@@ -1,15 +1,15 @@
 # Current Task
 
-Status: complete — P5.4 报告页视觉优化（彩色实心道具图标 + 深蓝灰体系）PASS
+Status: complete — P5.5 Round Timeline MVP（回合时间线 + Findings → Timeline 联动）PASS
 
-基线：`360c84f`（P5.3 残局面板列对齐 PASS）；本轮只做 Renderer 展示层视觉，不改 P3 Analytics 语义、P4 Findings 阈值 / ranking / evidence、report DTO 字段与 demo1 数值，也不动 installer 架构。
+基线：`642fd0d`（P5.4 报告页视觉优化 PASS）；本轮只做 Desktop presenter 只读展示 DTO 与 Renderer 展示，不改 P3 Analytics 语义、P4 Findings 阈值 / 排序 / evidence、demo1 数值与 ruleId 顺序，也不重新解析 DEM 或重跑 Analytics。
 
-- 主题：新增 `apps/desktop/renderer/src/theme.ts`，在 `webDarkTheme` 之上覆盖 Fluent UI 中性色 token —— 页面 `linear-gradient(180deg, #161d26 0%, #111821 100%)`、卡片 `#1d242e`、弱边框 `rgba(148, 163, 184, 0.12)`、行分隔 `rgba(148, 163, 184, 0.08)`、文字三档 `#e8eef6 / #c5cfdc / #8f9db0`。品牌与状态 ramp 不变；固定色值只登记在 `theme.ts`，组件读 `tokens.*` 或 `palette.*`。
-- 道具图标：新增 `apps/desktop/renderer/src/utility-icons.tsx`，6 个彩色实心内联 SVG React 组件（闪光弹 `#4DB6FF`、烟雾弹 `#B9C7D9`、高爆手雷 `#FF5A36`、燃烧弹 `#FF8A1F`、燃烧瓶 `#FFB13B`、诱饵弹 `#57D68D`），24px 网格 / 22px 显示、`aria-hidden`。`icons.tsx` 只保留界面自身的单色线性 `?` 图标，道具面板不混用两套风格。未新增依赖，未新增 .svg 资源文件。
-- 视觉一致性：所有卡片统一 6px 圆角（`tokens.borderRadiusLarge`）+ 1px 弱边框 + 无阴影；道具投掷 / 道具效果 / 残局统一 34px 行高与分隔线；标题层级 Title1 → Title2 → Subtitle1 → Caption1；数值右对齐 + 等宽数字，标签改用次级中性灰。
-- 颜色只做视觉锚点：道具图标、Findings severity 徽章、残局成功 / 失败徽章、主按钮等少量交互态。残局“失败”由 `informative` 改为 `danger`（只改颜色，文案与数据不变）。核心数值、标题、正文保持白 / 中性灰。
-- 主进程窗口底色 `#202020 → #111821`，启动不再闪黑。
-- 验证：`pnpm typecheck`、`pnpm build` PASS；桌面 Node 集成 3/3；`test:report` 真实 DEM / 损坏 DEM / 非 .dem 三个场景通过；`pnpm test:smoke`（dev + preview）通过；重新打包后 `test:installed` 全通过（生产安装版无 seam、测试 seam 安装版 demo1 报告与开发环境一致）。
-- demo1 golden 不变：twinkle 25/20/4、ADR 91.38、KAST 75%、Trade 22.2%、R24 1v3 胜、5 条 Findings 顺序不变。
-- 非目标保持：不改 Analytics 算法、Findings 阈值 / ranking / ruleId、Trade / Clutch / tick / time 逻辑、report DTO 数据语义、P5.3 Tooltip 文案；不重做布局、不用 Emoji、不做玻璃拟态 / 强阴影 / RGB 灯效。
-- focused commit 后交接；视觉体系细节见 [桌面比赛报告](../docs/desktop-report.md)。
+- DTO：`packages/report-contract` 新增 `DesktopTimelineEvent / DesktopRoundTimeline / DesktopPlayerTimeline`，`DesktopMatchReport` 增加 `timeline`（additive，`schemaVersion` 仍为 1）。全部 JSON-only，含 `tick` 供追溯但不渲染。
+- Presenter：`apps/desktop/electron/report.ts` 新增 `roundClock` / `roundScoreLookup` / `playerSide` / `buildRoundEvents` / `buildTimeline`；`teamScore` 重构为 `roundScoreLookup` 的最后一项（页头比分口径与数值不变）。`side` 取 freeze_end（回退 start）+ participant，`result` 取 `round.winner` 对比 side，`scoreAfter` 只在胜方能唯一映射回固定队伍时累计，时间 `(tick - startTick) / tickRate`；全部缺证据即 Unknown / unknown / null / 字段缺省。
+- 事件过滤：目标玩家 kill / death（死后击杀保留）、已证实 clutch start（复用 Analytics clutch tick）、炸弹生命周期（plant_start / planted / defuse_start / defused / exploded）。排除 pickup / drop、damage、weapon_fire、utility、flash、snapshot；只在正式回合窗口内取事件。
+- Renderer：`renderer/src/main.tsx` 新增 `RoundTimeline` section + `weaponLabels` / `sideText` / `scoreAfterText` / `roundResult` / `eventTime` 展示 helper；每回合一行摘要 + 点击展开，默认全部收起。Findings 带 `relatedRounds` 时显示“查看 R24 / 查看相关回合”，点击展开 + `scrollIntoView` + 2.4 秒中性高亮。切换玩家只换 DTO 数组，不重跑。
+- 验证：`pnpm typecheck` 11/11、`pnpm build` 6/6；desktop Node 集成 7/7（新增 timeline 过滤 / 昵称 / 时间 / 缺 tickRate / 窗口不完整 / 未知值 / deterministic 断言）；`test:report`（真实 / 损坏 / 非 .dem）新增时间线 DOM 断言通过；analytics 53/53、findings 17/17、dem-parser 28/28；`pnpm test:smoke` 通过；重新打包后 `test:installed` 通过。
+- demo1 golden 不变：twinkle 25/20/4、ADR 91.38、KAST 75%、Trade 22.2%、R24 1v3 胜、5 条 Findings 顺序 `side-impact.ct-gap / trade.low-rate / team-flash.frequent-effects / clutch.win.r24 / opening.positive`。R24 timeline：T / 成功 / 13 : 11，含 1v3 残局、炸弹安放、twinkle 4 杀；R7：CT / 成功，twinkle 3K + 成功拆弹；R22：T / 失败，保留 tarkz 死后击杀 twinkle（tick 121153）。
+- Roadmap：新增 P5.5 PASS 与 “Future — Account & Match History”（apps/api = Auth / Session + 历史摘要，不上传 DEM、不做服务端分析；Auto DEM discovery / directory scanning: NOT PLANNED）。登录 / API / 历史本轮不实现。
+- 非目标保持：不自动找 DEM、不扫描 Steam / CS2 路径、不做登录 / apps/api / 历史库 / AI / 地图俯视 / 3D Replay / 位置路径 / economy / 每 tick timeline / 完整播放器 / 新 Analytics 算法；不改 P3 冻结契约与 P4 规则。
+- focused commit 后交接；细节见 [桌面比赛报告](../docs/desktop-report.md)。

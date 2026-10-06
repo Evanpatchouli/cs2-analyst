@@ -1,11 +1,13 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
   Badge, Body1, Button, Card, Caption1, Divider, Dropdown, FluentProvider,
   MessageBar, MessageBarBody, Option, Spinner, Subtitle1, Title1, Title2,
   Tooltip, makeStyles, tokens,
 } from '@fluentui/react-components';
-import type { DesktopMatchReport, DesktopPlayerAnalytics } from '@cs2-coach/report-contract';
+import type {
+  DesktopMatchReport, DesktopPlayerAnalytics, DesktopRoundTimeline, DesktopTimelineEvent,
+} from '@cs2-coach/report-contract';
 import { useReport } from './store';
 import { QuestionCircleIcon } from './icons';
 import { UtilityIcon } from './utility-icons';
@@ -58,6 +60,29 @@ const useStyles = makeStyles({
   finding: { ...cardSurface, padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' },
   evidence: { padding: '8px 0', display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: '12px', borderBottom: `1px solid ${palette.rowDivider}`, overflowWrap: 'anywhere' },
   empty: { ...cardSurface, padding: '72px 32px', alignItems: 'center', textAlign: 'center' },
+  timelineRound: {
+    borderTop: `1px solid ${palette.rowDivider}`, ':first-child': { borderTopStyle: 'none' },
+    borderRadius: tokens.borderRadiusMedium, transitionProperty: 'background-color', transitionDuration: '240ms',
+  },
+  timelineRoundHighlight: { backgroundColor: palette.raised },
+  timelineRow: {
+    appearance: 'none', background: 'transparent', border: 'none', margin: 0, font: 'inherit', textAlign: 'left',
+    boxSizing: 'border-box', cursor: 'pointer', width: '100%',
+    display: 'grid', gridTemplateColumns: '56px 56px 76px minmax(0, 1fr) auto', alignItems: 'center',
+    columnGap: '10px', minHeight: rowHeight, padding: '0 6px', color: tokens.colorNeutralForeground1,
+    ':hover': { backgroundColor: palette.cardHover },
+    ':focus-visible': { outline: `1px solid ${palette.borderStrong}`, outlineOffset: '2px' },
+  },
+  timelineSide: { color: tokens.colorNeutralForeground2 },
+  timelineToggle: { color: tokens.colorNeutralForeground3 },
+  timelineDetail: { display: 'flex', flexDirection: 'column', padding: '2px 6px 10px 72px' },
+  timelineEvent: {
+    display: 'grid', gridTemplateColumns: '88px minmax(0, 1fr) auto', alignItems: 'baseline',
+    columnGap: '10px', padding: '4px 0', borderTop: `1px solid ${palette.rowDivider}`,
+    ':first-child': { borderTopStyle: 'none' },
+  },
+  timelineTime: { color: tokens.colorNeutralForeground3, fontVariantNumeric: 'tabular-nums' },
+  timelineWeapon: { color: tokens.colorNeutralForeground3, textAlign: 'right', whiteSpace: 'nowrap' },
 });
 
 /** Display-only number rules: counts 0, ADR/seconds 2, percentages 1, KAST integer. */
@@ -102,6 +127,26 @@ const metricLabel = (metric: string) => metricLabels[metric] ?? metric;
 /** Clutch outcomes are labelled; a missing result is never guessed. Colour only reinforces the label. */
 const clutchResult = (won: boolean | null): { label: string; color: 'success' | 'danger' | 'warning' } =>
   won === null ? { label: '结果未知', color: 'warning' } : won ? { label: '成功', color: 'success' } : { label: '失败', color: 'danger' };
+/** Round Timeline labels. Missing side/result/score/time stay unknown and are never guessed. */
+const sideText = (side: DesktopRoundTimeline['side']) => side === 'Unknown' ? '阵营未知' : side;
+const scoreAfterText = (score: DesktopRoundTimeline['scoreAfter']) => score ? `${score.initialCT} : ${score.initialT}` : '—';
+const roundResult = (result: DesktopRoundTimeline['result']): { label: string; color: 'success' | 'danger' | 'warning' } =>
+  result === 'win' ? { label: '成功', color: 'success' }
+    : result === 'loss' ? { label: '失败', color: 'danger' } : { label: '结果未知', color: 'warning' };
+const eventTime = (event: DesktopTimelineEvent) =>
+  event.roundTimeSeconds === undefined ? '—' : `+${event.roundTimeSeconds.toFixed(2)} 秒`;
+/** Display names for the weapon identifiers the parser reports; unknown ids pass through. */
+const weaponLabels: Record<string, string> = {
+  ak47: 'AK-47', m4a1: 'M4A4', m4a1_silencer: 'M4A1-S', awp: 'AWP', deagle: '沙漠之鹰', glock: 'Glock-18',
+  usp_silencer: 'USP-S', hkp2000: 'P2000', p250: 'P250', fiveseven: 'FN 57', tec9: 'Tec-9', elite: '双持贝瑞塔',
+  mp9: 'MP9', mac10: 'MAC-10', mp7: 'MP7', mp5sd: 'MP5-SD', ump45: 'UMP-45', p90: 'P90', bizon: 'PP-野牛',
+  galilar: 'Galil AR', famas: 'FAMAS', sg556: 'SG 553', aug: 'AUG', ssg08: 'SSG 08', g3sg1: 'G3SG1',
+  scar20: 'SCAR-20', nova: 'Nova', xm1014: 'XM1014', mag7: 'MAG-7', sawedoff: '截短霰弹枪', m249: 'M249',
+  negev: '内格夫', taser: '电击枪', c4: 'C4', hegrenade: '高爆手雷', flashbang: '闪光弹',
+  smokegrenade: '烟雾弹', molotov: '燃烧瓶', incgrenade: '燃烧弹', decoy: '诱饵弹',
+  knife: '匕首', knife_karambit: '爪子刀', knife_butterfly: '蝴蝶刀', inferno: '燃烧伤害', world: '坠落 / 世界伤害',
+};
+const weaponLabel = (weapon: string) => weaponLabels[weapon] ?? weapon;
 const severityText: Record<string, string> = { high: "高", medium: "中", low: "低", positive: "亮点" };
 const evidenceText = (value: number | boolean | string, unit: string): string => {
   if (unit === "flag") return value === true ? "是" : value === false ? "否" : String(value);
@@ -134,7 +179,9 @@ function Stat({ label, value, hint, tip }: { label: string; value: string; hint?
   </Card>;
 }
 
-function Findings({ report, playerId }: { report: DesktopMatchReport; playerId: string }) {
+function Findings({ report, playerId, onShowRounds }: {
+  report: DesktopMatchReport; playerId: string; onShowRounds: (rounds: number[]) => void;
+}) {
   const s = useStyles();
   const rows = report.findings.filter(f => f.playerId === playerId);
   return <section className={s.section} aria-label="本场复盘重点">
@@ -143,6 +190,11 @@ function Findings({ report, playerId }: { report: DesktopMatchReport; playerId: 
     {rows.length ? rows.map(f => <Card key={f.id} className={s.finding} data-rule={f.ruleId}>
       <div className={s.header}><Subtitle1>{f.title}</Subtitle1><Badge appearance="tint" color={f.severity === 'positive' ? 'success' : f.severity === 'high' ? 'danger' : 'warning'}>{severityText[f.severity] ?? f.severity}</Badge></div>
       <Body1>{f.summary}</Body1>
+      {f.relatedRounds?.length ? <div>
+        <Button appearance="subtle" size="small" onClick={() => onShowRounds(f.relatedRounds!)}>
+          {f.relatedRounds.length === 1 ? `查看 R${f.relatedRounds[0]}` : '查看相关回合'}
+        </Button>
+      </div> : null}
       <details><summary>查看证据（{f.evidence.length}）</summary>
         {f.evidence.map((e, i) => {
           const when = [e.round === undefined ? null : `R${e.round}`, e.roundTimeSeconds === undefined ? null : `回合开始后 ${seconds(e.roundTimeSeconds)}`].filter(Boolean).join(' · ');
@@ -197,11 +249,67 @@ function UtilityPanel({ utility }: { utility: DesktopPlayerAnalytics['utility'] 
   </Card>;
 }
 
+/** Round-by-round summary with click-to-expand key events; all rounds start collapsed. */
+function RoundTimeline({ rounds, expanded, highlighted, onToggle }: {
+  rounds: DesktopRoundTimeline[];
+  expanded: number[];
+  highlighted: number | null;
+  onToggle: (round: number) => void;
+}) {
+  const s = useStyles();
+  return <section id="round-timeline" className={s.section} aria-label="回合时间线">
+    <Title2>回合时间线</Title2>
+    <Caption1 className={s.muted}>每回合显示目标玩家阵营、胜负、回合结束比分与关键事件；点击回合展开详情，时间为回合开始后的秒数。</Caption1>
+    <Card className={s.panel}>
+      <div className={s.list}>
+        {rounds.map(r => {
+          const open = expanded.includes(r.round);
+          const badge = roundResult(r.result);
+          return <div key={r.round} id={`round-r${r.round}`} data-timeline-round={r.round}
+            data-highlighted={highlighted === r.round ? 'true' : undefined}
+            className={`${s.timelineRound}${highlighted === r.round ? ` ${s.timelineRoundHighlight}` : ''}`}>
+            <button type="button" className={s.timelineRow} data-round-summary={r.round} aria-expanded={open} onClick={() => onToggle(r.round)}>
+              <span className={s.numberCell}>R{r.round}</span>
+              <span className={s.timelineSide}>{sideText(r.side)}</span>
+              <span><Badge appearance="tint" color={badge.color}>{badge.label}</Badge></span>
+              <span className={s.numberCell}>{scoreAfterText(r.scoreAfter)}</span>
+              <span className={s.timelineToggle}>{open ? '收起' : '查看详情'}</span>
+            </button>
+            {open ? <div className={s.timelineDetail} data-round-detail={r.round}>
+              {r.events.length ? r.events.map(e => <div key={e.id} className={s.timelineEvent}>
+                <span className={s.timelineTime}>{eventTime(e)}</span>
+                <span>{e.description}</span>
+                <span className={s.timelineWeapon}>{e.weapon ? weaponLabel(e.weapon) : ''}</span>
+              </div>) : <Caption1 className={s.muted}>本回合没有可展示的关键事件。</Caption1>}
+            </div> : null}
+          </div>;
+        })}
+      </div>
+    </Card>
+  </section>;
+}
+
 function Report({ report, playerId }: { report: DesktopMatchReport; playerId: string }) {
   const s = useStyles();
   const selectPlayer = useReport(state => state.selectPlayer);
   const player = report.players.find(p => p.id === playerId)!;
   const p = report.analytics.find(a => a.playerId === playerId)!;
+  const timeline = report.timeline.find(t => t.playerId === playerId)?.rounds ?? [];
+  const [expanded, setExpanded] = useState<number[]>([]);
+  const [highlighted, setHighlighted] = useState<number | null>(null);
+  const highlightTimer = useRef<number | undefined>(undefined);
+  const toggleRound = (round: number) =>
+    setExpanded(prev => prev.includes(round) ? prev.filter(x => x !== round) : [...prev, round]);
+  // Findings linkage: expand the related rounds, scroll to the first and briefly emphasise it.
+  const showRounds = (rounds: number[]) => {
+    const known = rounds.filter(round => timeline.some(r => r.round === round));
+    if (!known.length) return;
+    setExpanded(prev => Array.from(new Set([...prev, ...known])));
+    setHighlighted(known[0]);
+    requestAnimationFrame(() => document.getElementById(`round-r${known[0]}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+    if (highlightTimer.current !== undefined) window.clearTimeout(highlightTimer.current);
+    highlightTimer.current = window.setTimeout(() => setHighlighted(null), 2400);
+  };
   return <>
     <div className={s.header}>
       <div className={s.column}><Title1>{report.match.map}</Title1><Body1>{report.match.score ? `${report.match.score.initialCT} : ${report.match.score.initialT}` : '比分不可用'} · 开局 CT 队 / 开局 T 队 · {report.match.rounds} 回合</Body1><Caption1 className={s.muted}>{report.match.fileName}</Caption1></div>
@@ -224,7 +332,7 @@ function Report({ report, playerId }: { report: DesktopMatchReport; playerId: st
     </div>
     <Divider />
     <div className={s.split}>
-      <Findings report={report} playerId={playerId} />
+      <Findings report={report} playerId={playerId} onShowRounds={showRounds} />
       <div className={s.section}>
         <Title2>道具与残局</Title2>
         <UtilityPanel utility={p.utility} />
@@ -250,6 +358,7 @@ function Report({ report, playerId }: { report: DesktopMatchReport; playerId: st
         </Card>
       </div>
     </div>
+    <RoundTimeline rounds={timeline} expanded={expanded} highlighted={highlighted} onToggle={toggleRound} />
   </>;
 }
 

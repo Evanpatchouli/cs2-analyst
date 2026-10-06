@@ -14,6 +14,8 @@ CS2 Coach is structured as a desktop application with a deterministic analysis c
 
 The Electron desktop app runs the native parser and the full deterministic pipeline in a Utility Process and sends a serializable report DTO to the sandboxed renderer over contextBridge IPC. The renderer never imports `dem-parser`, Node builtins or Analytics, and never recomputes metrics. Process model, IPC contract and UI: [desktop report](./desktop-report.md).
 
+`report-contract` also carries a read-only per-player Round Timeline projection of existing `Match` facts (round side / result / cumulative score plus filtered kill / death / clutch / bomb events with round-relative seconds). It is built in the Desktop presenter from frozen data, never in the renderer, and adds no new Analytics semantics.
+
 **Supported platform: Windows x64 only.** Packaging targets the NSIS x64 installer and stages the `win32-x64-msvc` native binding; there is no cross-platform packaging path.
 
 For Windows distribution the Main and Utility Process bundles inline every workspace package, and the native parser is staged next to the worker bundle as an asar-unpacked binding, so an installed application resolves nothing through pnpm workspace links. Packaging layout, staging script and installed-app verification: [Windows packaging](./windows-packaging.md).
@@ -27,5 +29,9 @@ The DEM implementation routes native demoparser2 results through an internal ada
 DEM parsing, analysis logic and UI presentation must remain independent.
 
 AI coaching is an optional interpretation layer built on top of structured findings.
+
+## Future boundary (not implemented)
+
+Auto DEM discovery / directory scanning is **not planned**: the user always selects the DEM explicitly, and no code scans Steam / CS2 directories. A future `apps/api` may add account / session and match-history summary storage, but DEM parsing, Analytics and Findings stay local to Desktop — the service never receives DEM files and never analyzes them.
 
 `findings` consumes only frozen `MatchAnalytics` via the Analytics public package. `generateFindings` runs pure deterministic rules and returns ranked evidence with per-player caps (3 issues, 2 highlights). It does not parse DEMs or recompute Analytics; parser is a devDependency only for real-demo golden tests. Policy and gaps: [Findings Engine](./findings-engine.md).

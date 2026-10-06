@@ -51,12 +51,40 @@ P5.2 Windows Packaging & Installable MVP — **PASS**。使用 electron-builder 
 
 P5.3 报告页可读性与说明优化 — **PASS**。纯展示层：Findings 证据不再默认显示原始 tick，改为按 `(eventTick - roundStartTick) / tickRate` 计算的“回合开始后 N 秒”；统一数字格式（秒/ADR 两位小数、百分比一位、整数计数零位）；Trade 文案改为“4 / 18 次死亡后队友完成补枪”；道具面板重做为逐行图标列表（投掷数量 + 道具效果）；8 张核心指标卡与道具面板统一增加 Fluent UI v9 `?` Tooltip。Analytics / Findings 语义、阈值、排序、evidence 数值与 ruleId 顺序全部不变。
 
+P5.5 Round Timeline MVP — **PASS**。报告页底部新增独立“回合时间线” section：每回合一行摘要（`R24 / T / 成功 / 13 : 11`）可点击展开关键事件，展示目标玩家的击杀、死亡（含死后击杀）、已证实的残局形成点与炸弹安放 / 拆除 / 爆炸生命周期；时间统一为 `(eventTick - round.startTick) / tickRate` 的回合内秒数，证据不足显示 `—`。Timeline 是 Desktop presenter 层新增的只读 JSON DTO，只依赖现有 `Match / Round / MatchEvent` 与冻结 Analytics 的 clutch 结果，不修改 P3 语义、不重跑 Analytics、不在 Renderer 重新推导比赛事实。Findings 的 `relatedRounds` 提供“查看 R24 / 查看相关回合”联动（展开、滚动、短暂高亮）；切换目标玩家只切换 DTO 中对应玩家的 timeline，不重新解析 DEM。事件过滤只保留目标玩家击杀 / 死亡、clutch start 与炸弹生命周期，不展示 damage / weapon_fire / 道具效果 / 受闪 / snapshot。详见 [桌面比赛报告](./desktop-report.md)。
+
 - P5.1 已完成：Match overview、玩家指标与 Findings 报告页。
 - P5.2 已完成：可安装、可卸载、脱离 pnpm workspace 运行的 Windows 版本。
 - P5.3 已完成：报告页时间显示、数字格式、Trade 文案、道具面板与指标说明。
-- 未开始：Round timeline（完整播放器）、Analysis views（图表/热力图/多玩家对比）。
+- P5.4 已完成：深蓝灰视觉体系、彩色实心道具图标与卡片一致性。
+- P5.5 已完成：回合时间线与 Findings → Timeline 联动。
+- 未开始：完整播放器、Analysis views（图表/热力图/多玩家对比）。
 
 ## P6 AI Coach
 
 - Optional AI explanation layer
 - Training recommendations
+
+## Future — Account & Match History（未开始）
+
+明确的产品边界：
+
+- **不做自动扫描 / 自动寻找 DEM。** Auto DEM discovery / directory scanning: **NOT PLANNED**。DEM 始终由用户主动选择。
+- 历史记录未来再做，并建立在登录机制之上。
+- DEM 解析、Analytics 与 Findings 永远由 Desktop 本地完成；服务端不解析 DEM，也不需要上传 DEM 文件。
+
+```text
+apps/api
+├── Auth / Session
+├── 保存比赛历史摘要
+├── 查询比赛历史
+└── 不上传 DEM，不做服务端 DEM 分析
+
+Desktop
+├── 本地解析 DEM
+├── 本地 Analytics
+├── 本地 Findings
+└── 分析完成后未来可同步摘要
+```
+
+登录 / Session、`apps/api`、历史比赛数据库均不在本轮或当前 P5 范围内。

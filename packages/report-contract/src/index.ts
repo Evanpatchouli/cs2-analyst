@@ -12,6 +12,57 @@ export interface DesktopFindingEvidence extends FindingEvidence {
 /** Findings are passed through unchanged except for the evidence presentation field. */
 export type DesktopFinding = Omit<Finding, 'evidence'> & { evidence: DesktopFindingEvidence[] };
 
+/** High-value Round Timeline event kinds. Low-value log events are intentionally absent. */
+export type DesktopTimelineEventType =
+  | 'kill'
+  | 'death'
+  | 'bomb-plant-start'
+  | 'bomb-planted'
+  | 'bomb-defuse-start'
+  | 'bomb-defused'
+  | 'bomb-exploded'
+  | 'clutch-start';
+
+/**
+ * One presentation event on the Round Timeline, projected from existing Match facts.
+ * The raw `tick` is kept for traceability; the Renderer shows `roundTimeSeconds`
+ * (seconds from the round start) and never the absolute tick.
+ */
+export interface DesktopTimelineEvent {
+  id: string;
+  type: DesktopTimelineEventType;
+  tick: number;
+  /** (tick - round.startTick) / tickRate; absent when the round clock cannot be established. */
+  roundTimeSeconds?: number;
+  actorId?: string;
+  actorName?: string;
+  targetId?: string;
+  targetName?: string;
+  weapon?: string;
+  opponents?: number;
+  description: string;
+}
+
+/**
+ * One round for one target player. `side` / `result` follow the target player's team,
+ * so the same round differs per player; `scoreAfter` belongs to the stable teams and is
+ * null whenever the winner cannot be uniquely mapped back to them.
+ */
+export interface DesktopRoundTimeline {
+  round: number;
+  side: 'CT' | 'T' | 'Unknown';
+  result: 'win' | 'loss' | 'unknown';
+  scoreAfter: { initialCT: number; initialT: number } | null;
+  startTick: number | null;
+  events: DesktopTimelineEvent[];
+}
+
+/** One target player's full round timeline; switching players swaps this array entry. */
+export interface DesktopPlayerTimeline {
+  playerId: string;
+  rounds: DesktopRoundTimeline[];
+}
+
 /** JSON-only presentation contract. No domain events, native objects or file paths. */
 export interface DesktopPlayerAnalytics {
   playerId: string;
@@ -43,6 +94,8 @@ export interface DesktopMatchReport {
   players: { id: string; nickname: string }[];
   analytics: DesktopPlayerAnalytics[];
   findings: DesktopFinding[];
+  /** Full per-player round timelines; the Renderer picks the entry matching the selected player. */
+  timeline: DesktopPlayerTimeline[];
 }
 export type ImportPhase = 'selecting' | 'parsing' | 'analyzing';
 export type ImportResult = { kind: 'success'; report: DesktopMatchReport } | { kind: 'cancelled' } | { kind: 'error'; message: string };
