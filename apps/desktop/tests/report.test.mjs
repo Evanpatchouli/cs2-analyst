@@ -51,6 +51,21 @@ test('real demo flows through parser -> analytics -> findings into a serializabl
     assert.ok(finding.title && finding.summary, 'findings carry a title and summary');
     assert.ok(finding.evidence.length > 0, 'findings carry evidence');
   }
+
+  // Presentation-only round clock: real seconds inside the round, derived from
+  // (eventTick - roundStartTick) / tickRate, never the absolute tick.
+  const timed = report.findings.filter(f => f.playerId === twinkle.id)
+    .flatMap(f => f.evidence).filter(e => e.round !== undefined && e.tick !== undefined);
+  assert.ok(timed.length > 0, 'demo1 evidence carries round and tick');
+  for (const e of timed) {
+    assert.equal(typeof e.roundTimeSeconds, 'number', `missing round time for ${e.metric}`);
+    assert.ok(Number.isFinite(e.roundTimeSeconds) && e.roundTimeSeconds >= 0, 'round time is a non-negative number');
+    assert.ok(e.roundTimeSeconds < e.tick / 64, 'round time is relative to the round start, not the absolute tick');
+  }
+  const r4 = timed.find(e => e.metric === 'utility.flash.teammate.evidence.victim' && e.round === 4 && e.tick === 17120);
+  assert.ok(r4, 'R4 teammate-flash evidence is present');
+  assert.ok(Math.abs(r4.roundTimeSeconds - (17120 - 15416) / 64) < 1e-9,
+    'R4 flash round time equals (eventTick - roundStartTick) / tickRate');
 });
 
 test('an unreadable DEM returns an error result instead of throwing', async () => {

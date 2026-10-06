@@ -3,8 +3,9 @@ import { analyzeMatch } from '@cs2-coach/analytics';
 import type { PlayerMetrics } from '@cs2-coach/analytics';
 import { Demoparser2Provider } from '@cs2-coach/dem-parser';
 import { generateFindings } from '@cs2-coach/findings';
+import type { Finding, FindingEvidence } from '@cs2-coach/findings';
 import type { Match } from '@cs2-coach/match-model';
-import type { DesktopMatchReport, ImportResult } from '@cs2-coach/report-contract';
+import type { DesktopFinding, DesktopMatchReport, ImportResult } from '@cs2-coach/report-contract';
 
 /** Score belongs to stable teams, not the CT/T sides that swap at halftime. */
 function teamScore(match: Match): DesktopMatchReport['match']['score'] {
@@ -42,12 +43,44 @@ function coverageNotes(player: PlayerMetrics, clutchIneligible: boolean): string
   return notes;
 }
 
+/**
+ * Presentation-only round clock for evidence rows: real elapsed seconds inside
+ * the round, computed as (eventTick - roundStartTick) / tickRate. Returns
+ * undefined whenever the round start, the event tick or a reliable tick rate is
+ * missing, so the UI never guesses a time. Frozen Analytics semantics are not
+ * touched; the raw tick stays in the contract for debugging.
+ */
+function roundTimeLookup(match: Match): (evidence: FindingEvidence) => number | undefined {
+  const rate = match.tickRate;
+  if (typeof rate !== 'number' || !Number.isFinite(rate) || rate <= 0) return () => undefined;
+  const roundStarts = new Map(match.rounds.map(round => [round.number, round.startTick]));
+  return ({ round, tick }) => {
+    if (round === undefined || tick === undefined) return undefined;
+    const start = roundStarts.get(round);
+    if (typeof start !== 'number') return undefined;
+    const seconds = (tick - start) / rate;
+    return Number.isFinite(seconds) && seconds >= 0 ? seconds : undefined;
+  };
+}
+
+/** Copies a finding and adds only the round-time presentation field to its evidence. */
+function withRoundTime(finding: Finding, roundTime: (evidence: FindingEvidence) => number | undefined): DesktopFinding {
+  return {
+    ...finding,
+    evidence: finding.evidence.map(evidence => {
+      const roundTimeSeconds = roundTime(evidence);
+      return roundTimeSeconds === undefined ? evidence : { ...evidence, roundTimeSeconds };
+    }),
+  };
+}
+
 export function buildDesktopReport(match: Match, filePath: string): DesktopMatchReport {
   const a = analyzeMatch(match);
   const valid = a.players.filter(p => p.steamId && p.roundsPlayed > 0);
   if (!valid.length) throw new Error('DEM 没有可报告的有效玩家或完整回合。');
   const selected = valid.find(p => p.nickname.toLowerCase() === 'twinkle') ?? valid[0];
   const clutchIneligible = Boolean(a.coverage.issues['clutch-round-ineligible']);
+  const roundTime = roundTimeLookup(match);
   return {
     schemaVersion: 1,
     match: { id: match.id, fileName: basename(filePath), map: match.map, rounds: match.rounds.length, score: teamScore(match) },
@@ -74,7 +107,7 @@ export function buildDesktopReport(match: Match, filePath: string): DesktopMatch
         coverage: { complete: notes.length === 0, notes },
       };
     }),
-    findings: valid.flatMap(p => generateFindings(a, p.steamId)),
+    findings: valid.flatMap(p => generateFindings(a, p.steamId).map(finding => withRoundTime(finding, roundTime))),
   };
 }
 

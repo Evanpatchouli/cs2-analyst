@@ -42,7 +42,7 @@ async function waitFor(probe, timeoutMs, label) {
 }
 
 /** Launches the built app with CS2_COACH_DEM_PATH so the import skips the native dialog. */
-async function scenario({ label, demPath, ready, assertReport }) {
+async function scenario({ label, demPath, ready, assertReport, assertDom }) {
   const port = await freePort();
   const env = { ...process.env, CS2_COACH_DEM_PATH: demPath };
   delete env.ELECTRON_RUN_AS_NODE;
@@ -113,6 +113,7 @@ async function scenario({ label, demPath, ready, assertReport }) {
     }, 120_000, label);
     assertReport(body);
     assertNoStiffEnglish(body);
+    await assertDom?.(evaluate);
     assert.deepEqual(errors, [], '页面存在未捕获异常');
     console.log(`${label}：通过`);
 
@@ -138,9 +139,17 @@ await scenario({
   assertReport: text => {
     for (const expected of ['de_dust2', '13 : 11', 'twinkle', '25 / 20 / 4', '91.38', '75%', '22.2%',
       'CT 方 ADR 明显低于 T 方', '死亡后队友补枪偏少', '本场多次闪到队友',
-      'R24 1v3 残局获胜', '本场首杀对决贡献突出', '重新选择 DEM']) {
+      'R24 1v3 残局获胜', '本场首杀对决贡献突出', '重新选择 DEM',
+      '4 / 18 次死亡后队友完成补枪', '投掷数量', '道具效果',
+      '闪光弹', '烟雾弹', '燃烧瓶', '诱饵弹', '高爆手雷对敌伤害', '燃烧伤害', '闪光助攻',
+      '回合开始后', '26.63 秒']) {
       assert.ok(text.includes(expected), `报告缺少内容：${expected}`);
     }
+    assert.ok(!/tick \d+/.test(text), '证据行不应默认显示原始 tick');
+  },
+  assertDom: async evaluate => {
+    const helps = await evaluate('document.querySelectorAll(\'button[aria-label$="说明"]\').length');
+    assert.ok(helps >= 9, `核心指标与道具面板的 Tooltip 入口不足：${helps}`);
   },
 });
 

@@ -1,4 +1,16 @@
-import type { Finding } from '@cs2-coach/findings';
+import type { Finding, FindingEvidence } from '@cs2-coach/findings';
+
+/**
+ * Presentation-only addition to a frozen evidence row. Seconds from the round
+ * start tick, derived from the existing round/tick evidence so the Renderer can
+ * show a human time without recomputing anything. Absent when the round clock
+ * cannot be established.
+ */
+export interface DesktopFindingEvidence extends FindingEvidence {
+  roundTimeSeconds?: number;
+}
+/** Findings are passed through unchanged except for the evidence presentation field. */
+export type DesktopFinding = Omit<Finding, 'evidence'> & { evidence: DesktopFindingEvidence[] };
 
 /** JSON-only presentation contract. No domain events, native objects or file paths. */
 export interface DesktopPlayerAnalytics {
@@ -30,7 +42,7 @@ export interface DesktopMatchReport {
   selectedPlayer: string;
   players: { id: string; nickname: string }[];
   analytics: DesktopPlayerAnalytics[];
-  findings: Finding[];
+  findings: DesktopFinding[];
 }
 export type ImportPhase = 'selecting' | 'parsing' | 'analyzing';
 export type ImportResult = { kind: 'success'; report: DesktopMatchReport } | { kind: 'cancelled' } | { kind: 'error'; message: string };

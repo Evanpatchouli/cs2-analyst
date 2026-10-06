@@ -1,18 +1,14 @@
 # Current Task
 
-Status: complete — P5.2.1 Product Polish PASS
+Status: complete — P5.3 报告页可读性与说明优化 PASS
 
-基线：`58a7abd`（P5.2 Windows Packaging & Installable MVP PASS）；不改 Analytics、不改 Findings 阈值/排序/契约、不做 UI 结构或功能改动。
+基线：`2556907`（P5.2.1 中文产品化 PASS）；本轮只做报告页展示层，不改 P3 Analytics 语义与 P4 Findings 阈值 / 排序 / ranking。
 
-- 发布目录：安装包统一归档到 `release/<version>/`（当前 `release/0.1.0/CS2-Coach-Setup-0.1.0.exe`），版本号取自 `apps/desktop/package.json`；测试 seam 产物移到 `.tmp/test-output/<version>/`，不再混入正式 release。`build-installer.mjs`、`installed-app-smoke.mjs`、`.gitignore` 与文档同步。
-- 平台约束：roadmap / architecture / windows-packaging 明确 **Supported platform: Windows x64 only**；`prepare-pack.mjs` 移除 darwin/linux/arm64 triple 映射，非 win32-x64 直接报错，不再保留跨平台 packaging 逻辑。
-- UI 术语中文化（纯展示层）：ADR（每回合平均有效伤害）、HS%（爆头率）、KAST（回合贡献率）、Trade rate（死亡后队友补枪率）、Trade kills（补枪击杀）、Opening（首杀对决）、Clutch（残局）；严重度徽章 high/medium/low/positive → 高/中/低/亮点。
-- 道具区：Utility/Flash/Smoke/HE/Incendiary/Molotov/Decoy → 道具/闪光弹/烟雾弹/高爆手雷/燃烧弹/燃烧瓶/诱饵弹；HE 敌伤/燃烧敌伤 → 高爆手雷对敌伤害/燃烧伤害（单位改为“点”）；受闪说明改写为不含 duration 的自然中文。
-- 残局面板标题改为“残局”，结果只显示“成功 / 失败 / 结果未知”，未新增“惜败”推断。
-- Trade 文案：指标卡改为“死亡时仍有队友存活：18 / 队友成功补枪：4”，不再出现“可交易死亡”；`trade.low-rate` 标题改为“死亡后队友补枪偏少”，summary 改为自然中文并附“存活不等于具备补枪位置”的解释。
-- Findings 文案：只改 title/summary；`side-impact.*` 改为“X 方 ADR 明显低于 Y 方”，utility 伤害/闪光与 team-flash 的直译（HE、duration、非零等）全部改写；ruleId、阈值、排序、evidence 结构、数值不变。
-- Findings 证据展示层中文化：metric 路径映射为中文指标名，unit 映射为中文单位（flag → 是/否，ratio/percent → %），数据契约不变。
-- 覆盖告警文案：`apps/desktop/electron/report.ts` 的 coverage notes 去掉 ADR / KAST / Trade / Clutch 直译。
-- 验证：`pnpm typecheck`、`pnpm build`、analytics 53/53、findings 17/17、dem-parser 28/28、desktop Node 集成 3/3、desktop `test:report`、`pnpm test:smoke`、installed-app smoke 全 PASS；twinkle demo1 数值与 Findings ruleId 完全不变。
-- 非目标保持：不改 Analytics、不加新规则、不加“惜败”判定、不做 timeline/历史/自动扫描/AI、无 UI 大改版。
-- focused commit 后交接；发布目录与平台约束见 [Windows 打包与安装](../docs/windows-packaging.md)。
+- tick → 回合内时间：`packages/report-contract` 新增展示层 `DesktopFinding` / `DesktopFindingEvidence.roundTimeSeconds`；`apps/desktop/electron/report.ts` 用真实数据 `(eventTick - roundStartTick) / tickRate` 计算，缺少回合起点 / 事件 tick / 可靠 tickRate 时字段缺省，不猜时间。Renderer 显示“R4 · 回合开始后 26.63 秒”，原始 `tick` 只保留在 `title` 次级提示。
+- 数字格式（仅展示层）：秒数与 ADR 两位小数、百分比一位小数（KAST 保持整数）、整数计数零位；evidence 的 hp / hp-round / ratio / percent / seconds / count 走同一套格式化，底层数值不截断。
+- Trade 文案：指标卡改为“Trade rate（死亡后队友补枪率）”+“4 / 18 次死亡后队友完成补枪”，Tooltip 补充“死亡时仍有队友存活：18 / 其中 5 秒内队友击杀该敌人：4”；不再出现“可交易死亡 / 被交易 / 及时回收”。算法、5 秒窗口、thresholds、ranking 均未动。
+- 道具面板：标题“道具”，先“投掷数量”6 项逐行（图标 + 中文名 + 右对齐计数），分隔线后“道具效果”5 项逐行；图标来自新增 `renderer/src/icons.tsx` 本地统一图标集（20px 网格、单色 `currentColor` 描边，不混用其他图标源）。
+- Tooltip：8 张核心指标卡 + 道具面板共 9 个 Fluent UI v9 `?` 入口（`Tooltip relationship="description"` + 可聚焦 `Button` + 中文 `aria-label`），文案只解释既有口径。
+- 验证：`pnpm typecheck`、`pnpm build`、desktop Node 集成 3/3（新增 round-time 断言）、desktop `test:report`（新增 9 个 Tooltip 入口 DOM 断言与“无 `tick <n>`”断言）、`pnpm test:smoke`、analytics 53/53、findings 17/17、dem-parser 28/28 全 PASS；twinkle demo1 数值与 Findings ruleId 顺序不变。
+- 非目标保持：不改 Analytics 算法、Findings 阈值 / ranking、不加“惜败”、不加 timeline / 图表 / 历史 / 自动扫描 / AI、无 installer 架构调整、无大范围 UI 重构。
+- focused commit 后交接；展示层细节与验收见 [桌面比赛报告](../docs/desktop-report.md)。

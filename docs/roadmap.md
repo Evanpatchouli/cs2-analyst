@@ -49,8 +49,11 @@ P5.1 End-to-End Desktop Report MVP — **PASS**。首次打通 `选择 .dem → 
 
 P5.2 Windows Packaging & Installable MVP — **PASS**。使用 electron-builder + NSIS 产出 Windows x64 安装包（`CS2 Coach`，版本沿用项目版本）。Utility Process 的 workspace 依赖全部打进 `report-worker.js`，原生 parser 以 asar-unpacked 形式随安装目录分发，安装版不再依赖 pnpm workspace symlink；仍不包含签名、自动更新或发布流程。安装版 E2E 覆盖安装/启动、Renderer 无 Node 暴露、真实 demo1.dem 报告、损坏 DEM 错误、分析中途关闭无残留 worker 与卸载。见 [Windows 打包与安装](./windows-packaging.md)。
 
+P5.3 报告页可读性与说明优化 — **PASS**。纯展示层：Findings 证据不再默认显示原始 tick，改为按 `(eventTick - roundStartTick) / tickRate` 计算的“回合开始后 N 秒”；统一数字格式（秒/ADR 两位小数、百分比一位、整数计数零位）；Trade 文案改为“4 / 18 次死亡后队友完成补枪”；道具面板重做为逐行图标列表（投掷数量 + 道具效果）；8 张核心指标卡与道具面板统一增加 Fluent UI v9 `?` Tooltip。Analytics / Findings 语义、阈值、排序、evidence 数值与 ruleId 顺序全部不变。
+
 - P5.1 已完成：Match overview、玩家指标与 Findings 报告页。
 - P5.2 已完成：可安装、可卸载、脱离 pnpm workspace 运行的 Windows 版本。
+- P5.3 已完成：报告页时间显示、数字格式、Trade 文案、道具面板与指标说明。
 - 未开始：Round timeline（完整播放器）、Analysis views（图表/热力图/多玩家对比）。
 
 ## P6 AI Coach

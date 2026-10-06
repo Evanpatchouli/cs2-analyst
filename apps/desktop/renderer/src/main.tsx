@@ -3,10 +3,13 @@ import { createRoot } from 'react-dom/client';
 import {
   Badge, Body1, Button, Card, Caption1, Divider, Dropdown, FluentProvider,
   MessageBar, MessageBarBody, Option, Spinner, Subtitle1, Title1, Title2,
-  makeStyles, tokens, webDarkTheme,
+  Tooltip, makeStyles, tokens, webDarkTheme,
 } from '@fluentui/react-components';
-import type { DesktopMatchReport } from '@cs2-coach/report-contract';
+import type { DesktopMatchReport, DesktopPlayerAnalytics } from '@cs2-coach/report-contract';
 import { useReport } from './store';
+import {
+  DecoyIcon, ExplosiveIcon, FlashbangIcon, IncendiaryIcon, MolotovIcon, QuestionCircleIcon, SmokeIcon,
+} from './icons';
 
 const useStyles = makeStyles({
   page: { minHeight: '100vh', backgroundColor: tokens.colorNeutralBackground2, color: tokens.colorNeutralForeground1 },
@@ -17,13 +20,41 @@ const useStyles = makeStyles({
   muted: { color: tokens.colorNeutralForeground3 },
   grid: { display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: '12px', '@media (max-width: 900px)': { gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' } },
   split: { display: 'grid', gridTemplateColumns: 'minmax(0, 3fr) minmax(0, 2fr)', gap: '20px', '@media (max-width: 900px)': { gridTemplateColumns: '1fr' } },
-  stat: { backgroundColor: tokens.colorNeutralBackground1, padding: '16px' },
+  stat: { backgroundColor: tokens.colorNeutralBackground1, padding: '16px', display: 'flex', flexDirection: 'column', gap: '6px' },
+  statHeader: { display: 'flex', alignItems: 'center', gap: '2px' },
+  panel: { backgroundColor: tokens.colorNeutralBackground1, padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' },
+  panelHeader: { display: 'flex', alignItems: 'center', gap: '2px' },
+  help: { color: tokens.colorNeutralForeground3, flexShrink: 0, ':hover': { color: tokens.colorNeutralForeground2 } },
+  list: { display: 'flex', flexDirection: 'column' },
+  listRow: { display: 'grid', gridTemplateColumns: '20px minmax(0, 1fr) auto', alignItems: 'center', columnGap: '10px', minHeight: '34px', padding: '0 2px', borderBottom: `1px solid ${tokens.colorNeutralStroke3}`, ':last-child': { borderBottomStyle: 'none' } },
+  effectRow: { display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', alignItems: 'center', columnGap: '10px', minHeight: '34px', padding: '0 2px', borderBottom: `1px solid ${tokens.colorNeutralStroke3}`, ':last-child': { borderBottomStyle: 'none' } },
+  rowIcon: { display: 'inline-flex', color: tokens.colorNeutralForeground3 },
+  rowValue: { textAlign: 'right', fontVariantNumeric: 'tabular-nums' },
   finding: { backgroundColor: tokens.colorNeutralBackground1, padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' },
   evidence: { padding: '8px 0', display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: '12px', borderBottom: `1px solid ${tokens.colorNeutralStroke2}`, overflowWrap: 'anywhere' },
   empty: { padding: '72px 32px', alignItems: 'center', textAlign: 'center' },
 });
-const fmt = (value: number | null, digits = 0) => value === null ? '—' : value.toFixed(digits);
-const percent = (value: number | null, digits = 0) => value === null ? '—' : `${value.toFixed(digits)}%`;
+
+/** Display-only number rules: counts 0, ADR/seconds 2, percentages 1, KAST integer. */
+const decimal = (value: number | null, digits: number) => value === null || !Number.isFinite(value) ? '—' : value.toFixed(digits);
+const count = (value: number | null) => decimal(value, 0);
+const percent = (value: number | null, digits = 1) => value === null || !Number.isFinite(value) ? '—' : `${value.toFixed(digits)}%`;
+const seconds = (value: number | null | undefined) => value === null || value === undefined || !Number.isFinite(value) ? '—' : `${value.toFixed(2)} 秒`;
+const points = (value: number | null) => value === null || !Number.isFinite(value) ? '—' : `${value.toFixed(0)} 点`;
+
+/** Presentation-only help copy. Metric definitions stay identical to the frozen contracts. */
+const help = {
+  kda: '击杀 / 死亡 / 助攻。仅统计正式回合内符合规则的事件，不包含热身和回合结束后的无效事件。',
+  adr: '每回合平均有效伤害。按实际从敌人生命值中扣除的伤害计算，不计友伤、自伤和超过敌人剩余生命值的额外伤害。',
+  hs: '爆头击杀占全部有效击杀的比例。',
+  kast: '某回合只要满足击杀、助攻、存活，或死亡后队友完成补枪任一条件，该回合就计入 KAST，用于观察整场比赛的稳定参与度。',
+  tradeRate: '你死亡后，队友在 5 秒内击杀该名敌人的比例。队友当时存活不代表一定具备补枪位置，因此该指标主要用于定位值得复盘的死亡回合。',
+  tradeKills: '队友被敌人击杀后，你在 5 秒内击杀该名敌人的次数。',
+  opening: '每回合首个有效击杀形成的首杀对决，包括首杀、首死以及对决胜率，用于观察开局阶段的影响。',
+  clutch: '当你成为队伍唯一存活玩家且敌方仍有人存活时形成 1vN 残局机会。只有证据明确的回合才会计入。',
+  utility: '统计本场正式回合内确认的道具事件。投掷数量为游戏记录的投掷次数；伤害为实际从敌人生命值中扣除的有效伤害；受闪次数按游戏记录到的受闪事件统计，可能包含几乎未产生实际致盲效果的记录，因此不能直接理解为“有效闪光次数”或实际致盲时长。“—”表示当前录像证据不足，无法可靠计算。',
+};
+const flashCaveat = '受闪次数按游戏记录到的受闪事件统计，其中可能包含几乎未产生实际致盲效果的记录，因此不能直接理解为“有效闪光次数”或实际致盲时长。“—”表示当前录像证据不足，无法可靠计算。';
 
 /** Findings evidence is a frozen technical contract; only its presentation is localized. */
 const metricLabels: Record<string, string> = {
@@ -31,7 +62,7 @@ const metricLabels: Record<string, string> = {
   "side.CT.roundsPlayed": "CT 方参与回合", "side.T.roundsPlayed": "T 方参与回合",
   "side.CT.kills": "CT 方击杀", "side.T.kills": "T 方击杀",
   "side.CT.deaths": "CT 方死亡", "side.T.deaths": "T 方死亡",
-  "trade.tradeableDeaths": "死亡时仍有队友存活", "trade.tradedDeaths": "队友成功补枪",
+  "trade.tradeableDeaths": "死亡时仍有队友存活", "trade.tradedDeaths": "其中 5 秒内队友击杀该敌人",
   "trade.tradeRate": "补枪率", "trade.complete": "补枪证据完整", "tradeWindow.seconds": "补枪判定窗口",
   "opening.kills": "首杀", "opening.deaths": "首死", "opening.duels": "首杀对决次数", "opening.winRate": "首杀对决胜率",
   "utility.throws.counts.hegrenade": "高爆手雷投掷", "utility.throws.counts.fire": "燃烧道具投掷",
@@ -48,18 +79,31 @@ const evidenceText = (value: number | boolean | string, unit: string): string =>
   if (unit === "flag") return value === true ? "是" : value === false ? "否" : String(value);
   if (typeof value !== "number") return String(value);
   switch (unit) {
-    case "ratio": return `${(value * 100).toFixed(0)}%`;
+    case "ratio": return `${(value * 100).toFixed(1)}%`;
     case "percent": return `${value.toFixed(1)}%`;
-    case "hp": return `${value} 点`;
-    case "hp/round": return `${value} 点/回合`;
-    case "seconds": return `${value} 秒`;
-    default: return value.toFixed(Number.isInteger(value) ? 0 : 2);
+    case "hp": return points(value);
+    case "hp/round": return `${value.toFixed(2)} 点/回合`;
+    case "seconds": return seconds(value);
+    case "count": return count(value);
+    default: return decimal(value, Number.isInteger(value) ? 0 : 2);
   }
 };
 
-function Stat({ label, value, hint }: { label: string; value: string; hint?: React.ReactNode }) {
+/** Uniform help entry: Fluent UI v9 Tooltip on a focusable, clickable button. */
+function InfoTip({ label, content }: { label: string; content: React.ReactElement | string }) {
   const s = useStyles();
-  return <Card className={s.stat}><Caption1 className={s.muted}>{label}</Caption1><Title2>{value}</Title2>{hint ? <Caption1>{hint}</Caption1> : null}</Card>;
+  return <Tooltip content={content} relationship="description" withArrow>
+    <Button appearance="transparent" size="small" className={s.help} icon={<QuestionCircleIcon size={16} />} aria-label={`${label}说明`} />
+  </Tooltip>;
+}
+
+function Stat({ label, value, hint, tip }: { label: string; value: string; hint?: React.ReactNode; tip: React.ReactElement | string }) {
+  const s = useStyles();
+  return <Card className={s.stat}>
+    <div className={s.statHeader}><Caption1 className={s.muted}>{label}</Caption1><InfoTip label={label} content={tip} /></div>
+    <Title2>{value}</Title2>
+    {hint ? <Caption1>{hint}</Caption1> : null}
+  </Card>;
 }
 
 function Findings({ report, playerId }: { report: DesktopMatchReport; playerId: string }) {
@@ -72,11 +116,57 @@ function Findings({ report, playerId }: { report: DesktopMatchReport; playerId: 
       <div className={s.header}><Subtitle1>{f.title}</Subtitle1><Badge appearance="tint" color={f.severity === 'positive' ? 'success' : f.severity === 'high' ? 'danger' : 'warning'}>{severityText[f.severity] ?? f.severity}</Badge></div>
       <Body1>{f.summary}</Body1>
       <details><summary>查看证据（{f.evidence.length}）</summary>
-        {f.evidence.map((e, i) => <div key={i} className={s.evidence}><Caption1>{metricLabel(e.metric)}{e.round !== undefined ? ` · R${e.round}` : ''}{e.tick !== undefined ? ` · tick ${e.tick}` : ''}</Caption1>
-          <Caption1>{evidenceText(e.value, e.unit)}</Caption1></div>)}
+        {f.evidence.map((e, i) => {
+          const when = [e.round === undefined ? null : `R${e.round}`, e.roundTimeSeconds === undefined ? null : `回合开始后 ${seconds(e.roundTimeSeconds)}`].filter(Boolean).join(' · ');
+          return <div key={i} className={s.evidence}>
+            <Caption1 title={e.tick === undefined ? undefined : `原始记录 tick ${e.tick}`}>{metricLabel(e.metric)}{when ? ` · ${when}` : ''}</Caption1>
+            <Caption1>{evidenceText(e.value, e.unit)}</Caption1>
+          </div>;
+        })}
       </details>
     </Card>) : <Body1>本场没有达到规则阈值且证据充分的复盘结论。</Body1>}
   </section>;
+}
+
+/** Row-per-metric utility panel; the numbers come straight from the DTO. */
+function UtilityPanel({ utility }: { utility: DesktopPlayerAnalytics['utility'] }) {
+  const s = useStyles();
+  const throws = [
+    { label: '闪光弹', icon: <FlashbangIcon />, value: count(utility.throws.flash) },
+    { label: '烟雾弹', icon: <SmokeIcon />, value: count(utility.throws.smoke) },
+    { label: '高爆手雷', icon: <ExplosiveIcon />, value: count(utility.throws.he) },
+    { label: '燃烧弹', icon: <IncendiaryIcon />, value: count(utility.throws.incendiary) },
+    { label: '燃烧瓶', icon: <MolotovIcon />, value: count(utility.throws.molotov) },
+    { label: '诱饵弹', icon: <DecoyIcon />, value: count(utility.throws.decoy) },
+  ];
+  const effects = [
+    { label: '高爆手雷对敌伤害', value: points(utility.heDamage) },
+    { label: '燃烧伤害', value: points(utility.fireDamage) },
+    { label: '敌人受闪效果', value: count(utility.enemyFlashEffects) },
+    { label: '队友受闪效果', value: count(utility.teamFlashEffects) },
+    { label: '闪光助攻', value: count(utility.flashAssists) },
+  ];
+  return <Card className={s.panel}>
+    <div className={s.panelHeader}><Subtitle1>道具</Subtitle1><InfoTip label="道具面板" content={help.utility} /></div>
+    <Caption1 className={s.muted}>投掷数量</Caption1>
+    <div className={s.list}>
+      {throws.map(row => <div key={row.label} className={s.listRow}>
+        <span className={s.rowIcon}>{row.icon}</span>
+        <span>{row.label}</span>
+        <span className={s.rowValue}>{row.value}</span>
+      </div>)}
+    </div>
+    <Divider />
+    <Caption1 className={s.muted}>道具效果</Caption1>
+    <div className={s.list}>
+      {effects.map(row => <div key={row.label} className={s.effectRow}>
+        <span>{row.label}</span>
+        <span className={s.rowValue}>{row.value}</span>
+      </div>)}
+    </div>
+    {utility.flashEffectsComplete ? null : <Caption1 className={s.muted}>受闪与闪光助攻证据不完整，相关数值可能偏低。</Caption1>}
+    <Caption1 className={s.muted}>{flashCaveat}</Caption1>
+  </Card>;
 }
 
 function Report({ report, playerId }: { report: DesktopMatchReport; playerId: string }) {
@@ -84,7 +174,6 @@ function Report({ report, playerId }: { report: DesktopMatchReport; playerId: st
   const selectPlayer = useReport(state => state.selectPlayer);
   const player = report.players.find(p => p.id === playerId)!;
   const p = report.analytics.find(a => a.playerId === playerId)!;
-  const u = p.utility;
   return <>
     <div className={s.header}>
       <div className={s.column}><Title1>{report.match.map}</Title1><Body1>{report.match.score ? `${report.match.score.initialCT} : ${report.match.score.initialT}` : '比分不可用'} · 开局 CT 队 / 开局 T 队 · {report.match.rounds} 回合</Body1><Caption1 className={s.muted}>{report.match.fileName}</Caption1></div>
@@ -94,30 +183,24 @@ function Report({ report, playerId }: { report: DesktopMatchReport; playerId: st
     </div>
     {p.coverage.notes.length ? <MessageBar intent="warning"><MessageBarBody>{p.coverage.notes.join(' ')}</MessageBarBody></MessageBar> : null}
     <div className={s.grid} aria-label="玩家指标">
-      <Stat label="K / D / A" value={`${p.kills} / ${p.deaths} / ${p.assists}`} />
-      <Stat label="ADR" value={fmt(p.adr, 2)} hint="每回合平均有效伤害" />
-      <Stat label="HS%（爆头率）" value={percent(p.headshotPercentage, 1)} />
-      <Stat label="KAST（回合贡献率）" value={percent(p.kast.percentage)} hint={`${p.kast.rounds} / ${p.kast.eligibleRounds} 回合${p.kast.complete ? '' : ' · 部分证据'}`} />
-      <Stat label="Trade rate（死亡后队友补枪率）" value={percent(p.trade.rate, 1)} hint={<>死亡时仍有队友存活：{fmt(p.trade.tradeableDeaths)}<br />队友成功补枪：{fmt(p.trade.tradedDeaths)}{p.trade.complete ? '' : ' · 部分证据'}</>} />
-      <Stat label="Trade kills（补枪击杀）" value={fmt(p.trade.kills)} />
-      <Stat label="Opening（首杀对决）" value={`${p.opening.kills} 首杀 / ${p.opening.deaths} 首死`} hint={p.opening.winRate === null ? undefined : `首杀对决胜率 ${(p.opening.winRate * 100).toFixed(0)}%`} />
-      <Stat label="Clutch（残局）" value={`${p.clutch.wins} 胜 / ${p.clutch.opportunities} 次`} hint={p.clutch.complete ? '已证明的 1vN 机会' : '仅已证明的部分机会'} />
+      <Stat label="K / D / A" value={`${p.kills} / ${p.deaths} / ${p.assists}`} tip={help.kda} />
+      <Stat label="ADR" value={decimal(p.adr, 2)} hint="每回合平均有效伤害" tip={help.adr} />
+      <Stat label="HS%（爆头率）" value={percent(p.headshotPercentage, 1)} tip={help.hs} />
+      <Stat label="KAST（回合贡献率）" value={percent(p.kast.percentage, 0)} hint={`${p.kast.rounds} / ${p.kast.eligibleRounds} 回合${p.kast.complete ? '' : ' · 部分证据'}`} tip={help.kast} />
+      <Stat label="Trade rate（死亡后队友补枪率）" value={percent(p.trade.rate, 1)}
+        hint={`${count(p.trade.tradedDeaths)} / ${count(p.trade.tradeableDeaths)} 次死亡后队友完成补枪${p.trade.complete ? '' : ' · 部分证据'}`}
+        tip={<>{help.tradeRate}<br />{`死亡时仍有队友存活：${count(p.trade.tradeableDeaths)}`}<br />{`其中 5 秒内队友击杀该敌人：${count(p.trade.tradedDeaths)}`}</>} />
+      <Stat label="Trade kills（补枪击杀）" value={count(p.trade.kills)} tip={help.tradeKills} />
+      <Stat label="Opening（首杀对决）" value={`${p.opening.kills} 首杀 / ${p.opening.deaths} 首死`} hint={p.opening.winRate === null ? undefined : `首杀对决胜率 ${percent(p.opening.winRate * 100, 1)}`} tip={help.opening} />
+      <Stat label="Clutch（残局）" value={`${p.clutch.wins} 胜 / ${p.clutch.opportunities} 次`} hint={p.clutch.complete ? '已证明的 1vN 机会' : '仅已证明的部分机会'} tip={help.clutch} />
     </div>
     <Divider />
     <div className={s.split}>
       <Findings report={report} playerId={playerId} />
       <div className={s.section}>
         <Title2>道具与残局</Title2>
-        <Card className={s.finding}>
-          <Subtitle1>道具</Subtitle1>
-          <Body1>闪光弹 {fmt(u.throws.flash)} · 烟雾弹 {fmt(u.throws.smoke)} · 高爆手雷 {fmt(u.throws.he)}</Body1>
-          <Body1>燃烧弹 {fmt(u.throws.incendiary)} · 燃烧瓶 {fmt(u.throws.molotov)} · 诱饵弹 {fmt(u.throws.decoy)}</Body1>
-          <Body1>高爆手雷对敌伤害 {fmt(u.heDamage)} 点 · 燃烧伤害 {fmt(u.fireDamage)} 点</Body1>
-          <Body1>敌人受闪效果 {fmt(u.enemyFlashEffects)} · 队友受闪效果 {fmt(u.teamFlashEffects)}{u.flashEffectsComplete ? '' : '（部分证据）'}</Body1>
-          <Body1>闪光助攻 {fmt(u.flashAssists)}</Body1>
-          <Caption1 className={s.muted}>受闪次数按游戏记录到的受闪事件统计，其中可能包含几乎未产生实际致盲效果的记录，因此不能直接理解为“有效闪光次数”或实际致盲时长。“—”表示当前录像证据不足，无法可靠计算。</Caption1>
-        </Card>
-        <Card className={s.finding}>
+        <UtilityPanel utility={p.utility} />
+        <Card className={s.panel}>
           <Subtitle1>残局</Subtitle1>
           {p.clutch.list.length ? p.clutch.list.map(c => <Body1 key={c.round}>R{c.round} · 1v{c.opponents} · {c.won === null ? '结果未知' : c.won ? '成功' : '失败'}</Body1>) : <Body1>没有可证明的残局机会。</Body1>}
         </Card>

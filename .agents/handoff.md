@@ -1,5 +1,18 @@
 # Agent Handoff
 
+## 2026-10-07 — P5.3 报告页可读性与说明优化 PASS
+
+- 基线 `2556907`（P5.2.1 PASS）。本轮只改 Renderer / presenter 展示层与 report DTO 的展示字段：不改 P3 Analytics 算法、P4 Findings 阈值 / 排序 / evidence 结构、Trade 5 秒窗口，未引入“惜败”、timeline、图表、历史库、自动扫描、AI 或 installer 变更。
+- tick → 回合内时间：`packages/report-contract` 新增 `DesktopFinding` 与 `DesktopFindingEvidence.roundTimeSeconds`（additive，`schemaVersion` 仍为 1，顶层 DTO 键不变）；`packages/report-contract` 只依赖 `findings` 类型不变。`apps/desktop/electron/report.ts` 的 `roundTimeLookup()` 用真实 `match.tickRate` 与 `round.startTick` 计算 `(eventTick - roundStartTick) / tickRate`，`withRoundTime()` 只复制 finding 并附加该字段；缺回合起点 / 事件 tick / 可靠 tickRate 或得到负值时字段缺省，UI 不猜测。Renderer 不再显示原始 tick，改为 `R4 · 回合开始后 26.63 秒`，原始 tick 仅保留在证据行的 `title` 次级提示。
+- 数字格式：`decimal / count / percent / seconds / points` 一套展示层 helper —— 秒数与 ADR 两位小数、百分比一位小数（KAST 保持整数）、整数计数零位，`—` 表示证据不足；evidence 的 `hp / hp/round / ratio / percent / seconds / count` 全部走同一套规则，底层 evidence 数值不截断（4.866097927093506 秒 → 4.87 秒）。
+- Trade 文案：指标卡显示“Trade rate（死亡后队友补枪率）”+“4 / 18 次死亡后队友完成补枪”，Tooltip 追加上下文“死亡时仍有队友存活：18 / 其中 5 秒内队友击杀该敌人：4”；旧术语“可交易死亡 / 被交易 / 及时回收”不再出现。Findings 的 `trade.low-rate` title/summary、ruleId、evidence 数值与顺序未改。
+- 道具面板：标题“道具”，分“投掷数量”（闪光弹 / 烟雾弹 / 高爆手雷 / 燃烧弹 / 燃烧瓶 / 诱饵弹，逐行 图标 + 中文名 + 右对齐计数）与“道具效果”（高爆手雷对敌伤害 / 燃烧伤害 / 敌人受闪效果 / 队友受闪效果 / 闪光助攻）两组，行高 / 间距一致，底部保留受闪口径说明；不再出现 Utility / HE / Flash / duration 等实现术语。
+- 图标：新增 `apps/desktop/renderer/src/icons.tsx`，单一风格本地图标集（20px 网格、单色 `currentColor` 描边、统一线宽）；项目未新增 icon 依赖，避免混用不同图标源。
+- Tooltip：`InfoTip` 用 Fluent UI v9 `Tooltip`（`relationship="description"`、`withArrow`）包裹真实 `Button`，hover / 点击聚焦 / Tab 均可访问，每个入口带中文 `aria-label`（如“ADR说明”“道具面板说明”）；覆盖 K/D/A、ADR、HS%、KAST、Trade rate、Trade kills、Opening、Clutch 八张卡片与道具面板，共 9 个入口。
+- 验证：`pnpm typecheck` 11/11、`pnpm build`、analytics 53/53、findings 17/17、dem-parser 28/28、desktop Node 集成 3/3（新增 round-time 断言：所有带 round+tick 的证据都有有限非负秒数且小于 `tick / 64`，R4 tick 17120 等于 `(17120 - 15416) / 64`）、desktop `test:report`（真实 / 损坏 / 非 .dem，新增 9 个 Tooltip 入口 DOM 断言与“正文不含 `tick <n>`”断言）、`pnpm test:smoke`（dev + preview）全 PASS。
+- demo1 golden 不变：twinkle 25/20/4、ADR 91.38、KAST 75%、Trade 22.2%、R24 1v3 胜、5 条 Findings ruleId 顺序 `side-impact.ct-gap / trade.low-rate / team-flash.frequent-effects / clutch.win.r24 / opening.positive`；R4 受闪证据显示“回合开始后 26.63 秒”（真实 R4 `startTick` 15416、tickRate 64；任务描述中的 18.42 秒只是示意值，未采用）。
+- 本 work unit focused commit 后交接；下一工作按用户新需求确定。
+
 ## 2026-10-07 — P5.2.1 Product Polish PASS
 
 - 基线 `58a7abd`（P5.2 PASS）。本轮只做发布目录规范 + 中文产品化文案：不改 Analytics、不改 Findings 阈值/排序/契约、不改 UI 结构与功能，未引入新规则、timeline、历史、自动扫描或 AI。
