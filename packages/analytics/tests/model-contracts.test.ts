@@ -7,6 +7,7 @@ import type {
   PlayerMetrics,
   SideMetrics,
   TradeMetrics,
+  UtilityMetrics,
 } from "@cs2-coach/analytics";
 import { analyzeMatch, coverageIssueSeverity } from "@cs2-coach/analytics";
 import type { Match } from "@cs2-coach/match-model";
@@ -39,6 +40,11 @@ function clutchFields(clutch: ClutchMetrics): [number, number, number] {
   return [clutch.opportunities, clutch.wins, clutch.byOpponents[3]];
 }
 
+function utilityFields(utility: UtilityMetrics): [number | null, number | null, number, number | null] {
+  return [utility.throws.counts.fire, utility.he.enemyDamage,
+    utility.flash.enemy.reportedDurationSeconds, utility.flash.enemy.blindDurationSeconds];
+}
+
 function tradeWindow(analytics: MatchAnalytics): [number, number | null] {
   return [analytics.tradeWindow.seconds, analytics.tradeWindow.ticks];
 }
@@ -59,6 +65,6 @@ const unknownSide = (analytics: MatchAnalytics) => analytics.players[0].side.Unk
 // @ts-expect-error Clutch opponent buckets are keyed 1..5 only.
 const bucketSix = (player: PlayerMetrics) => player.clutch.byOpponents[6];
 
-void [summarize, ctRounds, damageFields, unresolvedCounts, kastFields, tradeFields, clutchFields,
+void [summarize, ctRounds, damageFields, unresolvedCounts, kastFields, tradeFields, clutchFields, utilityFields,
   tradeWindow, issue, effectiveIssue, survivalIssue, tradeIssue, clutchIssue, severity, nullableAdr,
   run, numericId, unknownSide, bucketSix];

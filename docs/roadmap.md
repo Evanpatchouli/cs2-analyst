@@ -31,7 +31,7 @@ P3.2 Combat Metrics（KAST / Trade / Clutch）已完成：基于 freeze_end 名�
 
 - Basic player statistics（P3.1 已完成第一批）
 - Combat metrics（P3.2 KAST / Trade / Clutch 已完成）
-- Utility metrics（待 P3.3）
+- Utility metrics（P3.3 已完成）：release-only 投掷计数、HE/fire 敌方 HP loss、enemy/team/self flash 事件及原始 duration、death flag flash assist；重叠实际时间未获证实而返回 null。见 [Utility Analytics](./utility-analytics.md)。
 
 ## P4 Findings Engine
 

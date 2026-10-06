@@ -1,5 +1,17 @@
 # Agent Handoff
 
+## 2026-10-06 — P3.3 Utility Analytics PASS
+
+- 基于 `d73e05b` 完成 analytics utility work unit，`utility.ts` + metrics/index 集成；不改 parser、领域契约和生产包依赖，仅 analytics 依赖 match-model。
+- 唯一投掷口径：formal-window + confirmed participation 的 weapon_fire grenade release；detonate/start_burn/start_decoy 为独立效果证据，绝不叠加或反推 usage。同 actor/tick/归一 kind release 多行保留 observed、该类型 total=null；entityId 可复用、不做全局 ID。
+- Fire 归一 molotov/incgrenade/inferno；throws 仍区分 Molotov/Incendiary，inferno 仅 damage/effect。原始 event.weapon、round/tick 和 effectiveLoss 保留。
+- HE/fire 有效敌伤复用 damage ledger，overkill 截断、友伤/自伤不归属，ledger 缺口使 total=null。Flash count 为 victim effects；reported duration sum 为原始证据，actual blind duration 未经证实而 null。candidate overlap 考虑其他 thrower；effective threshold 默认不启用，显式 finite >=0 输入并回显。
+- Flash assist 依赖 kill.assistedFlash=true 和 isEligibleAssist；没有“闪后被杀”的猜测路径。unknown flag/side/assister actor 显式 coverage。
+- Utility 本地 coverage 输出 per-metric complete、reason counts 与 nullable totals。unidentified roster 和 null actor 保守门控。当前 parser 无 feed-completeness manifest，完整性仅针对领域事件证据；实际 blind reset/expiry/死亡终止仍待验证。
+- Golden twinkle：Flash23/Smoke14/HE10/Incendiary9/Molotov2/Decoy1（fire11）；HE112 reported→96 effective、fire49→54；enemy19/50.853604s raw、team10/24.592389s raw、self15/20.235922s raw；flash assist1（R6 tick28201）。HE 与人工≈98差2：已逐发核对，R17 reported19仅剩3 HP，不能修改既有 ledger 迎合近似参考。44 positive duration rows / 6 overlap candidate rows，actual duration=null。
+- 验证：analytics **47/47**（新增9 synthetic +1 real-demo golden）、dem-parser **28/28**，0 skipped；`pnpm typecheck`、`pnpm build` PASS（未变包使用 Turbo cache）。独立审查提出的 roster/assister coverage 缺口已修复并加入 regression。
+- 全定义、口径/coverage/差异：[Utility Analytics](../docs/utility-analytics.md)。本 work unit focused commit 后交接；未进入 Findings/UI/AI。
+
 ## 2026-10-06 — P3.2 Final Acceptance end-state coverage fix
 
 - 基线：已 fetch 并确认 `main` / `origin/main` 同为 `cbff78d`，从当前代码、测试和 docs 复核实现。根因是 Trade / Clutch 入口检查 available / anomaly 等条件，却漏掉 timeline 已识别的 `endStateSuspect`。

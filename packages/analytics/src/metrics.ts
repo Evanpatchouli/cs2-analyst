@@ -25,6 +25,7 @@ import {
   type TradeMetrics,
 } from "./trade.js";
 import { buildRoundTimeline, type RoundTimeline } from "./timeline.js";
+import { summarizeUtility, type UtilityMetrics } from "./utility.js";
 
 export interface SideMetrics {
   /** Rounds counted for this side (participation confirmed and side known). */
@@ -127,6 +128,7 @@ export interface PlayerMetrics {
   trade: TradeMetrics;
   /** Clutch opportunities and clutch wins for this player. */
   clutch: ClutchMetrics;
+  utility: UtilityMetrics;
   coverage: PlayerCoverage;
 }
 
@@ -147,6 +149,8 @@ export interface MatchAnalytics {
 export interface AnalyzeOptions {
   /** Trade window in seconds; defaults to 5. Ignored without a reliable tick rate. */
   tradeWindowSeconds?: number;
+  /** Optional threshold on reported per-victim duration; no implicit 'effective flash' policy. */
+  effectiveFlashThresholdSeconds?: number;
 }
 
 type OpeningResolution =
@@ -223,7 +227,7 @@ function computePlayerMetrics(
   clutches: ReadonlyMap<number, RoundClutchResolution>,
   tradeWindow: TradeWindow,
   metricIssues: Partial<Record<CoverageIssue, number>>,
-): PlayerMetrics {
+): Omit<PlayerMetrics, "utility"> {
   const steamId = player.steamId;
   let kills = 0;
   let deaths = 0;
@@ -380,6 +384,10 @@ function computePlayerMetrics(
  * is unreliable.
  */
 export function analyzeMatch(match: Match, options: AnalyzeOptions = {}): MatchAnalytics {
+  const threshold = options.effectiveFlashThresholdSeconds;
+  if (threshold !== undefined && (!Number.isFinite(threshold) || threshold < 0)) {
+    throw new RangeError("effectiveFlashThresholdSeconds must be finite and nonnegative");
+  }
   const coverage = buildCoverage(match);
   const metricIssues: Partial<Record<CoverageIssue, number>> = {};
   const ledgers = new Map<number, DamageLedger>();
@@ -439,6 +447,7 @@ export function analyzeMatch(match: Match, options: AnalyzeOptions = {}): MatchA
   }
 
   const players = match.players.map(player =>
-    computePlayerMetrics(player, coverage, openings, ledgers, timelines, trades, clutches, tradeWindow, metricIssues));
+    ({ ...computePlayerMetrics(player, coverage, openings, ledgers, timelines, trades, clutches, tradeWindow, metricIssues),
+      utility: summarizeUtility(player.steamId, coverage, ledgers, match.tickRate, threshold) }));
   return { matchId: match.id, players, coverage: coverage.summary(metricIssues), tradeWindow };
 }

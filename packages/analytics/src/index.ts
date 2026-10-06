@@ -54,6 +54,10 @@ export type {
   RoundClutchResolution,
 } from "./clutch.js";
 export { analyzeMatch } from "./metrics.js";
+export { classifyUtilityWeapon, summarizeUtility } from "./utility.js";
+export type {
+  FlashMetrics, GrenadeKind, UtilityDamageMetrics, UtilityEvidence, UtilityIssue, UtilityMetrics,
+} from "./utility.js";
 export type {
   AnalyzeOptions,
   MatchAnalytics,

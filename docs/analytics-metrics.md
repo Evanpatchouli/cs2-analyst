@@ -6,7 +6,11 @@
 
 范围（P3.2）：统一存活/时序上下文、KAST（K/A/S/T）、trade kill / traded death / tradeable death、clutch opportunity / clutch win。
 
-非目标：utility advanced metrics、Findings、AI、UI。
+范围（P3.3）：release 投掷统计、HE/fire 有效敌伤、enemy/team/self flash 受害者事件与原始 duration、事件证明的 flash assist。
+
+完整 P3.3 指标定义、lifecycle/overlap/assist 策略、coverage 门控与 twinkle golden：[Utility Analytics](./utility-analytics.md)。
+
+非目标：Findings、AI、UI、trajectory/lineup、位置热力图、utility CT/T split。
 
 证据文件：`.demo/demo1.dem`，SHA-256 `f3c3173eae0cd100d15c81c3b734be792f9212256a9c99703b358d3434000852`，64 tick，`de_dust2`，10 名玩家，24 个正式回合。
 

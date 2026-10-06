@@ -181,3 +181,37 @@ test("real demo1.dem produces the reviewed KAST, trade and clutch golden metrics
 
   assert.deepEqual(analyzeMatch(match), analytics);
 });
+
+test("real demo1.dem utility golden uses releases, effective HP loss and explicit flash evidence", { skip }, async () => {
+  const match = await new Demoparser2Provider().parse(demoPath);
+  const result = analyzeMatch(match);
+  const u = result.players.find(p => p.nickname === "twinkle").utility;
+  assert.deepEqual(u.throws.counts, { hegrenade: 10, smoke: 14, flashbang: 23, fire: 11, decoy: 1 });
+  assert.deepEqual([u.throws.incendiary, u.throws.molotov, u.throws.complete], [9, 2, true]);
+  assert.deepEqual([u.he.reportedEnemyDamage, u.he.enemyDamage, u.he.complete], [112, 96, true]);
+  assert.deepEqual([u.fire.reportedEnemyDamage, u.fire.enemyDamage, u.fire.complete], [49, 54, true]);
+  assert.deepEqual([u.flash.enemy.count, u.flash.teammate.count, u.flash.self.count], [19, 10, 15]);
+  assert.equal(u.flash.enemy.reportedDurationSeconds, 50.85360407829285);
+  assert.equal(u.flash.teammate.reportedDurationSeconds, 24.592388570308685);
+  assert.equal(u.flash.self.reportedDurationSeconds, 20.235921636223793);
+  for (const metric of [u.flash.enemy, u.flash.teammate, u.flash.self]) {
+    assert.equal(metric.complete, true); assert.equal(metric.durationComplete, false);
+    assert.equal(metric.blindDurationSeconds, null); assert.equal(metric.effectiveCount, null);
+  }
+  assert.deepEqual([u.flash.assists, u.flash.assistsComplete], [1, true]);
+  assert.equal(u.flash.assistEvidence[0].round, 6);
+  assert.equal(u.flash.assistEvidence[0].event.tick, 28201);
+  assert.deepEqual(u.coverage, { complete: false, issues: { "flash-duration-unverified": 44, "flash-overlap-possible": 6 } });
+  const overkill = u.he.evidence.find(e => e.round === 17);
+  assert.deepEqual([overkill.event.healthDamage, overkill.event.healthRemaining, overkill.effectiveLoss], [19, 0, 3]);
+  const formal = new Map(result.coverage.rounds.map(r => [r.number, r]));
+  for (const p of result.players) {
+    for (const e of [...p.utility.throws.evidence, ...p.utility.effects, ...p.utility.he.evidence,
+      ...p.utility.fire.evidence, ...p.utility.flash.enemy.evidence, ...p.utility.flash.teammate.evidence,
+      ...p.utility.flash.self.evidence, ...p.utility.flash.assistEvidence]) {
+      const r = formal.get(e.round);
+      assert.ok(e.event.tick >= r.startTick && e.event.tick <= r.endTick);
+    }
+  }
+  assert.deepEqual(analyzeMatch(match), result);
+});
