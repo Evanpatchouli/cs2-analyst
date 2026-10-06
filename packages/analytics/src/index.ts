@@ -18,6 +18,8 @@ export type {
   RoundRoster,
   RoundWindow,
 } from "./coverage.js";
+export { buildDamageLedger, damageLossIssueTypes, spawnHealth } from "./damage.js";
+export type { DamageLedger, DamageLossIssue } from "./damage.js";
 export { analyzeMatch } from "./metrics.js";
 export type {
   MatchAnalytics,

@@ -41,19 +41,27 @@ test("real demo1.dem produces the reviewed twinkle golden metrics", { skip }, as
   assert.equal(twinkle.headshotPercentage, 36);
   assert.equal(twinkle.roundsPlayed, 24);
   assert.equal(twinkle.reportedDamage, 2644);
-  assert.equal(twinkle.adr, 2644 / 24);
+  assert.equal(twinkle.reportedAdr, 2644 / 24);
+  // Effective HP loss caps every hit at the victim's pre-hit health; the gap to
+  // reported damage is overkill the hurting hit claimed but could not remove.
+  assert.equal(twinkle.effectiveDamage, 2193);
+  assert.equal(twinkle.adr, 2193 / 24);
 
   // CT/T split follows the per-round freeze-end snapshot side, not Player.team.
   assert.equal(twinkle.side.CT.roundsPlayed, 12);
   assert.equal(twinkle.side.T.roundsPlayed, 12);
   assert.deepEqual(
-    [twinkle.side.CT.kills, twinkle.side.CT.deaths, twinkle.side.CT.assists, twinkle.side.CT.reportedDamage],
-    [10, 10, 3, 1106]);
+    [twinkle.side.CT.kills, twinkle.side.CT.deaths, twinkle.side.CT.assists,
+      twinkle.side.CT.reportedDamage, twinkle.side.CT.effectiveDamage],
+    [10, 10, 3, 1106, 819]);
   assert.deepEqual(
-    [twinkle.side.T.kills, twinkle.side.T.deaths, twinkle.side.T.assists, twinkle.side.T.reportedDamage],
-    [15, 10, 1, 1538]);
-  assert.equal(twinkle.side.CT.adr, 1106 / 12);
-  assert.equal(twinkle.side.T.adr, 1538 / 12);
+    [twinkle.side.T.kills, twinkle.side.T.deaths, twinkle.side.T.assists,
+      twinkle.side.T.reportedDamage, twinkle.side.T.effectiveDamage],
+    [15, 10, 1, 1538, 1374]);
+  assert.equal(twinkle.side.CT.reportedAdr, 1106 / 12);
+  assert.equal(twinkle.side.T.reportedAdr, 1538 / 12);
+  assert.equal(twinkle.side.CT.adr, 819 / 12);
+  assert.equal(twinkle.side.T.adr, 1374 / 12);
 
   assert.deepEqual(twinkle.multiKills.counts, { 2: 6, 3: 1, 4: 1, 5: 0 });
   assert.equal(twinkle.multiKills.multiKillRounds, 8);
@@ -82,6 +90,7 @@ test("real demo1.dem aggregate analytics stay consistent with the review window"
   assert.equal(sum(analytics.players, player => player.deaths), 180);
   assert.equal(sum(analytics.players, player => player.assists), 57);
   assert.equal(sum(analytics.players, player => player.reportedDamage), 24600);
+  assert.equal(sum(analytics.players, player => player.effectiveDamage), 19351);
 
   // Every round has exactly one attributable opening duel.
   assert.equal(sum(analytics.players, player => player.opening.kills), 24);
@@ -95,6 +104,7 @@ test("real demo1.dem aggregate analytics stay consistent with the review window"
     assert.equal(player.side.CT.deaths + player.side.T.deaths, player.deaths);
     assert.equal(player.side.CT.assists + player.side.T.assists, player.assists);
     assert.equal(player.side.CT.reportedDamage + player.side.T.reportedDamage, player.reportedDamage);
+    assert.equal(player.side.CT.effectiveDamage + player.side.T.effectiveDamage, player.effectiveDamage);
     assert.equal(player.side.CT.roundsPlayed + player.side.T.roundsPlayed, player.roundsPlayed);
     assert.equal(player.roundsPlayed, 24);
   }

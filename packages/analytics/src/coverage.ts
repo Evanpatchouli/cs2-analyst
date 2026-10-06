@@ -28,6 +28,8 @@ export type CoverageIssue =
   | "kill-teamkill-status-unknown"
   | "kill-headshot-status-unknown"
   | "damage-side-unknown"
+  | "damage-effective-chain-broken"
+  | "damage-effective-same-tick-ambiguous"
   | "assist-side-mismatch"
   | "opening-duel-contested"
   | "opening-duel-unattributed"
@@ -48,6 +50,8 @@ export const coverageIssueTypes: readonly CoverageIssue[] = [
   "kill-teamkill-status-unknown",
   "kill-headshot-status-unknown",
   "damage-side-unknown",
+  "damage-effective-chain-broken",
+  "damage-effective-same-tick-ambiguous",
   "assist-side-mismatch",
   "opening-duel-contested",
   "opening-duel-unattributed",

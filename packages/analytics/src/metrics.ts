@@ -12,6 +12,7 @@ import {
   type MatchCoverage,
   type RoundCoverage,
 } from "./coverage.js";
+import { buildDamageLedger, damageLossIssueTypes, type DamageLedger } from "./damage.js";
 
 export interface SideMetrics {
   /** Rounds counted for this side (participation confirmed and side known). */
@@ -19,8 +20,13 @@ export interface SideMetrics {
   kills: number;
   deaths: number;
   assists: number;
-  /** Reported damage dealt to enemies while on this side. Not effective HP loss. */
+  /** Reported damage dealt to enemies while on this side. Raw evidence, overkill preserved. */
   reportedDamage: number;
+  /** reportedDamage / roundsPlayed; null when roundsPlayed is zero. */
+  reportedAdr: number | null;
+  /** Actual enemy HP removed while on this side; overkill capped at pre-hit health. */
+  effectiveDamage: number;
+  /** effectiveDamage / roundsPlayed; null when roundsPlayed is zero. */
   adr: number | null;
 }
 
@@ -55,6 +61,8 @@ export interface PlayerCoverage {
   killsWithoutHeadshotStatus: number;
   /** Damage rows dropped because a side was unknown. */
   damageWithoutKnownSides: number;
+  /** Credited enemy damage rows whose actual HP loss could not be resolved. */
+  effectiveDamageUnresolved: number;
 }
 
 export interface PlayerMetrics {
@@ -72,7 +80,11 @@ export interface PlayerMetrics {
   roundsPlayed: number;
   /** Sum of reported health damage to enemies. Overkill is preserved, not capped. */
   reportedDamage: number;
-  /** reportedDamage / roundsPlayed; null when roundsPlayed is zero. */
+  /** reportedDamage / roundsPlayed; null when roundsPlayed is zero. Raw-evidence ADR. */
+  reportedAdr: number | null;
+  /** Actual enemy HP removed; overkill is capped at the victim's pre-hit health. */
+  effectiveDamage: number;
+  /** Standard ADR: effectiveDamage / roundsPlayed; null when roundsPlayed is zero. */
   adr: number | null;
   side: { CT: SideMetrics; T: SideMetrics };
   multiKills: MultiKillMetrics;
@@ -98,10 +110,11 @@ interface MutableSide {
   deaths: number;
   assists: number;
   reportedDamage: number;
+  effectiveDamage: number;
 }
 
 function createSide(): MutableSide {
-  return { roundsPlayed: 0, kills: 0, deaths: 0, assists: 0, reportedDamage: 0 };
+  return { roundsPlayed: 0, kills: 0, deaths: 0, assists: 0, reportedDamage: 0, effectiveDamage: 0 };
 }
 
 function addIssue(counts: Partial<Record<CoverageIssue, number>>, issue: CoverageIssue, amount = 1): void {
@@ -115,7 +128,9 @@ function finalizeSide(side: MutableSide): SideMetrics {
     deaths: side.deaths,
     assists: side.assists,
     reportedDamage: side.reportedDamage,
-    adr: side.roundsPlayed > 0 ? side.reportedDamage / side.roundsPlayed : null,
+    reportedAdr: side.roundsPlayed > 0 ? side.reportedDamage / side.roundsPlayed : null,
+    effectiveDamage: side.effectiveDamage,
+    adr: side.roundsPlayed > 0 ? side.effectiveDamage / side.roundsPlayed : null,
   };
 }
 
@@ -137,10 +152,13 @@ function resolveOpening(round: RoundCoverage): OpeningResolution {
   return { status: "duel", killer: kill.killer, victim: kill.victim };
 }
 
+const emptyLedger: DamageLedger = { loss: () => null, unresolved: {} };
+
 function computePlayerMetrics(
   player: Player,
   coverage: MatchCoverage,
   openings: ReadonlyMap<number, OpeningResolution>,
+  ledgers: ReadonlyMap<number, DamageLedger>,
   metricIssues: Partial<Record<CoverageIssue, number>>,
 ): PlayerMetrics {
   const steamId = player.steamId;
@@ -158,6 +176,8 @@ function computePlayerMetrics(
   let killsWithoutTeamkillStatus = 0;
   let killsWithoutHeadshotStatus = 0;
   let damageWithoutKnownSides = 0;
+  let effectiveDamage = 0;
+  let effectiveDamageUnresolved = 0;
   let openingKills = 0;
   let openingDeaths = 0;
   const side: Record<KnownSide, MutableSide> = { CT: createSide(), T: createSide() };
@@ -166,6 +186,7 @@ function computePlayerMetrics(
   let maxKillsInRound = 0;
 
   for (const round of coverage.rounds) {
+    const ledger = ledgers.get(round.number) ?? emptyLedger;
     const state = round.playerState(steamId);
     if (round.window.eventEligible) eligibleRounds++;
     const plays = round.window.eventEligible && state.participant === true;
@@ -214,6 +235,12 @@ function computePlayerMetrics(
         if (isEligibleDamage(event, steamId)) {
           reportedDamage += event.healthDamage;
           if (state.side) side[state.side].reportedDamage += event.healthDamage;
+          const loss = ledger.loss(event);
+          if (loss === null) effectiveDamageUnresolved++;
+          else {
+            effectiveDamage += loss;
+            if (state.side) side[state.side].effectiveDamage += loss;
+          }
         } else if (event.attackerSide === "Unknown" || event.victimSide === "Unknown") {
           damageWithoutKnownSides++;
         }
@@ -244,7 +271,9 @@ function computePlayerMetrics(
     headshotPercentage: headshotsKnown > 0 ? (headshotKills / headshotsKnown) * 100 : null,
     roundsPlayed,
     reportedDamage,
-    adr: roundsPlayed > 0 ? reportedDamage / roundsPlayed : null,
+    reportedAdr: roundsPlayed > 0 ? reportedDamage / roundsPlayed : null,
+    effectiveDamage,
+    adr: roundsPlayed > 0 ? effectiveDamage / roundsPlayed : null,
     side: { CT: finalizeSide(side.CT), T: finalizeSide(side.T) },
     multiKills: { counts: multiKillCounts, multiKillRounds, maxKillsInRound },
     opening: {
@@ -262,6 +291,7 @@ function computePlayerMetrics(
       killsWithoutTeamkillStatus,
       killsWithoutHeadshotStatus,
       damageWithoutKnownSides,
+      effectiveDamageUnresolved,
     },
   };
 }
@@ -277,6 +307,15 @@ function computePlayerMetrics(
 export function analyzeMatch(match: Match): MatchAnalytics {
   const coverage = buildCoverage(match);
   const metricIssues: Partial<Record<CoverageIssue, number>> = {};
+  const ledgers = new Map<number, DamageLedger>();
+  for (const round of coverage.rounds) {
+    const ledger = buildDamageLedger(round);
+    ledgers.set(round.number, ledger);
+    for (const issue of damageLossIssueTypes) {
+      const count = ledger.unresolved[issue] ?? 0;
+      if (count > 0) addIssue(metricIssues, issue, count);
+    }
+  }
   const openings = new Map<number, OpeningResolution>();
   for (const round of coverage.eventEligibleRounds) {
     const resolution = resolveOpening(round);
@@ -286,6 +325,6 @@ export function analyzeMatch(match: Match): MatchAnalytics {
     else if (resolution.status === "absent") addIssue(metricIssues, "opening-duel-absent");
   }
   const players = match.players.map(player =>
-    computePlayerMetrics(player, coverage, openings, metricIssues));
+    computePlayerMetrics(player, coverage, openings, ledgers, metricIssues));
   return { matchId: match.id, players, coverage: coverage.summary(metricIssues) };
 }

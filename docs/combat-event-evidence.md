@@ -48,14 +48,14 @@ Required hurt amounts and remaining health/armor are nonnegative safe integers; 
 - No verified plant/defuse abort row or `grenade_thrown` row occurs in this sample. Those actions are not modeled or inferred from missing completions. Other DEMs need their own actual-row verification before adding mappings.
 - The inferno effect does not identify molotov versus incendiary; no guessed connection to a previous weapon-fire row is made.
 - No complete per-round participant/side roster, alive-at-start snapshot, disconnect/reconnect or respawn timeline is collected. A player with no combat events still needs a round participation denominator. `Player.team` cannot supply this across halftime/overtime.
-- No pre-hurt health snapshot is collected. Reported hurt amounts alone do not establish capped effective damage in partial recordings or when earlier state is missing. P3 must choose a damage policy and identify unsupported coverage.
+- No pre-hurt health snapshot is collected. Reported hurt amounts alone do not establish capped effective damage in partial recordings or when earlier state is missing. P3.1 resolves the policy: `reportedDamage` keeps the raw amount, while effective HP loss is reconstructed from `healthRemaining` per victim and gated by coverage ([analytics-metrics.md](./analytics-metrics.md)). The parser still collects no separate pre-hurt snapshot.
 - No exact subtick timestamp, global grenade ID, normalized weapon catalog, grenade flight, smoke/fire expiry, blind overlap resolution or site A/B mapping is claimed.
 
 ## Before P3
 
 | Intended metric | Available evidence | Remaining requirement |
 | --- | --- | --- |
-| ADR / damage | attacker/victim, sides, damage amounts, remaining HP/armor, round boundaries | Define reported versus effective damage, friendly/environment exclusions and valid round denominator; pre-damage state if effective HP loss is required |
+| ADR / damage | attacker/victim, sides, damage amounts, remaining HP/armor, round boundaries | P3.1 done: reported damage kept as raw evidence; effective HP loss reconstructed per victim from `healthRemaining`, friendly/environment excluded from credit but kept in the HP trajectory, valid round denominator defined ([analytics-metrics.md](./analytics-metrics.md)) |
 | KAST | kill/assist/flash-assist and trade candidates | Full per-round participation/alive state; define assist and survival/trade rules |
 | Opening duel / multi-kill | kill actors, event sides, ticks and round bounds | Define valid combat window, exclusions and equal-tick handling |
 | Trade | killer/victim links, sides, ticks, observed tick rate | Define trade time window and simultaneous-kill policy; suppress time-based results when tick rate is unknown |

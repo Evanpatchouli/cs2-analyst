@@ -2,7 +2,7 @@
 
 本文记录第一批确定性玩家指标的**计算口径**、统一的 **coverage / eligibility** 规则，以及真实 `demo1.dem` 的 golden 结果与人工复盘对比。实现位于 `packages/analytics`，只依赖 `match-model` 领域类型，不引用 demoparser2 原始类型。
 
-范围（P3.1）：K / D / A、K/D、HS%、rounds played、reported damage、ADR、CT/T split、multi-kill、opening kill / opening death。
+范围（P3.1）：K / D / A、K/D、HS%、rounds played、reported damage / reported ADR、effective damage / 标准 ADR、CT/T split、multi-kill、opening kill / opening death。
 
 非目标：KAST、Trade、Clutch、utility advanced metrics、Findings、AI、UI。
 
@@ -28,19 +28,26 @@ pnpm --filter @cs2-coach/analytics test
 | `kdRatio` | `kills / deaths`；`deaths === 0` 时为 `null`，不虚构数值。 |
 | `headshotKills` / `headshotPercentage` | HS kills / 已知 headshot 状态的计入击杀 × 100；无已知状态时为 `null`。 |
 | `roundsPlayed` | 有效窗口且所选快照 `participant === true` 的回合数，同时作为 ADR 分母。 |
-| `reportedDamage` | 计入回合内 `DamageEvent` 中 `attacker === player` 且双方 side 已知且敌对的 `healthDamage` 之和。 |
-| `adr` | `reportedDamage / roundsPlayed`；`roundsPlayed === 0` 时为 `null`。 |
-| CT/T split | 每个计入回合按**该回合所选快照的 side**把 kill/death/assist/damage/round 归入 CT 或 T；绝不使用全局 `Player.team`。 |
+| `reportedDamage` | 计入回合内 `DamageEvent` 中 `attacker === player` 且双方 side 已知且敌对的 `healthDamage` 之和。**原始上报证据**，保留 overkill。 |
+| `reportedAdr` | `reportedDamage / roundsPlayed`；`roundsPlayed === 0` 时为 `null`。基于上报伤害，**不是**标准 ADR。 |
+| `effectiveDamage` | 同一批计入伤害行的**实际敌方 HP 损失**之和；单次伤害被受害者受击前剩余 HP 截断。见下节。 |
+| `adr` | **标准 ADR**：`effectiveDamage / roundsPlayed`；`roundsPlayed === 0` 时为 `null`。 |
+| CT/T split | 每个计入回合按**该回合所选快照的 side**把 kill/death/assist/reportedDamage/effectiveDamage/round 归入 CT 或 T；绝不使用全局 `Player.team`。每侧同样输出 `reportedAdr` 与标准 `adr`。 |
 | `multiKills` | 每个有效回合内该玩家的计入击杀数；`counts[2..5]` 为对应击杀数的回合数，key `5` 表示 5 杀及以上；`maxKillsInRound` 为最大单回合击杀。 |
 | `opening` | 每个有效回合最早 tick 的击杀为该回合 opening duel。唯一最早击杀且为可识别敌方击杀时，killer 记 opening kill、victim 记 opening death；同一最早 tick 出现多杀记为 contested，不应归属玩家；最早击杀为 world/teamkill/side 未知记为 unattributed；回合内无击杀记为 absent。 |
 
-### reported damage 口径（明确保留）
+### reported damage 与 standard effective damage 的区别
 
-ADR 本轮固定采用 **reported damage**：直接累加 `player_hurt` 上报的 `dmg_health`，**不**修正为 effective HP loss。
+`player_hurt` 的 `dmg_health` 是**上报伤害**，不是实际扣血量。样本 tick 2287 对满血 100 HP 的目标上报 `dmg_health: 109`、`health: 0`：按 reported 计入 109，按 effective 只能计入 100。因此 reported ADR 会在高伤害武器（AWP / AK 爆头）与收尾补枪上系统性偏高。
 
-- 不设 100 上限，保留 overkill。样本 tick 2287 上报 `dmg_health: 109`、`health: 0`，按 109 计入。
-- 只计入敌方伤害；自伤与友伤剔除。友伤是否计入不改变“不修正 overdamage”的结论，只是伤害归属过滤。
-- 样本缺少 pre-hurt HP 轨迹，因此无法在不猜测的前提下推导有效伤害；本轮不尝试。
+`effectiveDamage` 只统计受害者 HP 的**实际减少量**：
+
+- 单次命中 `loss = preHurtHP - healthRemaining`，天然被 `preHurtHP` 截断，不超过受害者受击前剩余 HP。
+- 只统计**敌方**伤害行；自伤（`attacker === victim` / `world`）与友伤（同 side）经 `isEligibleDamage` 剔除，但它们**仍然参与受害者 HP 轨迹**，因为它们改变剩余 HP。
+- warmup 由 parser 以 `is_warmup_period` 过滤；post-round 由统一回合窗口 `[startTick, endTick]` 剔除。
+- 每个 victim 每回合的 HP 轨迹从 competitive 出生满血 100 开始。每个有效回合的**第一个**命中都会用 100 校验，因此“回合开始时已经受伤/补满”会被记为链条断裂，而不是静默接受一个更低或更高的起点。
+- 上报 `dmg_health` 只用于**校验**，不直接进入 effective。demo 的 `dmg_health` 是整数，而上报的 `health` 是截断后的余量，因此单发实测损失可能恰好比上报伤害多 1。实测损失落在 `[min(dmg_health, preHurtHP) - 1, min(dmg_health, preHurtHP) + 1]` 内视为一致；超出该区间说明 HP 轨迹缺少证据（治疗、回合内重生、漏记伤害），该命中不计入 effective 并记 coverage——**不猜**。
+- 无法从 `healthDamage + healthRemaining` 推出可信损失时，通过 coverage 标记而不估计数值；被跳过的命中仍保留在 `reportedDamage` 中，并由逐玩家 `coverage.effectiveDamageUnresolved` 计数。
 
 ### assist 口径（与复盘对齐的关键证据）
 
@@ -58,6 +65,7 @@ ADR 本轮固定采用 **reported damage**：直接累加 `player_hurt` 上报�
 - 事件窗口对 `startTick` / `endTick` **闭区间**，同 tick 的 `round_start` 事件属于新回合（沿用 P2.1 约定）。
 - multi-kill 统计同一回合内同 tick 的每个击杀，因为每个 `player_death` 是独立的击杀证据；不声称 tick 内的 subtick 先后。
 - opening 在同一最早 tick 有多个击杀时不任选一个，而是标记 contested 并降低覆盖。
+- effective damage 在同一 tick 对同一 victim 有多发伤害时，要求上报余量**严格递减且逐发一致**，才接受 demo 数组顺序；否则整组不归属并记 `damage-effective-same-tick-ambiguous`。
 
 ## 统一 coverage / eligibility 机制
 
@@ -66,6 +74,7 @@ ADR 本轮固定采用 **reported damage**：直接累加 `player_hurt` 上报�
 - `RoundWindow`：`startTick` / `endTick` / `freezeEndTick`、`eventEligible`、`excludedEventCount`、`includes(tick)`。`startTick` 或 `endTick` 缺失时该回合 `eventEligible === false`，不猜测事件归属。
 - `RoundRoster`：优先取 `freeze_end` 且 `availability === "observed"` 的快照，缺失时退化到 `start`（`degraded: true`），两者都不可用时 `available === false`。名单缺失不视为空名单。
 - `PlayerRoundState`：`inRoster` / `side` / `participant` / `alive`；`Unknown` side 归一为 `null`，不用事件或 `Player.team` 回填。
+- `buildDamageLedger(round)`：把回合内伤害事件还原成受害者 HP 轨迹，为每个事件给出可解的实际损失或 `null`，并回报未解原因计数。指标不自己重算 HP。
 - 两层资格：事件总量（K/D/A、HS%、multi-kill、opening）只需完整窗口；参与类（rounds played、damage、ADR、CT/T split）额外要求 `participant === true`，保证 ADR 分子与分母覆盖同一批回合。
 - 共享判定函数 `isEligibleKill` / `isEligibleAssist` / `isEligibleDamage` / `isIdentifiedEnemyKill`，指标只调用，不重新实现覆盖判断。
 
@@ -86,10 +95,14 @@ ADR 本轮固定采用 **reported damage**：直接累加 `player_hurt` 上报�
 | `kill-teamkill-status-unknown` | 计入击杀但 teamkill 状态未知的数量 |
 | `kill-headshot-status-unknown` | 计入击杀但 headshot 状态未知的数量 |
 | `damage-side-unknown` | 因 side 未知而弃用的伤害行数量 |
+| `damage-effective-chain-broken` | 伤害行无法从 `healthDamage + healthRemaining` 推出可信的实际 HP 损失（HP 轨迹断裂，含治疗/重生/漏记）；不计入 effective |
+| `damage-effective-same-tick-ambiguous` | 同一 tick 对同一 victim 的多次命中顺序无法由余量证据证明；整组不计入 effective |
 | `assist-side-mismatch` | 因 assister 不在 killer 侧而抑制的助攻数 |
 | `opening-duel-contested` | 同最早 tick 多杀，opening 不归属 |
 | `opening-duel-unattributed` | 最早击杀为 world/teamkill/side 未知 |
 | `opening-duel-absent` | 回合窗口内无击杀 |
+
+逐玩家 coverage 另有 `effectiveDamageUnresolved`：该玩家被计入的敌方伤害行中，实际 HP 损失无法解出的数量。
 
 ## demo1.dem golden 结果
 
@@ -102,9 +115,11 @@ ADR 本轮固定采用 **reported damage**：直接累加 `player_hurt` 上报�
 | HS kills / HS% | **9** / 36% |
 | rounds played | 24 |
 | reported damage | 2644 |
-| ADR | **110.17**（2644 / 24） |
-| CT（12 回合） | 10 kills / 10 deaths / 3 assists / 1106 damage / ADR 92.17 |
-| T（12 回合） | 15 kills / 10 deaths / 1 assist / 1538 damage / ADR 128.17 |
+| reported ADR | 110.17（2644 / 24） |
+| effective damage | **2193** |
+| ADR（标准） | **91.38**（2193 / 24） |
+| CT（12 回合） | 10 kills / 10 deaths / 3 assists / reported 1106（reportedAdr 92.17）/ effective 819（adr 68.25） |
+| T（12 回合） | 15 kills / 10 deaths / 1 assist / reported 1538（reportedAdr 128.17）/ effective 1374（adr 114.50） |
 | multi-kill | 8 个多杀回合：2 杀 ×6、3 杀 ×1、4 杀 ×1、5 杀 ×0；单回合最多 4 |
 | opening | 4 opening kills / 0 opening deaths / 4 duels / winRate 1.00 |
 
@@ -116,9 +131,11 @@ ADR 本轮固定采用 **reported damage**：直接累加 `player_hurt` 上报�
 | 有效窗口内击杀（= 全部 death 数） | **180** |
 | 计入助攻 | 57（原始 59，抑制 2 个友伤助攻） |
 | 敌方 reported damage 合计 | 24600 |
+| 敌方 effective damage 合计 | **19351** |
 | opening duel | 24 kills / 24 deaths（24 回合各 1 次） |
 | 被排除 post-round 事件 | 117 |
-| 覆盖不足 | 无：24/24 回合有完整窗口与 freeze_end 名单，无 unidentified / unknown side / unknown participation |
+| damage-effective-chain-broken / same-tick-ambiguous | 0 / 0 |
+| 覆盖不足 | 无：24/24 回合有完整窗口与 freeze_end 名单，无 unidentified / unknown side / unknown participation / 不可解 HP 轨迹 |
 
 被排除的 2 个 post-round 击杀：tick 101061（正常击杀）与 tick 141061（twinkle 的 post-round world 自伤），均在 `round_end` 之后。
 
@@ -128,16 +145,26 @@ ADR 本轮固定采用 **reported damage**：直接累加 `player_hurt` 上报�
 | --- | --- | --- | --- |
 | K / D / A | 25 / 20 / 4 | 25 / 20 / 4 | 一致（需排除 post-round 与友伤助攻） |
 | HS kills | 9 | 9 | 一致 |
-| CT/T kills/deaths/damage | — | 10/10/1106 与 15/10/1538 | 需按逐回合快照 side 才能得到 |
-| ADR / 分母 | — | 110.17 / 24 | 分母为有确认参与的完整回合 |
+| CT/T kills/deaths/reported damage | — | 10/10/1106 与 15/10/1538 | 需按逐回合快照 side 才能得到 |
+| reported ADR / 分母 | — | 110.17 / 24 | 基于上报伤害，保留 overkill |
+| effective damage | ~2195 | **2193** | 相差 2（0.09%），见下 |
+| ADR（标准） | ~91.5 | **91.38** | 差 0.125，同源于 2 点伤害 |
 | opening | — | 4 / 0 | 4 次首杀、0 次首死 |
 | multi-kill | — | 8 个多杀回合 | 2×6、3×1、4×1 |
 
-K/D/A 的差异来源不是硬编码，而是两项可复现证据决策：post-round 排除（21 → 20 deaths；26 → 25 kills）与友伤助攻抑制（6 → 4 assists）。HS、CT/T、ADR、opening、multi-kill 直接由统一口径复算，无逐数值特判。
+K/D/A 的差异来源不是硬编码，而是两项可复现证据决策：post-round 排除（21 → 20 deaths；26 → 25 kills）与友伤助攻抑制（6 → 4 assists）。HS、CT/T、reported/effective damage、ADR、opening、multi-kill 直接由统一口径复算，无逐数值特判。
+
+**2 点伤害差异的归因**：本实现与人工复盘采用同一口径（实际 HP 损失 = 受击前剩余 HP − 命中后剩余 HP），差异来自整数舍入。demo 的 `dmg_health` 是整数、`health` 是截断余量，逐发最多相差 1 点；人工复盘在个别命中的取整方向不同即累计出 2 点。作为对照：
+
+- `pre - healthRemaining` 逐发累加（本实现）：**2193**。
+- `min(dmg_health, preFromRemaining)` 逐发累加：2162。
+- `min(dmg_health, preFromReported)` 逐发累加：2187。
+
+只有本实现落在 ~2195 的 0.1% 内，说明人工复盘确实使用了 HP 损失口径，而 scoreboard 风格的 `min(dmg, hp)` 会明显偏低。该差异不影响任何结论。
 
 ## 降级与跳过
 
-本轮该样本覆盖完整，没有指标被降级或跳过：24 个回合全部 `eventEligible`，全部有 freeze_end 快照，0 个 unidentified、unknown side、unknown participation、teamkill 状态未知、headshot 状态未知。
+本轮该样本覆盖完整，没有指标被降级或跳过：24 个回合全部 `eventEligible`，全部有 freeze_end 快照，0 个 unidentified、unknown side、unknown participation、teamkill 状态未知、headshot 状态未知，`damage-effective-chain-broken` 与 `damage-effective-same-tick-ambiguous` 均为 0。
 
 机制上会被降级/跳过的情形已由合成测试覆盖：
 
@@ -146,6 +173,7 @@ K/D/A 的差异来源不是硬编码，而是两项可复现证据决策：post-
 - freeze_end 不可用：退化到 start，记 `roster-snapshot-fallback-start`。
 - participant 非 true：rounds played 与伤害不计入，记 `player-participation-unknown` / 逐玩家 `skippedUnconfirmedParticipation`。
 - side 未知：damage 弃用并记 `damage-side-unknown`。
+- HP 轨迹断裂（如 HP 回升）或同 tick 顺序不可证：对应伤害行不计入 effective，由 `effectiveDamageUnresolved` 与 coverage 记数；reported damage 仍保留。
 - opening 同 tick 多杀 / 首杀为 world、teamkill：不归属玩家。
 
 ## P3.2 前仍缺什么
@@ -156,6 +184,7 @@ K/D/A 的差异来源不是硬编码，而是两项可复现证据决策：post-
 - **Utility advanced**：需要投掷物类型归一（molotov vs incendiary）、stage 去重（release vs detonate）、闪光重叠解析；entity index 可复用，必须结合回合与 tick。
 - **生存/连接状态**：`participant` 不是连接标志；断连/重连枚举语义仍未验证，跨回合连接状态机需要更多真实样本。
 - **Bot / 部分录制**：无法用唯一 SteamID 表示的行只计入 unidentified，指标需按覆盖门控。
+- **治疗/回合内重生**：本样本没有出现，机制上会记 `damage-effective-chain-broken`；需要真实样本验证该降级路径。
 
 ## 验证
 

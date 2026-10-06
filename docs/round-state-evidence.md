@@ -49,7 +49,7 @@ P3 可以开始设计和实现有明确覆盖条件的 Analytics。该完整竞�
 - Clutch：用起始名单、死亡和已观察生命周期推进状态；遇到未识别玩家、缺边界、未知状态或无法证明的中途连接/重生覆盖时，降低覆盖或不输出结论。边界快照不证明回合中间从未变化。
 - CT/T split：使用该回合选定快照阵营，不使用全局 Player.team；处理中途换边需显式规则。
 - Trade / opening：选择有效回合时间窗口、参与范围、同 tick 策略和 trade 时窗；不能把 post-round 事件默认计入。
-- ADR：仍需选择 reported/effective damage 策略；本轮没有增加 pre-hurt HP 轨迹。
+- ADR：P3.1 已选定策略——保留 reported damage 原始证据，并用 `healthRemaining` 重建 victim HP 轨迹得到 standard effective damage；见 [指标口径、覆盖机制与 demo1.dem golden](./analytics-metrics.md)。P2.2 自身不计算指标，也没有新增独立的 pre-hurt 快照。
 
 要支持任意模式、带 bot、回合内断连/重连/重生或异常 DEM 的无条件精准指标，仍需额外真实样本和覆盖验证。
 

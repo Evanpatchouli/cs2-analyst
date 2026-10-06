@@ -25,7 +25,7 @@ P2.2 Round Participation & Player State 已完成：精确 start / freeze end / 
 
 ## P3 Analytics Engine
 
-P3.1 Core Player Metrics & Coverage 已完成：K/D/A、K/D、HS%、rounds played、reported damage、ADR、CT/T split、multi-kill、opening kill/death，配套统一 coverage/eligibility 机制。详见 [指标口径、覆盖机制与 demo1.dem golden](./analytics-metrics.md)。
+P3.1 Core Player Metrics & Coverage 已完成：K/D/A、K/D、HS%、rounds played、reported damage / effective damage、reported ADR / 标准 ADR、CT/T split、multi-kill、opening kill/death，配套统一 coverage/eligibility 与伤害 HP 轨迹确认机制。详见 [指标口径、覆盖机制与 demo1.dem golden](./analytics-metrics.md)。
 
 - Basic player statistics（P3.1 已完成第一批）
 - Combat metrics（KAST / Trade / Clutch 待 P3.2）

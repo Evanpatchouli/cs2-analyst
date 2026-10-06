@@ -83,15 +83,18 @@ test("computes K/D/A, HS%, ADR, side split and opening from fully covered rounds
   const ct = byId(result, CT1);
   assert.deepEqual([ct.kills, ct.deaths, ct.assists, ct.kdRatio], [1, 1, 0, 1]);
   assert.deepEqual([ct.headshotKills, ct.headshotPercentage], [1, 100]);
-  assert.deepEqual([ct.roundsPlayed, ct.reportedDamage, ct.adr], [2, 0, 0]);
+  assert.deepEqual([ct.roundsPlayed, ct.reportedDamage, ct.reportedAdr], [2, 0, 0]);
+  assert.deepEqual([ct.effectiveDamage, ct.adr], [0, 0]);
   assert.deepEqual([ct.side.CT.kills, ct.side.CT.deaths, ct.side.T.kills], [1, 1, 0]);
   assert.deepEqual([ct.opening.kills, ct.opening.deaths, ct.opening.duels, ct.opening.winRate], [1, 1, 2, 0.5]);
 
   const t = byId(result, T1);
   assert.deepEqual([t.kills, t.deaths, t.assists], [1, 1, 0]);
   assert.deepEqual([t.headshotKills, t.headshotPercentage], [0, 0]);
-  assert.deepEqual([t.roundsPlayed, t.reportedDamage, t.adr], [2, 30, 15]);
-  assert.deepEqual([t.side.T.kills, t.side.T.deaths, t.side.T.reportedDamage], [1, 1, 30]);
+  assert.deepEqual([t.roundsPlayed, t.reportedDamage, t.reportedAdr], [2, 30, 15]);
+  assert.deepEqual([t.effectiveDamage, t.adr], [30, 15]);
+  assert.deepEqual([t.side.T.kills, t.side.T.deaths, t.side.T.reportedDamage, t.side.T.effectiveDamage],
+    [1, 1, 30, 30]);
   assert.deepEqual([t.opening.kills, t.opening.deaths], [1, 1]);
 });
 
@@ -109,6 +112,7 @@ test("excludes post-round kills, deaths and damage through the centralized windo
   assert.deepEqual([ct.kills, ct.deaths], [1, 0]);
   assert.deepEqual([t.kills, t.deaths], [0, 1]);
   assert.equal(ct.reportedDamage, 0);
+  assert.equal(ct.effectiveDamage, 0);
   assert.equal(result.coverage.issues["post-round-events-excluded"], 3);
   assert.equal(result.coverage.rounds[0].excludedEventCount, 3);
 });
@@ -155,6 +159,8 @@ test("distinguishes an unavailable roster from a degraded start-boundary fallbac
   const ct = byId(result, CT1);
   assert.equal(ct.roundsPlayed, 2);
   assert.equal(ct.reportedDamage, 100);
+  assert.equal(ct.reportedAdr, 50);
+  assert.equal(ct.effectiveDamage, 100);
   assert.equal(ct.adr, 50);
   assert.equal(ct.coverage.skippedUnconfirmedParticipation, 1);
 });
@@ -220,15 +226,20 @@ test("keeps reported overkill, drops friendly fire, and flags unknown damage sid
   const sides = { [CT1]: "CT", [CT2]: "CT", [T1]: "T" };
   const rounds = [mkRound(1, [
     damage(140, CT1, CT2, 50, { attackerSide: "CT", victimSide: "CT" }),
-    damage(150, CT1, T1, 109, { attackerSide: "CT", victimSide: "T" }),
-    damage(160, CT1, T1, 20, { attackerSide: "Unknown", victimSide: "T" }),
+    damage(150, CT1, T1, 20, { attackerSide: "Unknown", victimSide: "T" }),
+    damage(160, CT1, T1, 109, { attackerSide: "CT", victimSide: "T" }),
   ], { start: 100, freeze: 110, end: 200, snapshots: [roster(sides, 110)] })];
   const result = analyzeMatch(mkMatch(players, rounds));
   const ct = byId(result, CT1);
+  // Reported damage keeps the raw 109 overkill; effective damage removes only
+  // the 80 HP the victim still had when the hit landed.
   assert.equal(ct.reportedDamage, 109);
-  assert.equal(ct.adr, 109);
+  assert.equal(ct.reportedAdr, 109);
+  assert.equal(ct.effectiveDamage, 80);
+  assert.equal(ct.adr, 80);
   assert.equal(ct.coverage.damageWithoutKnownSides, 1);
   assert.equal(result.coverage.issues["damage-side-unknown"], 1);
+  assert.equal(result.coverage.issues["damage-effective-chain-broken"], 0);
 });
 
 test("distributes multi-kills by round and keeps every same-tick kill", () => {
@@ -278,6 +289,87 @@ test("exposes the window as inclusive of both formal boundaries", () => {
   assert.deepEqual([window.includes(100), window.includes(150), window.includes(200), window.includes(201)], [true, true, true, false]);
   assert.equal(window.excludedEventCount, 1);
   assert.equal(analyzeMatch(mkMatch(players, [round])).players[0].kills, 2);
+});
+
+test("caps effective damage at the victim's pre-hit health while keeping reported overkill", () => {
+  const players = [player(CT1, "ct"), player(T1, "t")];
+  const rounds = [mkRound(1, [
+    damage(150, CT1, T1, 109, { attackerSide: "CT", victimSide: "T", healthRemaining: 0 }),
+  ], { start: 100, freeze: 110, end: 200, snapshots: [roster({ [CT1]: "CT", [T1]: "T" }, 110)] })];
+  const result = analyzeMatch(mkMatch(players, rounds));
+  const ct = byId(result, CT1);
+  assert.equal(ct.reportedDamage, 109);
+  assert.equal(ct.reportedAdr, 109);
+  assert.equal(ct.effectiveDamage, 100);
+  assert.equal(ct.adr, 100);
+  assert.equal(ct.coverage.effectiveDamageUnresolved, 0);
+  assert.equal(result.coverage.issues["damage-effective-chain-broken"], 0);
+});
+
+test("keeps friendly and self damage in the target health trajectory but credits only enemy loss", () => {
+  const players = [player(CT1, "ct"), player(T1, "t"), player(T2, "teammate")];
+  const sides = { [CT1]: "CT", [T1]: "T", [T2]: "T" };
+  const rounds = [mkRound(1, [
+    // World/self and friendly damage lower the victim even though neither is
+    // credited, so the enemy hit can only remove the 50 HP that are left.
+    damage(140, null, T1, 20, { attackerSide: "Unknown", victimSide: "T" }),
+    damage(150, T2, T1, 30, { attackerSide: "T", victimSide: "T", healthRemaining: 50 }),
+    damage(160, CT1, T1, 60, { attackerSide: "CT", victimSide: "T", healthRemaining: 0 }),
+  ], { start: 100, freeze: 110, end: 200, snapshots: [roster(sides, 110)] })];
+  const result = analyzeMatch(mkMatch(players, rounds));
+  const ct = byId(result, CT1);
+  assert.equal(ct.reportedDamage, 60);
+  assert.equal(ct.effectiveDamage, 50);
+  const teammate = byId(result, T2);
+  assert.equal(teammate.reportedDamage, 0);
+  assert.equal(teammate.effectiveDamage, 0);
+  assert.equal(result.coverage.issues["damage-effective-chain-broken"], 0);
+});
+
+test("reports a broken health trajectory instead of guessing an effective loss", () => {
+  const players = [player(CT1, "ct"), player(T1, "t")];
+  const sides = { [CT1]: "CT", [T1]: "T" };
+  const rounds = [mkRound(1, [
+    damage(150, CT1, T1, 20, { attackerSide: "CT", victimSide: "T", healthRemaining: 80 }),
+    // Health rises again, so this hit's real loss cannot be separated from the heal.
+    damage(160, CT1, T1, 20, { attackerSide: "CT", victimSide: "T", healthRemaining: 90 }),
+  ], { start: 100, freeze: 110, end: 200, snapshots: [roster(sides, 110)] })];
+  const result = analyzeMatch(mkMatch(players, rounds));
+  const ct = byId(result, CT1);
+  assert.equal(ct.reportedDamage, 40);
+  assert.equal(ct.effectiveDamage, 20);
+  assert.equal(ct.adr, 20);
+  assert.equal(ct.coverage.effectiveDamageUnresolved, 1);
+  assert.equal(result.coverage.issues["damage-effective-chain-broken"], 1);
+});
+
+test("does not order same-tick hits on one victim without corroborating health", () => {
+  const players = [player(CT1, "ct1"), player(CT2, "ct2"), player(T1, "t")];
+  const sides = { [CT1]: "CT", [CT2]: "CT", [T1]: "T" };
+  const rounds = [mkRound(1, [
+    damage(150, CT1, T1, 30, { attackerSide: "CT", victimSide: "T", healthRemaining: 50 }),
+    damage(150, CT2, T1, 30, { attackerSide: "CT", victimSide: "T", healthRemaining: 50 }),
+  ], { start: 100, freeze: 110, end: 200, snapshots: [roster(sides, 110)] })];
+  const result = analyzeMatch(mkMatch(players, rounds));
+  // Both hits record the same post-hit health, so the split is unprovable.
+  assert.equal(byId(result, CT1).effectiveDamage, 0);
+  assert.equal(byId(result, CT2).effectiveDamage, 0);
+  assert.equal(byId(result, CT1).coverage.effectiveDamageUnresolved, 1);
+  assert.equal(byId(result, CT2).coverage.effectiveDamageUnresolved, 1);
+  assert.equal(result.coverage.issues["damage-effective-same-tick-ambiguous"], 2);
+});
+
+test("accepts same-tick hits when the recorded health proves the hit order", () => {
+  const players = [player(CT1, "ct1"), player(CT2, "ct2"), player(T1, "t")];
+  const sides = { [CT1]: "CT", [CT2]: "CT", [T1]: "T" };
+  const rounds = [mkRound(1, [
+    damage(150, CT1, T1, 30, { attackerSide: "CT", victimSide: "T", healthRemaining: 70 }),
+    damage(150, CT2, T1, 40, { attackerSide: "CT", victimSide: "T", healthRemaining: 30 }),
+  ], { start: 100, freeze: 110, end: 200, snapshots: [roster(sides, 110)] })];
+  const result = analyzeMatch(mkMatch(players, rounds));
+  assert.equal(byId(result, CT1).effectiveDamage, 30);
+  assert.equal(byId(result, CT2).effectiveDamage, 40);
+  assert.equal(result.coverage.issues["damage-effective-same-tick-ambiguous"], 0);
 });
 
 test("is deterministic for identical input", () => {
