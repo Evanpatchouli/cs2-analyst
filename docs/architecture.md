@@ -20,3 +20,5 @@ The DEM implementation routes native demoparser2 results through an internal ada
 DEM parsing, analysis logic and UI presentation must remain independent.
 
 AI coaching is an optional interpretation layer built on top of structured findings.
+
+`findings` consumes only frozen `MatchAnalytics` via the Analytics public package. `generateFindings` runs pure deterministic rules and returns ranked evidence with per-player caps (3 issues, 2 highlights). It does not parse DEMs or recompute Analytics; parser is a devDependency only for real-demo golden tests. Policy and gaps: [Findings Engine](./findings-engine.md).

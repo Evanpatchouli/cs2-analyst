@@ -1,5 +1,17 @@
 # Agent Handoff
 
+## 2026-10-07 — P4.1 Findings MVP PASS
+
+- 基线 `6e04f91c`（P3 FINAL PASS）。生产仅 `packages/findings`，依赖冻结 Analytics 公共类型；P3 Analytics/parser/domain 源码与契约未变，无 AI/UI/economy/positioning。
+- 新入口 `generateFindings(MatchAnalytics, playerId?)` 返回 Finding[]；schema 含稳定 id/ruleId/playerId/category/severity/title/summary/typed evidence/relatedRounds?/confidence。
+- 六类：CT/T ADR gap、trade low rate、opening positive/negative、utility direct damage + proven flash support、team flash positive-duration victim effects、single clutch-win highlight。所有阈值、最小样本与 complete/null 门控见 `docs/findings-engine.md`。
+- 排序限额逐玩家：问题按 severity/category/ruleId 最多3；positive clutch（对手数降序、回合升序）→opening→utility 最多2。确定性不受玩家/effect/list 数组顺序影响，保留同 tick/victim 原始 flash 重复行，duration 消歧。
+- twinkle 默认：CT ADR68.25 vs T114.50（各12回合）；traded4/tradeable18=22.2%（5秒、complete）；23 throws/10非零队友效果；R24 tick135415 T1v3 win；opening4/0。utility150/21=7.14直接敌伤低收益候选因ranking未突出。
+- 跳过 low-impact/consistency：冻结 MatchAnalytics 无逐玩家回合通用 combat evidence。actual flash duration、逐投掷利用率、封路/拖延及补枪位置责任亦无足够证据；不回改 P3。
+- 验证：findings17/17、analytics53/53、dem-parser28/28，真实 demo 均执行、0 skipped；pnpm typecheck / build PASS。独立审查修正同 tick/victim duration tie-break 并加回归。
+- 文档：Findings/analysis-rules/architecture/roadmap/current-task/handoff 同步；analytics-metrics 已清理过时 Utility advanced 残留。
+- 本 work unit 验证后 focused commit；下一工作应按用户新需求确定，不自动进入 UI/AI 或大规则系统。
+
 ## 2026-10-06 — P3 Analytics Final Acceptance PASS（contracts frozen for P4）
 
 - 基线 `1d6666b`。本轮只做 `packages/analytics` 的最终一致性验收与真实 bug 修复：未进入 P4 Findings，未加新 Analytics 功能、CT/T 拆分、地图/位置分析、parser/domain 变更、UI/AI 或大重构。

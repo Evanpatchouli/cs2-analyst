@@ -37,8 +37,9 @@ P3.2 Combat Metrics（KAST / Trade / Clutch）已完成：基于 freeze_end 名�
 
 ## P4 Findings Engine
 
-- Evidence-based issue detection
-- Player improvement patterns
+P4.1 Findings MVP — **PASS**。冻结 MatchAnalytics → 确定性规则 → Finding[]；实现 CT/T 伤害落差、低被交易比例、Opening 正负影响、Utility 直接敌伤与明确闪光支援、Team flash 纪律、单次 Clutch highlight 六类。每名玩家默认最多 3 个问题 + 2 个亮点，不调用 AI、不修改 P3。
+
+Schema、阈值、coverage 门控、priority、真实 twinkle 输出与 future gaps 见 [Findings Engine](./findings-engine.md)。Low-impact/consistency 因冻结 API 无逐玩家回合 combat evidence 跳过；实际 flash duration/战术位置价值仍需可靠 Analytics 证据。后续扩展需要独立明确需求，不建设大而全规则系统。
 
 ## P5 Desktop Report UI
 

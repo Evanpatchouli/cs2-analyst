@@ -84,7 +84,18 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2
 
-  packages/findings: {}
+  packages/findings:
+    dependencies:
+      '@cs2-coach/analytics':
+        specifier: workspace:^
+        version: link:../analytics
+    devDependencies:
+      '@cs2-coach/dem-parser':
+        specifier: workspace:^
+        version: link:../dem-parser
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
 
   packages/match-model:
     devDependencies:

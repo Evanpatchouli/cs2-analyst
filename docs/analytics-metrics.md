@@ -316,12 +316,12 @@ P3.2 新增的降级/跳过路径（合成测试覆盖）：
 
 ## P3 已知边界与后续样本需求
 
-- **Utility advanced**：需要投掷物类型归一（molotov vs incendiary）、stage 去重（release vs detonate）、闪光重叠解析；entity index 可复用，必须结合回合与 tick。
+- **Utility（P3.3 已完成）**：已实现投掷类型归一、release-only 计数、独立 lifecycle evidence、HE/fire effective HP loss、闪光 victim effects 与事件确认 assist。实际连续致盲时间和 overlap 归属仍未获证实；entity index 可复用，不作全局 ID。详见 [Utility Analytics](./utility-analytics.md)。
 - **生存/连接状态**：`participant` 不是连接标志；断连/重连枚举语义仍未验证，跨回合连接状态机需要更多真实样本。本样本的 disconnect 全部在末回合 end 之后，回合内断连路径只有合成测试覆盖。
 - **Bot / 部分录制**：无法用唯一 SteamID 表示的行只计入 unidentified，指标需按覆盖门控。
 - **治疗/回合内重生**：本样本没有出现，机制上会记 `damage-effective-chain-broken`；P3.2 的 KAST/Trade/Clutch 也会因回合内 spawn 记 `survival-timeline-anomaly` 并整回合退出，待真实样本验证。
 - **Posthumous kill**：样本 R22 出现死后手雷击杀。当前实现把它当作合法击杀（不复活、不作为 trade），但没有专门的证据字段区分投掷物延迟；更多样本可能需要更细的归因。
-- **CT/T 分桶的 KAST / Trade / Clutch**：本轮只输出玩家级总量，未做逐侧拆分；如 Findings 需要，再按回合快照 side 扩展。
+- **CT/T 分桶的 KAST / Trade / Clutch**：当前只输出玩家级总量，未做逐侧拆分；P3 契约已冻结，若未来需要应作为独立 Analytics 迭代设计，Findings 不自行扩展或重算。
 
 ## 验证
 
