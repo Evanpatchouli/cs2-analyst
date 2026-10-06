@@ -1,6 +1,7 @@
 import type { KillEvent, Match, Player } from "@cs2-coach/match-model";
 
 import {
+  addIssueCount,
   buildCoverage,
   isEligibleAssist,
   isEligibleDamage,
@@ -13,6 +14,17 @@ import {
   type RoundCoverage,
 } from "./coverage.js";
 import { buildDamageLedger, damageLossIssueTypes, type DamageLedger } from "./damage.js";
+import { resolveRoundClutch, summarizeClutch, type ClutchMetrics, type RoundClutchResolution }
+  from "./clutch.js";
+import { computeKast, type KastMetrics } from "./kast.js";
+import {
+  defaultTradeWindowSeconds,
+  resolveRoundTrades,
+  summarizeTrade,
+  type RoundTradeResolution,
+  type TradeMetrics,
+} from "./trade.js";
+import { buildRoundTimeline, type RoundTimeline } from "./timeline.js";
 
 export interface SideMetrics {
   /** Rounds counted for this side (participation confirmed and side known). */
@@ -109,13 +121,32 @@ export interface PlayerMetrics {
   side: { CT: SideMetrics; T: SideMetrics };
   multiKills: MultiKillMetrics;
   opening: OpeningMetrics;
+  /** KAST breakdown built on the shared survival timeline. */
+  kast: KastMetrics;
+  /** Trade kills / traded deaths / tradeable deaths for this player. */
+  trade: TradeMetrics;
+  /** Clutch opportunities and clutch wins for this player. */
+  clutch: ClutchMetrics;
   coverage: PlayerCoverage;
+}
+
+export interface TradeWindow {
+  readonly seconds: number;
+  /** Converted window in ticks; null when match.tickRate is unreliable. */
+  readonly ticks: number | null;
 }
 
 export interface MatchAnalytics {
   matchId: string;
   players: PlayerMetrics[];
   coverage: CoverageSummary;
+  /** Window every trade conclusion was computed with. */
+  tradeWindow: TradeWindow;
+}
+
+export interface AnalyzeOptions {
+  /** Trade window in seconds; defaults to 5. Ignored without a reliable tick rate. */
+  tradeWindowSeconds?: number;
 }
 
 type OpeningResolution =
@@ -144,10 +175,6 @@ function createSide(): MutableSide {
     effectiveDamage: 0,
     effectiveDamageUnresolved: 0,
   };
-}
-
-function addIssue(counts: Partial<Record<CoverageIssue, number>>, issue: CoverageIssue, amount = 1): void {
-  counts[issue] = (counts[issue] ?? 0) + amount;
 }
 
 function finalizeSide(side: MutableSide): SideMetrics {
@@ -191,6 +218,10 @@ function computePlayerMetrics(
   coverage: MatchCoverage,
   openings: ReadonlyMap<number, OpeningResolution>,
   ledgers: ReadonlyMap<number, DamageLedger>,
+  timelines: ReadonlyMap<number, RoundTimeline>,
+  trades: ReadonlyMap<number, RoundTradeResolution>,
+  clutches: ReadonlyMap<number, RoundClutchResolution>,
+  tradeWindow: TradeWindow,
   metricIssues: Partial<Record<CoverageIssue, number>>,
 ): PlayerMetrics {
   const steamId = player.steamId;
@@ -288,10 +319,10 @@ function computePlayerMetrics(
     if (roundKills > maxKillsInRound) maxKillsInRound = roundKills;
   }
 
-  addIssue(metricIssues, "assist-side-mismatch", assistsExcludedBySide);
-  addIssue(metricIssues, "kill-teamkill-status-unknown", killsWithoutTeamkillStatus);
-  addIssue(metricIssues, "kill-headshot-status-unknown", killsWithoutHeadshotStatus);
-  addIssue(metricIssues, "damage-side-unknown", damageWithoutKnownSides);
+  addIssueCount(metricIssues, "assist-side-mismatch", assistsExcludedBySide);
+  addIssueCount(metricIssues, "kill-teamkill-status-unknown", killsWithoutTeamkillStatus);
+  addIssueCount(metricIssues, "kill-headshot-status-unknown", killsWithoutHeadshotStatus);
+  addIssueCount(metricIssues, "damage-side-unknown", damageWithoutKnownSides);
 
   const openingDuels = openingKills + openingDeaths;
   return {
@@ -318,6 +349,12 @@ function computePlayerMetrics(
       duels: openingDuels,
       winRate: openingDuels > 0 ? openingKills / openingDuels : null,
     },
+    kast: computeKast(steamId, coverage, timelines, trades, tradeWindow.ticks),
+    trade: summarizeTrade(steamId, coverage, trades, {
+      windowSeconds: tradeWindow.seconds,
+      windowTicks: tradeWindow.ticks,
+    }),
+    clutch: summarizeClutch(steamId, clutches),
     coverage: {
       eligibleRounds,
       countedRounds: roundsPlayed,
@@ -333,14 +370,16 @@ function computePlayerMetrics(
 }
 
 /**
- * Compute the first deterministic player metric set.
+ * Compute the deterministic player metric set.
  *
  * Totals (K/D/A, HS%, multi-kill, opening) require only a complete formal round
  * window. Participation-scoped values (rounds played, damage, ADR, CT/T split)
  * additionally require confirmed freeze-end/start participation so numerator
- * and denominator cover the same rounds.
+ * and denominator cover the same rounds. KAST / Trade / Clutch read the shared
+ * survival timeline and suppress time-based trade evidence when match.tickRate
+ * is unreliable.
  */
-export function analyzeMatch(match: Match): MatchAnalytics {
+export function analyzeMatch(match: Match, options: AnalyzeOptions = {}): MatchAnalytics {
   const coverage = buildCoverage(match);
   const metricIssues: Partial<Record<CoverageIssue, number>> = {};
   const ledgers = new Map<number, DamageLedger>();
@@ -349,18 +388,57 @@ export function analyzeMatch(match: Match): MatchAnalytics {
     ledgers.set(round.number, ledger);
     for (const issue of damageLossIssueTypes) {
       const count = ledger.unresolved[issue] ?? 0;
-      if (count > 0) addIssue(metricIssues, issue, count);
+      if (count > 0) addIssueCount(metricIssues, issue, count);
     }
   }
   const openings = new Map<number, OpeningResolution>();
   for (const round of coverage.eventEligibleRounds) {
     const resolution = resolveOpening(round);
     openings.set(round.number, resolution);
-    if (resolution.status === "contested") addIssue(metricIssues, "opening-duel-contested");
-    else if (resolution.status === "unattributed") addIssue(metricIssues, "opening-duel-unattributed");
-    else if (resolution.status === "absent") addIssue(metricIssues, "opening-duel-absent");
+    if (resolution.status === "contested") addIssueCount(metricIssues, "opening-duel-contested");
+    else if (resolution.status === "unattributed") addIssueCount(metricIssues, "opening-duel-unattributed");
+    else if (resolution.status === "absent") addIssueCount(metricIssues, "opening-duel-absent");
   }
+
+  const tradeWindowSeconds = options.tradeWindowSeconds ?? defaultTradeWindowSeconds;
+  const tickRate = match.tickRate;
+  const reliableTickRate = typeof tickRate === "number" && Number.isFinite(tickRate) && tickRate > 0;
+  const tradeWindow: TradeWindow = {
+    seconds: tradeWindowSeconds,
+    ticks: reliableTickRate ? Math.max(1, Math.round(tradeWindowSeconds * tickRate)) : null,
+  };
+  if (tradeWindow.ticks === null) addIssueCount(metricIssues, "trade-tick-rate-unknown");
+
+  const timelines = new Map<number, RoundTimeline>();
+  const trades = new Map<number, RoundTradeResolution>();
+  const clutches = new Map<number, RoundClutchResolution>();
+  for (const round of coverage.rounds) {
+    const timeline = buildRoundTimeline(round);
+    timelines.set(round.number, timeline);
+    if (!timeline.available) addIssueCount(metricIssues, "survival-context-unavailable");
+    else if (timeline.degraded) addIssueCount(metricIssues, "survival-context-degraded");
+    for (const anomaly of timeline.anomalies) addIssueCount(metricIssues, "survival-timeline-anomaly");
+    for (const state of timeline.states) {
+      if (state.endConflict) addIssueCount(metricIssues, "survival-end-state-conflict");
+      else if (state.aliveAtBaseline === true && state.survived === null) {
+        addIssueCount(metricIssues, "survival-end-state-unavailable");
+      }
+    }
+    const tradeResolution = resolveRoundTrades(round, timeline, tradeWindow.ticks);
+    trades.set(round.number, tradeResolution);
+    for (const ambiguity of tradeResolution.ambiguities) {
+      addIssueCount(metricIssues,
+        ambiguity.reason === "same-tick" ? "trade-same-tick-ambiguous" : "trade-candidate-ambiguous");
+    }
+    const clutch = resolveRoundClutch(round, timeline);
+    clutches.set(round.number, clutch);
+    if (clutch.ineligible) addIssueCount(metricIssues, "clutch-round-ineligible");
+    else if (clutch.opportunities.some(opportunity => opportunity.won === null)) {
+      addIssueCount(metricIssues, "clutch-winner-unknown");
+    }
+  }
+
   const players = match.players.map(player =>
-    computePlayerMetrics(player, coverage, openings, ledgers, metricIssues));
-  return { matchId: match.id, players, coverage: coverage.summary(metricIssues) };
+    computePlayerMetrics(player, coverage, openings, ledgers, timelines, trades, clutches, tradeWindow, metricIssues));
+  return { matchId: match.id, players, coverage: coverage.summary(metricIssues), tradeWindow };
 }

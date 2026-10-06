@@ -1,5 +1,17 @@
 # Agent Handoff
 
+## 2026-10-06 — P3.2 KAST / Trade / Clutch
+
+- `packages/analytics` 新增统一存活/时序上下文 `src/timeline.ts`：以 coverage 选出的名单快照（freeze_end 优先）为起点，用正式窗口 `[startTick, endTick]` 内的死亡事件推进，并用 `end` 边界快照核验。`survived` 只有在“起点 alive + 无死亡 + end alive=true”同时成立时才为 true；无死亡不等于存活。生命周期异常（baseline 之后 disconnect/spawn/side_change）与不一致死亡使该回合时间线退出 KAST/Trade/Clutch。
+- KAST（`src/kast.ts`）：K = 窗口内合规击杀，A = 合规助攻，S = 可证存活到 round end，T = 死亡在窗口内被存活队友有效 trade。K/A/T 任一成立即 KAST，S 不影响；否则只有 S 与 T 都被证明为 false 才判 miss，无法证明则该回合退出分母。输出 rounds / eligibleRounds / playedRounds / percentage 与 K/A/S/T 分量回合数、`complete` 标记。
+- Trade（`src/trade.ts`）：trader 在窗口内击杀 tradedKiller，为队友 tradedVictim 复仇；trade kill 与 traded death 严格 1:1。默认 `tradeWindowSeconds = 5`，`windowTicks = round(5 × tickRate)`；`match.tickRate` 不可靠时 `available=false`、`windowTicks=null`、tradeRate=null 并记 `trade-tick-rate-unknown`（tradeableDeaths 仍输出）。同 tick 记 `trade-same-tick-ambiguous`，并列候选记 `trade-candidate-ambiguous`，都不归属。双方都必须是可识别敌方击杀，排除 teamkill/world/side unknown。tradeRate 仅在 tick rate 可用、上下文完整、无 ambiguous 时为数值。
+- Clutch（`src/clutch.ts`）：从可靠 freeze_end 名单推进存活人数，当某队恰剩 1 人且敌方 ≥1 时形成 opportunity，按 1v1–1v5 分桶；只有 `round.winner === 该阵营` 才算 clutch win（winner 未知记 `clutch-winner-unknown`）。lifecycle 异常 / unidentified / 名单回退时整回合不输出（`clutch-round-ineligible`），禁止猜测。
+- Coverage（`src/coverage.ts`）：新增 10 个 issue code，并给出 `coverageIssueSeverity`（unavailable / ambiguous / degraded / informational）与 `CoverageSummary.severity` 合计；`RoundRoster` 增加 `entries`/`tick`，`RoundCoverage` 增加 `endState`、`winner`、`lifecycleEvents`。
+- demo1.dem golden（twinkle）：KAST **18/24 = 75.0%**（K14/A3/S4/T4，全部可证、complete=true）；trade kills **6**、traded deaths **4**、tradeable deaths **18**、trade rate **22.2%**；clutch 3 次（R1 1v3、R17 1v2、R24 1v3）1 win（R24）。全局 tradeKills = tradedDeaths = 34，tradeable 158，clutch 31/7，P3.2 新 issue 全 0。
+- 与人工复盘一致；差异仅来自口径精确化。对账中发现 R22 死后手雷击杀（tarkz 于 121075 死亡后 121153 击杀 twinkle）为合法 posthumous kill，不复活、不作 trade；R13/R23 的复仇击杀分别 395/359 ticks，超出 320 窗口故不算 trade（放宽到 ~6.2s 会得到 6，与人工复盘 4 不符）。
+- 验证：`pnpm --filter @cs2-coach/analytics test` **35/35**（P3.1 19 + P3.2 combat 13 + 真实 DEM 3）、`pnpm --filter @cs2-coach/dem-parser test` **28/28** 无回归、`pnpm typecheck`、`pnpm build` 全 PASS。上一轮 handoff/current-task 记录的 “20/20” 实际为 **21/21**（19 合成 + 2 真实 DEM），已更正。
+- 未实现：utility advanced metrics、Findings、AI、UI。完整定义、issue 码表与 golden：docs/analytics-metrics.md。
+
 ## 2026-10-06 — P3.1 damage / ADR semantics correction
 
 - `packages/analytics` 现在区分两套伤害：`reportedDamage`（原始 `dmg_health`，保留 overkill）与 `effectiveDamage`（受害者实际 HP 损失，单发被受击前剩余 HP 截断）。`reportedAdr = reportedDamage / roundsPlayed`，`adr = effectiveDamage / roundsPlayed`（标准 ADR）。CT/T split 同样输出两套。旧的 `adr` 字段语义已改为标准 ADR，原值迁移到 `reportedAdr`。

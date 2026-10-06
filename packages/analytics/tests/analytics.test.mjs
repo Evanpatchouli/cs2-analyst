@@ -52,7 +52,7 @@ function mkRound(number, events, options = {}) {
 }
 
 function mkMatch(players, rounds) {
-  return { id: "synthetic-match", map: "de_dust2", players, rounds };
+  return { id: "synthetic-match", map: "de_dust2", tickRate: 64, players, rounds };
 }
 
 function byId(result, steamId) {
@@ -70,10 +70,16 @@ test("computes K/D/A, HS%, ADR, side split and opening from fully covered rounds
     mkRound(1, [
       damage(140, T1, CT1, 30, { attackerSide: "T", victimSide: "CT" }),
       kill(150, CT1, T1, { killerSide: "CT", victimSide: "T", headshot: true, teamkill: false }),
-    ], { start: 100, freeze: 110, end: 200, snapshots: [roster(sides, 110)] }),
+    ], { start: 100, freeze: 110, end: 200, snapshots: [
+      roster(sides, 110),
+      snapshot("end", 200, [state(CT1, "CT"), state(T1, "T", { alive: false })]),
+    ] }),
     mkRound(2, [
       kill(350, T1, CT1, { killerSide: "T", victimSide: "CT", headshot: false, teamkill: false }),
-    ], { start: 300, freeze: 310, end: 400, snapshots: [roster(sides, 310)] }),
+    ], { start: 300, freeze: 310, end: 400, snapshots: [
+      roster(sides, 310),
+      snapshot("end", 400, [state(CT1, "CT", { alive: false }), state(T1, "T")]),
+    ] }),
   ];
   const result = analyzeMatch(mkMatch(players, rounds));
   assert.ok(zeroIssues(result));

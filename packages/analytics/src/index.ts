@@ -1,5 +1,7 @@
 export {
+  addIssueCount,
   buildCoverage,
+  coverageIssueSeverity,
   coverageIssueTypes,
   isEligibleAssist,
   isEligibleDamage,
@@ -10,22 +12,55 @@ export {
 export type {
   CoverageIssue,
   CoverageSummary,
+  IssueSeverity,
   KnownSide,
   MatchCoverage,
   PlayerRoundState,
   RoundCoverage,
   RoundCoverageSummary,
+  RoundEndState,
   RoundRoster,
+  RoundRosterEntry,
   RoundWindow,
 } from "./coverage.js";
 export { buildDamageLedger, damageLossIssueTypes, spawnHealth } from "./damage.js";
 export type { DamageLedger, DamageLossIssue } from "./damage.js";
+export { buildRoundTimeline } from "./timeline.js";
+export type {
+  PlayerTimelineState,
+  RoundTimeline,
+  TimelineAnomaly,
+  TimelineAnomalyKind,
+} from "./timeline.js";
+export {
+  defaultTradeWindowSeconds,
+  resolveRoundTrades,
+  summarizeTrade,
+} from "./trade.js";
+export type {
+  RoundTradeResolution,
+  TradeAmbiguity,
+  TradeAmbiguityReason,
+  TradeKill,
+  TradeMetrics,
+} from "./trade.js";
+export { computeKast } from "./kast.js";
+export type { KastMetrics } from "./kast.js";
+export { resolveRoundClutch, summarizeClutch } from "./clutch.js";
+export type {
+  ClutchMetrics,
+  ClutchOpportunity,
+  OpponentBuckets,
+  RoundClutchResolution,
+} from "./clutch.js";
 export { analyzeMatch } from "./metrics.js";
 export type {
+  AnalyzeOptions,
   MatchAnalytics,
   MultiKillMetrics,
   OpeningMetrics,
   PlayerCoverage,
   PlayerMetrics,
   SideMetrics,
+  TradeWindow,
 } from "./metrics.js";

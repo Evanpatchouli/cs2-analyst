@@ -53,6 +53,8 @@ Required hurt amounts and remaining health/armor are nonnegative safe integers; 
 
 ## Before P3
 
+P3.1 resolved the ADR/damage row and the opening duel, and P3.2 resolved the KAST, Trade and Clutch rows below; the remaining requirements describe the P2.1 baseline, not current gaps. Current definitions and limits: [analytics-metrics.md](./analytics-metrics.md).
+
 | Intended metric | Available evidence | Remaining requirement |
 | --- | --- | --- |
 | ADR / damage | attacker/victim, sides, damage amounts, remaining HP/armor, round boundaries | P3.1 done: reported damage kept as raw evidence; effective HP loss reconstructed per victim from `healthRemaining`, friendly/environment excluded from credit but kept in the HP trajectory, valid round denominator defined ([analytics-metrics.md](./analytics-metrics.md)) |

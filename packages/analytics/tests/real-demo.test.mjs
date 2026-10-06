@@ -119,3 +119,65 @@ test("real demo1.dem aggregate analytics stay consistent with the review window"
 
   assert.deepEqual(analyzeMatch(match), analytics);
 });
+
+test("real demo1.dem produces the reviewed KAST, trade and clutch golden metrics", { skip }, async () => {
+  const match = await new Demoparser2Provider().parse(demoPath);
+  const analytics = analyzeMatch(match);
+
+  // Five-second window on a 64-tick demo, with complete time-based coverage.
+  assert.deepEqual(analytics.tradeWindow, { seconds: 5, ticks: 320 });
+
+  const twinkle = analytics.players.find(player => player.nickname === "twinkle");
+  assert.ok(twinkle, "twinkle must be present");
+  // KAST 18/24 = 75%: K 14 rounds, A 3, S 4, T 4 (components overlap).
+  assert.equal(twinkle.kast.rounds, 18);
+  assert.equal(twinkle.kast.eligibleRounds, 24);
+  assert.equal(twinkle.kast.playedRounds, 24);
+  assert.equal(twinkle.kast.percentage, 75);
+  assert.deepEqual(
+    [twinkle.kast.killRounds, twinkle.kast.assistRounds, twinkle.kast.survivalRounds, twinkle.kast.tradedRounds],
+    [14, 3, 4, 4]);
+  assert.equal(twinkle.kast.complete, true);
+  assert.deepEqual(
+    [twinkle.kast.unavailableRounds, twinkle.kast.ambiguousRounds, twinkle.kast.degradedRounds],
+    [0, 0, 0]);
+
+  // 6 trade kills, 4 traded deaths out of 18 tradeable deaths = 22.2%.
+  assert.deepEqual(
+    [twinkle.trade.tradeKills, twinkle.trade.tradedDeaths, twinkle.trade.tradeableDeaths],
+    [6, 4, 18]);
+  assert.equal(twinkle.trade.tradeRate, (4 / 18) * 100);
+  assert.equal(twinkle.trade.complete, true);
+  assert.deepEqual([twinkle.trade.ambiguousDeaths, twinkle.trade.ambiguousTradeKills], [0, 0]);
+
+  // At least the R24 1v3 clutch must be recognised, and it was won.
+  const r24 = twinkle.clutch.list.find(opportunity => opportunity.round === 24);
+  assert.ok(r24, "round 24 clutch must be present");
+  assert.deepEqual([r24.opponents, r24.won, r24.deathTick], [3, true, null]);
+  assert.equal(twinkle.clutch.opportunities, 3);
+  assert.equal(twinkle.clutch.wins, 1);
+  assert.deepEqual(twinkle.clutch.byOpponents, { 1: 0, 2: 1, 3: 2, 4: 0, 5: 0 });
+
+  // A credited trade always pairs exactly one trade kill with one traded death.
+  assert.equal(sum(analytics.players, player => player.trade.tradeKills), 34);
+  assert.equal(sum(analytics.players, player => player.trade.tradedDeaths), 34);
+  assert.equal(sum(analytics.players, player => player.trade.tradeableDeaths), 158);
+  assert.equal(sum(analytics.players, player => player.clutch.opportunities), 31);
+  assert.equal(sum(analytics.players, player => player.clutch.wins), 7);
+
+  // The full-coverage sample must not raise any KAST / Trade / Clutch issue.
+  for (const issue of [
+    "survival-context-unavailable", "survival-context-degraded", "survival-end-state-unavailable",
+    "survival-end-state-conflict", "survival-timeline-anomaly", "trade-tick-rate-unknown",
+    "trade-same-tick-ambiguous", "trade-candidate-ambiguous", "clutch-round-ineligible",
+    "clutch-winner-unknown",
+  ]) {
+    assert.equal(analytics.coverage.issues[issue], 0, issue);
+  }
+  assert.equal(analytics.coverage.severity.unavailable, 0);
+  assert.equal(analytics.coverage.severity.ambiguous, 0);
+  assert.equal(analytics.coverage.severity.degraded, 2);   // assist-side-mismatch only
+  assert.equal(analytics.coverage.severity.informational, 117);
+
+  assert.deepEqual(analyzeMatch(match), analytics);
+});

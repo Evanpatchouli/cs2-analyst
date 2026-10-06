@@ -1,10 +1,12 @@
-# P3.1 核心玩家指标与覆盖机制
+# P3 核心指标、KAST / Trade / Clutch 与覆盖机制
 
-本文记录第一批确定性玩家指标的**计算口径**、统一的 **coverage / eligibility** 规则，以及真实 `demo1.dem` 的 golden 结果与人工复盘对比。实现位于 `packages/analytics`，只依赖 `match-model` 领域类型，不引用 demoparser2 原始类型。
+本文记录 P3 确定性指标的**计算口径**、统一的 **coverage / eligibility** 规则，以及真实 `demo1.dem` 的 golden 结果与人工复盘对比。实现位于 `packages/analytics`，只依赖 `match-model` 领域类型，不引用 demoparser2 原始类型。
 
 范围（P3.1）：K / D / A、K/D、HS%、rounds played、reported damage / reported ADR、effective damage / 标准 ADR、CT/T split、multi-kill、opening kill / opening death。
 
-非目标：KAST、Trade、Clutch、utility advanced metrics、Findings、AI、UI。
+范围（P3.2）：统一存活/时序上下文、KAST（K/A/S/T）、trade kill / traded death / tradeable death、clutch opportunity / clutch win。
+
+非目标：utility advanced metrics、Findings、AI、UI。
 
 证据文件：`.demo/demo1.dem`，SHA-256 `f3c3173eae0cd100d15c81c3b734be792f9212256a9c99703b358d3434000852`，64 tick，`de_dust2`，10 名玩家，24 个正式回合。
 
@@ -73,19 +75,81 @@ pnpm --filter @cs2-coach/analytics test
 - opening 在同一最早 tick 有多个击杀时不任选一个，而是标记 contested 并降低覆盖。
 - effective damage 在同一 tick 对同一 victim 有多发伤害时，要求上报余量**严格递减且逐发一致**，才接受 demo 数组顺序；否则整组不归属并记 `damage-effective-same-tick-ambiguous`。
 
+## P3.2 统一存活上下文、KAST、Trade、Clutch
+
+### 统一时序与存活上下文
+
+所有 P3.2 指标共用 `buildRoundTimeline(round)`（`packages/analytics/src/timeline.ts`）产出的逐回合上下文，不各自判断状态：
+
+- 起点是统一 coverage 选出的**名单快照**（`freeze_end` 优先，缺失时退化到 `start` 并标记 degraded），记录每个玩家的 side 与 `alive`。
+- 只用正式回合窗口 `[startTick, endTick]`（闭区间）内的死亡事件推进状态；post-round 死亡被排除。
+- 终点用 `end` 边界快照核验。`survived` 只有在“起点 alive、窗口内无死亡、end 快照该玩家 alive=true”三者同时成立时才为 `true`；**没有死亡事件本身不等于存活**。
+- baseline 之后、窗口内的 lifecycle `disconnect` / `spawn` / `side_change`，以及不一致死亡（baseline 非存活者的死亡、同一玩家多次死亡）都记为 anomaly，使该回合的时间线不再被 KAST/Trade/Clutch 采信。
+- 死亡与 end 快照冲突（有死亡但 end 显示存活，或无死亡但 end 显示已死）记 `survival-end-state-conflict`，该回合的存活证据按 ambiguous 降级。
+
+### KAST
+
+对每名玩家、每个**确认参与**（`playsIn`）的回合判定：
+
+| 分量 | 条件 |
+| --- | --- |
+| K | 窗口内存在 `isEligibleKill(kill, player)` |
+| A | 窗口内存在 `isEligibleAssist(kill, player)` |
+| S | `timeline.survived === true`（起点存活 + 无死亡 + end 快照确认存活） |
+| T | 该玩家的死亡在 trade window 内被存活队友有效 trade |
+
+判定规则：
+
+- 只要 K、A 或已证明的 T 成立，该回合即 KAST，S 是否可证不影响结论。
+- 否则只有 S 被证明为 false（死亡已证）且 T 已被证明为 false 时，才判为 KAST 未达成。
+- S 或 T 无法证明时，该回合**退出分母**（unavailable / ambiguous），而不是猜成 miss。
+- 输出 `rounds`（KAST 回合）、`eligibleRounds`（分母）、`playedRounds`、`percentage = rounds / eligibleRounds × 100`，以及 K/A/S/T 各自命中的回合数（分量可重叠）。`complete` 仅在 `eligibleRounds === playedRounds` 且无 unavailable / ambiguous / degraded 时为 `true`；有降级时 `percentage` 仍按可证回合给出，但不得当作完整覆盖。
+
+### Trade
+
+- 定义：`trader` 在窗口内击杀 `tradedKiller`，为队友 `tradedVictim`（更早被同一 `tradedKiller` 击杀、且当时仍有存活队友）复仇。一次 trade kill 恰好对应一次 traded death（全场 `tradeKills === tradedDeaths`）。
+- 双方事件都必须是**可识别敌方击杀**（killer 非 `world`、双方 side 已知且敌对、非确认 teamkill）；trader 与 victim 同侧且 `trader !== victim`；trader 在复仇击杀时仍存活（因此也在 victim 死亡时存活）。
+- 默认 `tradeWindowSeconds = 5`，`windowTicks = round(tradeWindowSeconds × match.tickRate)`。`match.tickRate` 缺失或不可靠时一律**不输出**时间型 trade 结论：`windowTicks = null`、`available = false`、`tradeKills / tradedDeaths` 保持 0、`tradeRate = null`，并记 `trade-tick-rate-unknown`；`tradeableDeaths` 不依赖时钟，仍然输出。
+- 同一 `tradedKiller` 在窗口内多次击杀队友时，取**最晚**的一次；最晚 tick 有并列候选时记 `trade-candidate-ambiguous`，不归属。
+- 死亡与复仇击杀同 tick 时不声称 subtick 先后，记 `trade-same-tick-ambiguous`，不归属（沿用 opening / 同 tick 伤害策略）。
+- `tradeableDeaths`：死亡是可识别敌方击杀，且死亡发生时至少有 1 名队友仍存活。
+- `tradeRate = tradedDeaths / tradeableDeaths × 100`；仅在 tick rate 可用、回合上下文完整、且该玩家没有被 ambiguous 命中的候选时为数值，否则为 `null`。
+- 排除：teamkill、`world` 死亡、任一方 side 未知。
+
+### Clutch
+
+- 从可靠起始名单（`freeze_end` 快照、无 unidentified、全部 side/alive 已知、无 lifecycle anomaly、无不一致死亡）出发，按 tick 推进存活人数（应用窗口内**所有**死亡，含 teamkill/world）。
+- 当某队恰好只剩 1 名存活者且敌方仍有 ≥1 人时形成 clutch opportunity，记录该玩家、对手人数与形成 tick；对手数取形成瞬间的值，之后敌方减少不改变该 1vN。
+- 对手数分桶 1v1 / 1v2 / 1v3 / 1v4 / 1v5（5 表示 ≥5）。
+- 赢下回合（`round.winner === 该玩家阵营`）才计 clutch win；winner 未知时 opportunity 仍记录但 `won = null` 并记 `clutch-winner-unknown`。
+- 无法解释的 disconnect / respawn / side change、unidentified 玩家、名单回退或不可用都会让该回合 clutch **整体不输出**（`clutch-round-ineligible`），禁止猜测。
+
+### P3.2 同 tick 与窗口策略小结
+
+- 事件窗口沿用 P3.1 的闭区间 `[startTick, endTick]`。
+- trade window 用 `Math.round(seconds × tickRate)`，边界含端点（恰好等于窗口 tick 数算入）。
+- 同一 tick 的多名玩家死亡视为同时发生：存活人数一次性推进；但“谁先死”不用于 trade / opening 归属，无法证明即 ambiguous。
+
 ## 统一 coverage / eligibility 机制
 
 所有指标共用 `buildCoverage(match)` 产出的资格上下文，不各自重复判断：
 
 - `RoundWindow`：`startTick` / `endTick` / `freezeEndTick`、`eventEligible`、`excludedEventCount`、`includes(tick)`。`startTick` 或 `endTick` 缺失时该回合 `eventEligible === false`，不猜测事件归属。
 - `RoundRoster`：优先取 `freeze_end` 且 `availability === "observed"` 的快照，缺失时退化到 `start`（`degraded: true`），两者都不可用时 `available === false`。名单缺失不视为空名单。
-- `PlayerRoundState`：`inRoster` / `side` / `participant` / `alive`；`Unknown` side 归一为 `null`，不用事件或 `Player.team` 回填。
+- `PlayerRoundState` / `RoundRosterEntry`：`inRoster` / `side` / `participant` / `alive`；`Unknown` side 归一为 `null`，不用事件或 `Player.team` 回填。`RoundRoster.entries` 与 `tick` 让 P3.2 时间线拿到完整名单与 baseline tick。
+- `RoundEndState`：`end` 边界的 observed 快照，提供 `alive(steamId)` / `hasRow` / `tick`，是 KAST 存活证明的唯一终点证据来源。
+- `RoundCoverage.winner` / `lifecycleEvents`：分别提供 clutch win 判定与回合内生命周期异常检测。
 - `buildDamageLedger(round)`：把回合内伤害事件还原成受害者 HP 轨迹，为每个事件给出可解的实际损失或 `null`，并回报未解原因计数。指标不自己重算 HP。
 - 两层资格：事件总量（K/D/A、HS%、multi-kill、opening）只需完整窗口；参与类（rounds played、damage、ADR、CT/T split）额外要求 `participant === true`，保证 ADR 分子与分母覆盖同一批回合。
 - ADR 另有一道 effective-damage 完整性门槛：只有 `effectiveDamageUnresolved === 0` 才输出标准 `adr`，否则为 `null`（玩家级与逐侧各自判定）。
 - 共享判定函数 `isEligibleKill` / `isEligibleAssist` / `isEligibleDamage` / `isIdentifiedEnemyKill`，指标只调用，不重新实现覆盖判断。
 
-`CoverageSummary` 输出全局 issue 计数和逐回合摘要；`PlayerMetrics.coverage` 输出逐玩家降级信息。
+`CoverageSummary` 输出全局 issue 计数和逐回合摘要；`PlayerMetrics.coverage` 输出逐玩家降级信息。每个 issue 还通过 `coverageIssueSeverity` 归入一个严重度类别，`CoverageSummary.severity` 给出各类别合计：
+
+- `unavailable`：所需证据缺失，数值不得产出（例如 roster 不可用、tick rate 不可靠）。
+- `ambiguous`：证据存在但无法证明唯一结果，数值不得猜测（例如同 tick trade、end 状态与死亡时间线冲突）。
+- `degraded`：可用文档化的弱信号产出数值，但不构成完整覆盖（例如 start 边界回退、unidentified 行）。
+- `informational`：已解释的排除，不是覆盖缺陷（post-round 事件、无击杀回合的 opening）。
 
 | Coverage issue | 含义 |
 | --- | --- |
@@ -97,7 +161,7 @@ pnpm --filter @cs2-coach/analytics test
 | `player-not-in-roster` | 观察到的快照中没有该玩家行（未知参与，不等于断连） |
 | `player-side-unknown` | 该玩家该回合 side 为 Unknown |
 | `player-participation-unknown` | participant 未知（非 true/false） |
-| `player-alive-unknown` | 该回合 alive 未知（本轮无指标依赖，供 KAST/Clutch 使用） |
+| `player-alive-unknown` | 该回合 alive 未知；KAST 的存活证明与 Clutch 的存活推进会因此不可用 |
 | `post-round-events-excluded` | 被有效窗口排除的事件数 |
 | `kill-teamkill-status-unknown` | 计入击杀但 teamkill 状态未知的数量 |
 | `kill-headshot-status-unknown` | 计入击杀但 headshot 状态未知的数量 |
@@ -108,6 +172,16 @@ pnpm --filter @cs2-coach/analytics test
 | `opening-duel-contested` | 同最早 tick 多杀，opening 不归属 |
 | `opening-duel-unattributed` | 最早击杀为 world/teamkill/side 未知 |
 | `opening-duel-absent` | 回合窗口内无击杀 |
+| `survival-context-unavailable` | 回合窗口或名单不可用，存活时间线无法建立（unavailable） |
+| `survival-context-degraded` | KAST/Trade 使用 start 边界回退名单，或名单快照含 unidentified 行（degraded） |
+| `survival-end-state-unavailable` | 无死亡证据但 end 快照缺失或无该玩家行，存活无法证明（unavailable） |
+| `survival-end-state-conflict` | end 快照与死亡时间线矛盾（ambiguous） |
+| `survival-timeline-anomaly` | baseline 之后出现无法解释的 disconnect / respawn / side change，或死亡时间线不一致（unavailable） |
+| `trade-tick-rate-unknown` | `match.tickRate` 不可靠，抑制全部时间型 trade 结论（unavailable） |
+| `trade-same-tick-ambiguous` | 死亡与复仇击杀同 tick，先后不可证（ambiguous） |
+| `trade-candidate-ambiguous` | 同一最晚 tick 有多个可交易候选（ambiguous） |
+| `clutch-round-ineligible` | 名单或时间线不可靠，该回合 clutch 不输出（unavailable） |
+| `clutch-winner-unknown` | 有 clutch opportunity 但回合 winner 未知（degraded） |
 
 逐玩家 coverage 另有 `effectiveDamageUnresolved`：该玩家被计入的敌方伤害行中，实际 HP 损失无法解出的数量。`side.CT` / `side.T` 各自也有同名计数，用于判断某一侧的标准 `adr` 是否可用。
 
@@ -170,6 +244,39 @@ K/D/A 的差异来源不是硬编码，而是两项可复现证据决策：post-
 
 只有本实现落在 ~2195 的 0.1% 内，说明人工复盘确实使用了 HP 损失口径，而 scoreboard 风格的 `min(dmg, hp)` 会明显偏低。该差异不影响任何结论。
 
+### P3.2 golden（twinkle）
+
+| 指标 | 结果 |
+| --- | --- |
+| KAST | **18 / 24 = 75.0%**（K 14 回合 / A 3 / S 4 / T 4，分量可重叠） |
+| KAST coverage | eligible 24/24、unavailable 0、ambiguous 0、degraded 0，`complete = true` |
+| trade kills | **6** |
+| traded deaths | **4** |
+| tradeable deaths | **18** |
+| trade rate | **22.2%（4 / 18）** |
+| window | 5s → **320 ticks**（64 tick，`MatchAnalytics.tradeWindow`） |
+| clutch | 3 次 opportunity（R1 1v3、R17 1v2、R24 1v3），1 次 win（R24 1v3） |
+
+全局：trade kills = traded deaths = **34**（1:1 关系）；tradeable deaths 合计 **158**；clutch opportunity 合计 **31**、win **7**；全部 P3.2 新增 issue 计数为 0，`severity.unavailable = 0`、`severity.ambiguous = 0`、`severity.degraded = 2`（仅 assist-side-mismatch）、`severity.informational = 117`。
+
+### P3.2 与人工复盘对比
+
+| 复核项 | 人工复盘 | 本实现 | 结论 |
+| --- | --- | --- | --- |
+| twinkle KAST | ~75% | **75.0%（18/24）** | 一致 |
+| twinkle trade kills | ~6 | **6** | 一致 |
+| twinkle traded deaths | ~4 | **4** | 一致 |
+| tradeable deaths / rate | 18 / ~22% | **18 / 22.2%** | 一致 |
+| R24 clutch | 1v3 | **1v3，won = true** | 一致 |
+
+对账中发现并解释的真实时序特例：
+
+- R22 tick 121075 twinkle 击杀 tarkz，随后 tarkz 在 tick 121153 以 HE 手雷（死后生效的投掷物）击杀 twinkle。死亡时间线因此出现“已死亡玩家仍有击杀”。实现不去除这种合法的 posthumous kill：它不把 tarkz 当作可复仇的 trade（trader 已死），也不把 tarkz 复活进存活计数。
+- R13 的复仇击杀距死亡 395 ticks、R23 为 359 ticks，都略超 5s（320 ticks）窗口，因此**不算** trade。若把窗口放宽到 ~6.2s，twinkle 的 traded deaths 会变成 6，与人工复盘的 4 不一致；320 ticks 与人工复盘一致。
+- R18 的 trade 只隔 9 ticks（tick 98850 死亡 → 98859 复仇），是典型的“补枪换人”，完全落在窗口内，属正常 trade。
+
+R13 / R18 / R22 / R23 说明 trade 结论对窗口定义高度敏感，因此窗口参数显式暴露在 `MatchAnalytics.tradeWindow`，且 tick rate 不可靠时整类结论被抑制。
+
 ## 降级与跳过
 
 本轮该样本覆盖完整，没有指标被降级或跳过：24 个回合全部 `eventEligible`，全部有 freeze_end 快照，0 个 unidentified、unknown side、unknown participation、teamkill 状态未知、headshot 状态未知，`damage-effective-chain-broken` 与 `damage-effective-same-tick-ambiguous` 均为 0。
@@ -184,21 +291,32 @@ K/D/A 的差异来源不是硬编码，而是两项可复现证据决策：post-
 - HP 轨迹断裂（如 HP 回升）或同 tick 顺序不可证：对应伤害行不计入 effective，由 `effectiveDamageUnresolved` 与 coverage 记数；reported damage 与 `reportedAdr` 仍保留，但 `adr` 变为 `null`（存在 unresolved 的 CT/T 侧同理）。
 - opening 同 tick 多杀 / 首杀为 world、teamkill：不归属玩家。
 
-## P3.2 前仍缺什么
+P3.2 新增的降级/跳过路径（合成测试覆盖）：
 
-- **KAST / Survival**：需要“助攻或存活或被杀或 traded”的完整判定；存活部分要用 freeze_end 初始 alive + 死亡时间线 + end 快照推进，不能用“没有死亡”当作存活。
-- **Trade**：需要 trade 时窗与 tick rate 策略；`tickRate` 未知时必须抑制时间型结论。同 tick 同时死亡、队伍存活数、lifecycle 中断都要显式规则。
-- **Clutch**：需要可靠的起始存活名单、回合内死亡顺序、lifecycle（断连/重生）覆盖；当前样本没有验证回合内重生/重连场景。
+- 无死亡事件但 end 快照缺失或无该玩家行：存活不可证，该回合退出 KAST 分母，记 `survival-end-state-unavailable`。
+- end 快照与死亡时间线冲突：该回合存活证据按 ambiguous 降级，记 `survival-end-state-conflict`。
+- baseline 之后出现 disconnect / spawn / side change 或不一致死亡：时间线不可用，KAST/Trade 该回合退出，clutch 整体不输出，记 `survival-timeline-anomaly` 与 `clutch-round-ineligible`。
+- 名单回退到 start 或含 unidentified：KAST/Trade 以 degraded 计数（`survival-context-degraded`），clutch 不输出。
+- `match.tickRate` 不可靠：时间型 trade 全部抑制，记 `trade-tick-rate-unknown`；`tradeableDeaths` 仍输出。
+- 同 tick trade 或并列候选：不归属并记 `trade-same-tick-ambiguous` / `trade-candidate-ambiguous`，受影响玩家的 `tradeRate` 为 `null`。
+- winner 未知：clutch opportunity 仍记录，`won = null`，记 `clutch-winner-unknown`。
+
+## P3.3 前仍缺什么
+
 - **Utility advanced**：需要投掷物类型归一（molotov vs incendiary）、stage 去重（release vs detonate）、闪光重叠解析；entity index 可复用，必须结合回合与 tick。
-- **生存/连接状态**：`participant` 不是连接标志；断连/重连枚举语义仍未验证，跨回合连接状态机需要更多真实样本。
+- **生存/连接状态**：`participant` 不是连接标志；断连/重连枚举语义仍未验证，跨回合连接状态机需要更多真实样本。本样本的 disconnect 全部在末回合 end 之后，回合内断连路径只有合成测试覆盖。
 - **Bot / 部分录制**：无法用唯一 SteamID 表示的行只计入 unidentified，指标需按覆盖门控。
-- **治疗/回合内重生**：本样本没有出现，机制上会记 `damage-effective-chain-broken`；需要真实样本验证该降级路径。
+- **治疗/回合内重生**：本样本没有出现，机制上会记 `damage-effective-chain-broken`；P3.2 的 KAST/Trade/Clutch 也会因回合内 spawn 记 `survival-timeline-anomaly` 并整回合退出，待真实样本验证。
+- **Posthumous kill**：样本 R22 出现死后手雷击杀。当前实现把它当作合法击杀（不复活、不作为 trade），但没有专门的证据字段区分投掷物延迟；更多样本可能需要更细的归因。
+- **CT/T 分桶的 KAST / Trade / Clutch**：本轮只输出玩家级总量，未做逐侧拆分；如 Findings 需要，再按回合快照 side 扩展。
 
 ## 验证
 
 ```powershell
-pnpm --filter @cs2-coach/analytics test   # 合成 + 覆盖 + 真实 DEM golden
+pnpm --filter @cs2-coach/analytics test   # 合成 + P3.2 战斗覆盖 + 真实 DEM golden
 pnpm --filter @cs2-coach/dem-parser test  # parser 回归
 pnpm typecheck
 pnpm build
 ```
+
+analytics 测试当前 **35/35 PASS**（P3.1 合成 19、P3.2 combat 13、真实 DEM 3），dem-parser **28/28 PASS** 无回归，`pnpm typecheck` 与 `pnpm build` 全 PASS。`model-contracts.test.ts` 额外对 KAST / Trade / Clutch 类型契约做编译期断言。
