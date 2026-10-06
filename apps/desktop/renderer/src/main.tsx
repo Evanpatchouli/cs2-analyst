@@ -3,40 +3,61 @@ import { createRoot } from 'react-dom/client';
 import {
   Badge, Body1, Button, Card, Caption1, Divider, Dropdown, FluentProvider,
   MessageBar, MessageBarBody, Option, Spinner, Subtitle1, Title1, Title2,
-  Tooltip, makeStyles, tokens, webDarkTheme,
+  Tooltip, makeStyles, tokens,
 } from '@fluentui/react-components';
 import type { DesktopMatchReport, DesktopPlayerAnalytics } from '@cs2-coach/report-contract';
 import { useReport } from './store';
-import {
-  DecoyIcon, ExplosiveIcon, FlashbangIcon, IncendiaryIcon, MolotovIcon, QuestionCircleIcon, SmokeIcon,
-} from './icons';
+import { QuestionCircleIcon } from './icons';
+import { UtilityIcon } from './utility-icons';
+import type { UtilityIconKind } from './utility-icons';
+import { coachTheme, palette } from './theme';
+
+/** One surface for every card on the page: same background, same weak border, same radius, no shadows. */
+const cardSurface = {
+  backgroundColor: palette.card,
+  border: `1px solid ${palette.border}`,
+  borderRadius: tokens.borderRadiusLarge,
+  boxShadow: 'none',
+};
+
+/** One row rhythm for every list on the page (utility counts, utility effects, clutch). */
+const rowHeight = '34px';
 
 const useStyles = makeStyles({
-  page: { minHeight: '100vh', backgroundColor: tokens.colorNeutralBackground2, color: tokens.colorNeutralForeground1 },
-  content: { maxWidth: '1120px', margin: '0 auto', padding: '28px 32px', display: 'flex', flexDirection: 'column', gap: '24px' },
+  page: { minHeight: '100vh', backgroundColor: palette.pageBottom, backgroundImage: palette.pageGradient, color: tokens.colorNeutralForeground1 },
+  content: { maxWidth: '1120px', margin: '0 auto', padding: '28px 32px 44px', display: 'flex', flexDirection: 'column', gap: '20px' },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px' },
   column: { display: 'flex', flexDirection: 'column', gap: '8px' },
   section: { display: 'flex', flexDirection: 'column', gap: '16px' },
   muted: { color: tokens.colorNeutralForeground3 },
   grid: { display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: '12px', '@media (max-width: 900px)': { gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' } },
   split: { display: 'grid', gridTemplateColumns: 'minmax(0, 3fr) minmax(0, 2fr)', gap: '20px', '@media (max-width: 900px)': { gridTemplateColumns: '1fr' } },
-  stat: { backgroundColor: tokens.colorNeutralBackground1, padding: '16px', display: 'flex', flexDirection: 'column', gap: '6px' },
+  stat: { ...cardSurface, padding: '16px', display: 'flex', flexDirection: 'column', gap: '6px' },
   statHeader: { display: 'flex', alignItems: 'center', gap: '2px' },
-  panel: { backgroundColor: tokens.colorNeutralBackground1, padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' },
+  panel: { ...cardSurface, padding: '20px', display: 'flex', flexDirection: 'column', gap: '10px' },
   panelHeader: { display: 'flex', alignItems: 'center', gap: '2px' },
-  help: { color: tokens.colorNeutralForeground3, flexShrink: 0, ':hover': { color: tokens.colorNeutralForeground2 } },
+  help: {
+    color: tokens.colorNeutralForeground3, flexShrink: 0,
+    ':hover': { color: tokens.colorNeutralForeground1 },
+    ':focus-visible': { color: tokens.colorNeutralForeground1 },
+  },
   list: { display: 'flex', flexDirection: 'column' },
-  listRow: { display: 'grid', gridTemplateColumns: '20px minmax(0, 1fr) auto', alignItems: 'center', columnGap: '10px', minHeight: '34px', padding: '0 2px', borderBottom: `1px solid ${tokens.colorNeutralStroke3}`, ':last-child': { borderBottomStyle: 'none' } },
-  effectRow: { display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', alignItems: 'center', columnGap: '10px', minHeight: '34px', padding: '0 2px', borderBottom: `1px solid ${tokens.colorNeutralStroke3}`, ':last-child': { borderBottomStyle: 'none' } },
-  rowIcon: { display: 'inline-flex', color: tokens.colorNeutralForeground3 },
-  clutchHead: { display: 'grid', gridTemplateColumns: '56px minmax(0, 1fr) auto', alignItems: 'center', columnGap: '10px', padding: '0 2px' },
-  clutchRow: { display: 'grid', gridTemplateColumns: '56px minmax(0, 1fr) auto', alignItems: 'center', columnGap: '10px', minHeight: '34px', padding: '0 2px', borderBottom: `1px solid ${tokens.colorNeutralStroke3}`, ':last-child': { borderBottomStyle: 'none' } },
+  row: {
+    display: 'grid', alignItems: 'center', columnGap: '10px', minHeight: rowHeight, padding: '0 4px',
+    borderBottom: `1px solid ${palette.rowDivider}`, ':last-child': { borderBottomStyle: 'none' },
+  },
+  listRow: { gridTemplateColumns: '22px minmax(0, 1fr) auto' },
+  effectRow: { gridTemplateColumns: 'minmax(0, 1fr) auto' },
+  rowIcon: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px' },
+  rowLabel: { color: tokens.colorNeutralForeground2 },
+  clutchHead: { display: 'grid', gridTemplateColumns: '56px minmax(0, 1fr) auto', alignItems: 'center', columnGap: '10px', padding: '0 4px' },
+  clutchRow: { gridTemplateColumns: '56px minmax(0, 1fr) auto' },
   numberCell: { fontVariantNumeric: 'tabular-nums' },
   clutchResult: { display: 'flex', justifyContent: 'flex-end' },
   rowValue: { textAlign: 'right', fontVariantNumeric: 'tabular-nums' },
-  finding: { backgroundColor: tokens.colorNeutralBackground1, padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' },
-  evidence: { padding: '8px 0', display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: '12px', borderBottom: `1px solid ${tokens.colorNeutralStroke2}`, overflowWrap: 'anywhere' },
-  empty: { padding: '72px 32px', alignItems: 'center', textAlign: 'center' },
+  finding: { ...cardSurface, padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' },
+  evidence: { padding: '8px 0', display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: '12px', borderBottom: `1px solid ${palette.rowDivider}`, overflowWrap: 'anywhere' },
+  empty: { ...cardSurface, padding: '72px 32px', alignItems: 'center', textAlign: 'center' },
 });
 
 /** Display-only number rules: counts 0, ADR/seconds 2, percentages 1, KAST integer. */
@@ -78,9 +99,9 @@ const metricLabels: Record<string, string> = {
   "clutch.list.opponents": "残局敌人数量", "clutch.list.won": "残局获胜", "clutch.list.side": "残局所在阵营",
 };
 const metricLabel = (metric: string) => metricLabels[metric] ?? metric;
-/** Clutch outcomes are labelled; a missing result is never guessed. */
-const clutchResult = (won: boolean | null): { label: string; color: 'success' | 'informative' | 'warning' } =>
-  won === null ? { label: '结果未知', color: 'warning' } : won ? { label: '成功', color: 'success' } : { label: '失败', color: 'informative' };
+/** Clutch outcomes are labelled; a missing result is never guessed. Colour only reinforces the label. */
+const clutchResult = (won: boolean | null): { label: string; color: 'success' | 'danger' | 'warning' } =>
+  won === null ? { label: '结果未知', color: 'warning' } : won ? { label: '成功', color: 'success' } : { label: '失败', color: 'danger' };
 const severityText: Record<string, string> = { high: "高", medium: "中", low: "低", positive: "亮点" };
 const evidenceText = (value: number | boolean | string, unit: string): string => {
   if (unit === "flag") return value === true ? "是" : value === false ? "否" : String(value);
@@ -126,7 +147,7 @@ function Findings({ report, playerId }: { report: DesktopMatchReport; playerId: 
         {f.evidence.map((e, i) => {
           const when = [e.round === undefined ? null : `R${e.round}`, e.roundTimeSeconds === undefined ? null : `回合开始后 ${seconds(e.roundTimeSeconds)}`].filter(Boolean).join(' · ');
           return <div key={i} className={s.evidence}>
-            <Caption1 title={e.tick === undefined ? undefined : `原始记录 tick ${e.tick}`}>{metricLabel(e.metric)}{when ? ` · ${when}` : ''}</Caption1>
+            <Caption1 className={s.muted} title={e.tick === undefined ? undefined : `原始记录 tick ${e.tick}`}>{metricLabel(e.metric)}{when ? ` · ${when}` : ''}</Caption1>
             <Caption1>{evidenceText(e.value, e.unit)}</Caption1>
           </div>;
         })}
@@ -138,13 +159,13 @@ function Findings({ report, playerId }: { report: DesktopMatchReport; playerId: 
 /** Row-per-metric utility panel; the numbers come straight from the DTO. */
 function UtilityPanel({ utility }: { utility: DesktopPlayerAnalytics['utility'] }) {
   const s = useStyles();
-  const throws = [
-    { label: '闪光弹', icon: <FlashbangIcon />, value: count(utility.throws.flash) },
-    { label: '烟雾弹', icon: <SmokeIcon />, value: count(utility.throws.smoke) },
-    { label: '高爆手雷', icon: <ExplosiveIcon />, value: count(utility.throws.he) },
-    { label: '燃烧弹', icon: <IncendiaryIcon />, value: count(utility.throws.incendiary) },
-    { label: '燃烧瓶', icon: <MolotovIcon />, value: count(utility.throws.molotov) },
-    { label: '诱饵弹', icon: <DecoyIcon />, value: count(utility.throws.decoy) },
+  const throws: { label: string; kind: UtilityIconKind; value: string }[] = [
+    { label: '闪光弹', kind: 'flashbang', value: count(utility.throws.flash) },
+    { label: '烟雾弹', kind: 'smoke', value: count(utility.throws.smoke) },
+    { label: '高爆手雷', kind: 'he', value: count(utility.throws.he) },
+    { label: '燃烧弹', kind: 'incendiary', value: count(utility.throws.incendiary) },
+    { label: '燃烧瓶', kind: 'molotov', value: count(utility.throws.molotov) },
+    { label: '诱饵弹', kind: 'decoy', value: count(utility.throws.decoy) },
   ];
   const effects = [
     { label: '高爆手雷对敌伤害', value: points(utility.heDamage) },
@@ -157,17 +178,17 @@ function UtilityPanel({ utility }: { utility: DesktopPlayerAnalytics['utility'] 
     <div className={s.panelHeader}><Subtitle1>道具</Subtitle1><InfoTip label="道具面板" content={help.utility} /></div>
     <Caption1 className={s.muted}>投掷数量</Caption1>
     <div className={s.list}>
-      {throws.map(row => <div key={row.label} className={s.listRow}>
-        <span className={s.rowIcon}>{row.icon}</span>
-        <span>{row.label}</span>
+      {throws.map(row => <div key={row.label} className={`${s.row} ${s.listRow}`}>
+        <span className={s.rowIcon}><UtilityIcon kind={row.kind} /></span>
+        <span className={s.rowLabel}>{row.label}</span>
         <span className={s.rowValue}>{row.value}</span>
       </div>)}
     </div>
     <Divider />
     <Caption1 className={s.muted}>道具效果</Caption1>
     <div className={s.list}>
-      {effects.map(row => <div key={row.label} className={s.effectRow}>
-        <span>{row.label}</span>
+      {effects.map(row => <div key={row.label} className={`${s.row} ${s.effectRow}`}>
+        <span className={s.rowLabel}>{row.label}</span>
         <span className={s.rowValue}>{row.value}</span>
       </div>)}
     </div>
@@ -218,7 +239,7 @@ function Report({ report, playerId }: { report: DesktopMatchReport; playerId: st
             <div className={s.list}>
               {p.clutch.list.map(c => {
                 const result = clutchResult(c.won);
-                return <div key={c.round} className={s.clutchRow}>
+                return <div key={c.round} className={`${s.row} ${s.clutchRow}`}>
                   <span className={s.numberCell}>R{c.round}</span>
                   <span className={s.numberCell}>1v{c.opponents}</span>
                   <span className={s.clutchResult}><Badge appearance="tint" color={result.color}>{result.label}</Badge></span>
@@ -255,5 +276,5 @@ class ReportErrorBoundary extends React.Component<React.PropsWithChildren, { fai
 }
 document.body.style.margin = '0';
 createRoot(document.getElementById('root')!).render(
-  <React.StrictMode><FluentProvider theme={webDarkTheme}><ReportErrorBoundary><App /></ReportErrorBoundary></FluentProvider></React.StrictMode>,
+  <React.StrictMode><FluentProvider theme={coachTheme}><ReportErrorBoundary><App /></ReportErrorBoundary></FluentProvider></React.StrictMode>,
 );

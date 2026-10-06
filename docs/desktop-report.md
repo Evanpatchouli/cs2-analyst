@@ -83,7 +83,7 @@ idle → selecting → parsing → analyzing → success
 
 ## UI 页面结构
 
-统一使用 Fluent UI v9 + `webDarkTheme`。
+统一使用 Fluent UI v9：主题在 `webDarkTheme` 之上覆盖中性色 token（`apps/desktop/renderer/src/theme.ts`），形成深蓝灰体系；组件只读取 token 或 `palette`，不散落固定色值。
 
 1. **页头**：产品名 + “选择 DEM / 重新选择 DEM”主按钮。
 2. **进行中**：Spinner + 阶段文案（提示大型录像可能需要数十秒）。
@@ -96,7 +96,18 @@ idle → selecting → parsing → analyzing → success
    - 数字格式（仅展示层）：秒数与 ADR 两位小数、百分比一位小数（KAST 保持整数）、整数计数零位；`—` 表示证据不足。底层 evidence 数值不截断。
    - 证据告警：仅当展示的数值受不完整证据影响时显示（参与、伤害归属、回合贡献率 / 补枪 / 残局、道具计数/伤害/助攻）。
    - Findings（视觉重点，左侧宽栏）：最多 3 个问题 + 2 个亮点，显示中文严重度徽章、标题、summary 与可展开的逐条证据。证据行只做展示层中文化（中文指标名与中文单位），数据仍然是契约里的 metric / value / unit；带 `round` 的证据显示 `R4 · 回合开始后 26.63 秒`（由 `roundTimeSeconds` 计算），原始 `tick` 只在 `title` 次级提示中保留，默认不展示。
-   - 道具与残局（右侧）：道具面板标题为“道具”，先按“投掷数量”逐行显示闪光弹 / 烟雾弹 / 高爆手雷 / 燃烧弹 / 燃烧瓶 / 诱饵弹（每行统一风格图标 + 中文名称 + 右对齐计数），分隔线后按“道具效果”逐行显示高爆手雷对敌伤害、燃烧伤害、敌人受闪效果、队友受闪效果、闪光助攻。图标来自渲染层本地图标集 `renderer/src/icons.tsx`（统一 20px 网格、单色 `currentColor` 描边、不混用其他图标源）。面板底部保留受闪口径说明。残局面板与道具面板同样逐行对齐：`回合 / 局面 / 结果` 三列（`R24`、`1v3`），结果用 `Badge` 标签展示（成功 / 失败 / 结果未知），不新增任何结果推断。
+   - 道具与残局（右侧）：道具面板标题为“道具”，先按“投掷数量”逐行显示闪光弹 / 烟雾弹 / 高爆手雷 / 燃烧弹 / 燃烧瓶 / 诱饵弹（每行统一风格图标 + 中文名称 + 右对齐计数），分隔线后按“道具效果”逐行显示高爆手雷对敌伤害、燃烧伤害、敌人受闪效果、队友受闪效果、闪光助攻。道具图标来自渲染层本地彩色实心图标集 `renderer/src/utility-icons.tsx`（24px 网格、统一 22px 显示尺寸，颜色登记在 `theme.ts` 的 `palette.utility`），与界面自身的单色线性图标 `renderer/src/icons.tsx` 分开存放，道具列表不混用两套风格；图标 `aria-hidden`，含义由同一行的中文名称承担，不依赖颜色表达数据含义。面板底部保留受闪口径说明。残局面板与道具面板同样逐行对齐：`回合 / 局面 / 结果` 三列（`R24`、`1v3`），结果用 `Badge` 标签展示（成功 / 失败 / 结果未知，成功为绿色、失败为红色、未知为琥珀色，颜色只强化标签文本），不新增任何结果推断。
+
+## 视觉体系（P5.4）
+
+纯展示层：只改 Renderer 的主题、颜色、图标与排版，不改 Analytics / Findings / report DTO 语义。
+
+- 主题集中在 `apps/desktop/renderer/src/theme.ts`：在 `webDarkTheme` 之上覆盖 Fluent UI 中性色 token，页面与所有 Fluent 组件（Card / Divider / Badge / Dropdown / Tooltip / MessageBar）共用同一套深蓝灰；组件只读取 token 或 `palette`，不散落固定色值。
+- 背景层级：页面 `linear-gradient(180deg, #161d26 0%, #111821 100%)`，卡片 `#1d242e`，弱边框 `rgba(148, 163, 184, 0.12)`，行分隔 `rgba(148, 163, 184, 0.08)`，文字 `#e8eef6` / `#c5cfdc` / `#8f9db0`。主进程窗口底色同步为 `#111821`，启动时不再闪出黑灰底色。
+- 卡片：统一 6px 圆角（`tokens.borderRadiusLarge`）、1px 弱边框、无阴影（关闭 Fluent Card 默认投影）。
+- 列表节奏：道具投掷 / 道具效果 / 残局共用同一行高（34px）与分隔线；标题层级固定为 Title1（地图）→ Title2（区块）→ Subtitle1（面板）→ Caption1（说明）；正文以中性灰为主，数值右对齐并使用等宽数字。
+- 颜色只做视觉锚点：6 个道具图标（闪光弹 `#4DB6FF`、烟雾弹 `#B9C7D9`、高爆手雷 `#FF5A36`、燃烧弹 `#FF8A1F`、燃烧瓶 `#FFB13B`、诱饵弹 `#57D68D`）、Findings severity 徽章、残局成功 / 失败徽章，以及主按钮等少量交互态。核心数值、卡片标题与正文保持白色 / 中性灰。
+- 状态语义色（MessageBar、状态徽章）继续使用 Fluent 的状态 ramp，保证错误与告警的对比度，不参与中性色重映射。
 
 ## 验证
 

@@ -1,15 +1,15 @@
 # Current Task
 
-Status: complete — P5.3 报告页可读性与说明优化 PASS
+Status: complete — P5.4 报告页视觉优化（彩色实心道具图标 + 深蓝灰体系）PASS
 
-基线：`2556907`（P5.2.1 中文产品化 PASS）；本轮只做报告页展示层，不改 P3 Analytics 语义与 P4 Findings 阈值 / 排序 / ranking。
+基线：`360c84f`（P5.3 残局面板列对齐 PASS）；本轮只做 Renderer 展示层视觉，不改 P3 Analytics 语义、P4 Findings 阈值 / ranking / evidence、report DTO 字段与 demo1 数值，也不动 installer 架构。
 
-- tick → 回合内时间：`packages/report-contract` 新增展示层 `DesktopFinding` / `DesktopFindingEvidence.roundTimeSeconds`；`apps/desktop/electron/report.ts` 用真实数据 `(eventTick - roundStartTick) / tickRate` 计算，缺少回合起点 / 事件 tick / 可靠 tickRate 时字段缺省，不猜时间。Renderer 显示“R4 · 回合开始后 26.63 秒”，原始 `tick` 只保留在 `title` 次级提示。
-- 数字格式（仅展示层）：秒数与 ADR 两位小数、百分比一位小数（KAST 保持整数）、整数计数零位；evidence 的 hp / hp-round / ratio / percent / seconds / count 走同一套格式化，底层数值不截断。
-- Trade 文案：指标卡改为“Trade rate（死亡后队友补枪率）”+“4 / 18 次死亡后队友完成补枪”，Tooltip 补充“死亡时仍有队友存活：18 / 其中 5 秒内队友击杀该敌人：4”；不再出现“可交易死亡 / 被交易 / 及时回收”。算法、5 秒窗口、thresholds、ranking 均未动。
-- 道具面板：标题“道具”，先“投掷数量”6 项逐行（图标 + 中文名 + 右对齐计数），分隔线后“道具效果”5 项逐行；图标来自新增 `renderer/src/icons.tsx` 本地统一图标集（20px 网格、单色 `currentColor` 描边，不混用其他图标源）。
-- 残局面板：改为“回合 / 局面 / 结果”三列对齐列表（`R24` / `1v3`），结果用 `Badge` 标签展示（成功 / 失败 / 结果未知），不新增结果推断。
-- Tooltip：8 张核心指标卡 + 道具面板共 9 个 Fluent UI v9 `?` 入口（`Tooltip relationship="description"` + 可聚焦 `Button` + 中文 `aria-label`），文案只解释既有口径。
-- 验证：`pnpm typecheck`、`pnpm build`、desktop Node 集成 3/3（新增 round-time 断言）、desktop `test:report`（新增 9 个 Tooltip 入口 DOM 断言与“无 `tick <n>`”断言）、`pnpm test:smoke`、analytics 53/53、findings 17/17、dem-parser 28/28 全 PASS；twinkle demo1 数值与 Findings ruleId 顺序不变。
-- 非目标保持：不改 Analytics 算法、Findings 阈值 / ranking、不加“惜败”、不加 timeline / 图表 / 历史 / 自动扫描 / AI、无 installer 架构调整、无大范围 UI 重构。
-- focused commit 后交接；展示层细节与验收见 [桌面比赛报告](../docs/desktop-report.md)。
+- 主题：新增 `apps/desktop/renderer/src/theme.ts`，在 `webDarkTheme` 之上覆盖 Fluent UI 中性色 token —— 页面 `linear-gradient(180deg, #161d26 0%, #111821 100%)`、卡片 `#1d242e`、弱边框 `rgba(148, 163, 184, 0.12)`、行分隔 `rgba(148, 163, 184, 0.08)`、文字三档 `#e8eef6 / #c5cfdc / #8f9db0`。品牌与状态 ramp 不变；固定色值只登记在 `theme.ts`，组件读 `tokens.*` 或 `palette.*`。
+- 道具图标：新增 `apps/desktop/renderer/src/utility-icons.tsx`，6 个彩色实心内联 SVG React 组件（闪光弹 `#4DB6FF`、烟雾弹 `#B9C7D9`、高爆手雷 `#FF5A36`、燃烧弹 `#FF8A1F`、燃烧瓶 `#FFB13B`、诱饵弹 `#57D68D`），24px 网格 / 22px 显示、`aria-hidden`。`icons.tsx` 只保留界面自身的单色线性 `?` 图标，道具面板不混用两套风格。未新增依赖，未新增 .svg 资源文件。
+- 视觉一致性：所有卡片统一 6px 圆角（`tokens.borderRadiusLarge`）+ 1px 弱边框 + 无阴影；道具投掷 / 道具效果 / 残局统一 34px 行高与分隔线；标题层级 Title1 → Title2 → Subtitle1 → Caption1；数值右对齐 + 等宽数字，标签改用次级中性灰。
+- 颜色只做视觉锚点：道具图标、Findings severity 徽章、残局成功 / 失败徽章、主按钮等少量交互态。残局“失败”由 `informative` 改为 `danger`（只改颜色，文案与数据不变）。核心数值、标题、正文保持白 / 中性灰。
+- 主进程窗口底色 `#202020 → #111821`，启动不再闪黑。
+- 验证：`pnpm typecheck`、`pnpm build` PASS；桌面 Node 集成 3/3；`test:report` 真实 DEM / 损坏 DEM / 非 .dem 三个场景通过；`pnpm test:smoke`（dev + preview）通过；重新打包后 `test:installed` 全通过（生产安装版无 seam、测试 seam 安装版 demo1 报告与开发环境一致）。
+- demo1 golden 不变：twinkle 25/20/4、ADR 91.38、KAST 75%、Trade 22.2%、R24 1v3 胜、5 条 Findings 顺序不变。
+- 非目标保持：不改 Analytics 算法、Findings 阈值 / ranking / ruleId、Trade / Clutch / tick / time 逻辑、report DTO 数据语义、P5.3 Tooltip 文案；不重做布局、不用 Emoji、不做玻璃拟态 / 强阴影 / RGB 灯效。
+- focused commit 后交接；视觉体系细节见 [桌面比赛报告](../docs/desktop-report.md)。

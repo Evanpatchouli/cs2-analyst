@@ -85,7 +85,7 @@ async function createWindow() {
     height: 800,
     minWidth: 800,
     minHeight: 600,
-    backgroundColor: '#202020',
+    backgroundColor: '#111821',
     title: 'CS2 Coach',
     webPreferences: {
       preload: fileURLToPath(new URL('../preload/index.cjs', import.meta.url)),

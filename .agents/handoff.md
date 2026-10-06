@@ -1,5 +1,18 @@
 # Agent Handoff
 
+## 2026-10-07 — P5.4 报告页视觉优化（彩色实心道具图标 + 深蓝灰体系）PASS
+
+- 基线 `360c84f`（P5.3 PASS）。本轮是纯 presentation polish：只改 Renderer 主题 / 图标 / 排版与主进程窗口底色，不改 P3 Analytics 语义、P4 Findings 阈值 / 排序 / ruleId / evidence、Trade / Clutch / tick / time 逻辑、report DTO 数据字段；未引入 Emoji、玻璃拟态、强阴影、RGB 灯效或大面积彩色卡片，installer 架构未动。
+- 主题：新增 `apps/desktop/renderer/src/theme.ts`。`coachTheme` 在 `webDarkTheme` 之上覆盖中性色 token —— 卡片 `colorNeutralBackground1 = #1d242e`、页底 `Background2 = #111821`、抬升面 `Background3/4 = #232c38`、`Stroke1/2/3 = rgba(148,163,184,0.22/0.12/0.08)`、`Foreground1/2/3/4 = #e8eef6 / #c5cfdc / #8f9db0 / #7b8a9d`；品牌与状态 ramp 不动，保证 MessageBar 与徽章对比度。页面主背景 `linear-gradient(180deg, #161d26 0%, #111821 100%)`。组件只读 `tokens.*` 或 `palette.*`，固定色值只登记在 theme.ts。
+- 主进程：`electron/main.ts` 窗口 `backgroundColor` 由 `#202020` 改为 `#111821`，启动不再闪出黑灰底色。
+- 道具图标：新增 `apps/desktop/renderer/src/utility-icons.tsx`，6 个彩色实心内联 SVG React 组件（24px 网格、22px 显示、`aria-hidden`、不新增 accessible name）：闪光弹 `#4DB6FF`、烟雾弹 `#B9C7D9`、高爆手雷 `#FF5A36`、燃烧弹 `#FF8A1F`、燃烧瓶 `#FFB13B`、诱饵弹 `#57D68D`，颜色登记在 `palette.utility`。`icons.tsx` 删除 6 个单色线性道具图标、只保留界面自身的 `?` 帮助图标；两套风格分文件存放，道具面板不再混用。未新增依赖，未新增 .svg 资源文件（图形内联为组件，避免几何数据双份维护）。
+- 一致性：`cardSurface` 固定所有卡片 `backgroundColor` / `1px` 弱边框 / `tokens.borderRadiusLarge`(6px) / `boxShadow: none`；道具投掷 / 道具效果 / 残局共用 `row` 基类（34px 行高、`palette.rowDivider` 分隔、`:last-child` 去掉末行分隔）；标题层级 Title1（地图）→ Title2（区块）→ Subtitle1（面板）→ Caption1（说明）；数值列右对齐 + `tabular-nums` 保持白色，名称列改用 `colorNeutralForeground2`，evidence 指标名走 muted。
+- 颜色只做锚点：道具图标、Findings severity 徽章、残局结果徽章、主按钮与少量 hover/focus 态。`clutchResult()` 的“失败”由 `informative` 改为 `danger`（仅展示颜色；标签文案、Clutch 数据与判定未动）。
+- 实测（真实 demo1.dem，Electron 端到端 + CDP 计算样式）：页面背景 `rgb(17,24,33)` + 渐变（旧 `rgb(31,31,31)`）；卡片 `rgb(29,36,46)` + `1px solid rgba(148,163,184,0.12)` + 6px 圆角 + `box-shadow: none`（旧 `rgb(41,41,41)` / 4px / 双层阴影）；6 个道具图标渲染为 22×22，fill 依次为 `#4DB6FF / #B9C7D9 / #FF5A36 / #FF8A1F / #FFB13B / #57D68D`，每项独占一行、图标左 / 名称中 / 数值右仍对齐。
+- 验证：`pnpm typecheck` 11/11、`pnpm build` 6/6；`pnpm --filter @cs2-coach/desktop test` 3/3；`test:report`（真实 / 损坏 / 非 .dem）通过；`pnpm test:smoke`（dev + preview）通过；重新执行 `pack:win` + `pack:win:test` 后 `test:installed` 全通过（生产安装版不含 seam、测试 seam 安装版 demo1 报告与开发环境一致、无残留 worker、损坏 DEM 不白屏、卸载成功）。安装包仍为 `release/0.1.0/CS2-Coach-Setup-0.1.0.exe`（107.3 MB）。
+- demo1 golden 与 Findings 完全不变：twinkle 25/20/4、ADR 91.38、KAST 75%、Trade 22.2%、R24 1v3 胜、5 条 Findings ruleId 顺序 `side-impact.ct-gap / trade.low-rate / team-flash.frequent-effects / clutch.win.r24 / opening.positive`；本轮未改任何数据来源、断言或 Tooltip 文案。
+- 文档：`docs/desktop-report.md` 新增“视觉体系（P5.4）”一节并同步图标 / 主题描述；`current-task.md` 同步。本 work unit focused commit 后交接。
+
 ## 2026-10-07 — P5.3 报告页可读性与说明优化 PASS
 
 - 基线 `2556907`（P5.2.1 PASS）。本轮只改 Renderer / presenter 展示层与 report DTO 的展示字段：不改 P3 Analytics 算法、P4 Findings 阈值 / 排序 / evidence 结构、Trade 5 秒窗口，未引入“惜败”、timeline、图表、历史库、自动扫描、AI 或 installer 变更。
