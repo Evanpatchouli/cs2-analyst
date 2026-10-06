@@ -59,6 +59,7 @@ Before non-trivial tasks:
 2. Check `.agents/workflows/` for applicable workflow.
 3. Select the appropriate agent/model according to `.agents/routing/model-routing.md`.
 4. Keep the work unit small and independently verifiable.
+5. After an independently verifiable work unit passes validation, create a focused Git commit before handoff or starting another independent work unit, unless the user/task explicitly says not to commit.
 
 Important workflows:
 
