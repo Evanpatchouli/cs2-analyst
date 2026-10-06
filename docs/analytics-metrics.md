@@ -30,9 +30,9 @@ pnpm --filter @cs2-coach/analytics test
 | `roundsPlayed` | 有效窗口且所选快照 `participant === true` 的回合数，同时作为 ADR 分母。 |
 | `reportedDamage` | 计入回合内 `DamageEvent` 中 `attacker === player` 且双方 side 已知且敌对的 `healthDamage` 之和。**原始上报证据**，保留 overkill。 |
 | `reportedAdr` | `reportedDamage / roundsPlayed`；`roundsPlayed === 0` 时为 `null`。基于上报伤害，**不是**标准 ADR。 |
-| `effectiveDamage` | 同一批计入伤害行的**实际敌方 HP 损失**之和；单次伤害被受害者受击前剩余 HP 截断。见下节。 |
-| `adr` | **标准 ADR**：`effectiveDamage / roundsPlayed`；`roundsPlayed === 0` 时为 `null`。 |
-| CT/T split | 每个计入回合按**该回合所选快照的 side**把 kill/death/assist/reportedDamage/effectiveDamage/round 归入 CT 或 T；绝不使用全局 `Player.team`。每侧同样输出 `reportedAdr` 与标准 `adr`。 |
+| `effectiveDamage` | 同一批计入伤害行的**实际敌方 HP 损失**之和；单次伤害被受害者受击前剩余 HP 截断。见下节。**可能是“已确认有效伤害部分”**：当 `coverage.effectiveDamageUnresolved > 0` 时只包含可解出的伤害行。 |
+| `adr` | **标准 ADR**：`effectiveDamage / roundsPlayed`。`roundsPlayed === 0`，或 `coverage.effectiveDamageUnresolved > 0` 时为 `null`：后者是因为分子只覆盖部分计入伤害、分母覆盖全部计入回合；宁可不给标准 ADR，也不输出部分口径的误导数值。`reportedAdr` 不受此门控影响。 |
+| CT/T split | 每个计入回合按**该回合所选快照的 side**把 kill/death/assist/reportedDamage/effectiveDamage/unresolved/round 归入 CT 或 T；绝不使用全局 `Player.team`。每侧输出 `reportedAdr`、标准 `adr` 与逐侧 `effectiveDamageUnresolved`；某侧存在 unresolved 时该侧 `adr = null`，另一侧不受影响。 |
 | `multiKills` | 每个有效回合内该玩家的计入击杀数；`counts[2..5]` 为对应击杀数的回合数，key `5` 表示 5 杀及以上；`maxKillsInRound` 为最大单回合击杀。 |
 | `opening` | 每个有效回合最早 tick 的击杀为该回合 opening duel。唯一最早击杀且为可识别敌方击杀时，killer 记 opening kill、victim 记 opening death；同一最早 tick 出现多杀记为 contested，不应归属玩家；最早击杀为 world/teamkill/side 未知记为 unattributed；回合内无击杀记为 absent。 |
 
@@ -48,6 +48,12 @@ pnpm --filter @cs2-coach/analytics test
 - 每个 victim 每回合的 HP 轨迹从 competitive 出生满血 100 开始。每个有效回合的**第一个**命中都会用 100 校验，因此“回合开始时已经受伤/补满”会被记为链条断裂，而不是静默接受一个更低或更高的起点。
 - 上报 `dmg_health` 只用于**校验**，不直接进入 effective。demo 的 `dmg_health` 是整数，而上报的 `health` 是截断后的余量，因此单发实测损失可能恰好比上报伤害多 1。实测损失落在 `[min(dmg_health, preHurtHP) - 1, min(dmg_health, preHurtHP) + 1]` 内视为一致；超出该区间说明 HP 轨迹缺少证据（治疗、回合内重生、漏记伤害），该命中不计入 effective 并记 coverage——**不猜**。
 - 无法从 `healthDamage + healthRemaining` 推出可信损失时，通过 coverage 标记而不估计数值；被跳过的命中仍保留在 `reportedDamage` 中，并由逐玩家 `coverage.effectiveDamageUnresolved` 计数。
+
+因此 `effectiveDamage` 有两种可能语义：**完整口径**（`effectiveDamageUnresolved === 0`，所有计入敌方伤害行都已解出）与**已确认部分**（仍有未解行）。`adr` 只在完整口径下输出数值：
+
+- 部分口径下分子 `effectiveDamage` 只含已解出的伤害行，而分母 `roundsPlayed` 覆盖全部计入回合，两者口径不一致，会让标准 ADR 系统性偏低；
+- 因此 unresolved 存在时 `adr = null`；消费者应改用不受门控的 `reportedAdr`（原始上报口径），或显式展示 coverage；
+- CT/T split 用同一规则，并通过逐侧 `effectiveDamageUnresolved` 指明是哪一侧覆盖不足。若 unresolved 发生在 side 未知的回合，它只出现在 `player.coverage.effectiveDamageUnresolved`，不归入任何一侧。
 
 ### assist 口径（与复盘对齐的关键证据）
 
@@ -76,6 +82,7 @@ pnpm --filter @cs2-coach/analytics test
 - `PlayerRoundState`：`inRoster` / `side` / `participant` / `alive`；`Unknown` side 归一为 `null`，不用事件或 `Player.team` 回填。
 - `buildDamageLedger(round)`：把回合内伤害事件还原成受害者 HP 轨迹，为每个事件给出可解的实际损失或 `null`，并回报未解原因计数。指标不自己重算 HP。
 - 两层资格：事件总量（K/D/A、HS%、multi-kill、opening）只需完整窗口；参与类（rounds played、damage、ADR、CT/T split）额外要求 `participant === true`，保证 ADR 分子与分母覆盖同一批回合。
+- ADR 另有一道 effective-damage 完整性门槛：只有 `effectiveDamageUnresolved === 0` 才输出标准 `adr`，否则为 `null`（玩家级与逐侧各自判定）。
 - 共享判定函数 `isEligibleKill` / `isEligibleAssist` / `isEligibleDamage` / `isIdentifiedEnemyKill`，指标只调用，不重新实现覆盖判断。
 
 `CoverageSummary` 输出全局 issue 计数和逐回合摘要；`PlayerMetrics.coverage` 输出逐玩家降级信息。
@@ -102,7 +109,7 @@ pnpm --filter @cs2-coach/analytics test
 | `opening-duel-unattributed` | 最早击杀为 world/teamkill/side 未知 |
 | `opening-duel-absent` | 回合窗口内无击杀 |
 
-逐玩家 coverage 另有 `effectiveDamageUnresolved`：该玩家被计入的敌方伤害行中，实际 HP 损失无法解出的数量。
+逐玩家 coverage 另有 `effectiveDamageUnresolved`：该玩家被计入的敌方伤害行中，实际 HP 损失无法解出的数量。`side.CT` / `side.T` 各自也有同名计数，用于判断某一侧的标准 `adr` 是否可用。
 
 ## demo1.dem golden 结果
 
@@ -135,6 +142,7 @@ pnpm --filter @cs2-coach/analytics test
 | opening duel | 24 kills / 24 deaths（24 回合各 1 次） |
 | 被排除 post-round 事件 | 117 |
 | damage-effective-chain-broken / same-tick-ambiguous | 0 / 0 |
+| effectiveDamageUnresolved（全体玩家，含逐侧） | 0；因此本样本 `adr` 全部为数值，标准 ADR 与 `reportedAdr` 同时可用，golden 不受 ADR 门控影响 |
 | 覆盖不足 | 无：24/24 回合有完整窗口与 freeze_end 名单，无 unidentified / unknown side / unknown participation / 不可解 HP 轨迹 |
 
 被排除的 2 个 post-round 击杀：tick 101061（正常击杀）与 tick 141061（twinkle 的 post-round world 自伤），均在 `round_end` 之后。
@@ -173,7 +181,7 @@ K/D/A 的差异来源不是硬编码，而是两项可复现证据决策：post-
 - freeze_end 不可用：退化到 start，记 `roster-snapshot-fallback-start`。
 - participant 非 true：rounds played 与伤害不计入，记 `player-participation-unknown` / 逐玩家 `skippedUnconfirmedParticipation`。
 - side 未知：damage 弃用并记 `damage-side-unknown`。
-- HP 轨迹断裂（如 HP 回升）或同 tick 顺序不可证：对应伤害行不计入 effective，由 `effectiveDamageUnresolved` 与 coverage 记数；reported damage 仍保留。
+- HP 轨迹断裂（如 HP 回升）或同 tick 顺序不可证：对应伤害行不计入 effective，由 `effectiveDamageUnresolved` 与 coverage 记数；reported damage 与 `reportedAdr` 仍保留，但 `adr` 变为 `null`（存在 unresolved 的 CT/T 侧同理）。
 - opening 同 tick 多杀 / 首杀为 world、teamkill：不归属玩家。
 
 ## P3.2 前仍缺什么

@@ -62,6 +62,11 @@ test("real demo1.dem produces the reviewed twinkle golden metrics", { skip }, as
   assert.equal(twinkle.side.T.reportedAdr, 1538 / 12);
   assert.equal(twinkle.side.CT.adr, 819 / 12);
   assert.equal(twinkle.side.T.adr, 1374 / 12);
+  // Full effective-damage coverage: every credited hit resolves, so the
+  // standard ADR stays numeric and the golden values are unchanged.
+  assert.equal(twinkle.coverage.effectiveDamageUnresolved, 0);
+  assert.equal(twinkle.side.CT.effectiveDamageUnresolved, 0);
+  assert.equal(twinkle.side.T.effectiveDamageUnresolved, 0);
 
   assert.deepEqual(twinkle.multiKills.counts, { 2: 6, 3: 1, 4: 1, 5: 0 });
   assert.equal(twinkle.multiKills.multiKillRounds, 8);
@@ -106,6 +111,9 @@ test("real demo1.dem aggregate analytics stay consistent with the review window"
     assert.equal(player.side.CT.reportedDamage + player.side.T.reportedDamage, player.reportedDamage);
     assert.equal(player.side.CT.effectiveDamage + player.side.T.effectiveDamage, player.effectiveDamage);
     assert.equal(player.side.CT.roundsPlayed + player.side.T.roundsPlayed, player.roundsPlayed);
+    assert.equal(
+      player.side.CT.effectiveDamageUnresolved + player.side.T.effectiveDamageUnresolved,
+      player.coverage.effectiveDamageUnresolved);
     assert.equal(player.roundsPlayed, 24);
   }
 

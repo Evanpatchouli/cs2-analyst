@@ -19,6 +19,10 @@ function damageFields(side: SideMetrics): [number, number | null, number, number
   return [side.reportedDamage, side.reportedAdr, side.effectiveDamage, side.adr];
 }
 
+function unresolvedCounts(side: SideMetrics, player: PlayerMetrics): [number, number] {
+  return [side.effectiveDamageUnresolved, player.coverage.effectiveDamageUnresolved];
+}
+
 const issue: CoverageIssue = "assist-side-mismatch";
 const effectiveIssue: CoverageIssue = "damage-effective-chain-broken";
 const nullableAdr: number | null = null;
@@ -29,4 +33,4 @@ const numericId: PlayerMetrics = { steamId: 76561199642456355 };
 // @ts-expect-error "Unknown" is coverage, not a side split key.
 const unknownSide = (analytics: MatchAnalytics) => analytics.players[0].side.Unknown;
 
-void [summarize, ctRounds, damageFields, issue, effectiveIssue, nullableAdr, run, numericId, unknownSide];
+void [summarize, ctRounds, damageFields, unresolvedCounts, issue, effectiveIssue, nullableAdr, run, numericId, unknownSide];

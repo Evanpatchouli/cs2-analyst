@@ -85,6 +85,10 @@ test("computes K/D/A, HS%, ADR, side split and opening from fully covered rounds
   assert.deepEqual([ct.headshotKills, ct.headshotPercentage], [1, 100]);
   assert.deepEqual([ct.roundsPlayed, ct.reportedDamage, ct.reportedAdr], [2, 0, 0]);
   assert.deepEqual([ct.effectiveDamage, ct.adr], [0, 0]);
+  // Complete effective-damage coverage keeps the standard ADR numeric.
+  assert.equal(ct.coverage.effectiveDamageUnresolved, 0);
+  assert.equal(ct.side.CT.effectiveDamageUnresolved, 0);
+  assert.equal(ct.side.T.effectiveDamageUnresolved, 0);
   assert.deepEqual([ct.side.CT.kills, ct.side.CT.deaths, ct.side.T.kills], [1, 1, 0]);
   assert.deepEqual([ct.opening.kills, ct.opening.deaths, ct.opening.duels, ct.opening.winRate], [1, 1, 2, 0.5]);
 
@@ -337,9 +341,17 @@ test("reports a broken health trajectory instead of guessing an effective loss",
   const result = analyzeMatch(mkMatch(players, rounds));
   const ct = byId(result, CT1);
   assert.equal(ct.reportedDamage, 40);
+  // Reported ADR is raw evidence and is never gated by effective coverage.
+  assert.equal(ct.reportedAdr, 40);
+  // The first hit is confirmed, so effectiveDamage keeps that 20 HP as the
+  // resolved part, but no standard ADR may be published from a partial total.
   assert.equal(ct.effectiveDamage, 20);
-  assert.equal(ct.adr, 20);
+  assert.equal(ct.adr, null);
   assert.equal(ct.coverage.effectiveDamageUnresolved, 1);
+  assert.equal(ct.side.CT.effectiveDamage, 20);
+  assert.equal(ct.side.CT.effectiveDamageUnresolved, 1);
+  assert.equal(ct.side.CT.adr, null);
+  assert.equal(ct.side.T.effectiveDamageUnresolved, 0);
   assert.equal(result.coverage.issues["damage-effective-chain-broken"], 1);
 });
 
@@ -354,9 +366,54 @@ test("does not order same-tick hits on one victim without corroborating health",
   // Both hits record the same post-hit health, so the split is unprovable.
   assert.equal(byId(result, CT1).effectiveDamage, 0);
   assert.equal(byId(result, CT2).effectiveDamage, 0);
+  // Ambiguous hits are unresolved too, so neither attacker may publish ADR.
+  assert.equal(byId(result, CT1).adr, null);
+  assert.equal(byId(result, CT2).adr, null);
+  assert.equal(byId(result, CT1).reportedAdr, 30);
+  assert.equal(byId(result, CT2).reportedAdr, 30);
+  assert.equal(byId(result, CT1).side.CT.effectiveDamageUnresolved, 1);
+  assert.equal(byId(result, CT2).side.CT.effectiveDamageUnresolved, 1);
+  assert.equal(byId(result, CT1).side.CT.adr, null);
+  assert.equal(byId(result, CT2).side.CT.adr, null);
   assert.equal(byId(result, CT1).coverage.effectiveDamageUnresolved, 1);
   assert.equal(byId(result, CT2).coverage.effectiveDamageUnresolved, 1);
   assert.equal(result.coverage.issues["damage-effective-same-tick-ambiguous"], 2);
+});
+
+test("gates only the affected CT/T side while an unrelated side stays numeric", () => {
+  const players = [player(CT1, "ct"), player(T1, "t")];
+  const sides = { [CT1]: "CT", [T1]: "T" };
+  const rounds = [
+    mkRound(1, [
+      damage(150, CT1, T1, 20, { attackerSide: "CT", victimSide: "T", healthRemaining: 80 }),
+      // HP rises again, so this CT hit on T1 becomes unresolved.
+      damage(160, CT1, T1, 20, { attackerSide: "CT", victimSide: "T", healthRemaining: 90 }),
+    ], { start: 100, freeze: 110, end: 200, snapshots: [roster(sides, 110)] }),
+    mkRound(2, [
+      damage(350, T1, CT1, 30, { attackerSide: "T", victimSide: "CT", healthRemaining: 70 }),
+    ], { start: 300, freeze: 310, end: 400, snapshots: [roster(sides, 310)] }),
+  ];
+  const result = analyzeMatch(mkMatch(players, rounds));
+  const ct = byId(result, CT1);
+  const t = byId(result, T1);
+
+  // CT side of the CT player carries the unresolved hit.
+  assert.equal(ct.coverage.effectiveDamageUnresolved, 1);
+  assert.equal(ct.effectiveDamage, 20);
+  assert.equal(ct.adr, null);
+  assert.equal(ct.side.CT.effectiveDamageUnresolved, 1);
+  assert.equal(ct.side.CT.effectiveDamage, 20);
+  assert.equal(ct.side.CT.adr, null);
+  assert.equal(ct.reportedAdr, 20);
+
+  // The T player's damage fully resolves on its own side, so its side ADR
+  // stays numeric even though the opposing CT player is unresolved.
+  assert.equal(t.coverage.effectiveDamageUnresolved, 0);
+  assert.equal(t.side.T.effectiveDamageUnresolved, 0);
+  assert.equal(t.side.T.effectiveDamage, 30);
+  assert.equal(t.side.T.roundsPlayed, 2);
+  assert.equal(t.side.T.adr, 15);
+  assert.equal(t.adr, 15);
 });
 
 test("accepts same-tick hits when the recorded health proves the hit order", () => {

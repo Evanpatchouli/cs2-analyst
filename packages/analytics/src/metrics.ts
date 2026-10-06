@@ -22,11 +22,23 @@ export interface SideMetrics {
   assists: number;
   /** Reported damage dealt to enemies while on this side. Raw evidence, overkill preserved. */
   reportedDamage: number;
-  /** reportedDamage / roundsPlayed; null when roundsPlayed is zero. */
+  /**
+   * reportedDamage / roundsPlayed; null when roundsPlayed is zero. This is
+   * raw-evidence ADR and is never gated by effective-damage coverage.
+   */
   reportedAdr: number | null;
-  /** Actual enemy HP removed while on this side; overkill capped at pre-hit health. */
+  /**
+   * Confirmed enemy HP removed while on this side; overkill capped at pre-hit
+   * health. When effectiveDamageUnresolved > 0 this is only the resolved part.
+   */
   effectiveDamage: number;
-  /** effectiveDamage / roundsPlayed; null when roundsPlayed is zero. */
+  /** Credited enemy damage rows on this side whose actual HP loss could not be resolved. */
+  effectiveDamageUnresolved: number;
+  /**
+   * Standard ADR for this side: effectiveDamage / roundsPlayed. Null when
+   * roundsPlayed is zero, or when effectiveDamageUnresolved > 0 because the
+   * numerator would then cover only the resolved part of the side's damage.
+   */
   adr: number | null;
 }
 
@@ -82,9 +94,17 @@ export interface PlayerMetrics {
   reportedDamage: number;
   /** reportedDamage / roundsPlayed; null when roundsPlayed is zero. Raw-evidence ADR. */
   reportedAdr: number | null;
-  /** Actual enemy HP removed; overkill is capped at the victim's pre-hit health. */
+  /**
+   * Confirmed actual enemy HP removed; overkill is capped at the victim's
+   * pre-hit health. This is the resolved part of the player's damage: when
+   * coverage.effectiveDamageUnresolved > 0 some credited rows are missing.
+   */
   effectiveDamage: number;
-  /** Standard ADR: effectiveDamage / roundsPlayed; null when roundsPlayed is zero. */
+  /**
+   * Standard ADR: effectiveDamage / roundsPlayed. Null when roundsPlayed is
+   * zero, or when coverage.effectiveDamageUnresolved > 0 because the numerator
+   * would then mix a partial effective total with the full round denominator.
+   */
   adr: number | null;
   side: { CT: SideMetrics; T: SideMetrics };
   multiKills: MultiKillMetrics;
@@ -111,10 +131,19 @@ interface MutableSide {
   assists: number;
   reportedDamage: number;
   effectiveDamage: number;
+  effectiveDamageUnresolved: number;
 }
 
 function createSide(): MutableSide {
-  return { roundsPlayed: 0, kills: 0, deaths: 0, assists: 0, reportedDamage: 0, effectiveDamage: 0 };
+  return {
+    roundsPlayed: 0,
+    kills: 0,
+    deaths: 0,
+    assists: 0,
+    reportedDamage: 0,
+    effectiveDamage: 0,
+    effectiveDamageUnresolved: 0,
+  };
 }
 
 function addIssue(counts: Partial<Record<CoverageIssue, number>>, issue: CoverageIssue, amount = 1): void {
@@ -130,7 +159,10 @@ function finalizeSide(side: MutableSide): SideMetrics {
     reportedDamage: side.reportedDamage,
     reportedAdr: side.roundsPlayed > 0 ? side.reportedDamage / side.roundsPlayed : null,
     effectiveDamage: side.effectiveDamage,
-    adr: side.roundsPlayed > 0 ? side.effectiveDamage / side.roundsPlayed : null,
+    effectiveDamageUnresolved: side.effectiveDamageUnresolved,
+    adr: side.roundsPlayed > 0 && side.effectiveDamageUnresolved === 0
+      ? side.effectiveDamage / side.roundsPlayed
+      : null,
   };
 }
 
@@ -236,8 +268,10 @@ function computePlayerMetrics(
           reportedDamage += event.healthDamage;
           if (state.side) side[state.side].reportedDamage += event.healthDamage;
           const loss = ledger.loss(event);
-          if (loss === null) effectiveDamageUnresolved++;
-          else {
+          if (loss === null) {
+            effectiveDamageUnresolved++;
+            if (state.side) side[state.side].effectiveDamageUnresolved++;
+          } else {
             effectiveDamage += loss;
             if (state.side) side[state.side].effectiveDamage += loss;
           }
@@ -273,7 +307,9 @@ function computePlayerMetrics(
     reportedDamage,
     reportedAdr: roundsPlayed > 0 ? reportedDamage / roundsPlayed : null,
     effectiveDamage,
-    adr: roundsPlayed > 0 ? effectiveDamage / roundsPlayed : null,
+    adr: roundsPlayed > 0 && effectiveDamageUnresolved === 0
+      ? effectiveDamage / roundsPlayed
+      : null,
     side: { CT: finalizeSide(side.CT), T: finalizeSide(side.T) },
     multiKills: { counts: multiKillCounts, multiKillRounds, maxKillsInRound },
     opening: {
