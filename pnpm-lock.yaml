@@ -14,6 +14,21 @@ importers:
 
   apps/desktop:
     dependencies:
+      '@cs2-coach/analytics':
+        specifier: workspace:^
+        version: link:../../packages/analytics
+      '@cs2-coach/dem-parser':
+        specifier: workspace:^
+        version: link:../../packages/dem-parser
+      '@cs2-coach/findings':
+        specifier: workspace:^
+        version: link:../../packages/findings
+      '@cs2-coach/match-model':
+        specifier: workspace:^
+        version: link:../../packages/match-model
+      '@cs2-coach/report-contract':
+        specifier: workspace:^
+        version: link:../../packages/report-contract
       '@fluentui/react-components':
         specifier: ^9.74.9
         version: 9.74.9(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(scheduler@0.28.0)
@@ -98,6 +113,16 @@ importers:
         version: 7.0.2
 
   packages/match-model:
+    devDependencies:
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
+
+  packages/report-contract:
+    dependencies:
+      '@cs2-coach/findings':
+        specifier: workspace:^
+        version: link:../findings
     devDependencies:
       typescript:
         specifier: ^7.0.2

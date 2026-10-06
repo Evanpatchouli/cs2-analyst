@@ -1,5 +1,18 @@
 # Agent Handoff
 
+## 2026-10-07 — P5.1 End-to-End Desktop Report MVP PASS
+
+- 基线 `f9f9c58e`（P4.1 Findings PASS）。本轮不改 P3 Analytics 语义、不改 P4 Findings 阈值、不在 Renderer 重算指标、不猜 coaching 结论；未引入 AI/云端/登录/历史库/图表/热力图/installer。
+- 新包 `packages/report-contract`：Electron 与 Renderer 共享的 JSON-only 展示契约，只依赖 `@cs2-coach/findings` 类型。`DesktopMatchReport { schemaVersion, match, selectedPlayer, players, analytics, findings }`；`ImportResult` 为 success/cancelled/error 判别联合；`DesktopApi` 只含 `version/importDemo/onProgress`。
+- 进程边界：Main 用 `dialog.showOpenDialog` 只选 `.dem`，`utilityProcess.fork(dist/electron/report-worker.js)` 运行 native demoparser2 → analytics → findings → DTO；10 分钟超时、单任务互斥、窗口关闭终止 worker。Renderer 在 `contextIsolation:true / nodeIntegration:false / sandbox:true` 下只经 preload/contextBridge 调用 IPC，不接触 Node/fs/demoparser2。
+- DTO 构造 `apps/desktop/electron/report.ts`：`analyzeDemoFile(filePath, onParsed?)` = parse + `buildDesktopReport`，错误返回结构化 message 而非抛出；`teamScore` 只在每个回合胜方能唯一映射回固定队伍时输出“开局 CT 队 / 开局 T 队”比分，否则 null。Utility coverage 告警只针对影响展示数值的不完整证据（计数/伤害/助攻），未证实的 flash 时长由 Utility 卡片 caption 承担。
+- Renderer：Fluent UI v9 `webDarkTheme` 单页报告。页头（选择/重新选择 DEM）→ 进行中 Spinner → 错误 MessageBar → 空状态 → 报告（地图/比分/回合/文件名 + 目标玩家 Dropdown；K/D/A、ADR、HS%、KAST、Trade rate、Trade kills、Opening、Clutch；Findings 左栏最多 3 问题 + 2 亮点、severity 徽章、可展开证据；右栏 Utility 与 Clutch list）。状态机 idle/selecting/parsing/analyzing/success/error，React Error Boundary 兜底，取消/错误均保留上一次成功报告且不白屏。
+- 测试seam：非打包构建下 Main 读取 `CS2_COACH_DEM_PATH` 绕过原生对话框（打包应用始终用对话框），仅用于 Electron 端到端 smoke；Renderer/preload 不感知。
+- 实测 demo1.dem（267MB，de_dust2，24 回合，13:11）：twinkle 25/20/4、ADR 91.375、KAST 18/24=75%、Trade 4/18=22.222%、Opening 4/0、R24 1v3 win；默认 Findings 顺序 side-impact.ct-gap / trade.low-rate / team-flash.frequent-effects / clutch.win.r24 / opening.positive。损坏 DEM 返回“无法分析此 DEM…”，页面显示错误且保留“重新选择 DEM”。
+- 验证：desktop Node 集成 `test` 3/3；`test:report` Electron 端到端 smoke（真实 + 损坏 DEM）通过；analytics 53/53、findings 17/17、dem-parser 28/28；`pnpm typecheck` 11/11、`pnpm build --force` 6/6、现有 UI `pnpm test:smoke` 通过。
+- 文档：新增 docs/desktop-report.md；同步 roadmap（P5.1 PASS）、architecture（report-contract + 进程模型）、development（桌面测试命令）、current-task、handoff。
+- v0.1 日常使用仍缺：Windows installer/打包、最近文件与历史库、百分比进度、round timeline/图表/热力图/多玩家对比、队伍名归属，以及 Analytics 未证实的 flash 实际时长与战术价值。本 work unit focused commit 后交接；下一工作按用户新需求确定。
+
 ## 2026-10-07 — P4.1 Findings MVP PASS
 
 - 基线 `6e04f91c`（P3 FINAL PASS）。生产仅 `packages/findings`，依赖冻结 Analytics 公共类型；P3 Analytics/parser/domain 源码与契约未变，无 AI/UI/economy/positioning。

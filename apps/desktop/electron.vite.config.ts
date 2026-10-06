@@ -9,7 +9,7 @@ export default defineConfig({
     build: {
       outDir: 'dist/electron',
       rollupOptions: {
-        input: resolvePath('./electron/main.ts'),
+        input: { main: resolvePath('./electron/main.ts'), 'report-worker': resolvePath('./electron/report-worker.ts') },
       },
     },
   },

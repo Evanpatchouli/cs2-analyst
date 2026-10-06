@@ -83,11 +83,11 @@ async function smoke(mode) {
     async function waitForPage() {
       for (let attempt = 0; attempt < 100; attempt++) {
         const result = await send('Runtime.evaluate', {
-          expression: '({ ready: document.readyState, text: document.getElementById("root")?.textContent, version: window.cs2Coach?.version, url: location.href, node: typeof window.require })',
+          expression: '({ ready: document.readyState, text: document.getElementById("root")?.textContent, version: window.cs2Coach?.version, importDemo: typeof window.cs2Coach?.importDemo, url: location.href, node: typeof window.require })',
           returnByValue: true,
         });
         state = result.result.value;
-        if (state?.ready === 'complete' && state.text === 'CS2 Coach' && state.version === '0.1.0') return;
+        if (state?.ready === 'complete' && state.text?.includes('CS2 Coach') && state.version === '0.1.0') return;
         await delay(200);
       }
     }
@@ -111,8 +111,10 @@ async function smoke(mode) {
     await send('Page.reload');
     await loaded;
     await waitForPage();
-    assert.equal(state?.text, 'CS2 Coach', 'React 页面未渲染');
+    assert.ok(state?.text?.includes('CS2 Coach'), 'React 页面未渲染');
+    assert.ok(state.text.includes('选择 DEM'), '“选择 DEM”入口未渲染');
     assert.equal(state.version, '0.1.0', 'preload 桥接未加载');
+    assert.equal(state.importDemo, 'function', 'preload importDemo 未暴露');
     assert.equal(state.node, 'undefined', '渲染页面不应开放 Node.js');
     assert.match(state.url, mode === 'dev' ? /^http:\/\/localhost:/ : /^file:\/\//);
     assert.deepEqual(errors, [], '存在页面异常或资源加载失败');

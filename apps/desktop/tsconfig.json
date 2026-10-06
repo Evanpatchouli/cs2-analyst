@@ -5,5 +5,5 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "types": ["node", "vite/client"]
   },
-  "include": ["electron/**/*.ts", "preload/**/*.ts", "renderer/src/**/*.tsx", "electron.vite.config.ts"]
+  "include": ["electron/**/*.ts", "preload/**/*.ts", "renderer/src/**/*.ts", "renderer/src/**/*.tsx", "electron.vite.config.ts"]
 }

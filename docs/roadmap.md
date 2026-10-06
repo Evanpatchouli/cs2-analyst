@@ -43,9 +43,10 @@ Schema、阈值、coverage 门控、priority、真实 twinkle 输出与 future g
 
 ## P5 Desktop Report UI
 
-- Match overview
-- Round timeline
-- Analysis views
+P5.1 End-to-End Desktop Report MVP — **PASS**。首次打通 `选择 .dem → Main 文件选择 → Utility Process 解析/分析 → Findings → Renderer 报告页`。Renderer 只在 sandbox + contextIsolation 下消费 JSON-only `@cs2-coach/report-contract` DTO，不接触 Node/fs/demoparser2；原生解析与全部确定性计算在 Utility Process 中执行。report-contract `schemaVersion: 1` 为后续演进预留。实现、进程边界、IPC 契约、状态机、UI 结构与剩余缺口见 [桌面比赛报告](./desktop-report.md)。
+
+- P5.1 已完成：Match overview、玩家指标与 Findings 报告页。
+- 未开始：Round timeline（完整播放器）、Analysis views（图表/热力图/多玩家对比）。
 
 ## P6 AI Coach
 

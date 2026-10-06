@@ -1,15 +1,15 @@
 # Current Task
 
-Status: complete — P4.1 Findings MVP PASS
+Status: complete — P5.1 End-to-End Desktop Report MVP PASS
 
-基线：`6e04f91c`，P3 Analytics public contracts 保持冻结。
+基线：`f9f9c58e`（P4.1 Findings PASS）；P3 Analytics 契约与 P4 Findings 阈值保持冻结。
 
-- 在 packages/findings 建立纯确定性 Findings Engine；生产只依赖 Analytics，parser 仅真实 golden 的 devDependency。
-- Finding schema：id / ruleId / playerId / category / severity / title / summary / evidence / relatedRounds? / confidence。
-- 六类规则：CT/T ADR落差、低被交易比例、Opening正负贡献、Utility直接敌伤与已证明闪光助攻支援、Team flash纪律、Clutch单次highlight。
-- 每名玩家最多3个问题、2个positive；priority稳定，无AI、UI、插件DSL或Analytics契约修改。
-- twinkle实际默认：CT68.25 vs T114.50 ADR；4/18=22.2%被交易；23闪光投掷/10非零队友效果；R24 1v3获胜；4首杀/0首死。
-- low-impact/consistency 因冻结API无逐玩家回合combat evidence跳过；actual flash duration、逐枚利用率、位置责任与道具战术价值不猜。
-- 验证：Findings17/17、Analytics53/53、parser28/28；真实DEM全部执行、0 skipped；pnpm typecheck / build PASS。独立审查完成，修复重复flash evidence排序边界。
-- 文档：docs/findings-engine.md、roadmap、analysis-rules、architecture、analytics-metrics、handoff已同步。
-- focused commit 后交接；不自动开始下一阶段。完整schema、阈值、门控、ranking、golden及gap见 [Findings Engine](../docs/findings-engine.md)。
+- `packages/report-contract`：JSON-only 展示契约（DesktopMatchReport / DesktopPlayerAnalytics / ImportPhase / ImportResult / DesktopApi），只依赖 findings 类型。
+- `apps/desktop`：Main 负责 .dem 文件选择 + 任务互斥 + 进度 + 超时；Utility Process 运行 dem-parser → analytics → findings → DTO；preload 经 contextBridge 暴露最小 API（contextIsolation true / nodeIntegration false / sandbox true）。
+- Renderer：Fluent UI v9 深色报告页 —— 地图/比分/玩家 dropdown、K/D/A、ADR、HS%、KAST、Trade、Opening、Utility、Clutch、Findings（3 问题 + 2 亮点，可展开证据）；状态 idle/selecting/parsing/analyzing/success/error，错误不白屏。
+- 默认玩家 twinkle，否则第一名有效玩家；dropdown 切换只用后台已算好的结果，不重算指标。
+- demo1.dem 实测：twinkle 25/20/4、ADR 91.375、KAST 75%、Trade 22.2%、R24 1v3 win；Findings CT/T 落差、trade.low-rate、team flash、R24 clutch、opening positive。
+- 测试：desktop Node 集成 3/3、Electron 端到端 smoke（真实 + 损坏 DEM）通过、analytics 53/53、findings 17/17、dem-parser 28/28、UI smoke、`pnpm typecheck`、`pnpm build` 全 PASS。
+- 文档：docs/desktop-report.md、roadmap、architecture、development、current-task、handoff 同步。
+- 非目标保持：AI Coach、云端、登录、历史库、图表/热力图/round timeline、installer、目录自动扫描均未开始。
+- focused commit 后交接；完整契约、进程边界与剩余缺口见 [P5.1 桌面比赛报告](../docs/desktop-report.md)。

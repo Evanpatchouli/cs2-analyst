@@ -19,6 +19,8 @@ pnpm start
 
 DEM parser 的安装、调用与测试见 [DEM 解析（P2.2）](./dem-parser.md)。核心包 `match-model`、`dem-parser` 和 `analytics` 已纳入根目录构建与类型检查；运行 parser 的测试使用 `pnpm --filter @cs2-coach/dem-parser test`，运行 analytics 的合成、覆盖与真实 DEM golden 测试使用 `pnpm --filter @cs2-coach/analytics test`。指标口径见 [P3 核心指标、KAST / Trade / Clutch 与覆盖机制](./analytics-metrics.md)。
 
+桌面链路测试见 [桌面比赛报告](./desktop-report.md)：`pnpm --filter @cs2-coach/desktop test` 在 Node 中运行 parser → analytics → findings → report DTO 的集成测试；`pnpm --filter @cs2-coach/desktop test:report` 构建应用并通过 Electron 调试协议运行端到端 smoke（真实 demo1.dem 与损坏 DEM）；`pnpm test:smoke` 仍验证开发/生产模式的页面、preload 桥接与关闭流程。
+
 `pnpm test:smoke` 会构建应用，并通过 Electron 调试协议验证开发模式和本地生产模式的 React 页面、preload 桥接、资源加载及窗口关闭。测试会临时打开桌面窗口，结束后清理测试进程。
 
 构建产物位于 `apps/desktop/dist/`，包含 `electron/main.js`、`preload/index.cjs` 和 `renderer/index.html`。`pnpm start` 先通过 Turbo 完成构建或恢复构建缓存，再运行本地页面，无需启动开发服务器。当前构建生成可运行的应用代码，不生成安装包。
