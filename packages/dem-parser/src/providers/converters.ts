@@ -1,16 +1,27 @@
-import type { KillEvent, Match, MatchEvent, Player, Round, TeamSide } from "@cs2-coach/match-model";
+import type {
+  BombAction, BombEvent, DamageEvent, FlashEvent, KillEvent, Match, MatchEvent,
+  Player, Round, TeamSide, UtilityAction, UtilityEvent, UtilityKind, WeaponFireEvent,
+} from "@cs2-coach/match-model";
 
 type Row = Record<string, unknown>;
 
-const eventTypes = new Map<string, MatchEvent["type"]>([
-  ["player_death", "kill"],
-  ["player_hurt", "damage"],
-  ["weapon_fire", "weapon_fire"],
-  ["smokegrenade_detonate", "utility"],
-  ["hegrenade_detonate", "utility"],
-  ["flashbang_detonate", "utility"],
-  ["inferno_startburn", "utility"],
-  ["decoy_started", "utility"],
+const utilityEffects = new Map<string, [UtilityKind, UtilityAction]>([
+  ["smokegrenade_detonate", ["smoke", "detonate"]],
+  ["hegrenade_detonate", ["hegrenade", "detonate"]],
+  ["flashbang_detonate", ["flashbang", "detonate"]],
+  // The effect event does not distinguish molotov from incendiary grenades.
+  ["inferno_startburn", ["fire", "start_burn"]],
+  ["decoy_started", ["decoy", "start_decoy"]],
+]);
+
+const bombActions = new Map<string, BombAction>([
+  ["bomb_pickup", "pickup"],
+  ["bomb_dropped", "drop"],
+  ["bomb_beginplant", "plant_start"],
+  ["bomb_planted", "planted"],
+  ["bomb_begindefuse", "defuse_start"],
+  ["bomb_defused", "defused"],
+  ["bomb_exploded", "exploded"],
 ]);
 
 function row(value: unknown): Row {
@@ -33,6 +44,9 @@ function integer(value: unknown): number | undefined {
 
 function steamId(value: unknown): string | undefined {
   // SteamID64 must never pass through a JavaScript number (precision loss).
+  if (typeof value === "number" || typeof value === "bigint") {
+    throw new Error("DEM SteamID64 必须为 string");
+  }
   return typeof value === "string" && /^[1-9]\d*$/.test(value) ? value : undefined;
 }
 
@@ -42,24 +56,108 @@ function side(value: unknown): TeamSide {
   return "Unknown";
 }
 
-function convertEvent(event: Row): MatchEvent | null {
-  const type = eventTypes.get(String(event.event_name));
-  if (!type) return null;
-  const tick = integer(event.tick);
-  if (tick === undefined) throw new Error("DEM 事件缺少有效 tick");
-  if (type !== "kill") return { type, tick };
+function requiredInteger(event: Row, field: string): number {
+  const value = integer(event[field]);
+  if (value === undefined) throw new Error(`DEM ${event.event_name} 缺少有效 ${field}`);
+  return value;
+}
 
-  const victim = steamId(event.user_steamid);
-  if (!victim) return null;
-  const kill: KillEvent = {
-    type,
-    tick,
-    killer: steamId(event.attacker_steamid) ?? "world",
-    victim,
-  };
-  if (typeof event.weapon === "string") kill.weapon = event.weapon;
-  if (typeof event.headshot === "boolean") kill.headshot = event.headshot;
-  return kill;
+function label(value: unknown): value is string | number {
+  return typeof value === "string" || integer(value) !== undefined;
+}
+
+function convertEvent(event: Row): MatchEvent | null {
+  const tick = requiredInteger(event, "tick");
+  const name = String(event.event_name);
+  if (name === "player_death") {
+    const victim = steamId(event.user_steamid);
+    if (!victim) return null;
+    const killer = steamId(event.attacker_steamid);
+    const kill: KillEvent = {
+      type: "kill", tick, killer: killer ?? "world", victim,
+      killerSide: side(event.attacker_team_num), victimSide: side(event.user_team_num),
+    };
+    if (typeof event.weapon === "string") kill.weapon = event.weapon;
+    if (typeof event.headshot === "boolean") kill.headshot = event.headshot;
+    const assister = steamId(event.assister_steamid);
+    if (assister) {
+      kill.assister = assister;
+      kill.assisterSide = side(event.assister_team_num);
+    }
+    if (typeof event.assistedflash === "boolean") kill.assistedFlash = event.assistedflash;
+    if (killer && kill.killerSide !== "Unknown" && kill.victimSide !== "Unknown") {
+      kill.teamkill = killer !== victim && kill.killerSide === kill.victimSide;
+    }
+    return kill;
+  }
+  if (name === "player_hurt") {
+    const victim = steamId(event.user_steamid);
+    if (!victim) return null;
+    const damage: DamageEvent = {
+      type: "damage", tick, attacker: steamId(event.attacker_steamid) ?? null, victim,
+      attackerSide: side(event.attacker_team_num), victimSide: side(event.user_team_num),
+      healthDamage: requiredInteger(event, "dmg_health"),
+      armorDamage: requiredInteger(event, "dmg_armor"),
+      healthRemaining: requiredInteger(event, "health"),
+      armorRemaining: requiredInteger(event, "armor"),
+    };
+    if (typeof event.weapon === "string") damage.weapon = event.weapon;
+    if (label(event.hitgroup)) damage.hitgroup = event.hitgroup;
+    return damage;
+  }
+  if (name === "weapon_fire") {
+    const shooter = steamId(event.user_steamid);
+    if (!shooter) return null;
+    if (typeof event.weapon !== "string" || !event.weapon) {
+      throw new Error("DEM weapon_fire 缺少有效 weapon");
+    }
+    const fire: WeaponFireEvent = {
+      type: "weapon_fire", tick, shooter, shooterSide: side(event.user_team_num), weapon: event.weapon,
+    };
+    if (typeof event.silenced === "boolean") fire.silenced = event.silenced;
+    return fire;
+  }
+  const effect = utilityEffects.get(name);
+  if (effect) {
+    const utility: UtilityEvent = {
+      type: "utility", tick, utility: effect[0], action: effect[1],
+      thrower: steamId(event.user_steamid) ?? null, throwerSide: side(event.user_team_num),
+    };
+    const entityId = integer(event.entityid);
+    if (entityId !== undefined) utility.entityId = entityId;
+    const { x, y, z } = event;
+    if (typeof x === "number" && Number.isFinite(x) && typeof y === "number" && Number.isFinite(y)
+      && typeof z === "number" && Number.isFinite(z)) utility.position = { x, y, z };
+    return utility;
+  }
+  if (name === "player_blind") {
+    const victim = steamId(event.user_steamid);
+    if (!victim) return null;
+    const duration = event.blind_duration;
+    if (typeof duration !== "number" || !Number.isFinite(duration) || duration < 0) {
+      throw new Error("DEM player_blind 缺少有效 blind_duration");
+    }
+    const flash: FlashEvent = {
+      type: "flash", tick, attacker: steamId(event.attacker_steamid) ?? null, victim,
+      attackerSide: side(event.attacker_team_num), victimSide: side(event.user_team_num),
+      blindDurationSeconds: duration,
+    };
+    const entityId = integer(event.entityid);
+    if (entityId !== undefined) flash.entityId = entityId;
+    return flash;
+  }
+  const action = bombActions.get(name);
+  if (action) {
+    const bomb: BombEvent = {
+      type: "bomb", tick, action, player: steamId(event.user_steamid) ?? null,
+      playerSide: side(event.user_team_num),
+    };
+    const siteIndex = integer(event.site);
+    if (siteIndex !== undefined) bomb.siteIndex = siteIndex;
+    if (typeof event.haskit === "boolean") bomb.hasKit = event.haskit;
+    return bomb;
+  }
+  return null;
 }
 
 function convertPlayers(metadata: Row[], events: Row[]): Player[] {
@@ -122,9 +220,18 @@ function convertRounds(events: Row[]): Round[] {
       if (next === current && startTick !== event.tick) {
         next.events = [];
         next.winner = null;
+        delete next.freezeEndTick;
+        delete next.endTick;
+        delete next.endReason;
       }
       current = next;
       startTick = integer(event.tick);
+      current.startTick = startTick;
+      continue;
+    }
+    if (event.event_name === "round_freeze_end") {
+      current ??= getRound(event);
+      current.freezeEndTick = integer(event.tick);
       continue;
     }
     if (event.event_name === "round_end") {
@@ -133,6 +240,8 @@ function convertRounds(events: Row[]): Round[] {
       current = event.round !== undefined ? getRound(event) : current ?? getRound(event);
       const winner = side(event.winner);
       current.winner = winner === "Unknown" ? null : winner;
+      current.endTick = integer(event.tick);
+      if (label(event.reason)) current.endReason = event.reason;
       continue;
     }
     const converted = convertEvent(event);
@@ -157,7 +266,7 @@ function tickRate(events: Row[]): number | undefined {
   return rounded > 0 && Math.abs(rate - rounded) < 0.01 ? rounded : undefined;
 }
 
-/** Validate native results and translate them into the existing domain model. */
+/** Validate native results and translate them into parser-independent domain events. */
 export function convertToMatch(input: unknown): Match {
   const output = row(input);
   const header = row(output.header);
@@ -172,7 +281,10 @@ export function convertToMatch(input: unknown): Match {
       if (integer(event.tick) === undefined) throw new Error("DEM 事件缺少有效 tick");
       return event;
     })
-    .sort((a, b) => (a.tick as number) - (b.tick as number));
+    // Lifecycle start precedes same-tick events in that round; otherwise retain
+    // native ordering without claiming to know the order within a demo tick.
+    .sort((a, b) => (a.tick as number) - (b.tick as number)
+      || Number(b.event_name === "round_start") - Number(a.event_name === "round_start"));
 
   const match: Match = {
     id: output.id,
