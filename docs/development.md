@@ -17,7 +17,7 @@ pnpm build
 pnpm start
 ```
 
-DEM parser 的安装、调用与测试见 [DEM 解析（P2.2）](./dem-parser.md)。核心包 `match-model` 和 `dem-parser` 已纳入根目录构建与类型检查；运行 parser 的最小测试使用 `pnpm --filter @cs2-coach/dem-parser test`。
+DEM parser 的安装、调用与测试见 [DEM 解析（P2.2）](./dem-parser.md)。核心包 `match-model`、`dem-parser` 和 `analytics` 已纳入根目录构建与类型检查；运行 parser 的测试使用 `pnpm --filter @cs2-coach/dem-parser test`，运行 analytics 的合成、覆盖与真实 DEM golden 测试使用 `pnpm --filter @cs2-coach/analytics test`。指标口径见 [P3.1 核心玩家指标与覆盖机制](./analytics-metrics.md)。
 
 `pnpm test:smoke` 会构建应用，并通过 Electron 调试协议验证开发模式和本地生产模式的 React 页面、preload 桥接、资源加载及窗口关闭。测试会临时打开桌面窗口，结束后清理测试进程。
 

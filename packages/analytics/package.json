@@ -2,5 +2,26 @@
   "name": "@cs2-coach/analytics",
   "version": "0.1.0",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "pnpm --filter @cs2-coach/match-model build && pnpm --filter @cs2-coach/dem-parser build && pnpm build && tsc -p tests/tsconfig.json && node --test tests/*.test.mjs"
+  },
+  "dependencies": {
+    "@cs2-coach/match-model": "workspace:^"
+  },
+  "devDependencies": {
+    "@cs2-coach/dem-parser": "workspace:^",
+    "@types/node": "^24.19.0",
+    "typescript": "^7.0.2"
+  }
 }

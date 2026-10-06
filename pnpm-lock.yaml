@@ -52,7 +52,21 @@ importers:
         specifier: ^7.3.6
         version: 7.3.6(@types/node@24.19.0)(lightningcss@1.33.0)
 
-  packages/analytics: {}
+  packages/analytics:
+    dependencies:
+      '@cs2-coach/match-model':
+        specifier: workspace:^
+        version: link:../match-model
+    devDependencies:
+      '@cs2-coach/dem-parser':
+        specifier: workspace:^
+        version: link:../dem-parser
+      '@types/node':
+        specifier: ^24.19.0
+        version: 24.19.0
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
 
   packages/dem-parser:
     dependencies:
