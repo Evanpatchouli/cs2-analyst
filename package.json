@@ -11,6 +11,7 @@
     "start": "turbo run start",
     "typecheck": "turbo run typecheck",
     "test:smoke": "turbo run test:smoke",
+    "test:installed": "turbo run test:installed",
     "build": "turbo run build"
   },
   "devDependencies": {

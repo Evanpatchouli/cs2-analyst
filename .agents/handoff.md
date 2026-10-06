@@ -1,5 +1,18 @@
 # Agent Handoff
 
+## 2026-10-07 — P5.2 Windows Packaging & Installable MVP PASS
+
+- 基线 `58b0dc0`（P5.1 PASS）。本轮不改 P3 Analytics 语义、P4 Findings 阈值与 P5.1 报告 UI/DTO；未引入签名、自动更新、GitHub Release、CI 发布、macOS/Linux。
+- 打包方案：electron-builder 26 + NSIS（`apps/desktop/electron-builder.config.cjs`）。Windows x64、per-user、`oneClick:false` 可选安装目录、桌面 + 开始菜单快捷方式、独立卸载器；`productName: CS2 Coach`、版本沿用 `0.1.0`、appId `com.evanpatchouli.cs2coach`；复用工作区 Electron 运行时（`electronDist`）。
+- 产物：`apps/desktop/release/CS2-Coach-Setup-0.1.0.exe`（107.3 MB）与 `apps/desktop/release/test-seam/CS2-Coach-TestSeam-Setup-0.1.0.exe`。打包在系统临时目录完成再复制安装包：工作区文件 watcher 会占用新建的 `app.asar`，导致 electron-builder 无法重置输出目录（`EBUSY: unlink app.asar`）。
+- worker 依赖：`electron.vite.config.ts` 以 `CS2_COACH_PACK` 区分构建形态。打包构建 `externalizeDeps = { exclude: 5 个 workspace 包, include: [@laihoe/demoparser2, @laihoe/demoparser2-win32-x64-msvc] }`，把 workspace 包 inline 成 75 kB 的 `report-worker.js`；非打包构建仍 external，保证 `pnpm dev` / `start` / `test:report` 从 workspace symlink 解析（原生包并未链接到 `apps/desktop`，全量 inline 会让 dev 解析失败）。`scripts/prepare-pack.mjs` 把 loader 包与平台原生包复制到 `dist/electron/node_modules`（与 worker 同级，Node 向上解析命中同一 fallback 路径），electron-builder `asarUnpack: ["**/*.node"]` 把 3.9 MB `.node` 落到 `resources/app.asar.unpacked`。
+- 路径：`main.js` 中 report-worker / preload / renderer 全部用 `import.meta.url` 相对解析，worker 的原生依赖用 Node 模块解析；无开发目录硬编码，兼容 `app.isPackaged === true`。构建期校验（`build-installer.mjs`）：worker 不得再 external 引用 workspace 包、必须引用原生 parser、生产 `main.js` 不得含 seam 变量。
+- 注入防护：`CS2_COACH_DEM_PATH` 仅非打包构建生效；打包 seam `CS2_COACH_TEST_DEM_PATH` 只在 `CS2_COACH_TEST_SEAM=1` 的测试构建中编译，生产构建里 `__CS2_COACH_TEST_SEAM__` 被 define 成 false 并由 Rollup 消除。安装版实测：带两个环境变量启动并点击“选择 DEM”后 15 秒内不自动出报告。
+- 安装版 E2E `scripts/installed-app-smoke.mjs`（`pnpm --filter @cs2-coach/desktop test:installed`）：asar 只含 `dist/**` 与 `package.json`（1.26 MB / 10 条目）；renderer bundle 不含 Node/原生 parser；原生绑定 unpacked 3.9 MB；启动 → preload → 无 `window.require`/`window.process` → 关闭退出码 0；demo1 报告与开发环境一致（twinkle 25/20/4、ADR 91.38、KAST 75%、Trade 22.2%、R24 1v3 win、5 条 Findings、13 : 11）；分析中途关闭窗口无残留 `CS2 Coach.exe`（含 Utility Process）；损坏 DEM 报错且保留“重新选择 DEM”，不白屏；生产版与测试 seam 版均可静默卸载。
+- 验证：`pnpm typecheck`、`pnpm build`、analytics 53/53、findings 17/17、dem-parser 28/28、desktop Node 集成 3/3、desktop `test:report`（真实/损坏/非 .dem）、`pnpm test:smoke`（dev + preview）、installed-app smoke 全 PASS。
+- 已知限制：安装包未签名，可能触发 SmartScreen；只构建并验证 Windows x64；`disableAsarIntegrity: true`（ASAR integrity 重写会在 exe 刚复制完成时重写约 234 MB，与杀毒扫描竞争而间歇失败；Electron 仅在启用对应 fuse 时校验）；打包中间产物留在系统临时目录。
+- 文档：新增 `docs/windows-packaging.md`；同步 roadmap、architecture、development、desktop-report、current-task、handoff。本 work unit focused commit 后交接；下一工作按用户新需求确定。
+
 ## 2026-10-07 — P5.1 End-to-End Desktop Report MVP PASS
 
 - 基线 `f9f9c58e`（P4.1 Findings PASS）。本轮不改 P3 Analytics 语义、不改 P4 Findings 阈值、不在 Renderer 重算指标、不猜 coaching 结论；未引入 AI/云端/登录/历史库/图表/热力图/installer。

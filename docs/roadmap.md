@@ -45,7 +45,10 @@ Schema、阈值、coverage 门控、priority、真实 twinkle 输出与 future g
 
 P5.1 End-to-End Desktop Report MVP — **PASS**。首次打通 `选择 .dem → Main 文件选择 → Utility Process 解析/分析 → Findings → Renderer 报告页`。Renderer 只在 sandbox + contextIsolation 下消费 JSON-only `@cs2-coach/report-contract` DTO，不接触 Node/fs/demoparser2；原生解析与全部确定性计算在 Utility Process 中执行。report-contract `schemaVersion: 1` 为后续演进预留。实现、进程边界、IPC 契约、状态机、UI 结构与剩余缺口见 [桌面比赛报告](./desktop-report.md)。
 
+P5.2 Windows Packaging & Installable MVP — **PASS**。使用 electron-builder + NSIS 产出 Windows x64 安装包（`CS2 Coach`，版本沿用项目版本）。Utility Process 的 workspace 依赖全部打进 `report-worker.js`，原生 parser 以 asar-unpacked 形式随安装目录分发，安装版不再依赖 pnpm workspace symlink；仍不包含签名、自动更新或发布流程。安装版 E2E 覆盖安装/启动、Renderer 无 Node 暴露、真实 demo1.dem 报告、损坏 DEM 错误、分析中途关闭无残留 worker 与卸载。见 [Windows 打包与安装](./windows-packaging.md)。
+
 - P5.1 已完成：Match overview、玩家指标与 Findings 报告页。
+- P5.2 已完成：可安装、可卸载、脱离 pnpm workspace 运行的 Windows 版本。
 - 未开始：Round timeline（完整播放器）、Analysis views（图表/热力图/多玩家对比）。
 
 ## P6 AI Coach

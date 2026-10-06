@@ -14,7 +14,9 @@ CS2 Coach is structured as a desktop application with a deterministic analysis c
 
 The Electron desktop app runs the native parser and the full deterministic pipeline in a Utility Process and sends a serializable report DTO to the sandboxed renderer over contextBridge IPC. The renderer never imports `dem-parser`, Node builtins or Analytics, and never recomputes metrics. Process model, IPC contract and UI: [desktop report](./desktop-report.md).
 
-The DEM implementation routes native demoparser2 results through an internal adapter and converter before returning `Match`. Native APIs are not exported by the package. See [DEM parsing](./dem-parser.md) for the current mappings and limitations.
+For Windows distribution the Main and Utility Process bundles inline every workspace package, and the native parser is staged next to the worker bundle as an asar-unpacked binding, so an installed application resolves nothing through pnpm workspace links. Packaging layout, staging script and installed-app verification: [Windows packaging](./windows-packaging.md).
+
+The DEM implementation routes native demoparser2 results through an internal adapter and converter before returning `Match`. Native APIs are not exported by the package. The Electron main build keeps the native parser external and bundles the workspace packages. See [DEM parsing](./dem-parser.md) for the current mappings and limitations.
 
 `analytics` implements the P3 deterministic player and combat metrics and depends only on `match-model` domain types. Round windowing and roster coverage are centralized in `packages/analytics/src/coverage.ts` so individual metrics do not re-implement eligibility; the shared survival/trade timeline for KAST, Trade and Clutch lives in `packages/analytics/src/timeline.ts`. Definitions and limits: [analytics metrics](./analytics-metrics.md).
 

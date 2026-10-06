@@ -101,14 +101,18 @@ idle → selecting → parsing → analyzing → success
 - 损坏 DEM：错误提示 + 可重新选择，不白屏。
 - 测试：桌面 Node 集成测试 3/3；桌面 Electron 端到端 smoke（真实 DEM + 损坏 DEM）通过；analytics 53/53、findings 17/17、dem-parser 28/28；`pnpm typecheck`、`pnpm build`、现有 UI `test:smoke` 通过。
 - 命令：`pnpm --filter @cs2-coach/desktop test`（Node 集成）、`pnpm --filter @cs2-coach/desktop test:report`（Electron 端到端）、`pnpm test:smoke`（UI/preload/构建）。
+- 安装版：`pnpm --filter @cs2-coach/desktop pack:win` 产出安装包，`pnpm --filter @cs2-coach/desktop test:installed` 对安装后的应用重跑真实 demo1 与损坏 DEM 场景。
 
 ## 测试专用路径注入
 
 Electron 端到端测试需要绕过原生文件对话框。Main 在**非打包构建**下读取 `CS2_COACH_DEM_PATH` 作为导入路径；打包应用始终使用原生对话框。Renderer 与 preload 不感知该变量。
 
+## 打包与安装
+
+P5.2 已把该链路做成可安装的 Windows 版本（electron-builder + NSIS，Utility Process 依赖全部打进 bundle，原生 parser 以 asar-unpacked 分发）。方案、安装包内容、路径兼容、测试 seam 与安装版 E2E 见 [Windows 打包与安装](./windows-packaging.md)。
+
 ## 剩余缺口（v0.1 日常使用之前）
 
-- 打包与安装：目前只有 `pnpm start / electron-vite` 本地运行，尚无 Windows installer。
 - GUI 文件选择之外的便利性：无最近文件、历史比赛库、CS2 demo 目录自动扫描。
 - 报告深度：无 round timeline / 图表 / 地图热力图 / 多玩家对比；比分只按开局阵营展示，未关联队伍名。
 - 大规模 DEM 的进度反馈仍是阶段级（selecting/parsing/analyzing），无百分比。

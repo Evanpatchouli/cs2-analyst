@@ -4,6 +4,8 @@
   "private": true,
   "type": "module",
   "main": "dist/electron/main.js",
+  "description": "CS2 Coach desktop application: local CS2 DEM post-match analysis.",
+  "author": "Evanpatchouli",
   "scripts": {
     "dev": "install-electron && electron-vite dev",
     "start": "install-electron && electron-vite preview --skipBuild",
@@ -11,15 +13,18 @@
     "test": "pnpm --filter @cs2-coach/match-model build && pnpm --filter @cs2-coach/dem-parser build && pnpm --filter @cs2-coach/analytics build && pnpm --filter @cs2-coach/findings build && node --test tests/*.test.mjs",
     "test:report": "pnpm typecheck && install-electron && electron-vite build && node ../../scripts/desktop-report-smoke.mjs",
     "test:smoke": "pnpm typecheck && install-electron && node ../../scripts/desktop-smoke.mjs",
-    "build": "pnpm typecheck && electron-vite build"
+    "build": "pnpm typecheck && electron-vite build",
+    "pack:win": "pnpm typecheck && node scripts/build-installer.mjs production",
+    "pack:win:test": "node scripts/build-installer.mjs test-seam",
+    "test:installed": "node ../../scripts/installed-app-smoke.mjs"
   },
   "dependencies": {
-    "@fluentui/react-components": "^9.74.9",
-    "@cs2-coach/dem-parser": "workspace:^",
-    "@cs2-coach/match-model": "workspace:^",
     "@cs2-coach/analytics": "workspace:^",
+    "@cs2-coach/dem-parser": "workspace:^",
     "@cs2-coach/findings": "workspace:^",
+    "@cs2-coach/match-model": "workspace:^",
     "@cs2-coach/report-contract": "workspace:^",
+    "@fluentui/react-components": "^9.74.9",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
     "zustand": "^5.0.15"
@@ -30,6 +35,7 @@
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^5.2.0",
     "electron": "^44.5.1",
+    "electron-builder": "^26.15.3",
     "electron-vite": "^5.0.0",
     "typescript": "^7.0.2",
     "vite": "^7.3.6"

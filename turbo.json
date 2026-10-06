@@ -17,6 +17,10 @@
       "cache": false,
       "passThroughEnv": ["ELECTRON_*", "electron_*", "npm_config_*"]
     },
+    "test:installed": {
+      "cache": false,
+      "passThroughEnv": ["ELECTRON_*", "electron_*", "npm_config_*", "CS2_COACH_*"]
+    },
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
