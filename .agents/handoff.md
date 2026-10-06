@@ -1,5 +1,15 @@
 # Agent Handoff
 
+## 2026-10-06 — P3.2 Final Acceptance end-state coverage fix
+
+- 基线：已 fetch 并确认 `main` / `origin/main` 同为 `cbff78d`，从当前代码、测试和 docs 复核实现。根因是 Trade / Clutch 入口检查 available / anomaly 等条件，却漏掉 timeline 已识别的 `endStateSuspect`。
+- `src/trade.ts`：冲突时复用 unresolved 返回值，整个回合不贡献 trade kill / traded death / tradeable death；既有 `summarizeTrade()` 将确认参与者计入 `unavailableRounds`、`complete=false`、`tradeRate=null`。`available` 的既有时钟语义不变。
+- `src/clutch.ts`：冲突时整个回合 `ineligible=true`，无任何 1vN opportunity。统一 coverage 保留冲突原因 `survival-end-state-conflict`，并沿用 `clutch-round-ineligible`；无新增 issue。
+- KAST 现有 `timeline.endStateSuspect` 降级已保证 incomplete；未修改 `kast.ts`。timeline 架构、5s trade window、正常指标语义及 package boundaries 均未改动。
+- `tests/combat.test.mjs` 新增 Case A（有 death、end alive=true）与 Case B（无 death、end alive=false）。正常对照证明该回合本可产生 trade/clutch；冲突下验证 timeline、直接 resolver、全体玩家汇总/coverage/KAST，以及未知 trade 时钟组合。两个 regression 在修复前均失败。
+- 验证：analytics **37/37 PASS**（含 3 个真实 DEM golden）、dem-parser **28/28 PASS**（含真实 DEM）、`pnpm typecheck`、`pnpm build` 全 PASS，0 skipped。demo1 twinkle KAST **18/24=75.0%**、trade **6/4/18/22.2%**、R24 **1v3 won=true** 保持；P3.1 damage/ADR、全局 trade **34:34**、parser golden 均无回归。
+- 文档：同步 `docs/analytics-metrics.md` 与 `.agents/current-task.md`。本 work unit 创建 focused commit 后交接；未进入 P3.3，无无关改动。
+
 ## 2026-10-06 — P3.2 KAST / Trade / Clutch
 
 - `packages/analytics` 新增统一存活/时序上下文 `src/timeline.ts`：以 coverage 选出的名单快照（freeze_end 优先）为起点，用正式窗口 `[startTick, endTick]` 内的死亡事件推进，并用 `end` 边界快照核验。`survived` 只有在“起点 alive + 无死亡 + end alive=true”同时成立时才为 true；无死亡不等于存活。生命周期异常（baseline 之后 disconnect/spawn/side_change）与不一致死亡使该回合时间线退出 KAST/Trade/Clutch。

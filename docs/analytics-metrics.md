@@ -85,7 +85,7 @@ pnpm --filter @cs2-coach/analytics test
 - 只用正式回合窗口 `[startTick, endTick]`（闭区间）内的死亡事件推进状态；post-round 死亡被排除。
 - 终点用 `end` 边界快照核验。`survived` 只有在“起点 alive、窗口内无死亡、end 快照该玩家 alive=true”三者同时成立时才为 `true`；**没有死亡事件本身不等于存活**。
 - baseline 之后、窗口内的 lifecycle `disconnect` / `spawn` / `side_change`，以及不一致死亡（baseline 非存活者的死亡、同一玩家多次死亡）都记为 anomaly，使该回合的时间线不再被 KAST/Trade/Clutch 采信。
-- 死亡与 end 快照冲突（有死亡但 end 显示存活，或无死亡但 end 显示已死）记 `survival-end-state-conflict`，该回合的存活证据按 ambiguous 降级。
+- 死亡与 end 快照冲突（有死亡但 end 显示存活，或无死亡但 end 显示已死）记 `survival-end-state-conflict`，并使 `timeline.endStateSuspect = true`。KAST 保持不完整覆盖；Trade / Clutch 不再采信该回合的存活时间线。
 
 ### KAST
 
@@ -115,6 +115,7 @@ pnpm --filter @cs2-coach/analytics test
 - `tradeableDeaths`：死亡是可识别敌方击杀，且死亡发生时至少有 1 名队友仍存活。
 - `tradeRate = tradedDeaths / tradeableDeaths × 100`；仅在 tick rate 可用、回合上下文完整、且该玩家没有被 ambiguous 命中的候选时为数值，否则为 `null`。
 - 排除：teamkill、`world` 死亡、任一方 side 未知。
+- `timeline.endStateSuspect === true` 时整个回合返回 `resolved = false`，不生成 trade kill / traded death，也不计入 `tradeableDeaths`。`summarizeTrade()` 对确认参与者增加 `unavailableRounds`，令 `complete = false`、`tradeRate = null`；原因复用 `survival-end-state-conflict`。`available` 仍表示 trade 时钟可用性，回合可靠性由 `unavailableRounds` / `complete` 表达。
 
 ### Clutch
 
@@ -122,7 +123,7 @@ pnpm --filter @cs2-coach/analytics test
 - 当某队恰好只剩 1 名存活者且敌方仍有 ≥1 人时形成 clutch opportunity，记录该玩家、对手人数与形成 tick；对手数取形成瞬间的值，之后敌方减少不改变该 1vN。
 - 对手数分桶 1v1 / 1v2 / 1v3 / 1v4 / 1v5（5 表示 ≥5）。
 - 赢下回合（`round.winner === 该玩家阵营`）才计 clutch win；winner 未知时 opportunity 仍记录但 `won = null` 并记 `clutch-winner-unknown`。
-- 无法解释的 disconnect / respawn / side change、unidentified 玩家、名单回退或不可用都会让该回合 clutch **整体不输出**（`clutch-round-ineligible`），禁止猜测。
+- 无法解释的 disconnect / respawn / side change、unidentified 玩家、名单回退或不可用、`timeline.endStateSuspect === true` 都会让该回合 clutch **整体不输出**（`ineligible = true`、无任何 1vN opportunity，并记现有 `clutch-round-ineligible`），禁止猜测。end 冲突原因仍由 `survival-end-state-conflict` 表达，不增加重复 issue。
 
 ### P3.2 同 tick 与窗口策略小结
 
@@ -294,7 +295,7 @@ R13 / R18 / R22 / R23 说明 trade 结论对窗口定义高度敏感，因此窗
 P3.2 新增的降级/跳过路径（合成测试覆盖）：
 
 - 无死亡事件但 end 快照缺失或无该玩家行：存活不可证，该回合退出 KAST 分母，记 `survival-end-state-unavailable`。
-- end 快照与死亡时间线冲突：该回合存活证据按 ambiguous 降级，记 `survival-end-state-conflict`。
+- end 快照与死亡时间线冲突：记 `survival-end-state-conflict`（ambiguous）；KAST 保持 degraded / incomplete，Trade 该回合 unresolved、不贡献任何 trade / tradeable death，Clutch 整回合 ineligible、不输出 opportunity。两种冲突均有合成 regression，包含正常对照及 trade 时钟未知的组合。
 - baseline 之后出现 disconnect / spawn / side change 或不一致死亡：时间线不可用，KAST/Trade 该回合退出，clutch 整体不输出，记 `survival-timeline-anomaly` 与 `clutch-round-ineligible`。
 - 名单回退到 start 或含 unidentified：KAST/Trade 以 degraded 计数（`survival-context-degraded`），clutch 不输出。
 - `match.tickRate` 不可靠：时间型 trade 全部抑制，记 `trade-tick-rate-unknown`；`tradeableDeaths` 仍输出。
@@ -319,4 +320,4 @@ pnpm typecheck
 pnpm build
 ```
 
-analytics 测试当前 **35/35 PASS**（P3.1 合成 19、P3.2 combat 13、真实 DEM 3），dem-parser **28/28 PASS** 无回归，`pnpm typecheck` 与 `pnpm build` 全 PASS。`model-contracts.test.ts` 额外对 KAST / Trade / Clutch 类型契约做编译期断言。
+analytics 测试当前 **37/37 PASS**（P3.1 合成 19、P3.2 combat 15、真实 DEM 3；无跳过），dem-parser **28/28 PASS** 无回归，`pnpm typecheck` 与 `pnpm build` 全 PASS。`model-contracts.test.ts` 额外对 KAST / Trade / Clutch 类型契约做编译期断言。

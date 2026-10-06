@@ -1,7 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { analyzeMatch, coverageIssueSeverity } from "../dist/index.js";
+import {
+  analyzeMatch, buildCoverage, buildRoundTimeline, coverageIssueSeverity,
+  resolveRoundClutch, resolveRoundTrades,
+} from "../dist/index.js";
 
 const CT1 = "76561198000000001";
 const CT2 = "76561198000000002";
@@ -147,6 +150,62 @@ test("flags an end state that contradicts the death timeline and degrades KAST",
   // CT2 relied on the same suspect end snapshot for S.
   assert.equal(byId(result, CT2).kast.degradedRounds, 1);
 });
+
+for (const [name, conflictingPlayer, endAlive] of [
+  ["recorded death but end snapshot alive", CT1, true],
+  ["no recorded death but end snapshot dead", T2, false],
+]) {
+  test(`rejects trade and clutch evidence for ${name}`, () => {
+    const players = Object.keys(sides4).map(id => player(id, id));
+    const events = [
+      kill(1050, T1, CT1, { killerSide: "T", victimSide: "CT", teamkill: false }),
+      kill(1090, CT2, T1, { killerSide: "CT", victimSide: "T", teamkill: false }),
+    ];
+    const endStates = { [CT1]: false, [T1]: false };
+    // The consistent control proves this round would produce both conclusions.
+    const control = analyzeMatch(mkMatch(players, [makeRound(1, sides4, endStates, events)]));
+    assert.equal(byId(control, CT2).trade.tradeKills, 1);
+    assert.equal(byId(control, CT1).trade.tradedDeaths, 1);
+    assert.ok(control.players.some(candidate => candidate.clutch.opportunities > 0));
+
+    const match = mkMatch(players, [makeRound(1, sides4,
+      { ...endStates, [conflictingPlayer]: endAlive }, events)]);
+    const round = buildCoverage(match).rounds[0];
+    const timeline = buildRoundTimeline(round);
+    assert.equal(timeline.endStateSuspect, true);
+    assert.equal(timeline.state(conflictingPlayer).endConflict, true);
+    assert.equal(timeline.anomalies.length, 0);
+    // The end-state gate applies even when the trade clock is unavailable.
+    for (const windowTicks of [320, null]) {
+      const trade = resolveRoundTrades(round, timeline, windowTicks);
+      assert.equal(trade.resolved, false);
+      assert.deepEqual(trade.trades, []);
+      assert.equal(trade.tradeableDeaths.size, 0);
+      assert.deepEqual(trade.ambiguities, []);
+    }
+    assert.deepEqual(resolveRoundClutch(round, timeline), {
+      round: 1, opportunities: [], ineligible: true,
+    });
+
+    const result = analyzeMatch(match);
+    assert.equal(result.coverage.issues["survival-end-state-conflict"], 1);
+    assert.equal(result.coverage.issues["clutch-round-ineligible"], 1);
+    assert.equal(result.coverage.severity.ambiguous, 1);
+    assert.equal(result.coverage.severity.unavailable, 1);
+    for (const candidate of result.players) {
+      assert.equal(candidate.trade.tradeKills, 0);
+      assert.equal(candidate.trade.tradedDeaths, 0);
+      assert.equal(candidate.trade.tradeableDeaths, 0);
+      assert.equal(candidate.trade.unavailableRounds, 1);
+      assert.equal(candidate.trade.complete, false);
+      assert.equal(candidate.trade.tradeRate, null);
+      assert.equal(candidate.clutch.opportunities, 0);
+      assert.deepEqual(candidate.clutch.list, []);
+      assert.equal(candidate.kast.complete, false);
+      assert.ok(candidate.kast.degradedRounds + candidate.kast.unavailableRounds > 0);
+    }
+  });
+}
 
 test("credits a trade exactly at the window edge and rejects one tick later", () => {
   const players = [player(CT1, "ct1"), player(CT2, "ct2"), player(T1, "t1")];

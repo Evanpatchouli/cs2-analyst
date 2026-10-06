@@ -34,13 +34,14 @@ export interface RoundClutchResolution {
  * The round is omitted entirely when the starting roster is degraded, contains
  * unidentified players, has an unknown alive/side value, or shows an
  * unexplained lifecycle change (disconnect / respawn / side change) or an
- * inconsistent death timeline. Guessing a 1vX state there is forbidden.
+ * inconsistent death timeline or conflicting end state. Guessing a 1vX state
+ * there is forbidden.
  */
 export function resolveRoundClutch(
   round: RoundCoverage,
   timeline: RoundTimeline,
 ): RoundClutchResolution {
-  if (!timeline.available || timeline.degraded || timeline.anomalies.length > 0
+  if (!timeline.available || timeline.degraded || timeline.endStateSuspect || timeline.anomalies.length > 0
     || round.roster.unidentifiedPlayerCount > 0) {
     return { round: round.number, opportunities: [], ineligible: true };
   }

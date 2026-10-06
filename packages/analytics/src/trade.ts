@@ -60,13 +60,15 @@ const unresolved: RoundTradeResolution = Object.freeze({
  * trader must have been alive at the trade kill, which also proves they were
  * alive when the avenged teammate died. `windowTicks === null` suppresses
  * every time-based trade conclusion while still counting tradeable deaths.
+ * A conflicting end state makes the entire round unresolved, including
+ * tradeable deaths, because the inferred living teammates are unreliable.
  */
 export function resolveRoundTrades(
   round: RoundCoverage,
   timeline: RoundTimeline,
   windowTicks: number | null,
 ): RoundTradeResolution {
-  if (!timeline.available || timeline.anomalies.length > 0
+  if (!timeline.available || timeline.endStateSuspect || timeline.anomalies.length > 0
     || round.roster.unidentifiedPlayerCount > 0) return unresolved;
 
   const kills = timeline.deaths;

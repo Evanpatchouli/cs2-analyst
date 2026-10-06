@@ -1,6 +1,15 @@
 # Current Task
 
-Status: complete — P3.2 KAST / Trade / Clutch PASS
+Status: complete — P3.2 Final Acceptance end-state coverage fix PASS
+
+- 本 work unit 基于已同步的最新 `main` / `origin/main`：`cbff78d`。仅修复统一存活时间线的 end-state conflict 门控，未进入 P3.3。
+- `resolveRoundTrades()` 遇到 `timeline.endStateSuspect` 返回既有 unresolved，不产生 trade kill / traded death / tradeable death；`summarizeTrade()` 既有路径增加 `unavailableRounds`，`complete=false`、`tradeRate=null`。
+- `resolveRoundClutch()` 遇到同一标记返回 `ineligible=true`、空 opportunities。coverage 复用 `survival-end-state-conflict` 与 `clutch-round-ineligible`，无新增 issue / domain contract / package dependency。
+- KAST 已有 `timeline.endStateSuspect` 降级逻辑，确认冲突下 `complete=false`，未修改实现。
+- 新增 2 个 synthetic regressions：有 death 但 end alive=true；无 death 但 end alive=false。正常对照可生成 trade/clutch，冲突后验证 resolver、汇总 coverage、KAST 不完整和未知 trade 时钟组合。修复前均失败，修复后均 PASS。
+- Final acceptance：analytics **37/37**、dem-parser **28/28**（真实 DEM 均执行、无跳过）、`pnpm typecheck`、`pnpm build` 全 PASS。demo1 的 P3.1 damage/ADR、P3.2 golden、全局 trade 34:34 与 parser golden 均保持。
+
+以下为此前 P3.2 主体实现记录（历史验证计数保留）：
 
 - Scope: `packages/analytics` 新增统一存活/时序上下文与三项战斗指标。未进入 utility advanced metrics、Findings、AI、UI。
 - Correction: 上一轮记录的 `analytics test 20/20` 实际为 **21/21**（19 合成 + 2 真实 DEM）；本轮新增 combat 测试后为 **35/35**。
