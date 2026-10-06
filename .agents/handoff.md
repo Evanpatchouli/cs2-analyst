@@ -7,6 +7,7 @@
 - 数字格式：`decimal / count / percent / seconds / points` 一套展示层 helper —— 秒数与 ADR 两位小数、百分比一位小数（KAST 保持整数）、整数计数零位，`—` 表示证据不足；evidence 的 `hp / hp/round / ratio / percent / seconds / count` 全部走同一套规则，底层 evidence 数值不截断（4.866097927093506 秒 → 4.87 秒）。
 - Trade 文案：指标卡显示“Trade rate（死亡后队友补枪率）”+“4 / 18 次死亡后队友完成补枪”，Tooltip 追加上下文“死亡时仍有队友存活：18 / 其中 5 秒内队友击杀该敌人：4”；旧术语“可交易死亡 / 被交易 / 及时回收”不再出现。Findings 的 `trade.low-rate` title/summary、ruleId、evidence 数值与顺序未改。
 - 道具面板：标题“道具”，分“投掷数量”（闪光弹 / 烟雾弹 / 高爆手雷 / 燃烧弹 / 燃烧瓶 / 诱饵弹，逐行 图标 + 中文名 + 右对齐计数）与“道具效果”（高爆手雷对敌伤害 / 燃烧伤害 / 敌人受闪效果 / 队友受闪效果 / 闪光助攻）两组，行高 / 间距一致，底部保留受闪口径说明；不再出现 Utility / HE / Flash / duration 等实现术语。
+- 残局面板：与道具面板同一套列表样式，`回合 / 局面 / 结果` 三列对齐（`R1` / `1v3`），结果用 `Badge` 标签（成功 / 失败 / 结果未知），数据与判定未改。
 - 图标：新增 `apps/desktop/renderer/src/icons.tsx`，单一风格本地图标集（20px 网格、单色 `currentColor` 描边、统一线宽）；项目未新增 icon 依赖，避免混用不同图标源。
 - Tooltip：`InfoTip` 用 Fluent UI v9 `Tooltip`（`relationship="description"`、`withArrow`）包裹真实 `Button`，hover / 点击聚焦 / Tab 均可访问，每个入口带中文 `aria-label`（如“ADR说明”“道具面板说明”）；覆盖 K/D/A、ADR、HS%、KAST、Trade rate、Trade kills、Opening、Clutch 八张卡片与道具面板，共 9 个入口。
 - 验证：`pnpm typecheck` 11/11、`pnpm build`、analytics 53/53、findings 17/17、dem-parser 28/28、desktop Node 集成 3/3（新增 round-time 断言：所有带 round+tick 的证据都有有限非负秒数且小于 `tick / 64`，R4 tick 17120 等于 `(17120 - 15416) / 64`）、desktop `test:report`（真实 / 损坏 / 非 .dem，新增 9 个 Tooltip 入口 DOM 断言与“正文不含 `tick <n>`”断言）、`pnpm test:smoke`（dev + preview）全 PASS。

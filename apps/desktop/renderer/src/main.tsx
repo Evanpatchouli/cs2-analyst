@@ -29,6 +29,10 @@ const useStyles = makeStyles({
   listRow: { display: 'grid', gridTemplateColumns: '20px minmax(0, 1fr) auto', alignItems: 'center', columnGap: '10px', minHeight: '34px', padding: '0 2px', borderBottom: `1px solid ${tokens.colorNeutralStroke3}`, ':last-child': { borderBottomStyle: 'none' } },
   effectRow: { display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', alignItems: 'center', columnGap: '10px', minHeight: '34px', padding: '0 2px', borderBottom: `1px solid ${tokens.colorNeutralStroke3}`, ':last-child': { borderBottomStyle: 'none' } },
   rowIcon: { display: 'inline-flex', color: tokens.colorNeutralForeground3 },
+  clutchHead: { display: 'grid', gridTemplateColumns: '56px minmax(0, 1fr) auto', alignItems: 'center', columnGap: '10px', padding: '0 2px' },
+  clutchRow: { display: 'grid', gridTemplateColumns: '56px minmax(0, 1fr) auto', alignItems: 'center', columnGap: '10px', minHeight: '34px', padding: '0 2px', borderBottom: `1px solid ${tokens.colorNeutralStroke3}`, ':last-child': { borderBottomStyle: 'none' } },
+  numberCell: { fontVariantNumeric: 'tabular-nums' },
+  clutchResult: { display: 'flex', justifyContent: 'flex-end' },
   rowValue: { textAlign: 'right', fontVariantNumeric: 'tabular-nums' },
   finding: { backgroundColor: tokens.colorNeutralBackground1, padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' },
   evidence: { padding: '8px 0', display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: '12px', borderBottom: `1px solid ${tokens.colorNeutralStroke2}`, overflowWrap: 'anywhere' },
@@ -74,6 +78,9 @@ const metricLabels: Record<string, string> = {
   "clutch.list.opponents": "残局敌人数量", "clutch.list.won": "残局获胜", "clutch.list.side": "残局所在阵营",
 };
 const metricLabel = (metric: string) => metricLabels[metric] ?? metric;
+/** Clutch outcomes are labelled; a missing result is never guessed. */
+const clutchResult = (won: boolean | null): { label: string; color: 'success' | 'informative' | 'warning' } =>
+  won === null ? { label: '结果未知', color: 'warning' } : won ? { label: '成功', color: 'success' } : { label: '失败', color: 'informative' };
 const severityText: Record<string, string> = { high: "高", medium: "中", low: "低", positive: "亮点" };
 const evidenceText = (value: number | boolean | string, unit: string): string => {
   if (unit === "flag") return value === true ? "是" : value === false ? "否" : String(value);
@@ -202,7 +209,23 @@ function Report({ report, playerId }: { report: DesktopMatchReport; playerId: st
         <UtilityPanel utility={p.utility} />
         <Card className={s.panel}>
           <Subtitle1>残局</Subtitle1>
-          {p.clutch.list.length ? p.clutch.list.map(c => <Body1 key={c.round}>R{c.round} · 1v{c.opponents} · {c.won === null ? '结果未知' : c.won ? '成功' : '失败'}</Body1>) : <Body1>没有可证明的残局机会。</Body1>}
+          {p.clutch.list.length ? <>
+            <div className={s.clutchHead}>
+              <Caption1 className={s.muted}>回合</Caption1>
+              <Caption1 className={s.muted}>局面</Caption1>
+              <Caption1 className={s.muted}>结果</Caption1>
+            </div>
+            <div className={s.list}>
+              {p.clutch.list.map(c => {
+                const result = clutchResult(c.won);
+                return <div key={c.round} className={s.clutchRow}>
+                  <span className={s.numberCell}>R{c.round}</span>
+                  <span className={s.numberCell}>1v{c.opponents}</span>
+                  <span className={s.clutchResult}><Badge appearance="tint" color={result.color}>{result.label}</Badge></span>
+                </div>;
+              })}
+            </div>
+          </> : <Body1>没有可证明的残局机会。</Body1>}
         </Card>
       </div>
     </div>
