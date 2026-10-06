@@ -1,4 +1,4 @@
-# DEM 解析（P2.1）
+# DEM 解析（P2.2）
 
 `packages/dem-parser` 在 Node.js / Electron 主进程中读取本地 CS2 DEM。当前实现使用 `@laihoe/demoparser2` 0.42.0 的平台原生模块，返回 `packages/match-model` 定义的 `Match`。
 
@@ -32,7 +32,7 @@ const match = await parser.parse("E:/demos/match.dem");
 
 `MatchEvent` 现在是具体事件的可辨识联合类型。模型与完整原始字段映射见 [领域模型](./domain-model.md) 和 [P2.1 Combat Event Model 证据与限制](./combat-event-evidence.md)。安装包 `index.d.ts` 的事件结果为 `any`，因此转换契约以锁定版本真实 DEM 输出及捕获样本为证据，不使用上游原始类型定义领域模型。
 
-不采集玩家位置轨迹或每 tick 数据。没有唯一 SteamID 的机器人不能表示为独立 Player；无法识别受害者的击杀、伤害、闪光和无法识别 shooter 的开火不输出。新模型无法识别的 attacker/thrower/bomb player 使用 null。数值型 SteamID64 报错，避免精度损失。必要伤害数值或闪光时长缺失/非法时报错，不生成假零值。每回合完整 roster、存活状态、有效伤害策略、投掷物归一化与 trade 窗口仍需后续工作，本轮未实现 Analytics。
+仅在正式回合 start / freeze end / end 精确 tick 采集 team_num/is_alive 快照，不采集玩家位置轨迹或全量 tick 数据。无边界时不执行 parseTicks。没有唯一 SteamID 的机器人不能表示为独立 Player；无法识别受害者的击杀、伤害、闪光和无法识别 shooter 的开火不输出。新模型无法识别的 attacker/thrower/bomb player 使用 null。数值型 SteamID64 报错，避免精度损失。必要伤害数值或闪光时长缺失/非法时报错，不生成假零值。每回合状态、参与名单与已验证生命周期见 [P2.2 证据与限制](./round-state-evidence.md)。有效伤害策略、投掷物归一化与 trade 窗口仍需后续工作，本轮未实现 Analytics。
 
 文件不存在、非 CS2 文件或原生解析失败时，Promise 拒绝，错误包含文件路径及原始 `cause`。原生模块加载发生在文件魔数检查之后。
 

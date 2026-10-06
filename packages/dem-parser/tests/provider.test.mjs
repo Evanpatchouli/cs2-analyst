@@ -88,6 +88,38 @@ test("reads a real DEM through the public provider with deterministic results", 
     assert.deepEqual(Object.fromEntries(["kill", "damage", "weapon_fire", "utility", "flash", "bomb"].map(type => [type, events.filter(e => e.type === type).length])), {
       kill: 182, damage: 730, weapon_fire: 4399, utility: 421, flash: 282, bomb: 125,
     });
+    assert.ok(match.rounds.every(round => round.stateSnapshots?.length === 3));
+    const snapshots = match.rounds.flatMap(round => round.stateSnapshots);
+    for (const snapshot of snapshots) {
+      assert.equal(snapshot.availability, "observed");
+      assert.equal(snapshot.players.length, 10);
+      assert.equal(snapshot.unidentifiedPlayerCount, 0);
+      assert.equal(snapshot.players.filter(player => player.participant === true).length, 10);
+      assert.equal(snapshot.players.filter(player => player.side === "T").length, 5);
+      assert.equal(snapshot.players.filter(player => player.side === "CT").length, 5);
+    }
+    assert.ok(snapshots.filter(snapshot => snapshot.boundary !== "end")
+      .every(snapshot => snapshot.players.every(player => player.alive === true)));
+    const endSnapshots = snapshots.filter(snapshot => snapshot.boundary === "end");
+    assert.equal(endSnapshots.reduce((count, snapshot) => count + snapshot.players.filter(player => player.alive === true).length, 0), 60);
+    assert.equal(endSnapshots.reduce((count, snapshot) => count + snapshot.players.filter(player => player.alive === false).length, 0), 180);
+    const lifecycle = match.rounds.flatMap(round => (round.playerLifecycle ?? []).map(event => ({ ...event, round: round.number })));
+    assert.equal(lifecycle.filter(event => event.type === "spawn").length, 230); // The other 10 captured spawns are warmup events.
+    const sideChanges = lifecycle.filter(event => event.type === "side_change");
+    assert.equal(sideChanges.length, 10);
+    assert.ok(sideChanges.every(event => event.round === 13 && event.tick === match.rounds[12].startTick));
+    assert.ok(sideChanges.every(event => ["CT", "T"].includes(event.previousSide) && ["CT", "T"].includes(event.side)));
+    const disconnects = lifecycle.filter(event => event.type === "disconnect");
+    assert.equal(disconnects.length, 10);
+    assert.ok(disconnects.every(event => event.round === 24 && event.tick > match.rounds[23].endTick));
+    for (const round of match.rounds) {
+      const roundBoundaries = new Set([round.startTick, round.freezeEndTick, round.endTick]);
+      assert.ok(round.stateSnapshots.every(snapshot => roundBoundaries.has(snapshot.tick)));
+      for (const player of round.stateSnapshots.flatMap(snapshot => snapshot.players)) assert.ok(ids.has(player.steamId));
+      for (const event of round.playerLifecycle ?? []) {
+        if (event.player !== null) assert.ok(ids.has(event.player));
+      }
+    }
     assert.equal(match.id, "f3c3173eae0cd100d15c81c3b734be792f9212256a9c99703b358d3434000852");
     assert.deepEqual([match.rounds[0].startTick, match.rounds[0].freezeEndTick, match.rounds[0].endTick, match.rounds[0].endReason], [65, 1441, 3413, "ct_killed"]);
     assert.ok(match.rounds.every(r => r.startTick < r.freezeEndTick && r.freezeEndTick < r.endTick));

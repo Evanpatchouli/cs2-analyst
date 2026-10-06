@@ -21,7 +21,7 @@
 
 P2.1 Combat Event Model 已完成：具体伤害、开火、投掷物生效、闪光受害者、炸弹事件，击杀助攻/阵营及回合起止证据。详见 [字段映射与 P3 前置缺口](./combat-event-evidence.md)。
 
-进入 roster 相关 P3 指标前，仍需每回合完整参与玩家、阵营与初始存活状态，以及必要的离线/重连/重生证据。可以采用有界回合快照或已验证离散事件，避免全量 tick/position stream。
+P2.2 Round Participation & Player State 已完成：精确 start / freeze end / end 有界快照提供名单、阵营与存活状态，离散 spawn / disconnect / side_change 提供已验证的生命周期证据。详见 [P2.2 证据、覆盖限制与 P3 开工边界](./round-state-evidence.md)。P3 可按覆盖条件开工；重连和回合内重生仍需其他真实样本验证。
 
 ## P3 Analytics Engine
 

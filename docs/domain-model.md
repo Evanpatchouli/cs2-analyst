@@ -45,6 +45,8 @@ Damage is preserved as reported, including overkill. It is not precomputed effec
 
 The previous `KillEvent` killer/victim/weapon/headshot contract remains usable; new kill fields are optional. Consumers of the old base `MatchEvent` placeholder must supply the concrete payload. No current desktop/analytics/findings consumer depends on those placeholders.
 
+Round 另可包含 `stateSnapshots` 与 `playerLifecycle`。快照在已记录的 start / freeze_end / end 精确 tick 保存玩家身份、side、participant 和 nullable alive，标记 observed/unavailable 及不可识别玩家行数；名单不依赖战斗事件。生命周期与 combat union 分开，包含实际 spawn、disconnect 与 side_change，不推测连接或复活。兼容缺少这些可选字段的已有 Round。详见 [P2.2 round state](./round-state-evidence.md)。
+
 See [combat event evidence](./combat-event-evidence.md) for native mappings, captured examples, unavailable data and P3 prerequisites.
 
 ## Dependency Direction

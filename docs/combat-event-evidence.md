@@ -1,5 +1,7 @@
 # P2.1 Combat Event Model — evidence and limits
 
+P2.1 historical evidence is preserved below. P2.2 now adds bounded round-state snapshots and verified spawn/disconnect/team-change evidence; see [Round Participation & Player State](./round-state-evidence.md) for current roster coverage and remaining limits. Statements below about missing roster/state describe the P2.1 baseline, not the current parser.
+
 The adapter uses the lockfile's `@laihoe/demoparser2` **0.42.0**. Its installed `index.d.ts` declares event results as `any`, without field-level contracts. The mappings below were verified with `.demo/demo1.dem`, SHA-256 `f3c3173eae0cd100d15c81c3b734be792f9212256a9c99703b358d3434000852`. Current upstream documentation is only an API reference; installed signatures and this DEM's actual output are the implementation evidence.
 
 [`combat-native.json`](../packages/dem-parser/tests/fixtures/combat-native.json) captures unmodified native rows: the first live row of each requested event kind, then ordinary/flash assist kills, unattributed damage and an incendiary release. This is a set of field examples, not a complete match timeline. Synthetic tests separately cover malformed fields, unknown sides, bots, numeric IDs, restarts, halftime and same-tick starts.

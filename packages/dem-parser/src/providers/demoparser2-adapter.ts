@@ -14,36 +14,49 @@ export class Demoparser2Adapter implements ParserAdapter {
     }
 
     const native = await import("@laihoe/demoparser2");
+    const events = native.parseEvents(
+      bytes,
+      [
+        "round_start",
+        "round_end",
+        "round_freeze_end",
+        "player_death",
+        "player_hurt",
+        "weapon_fire",
+        "smokegrenade_detonate",
+        "hegrenade_detonate",
+        "flashbang_detonate",
+        "inferno_startburn",
+        "decoy_started",
+        "player_blind",
+        "bomb_pickup",
+        "bomb_dropped",
+        "bomb_beginplant",
+        "bomb_planted",
+        "bomb_begindefuse",
+        "bomb_defused",
+        "bomb_exploded",
+        "player_spawn",
+        "player_disconnect",
+        "player_team",
+      ],
+      ["team_num", "is_alive"],
+      ["total_rounds_played", "is_warmup_period", "game_time"],
+    ) as unknown;
+    const boundaryTicks = [...new Set((events as Record<string, unknown>[])
+      .filter(event => event.is_warmup_period !== true
+        && ["round_start", "round_freeze_end", "round_end"].includes(String(event.event_name))
+        && typeof event.tick === "number" && Number.isSafeInteger(event.tick) && event.tick >= 0)
+      .map(event => event.tick as number))].sort((a, b) => a - b);
+
     return {
       id: createHash("sha256").update(bytes).digest("hex"),
       header: native.parseHeader(bytes) as unknown,
       players: native.parsePlayerInfo(bytes) as unknown,
-      events: native.parseEvents(
-        bytes,
-        [
-          "round_start",
-          "round_end",
-          "round_freeze_end",
-          "player_death",
-          "player_hurt",
-          "weapon_fire",
-          "smokegrenade_detonate",
-          "hegrenade_detonate",
-          "flashbang_detonate",
-          "inferno_startburn",
-          "decoy_started",
-          "player_blind",
-          "bomb_pickup",
-          "bomb_dropped",
-          "bomb_beginplant",
-          "bomb_planted",
-          "bomb_begindefuse",
-          "bomb_defused",
-          "bomb_exploded",
-        ],
-        ["team_num"],
-        ["total_rounds_played", "is_warmup_period", "game_time"],
-      ) as unknown,
+      events,
+      stateRows: boundaryTicks.length > 0
+        ? native.parseTicks(bytes, ["team_num", "is_alive"], boundaryTicks) as unknown
+        : [],
     };
   }
 }

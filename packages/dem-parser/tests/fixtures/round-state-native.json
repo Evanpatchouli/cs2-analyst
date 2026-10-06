@@ -1,0 +1,1743 @@
+{
+  "parserVersion": "0.42.0",
+  "demoId": "f3c3173eae0cd100d15c81c3b734be792f9212256a9c99703b358d3434000852",
+  "demoBytes": 267275583,
+  "map": "de_dust2",
+  "query": {
+    "parseEvents": {
+      "names": [
+        "round_start",
+        "round_freeze_end",
+        "round_end",
+        "player_spawn",
+        "player_disconnect",
+        "player_connect",
+        "player_connect_full",
+        "player_team"
+      ],
+      "playerExtra": [
+        "team_num",
+        "is_alive",
+        "is_connected"
+      ],
+      "otherExtra": [
+        "total_rounds_played",
+        "is_warmup_period",
+        "game_time"
+      ],
+      "warmupFilteredForBoundaryRows": true
+    },
+    "parseTicks": {
+      "wantedProps": [
+        "team_num",
+        "is_alive",
+        "is_connected"
+      ],
+      "wantedTicks": [
+        65,
+        1441,
+        3413,
+        3861,
+        4821,
+        6882,
+        7330,
+        8290,
+        14968,
+        15416,
+        16376,
+        21657,
+        22105,
+        23065,
+        26076,
+        26524,
+        27484,
+        32513,
+        32961,
+        33921,
+        39309,
+        39757,
+        40717,
+        46051,
+        46499,
+        47459,
+        52517,
+        52965,
+        53925,
+        56286,
+        56734,
+        57694,
+        62020,
+        62468,
+        63428,
+        66566,
+        67110,
+        68486,
+        71396,
+        71844,
+        72804,
+        75852,
+        76300,
+        77260,
+        80771,
+        81219,
+        82179,
+        84375,
+        84823,
+        85783,
+        92090,
+        92538,
+        93498,
+        100858,
+        101306,
+        102266,
+        107770,
+        108218,
+        109178,
+        112504,
+        112952,
+        113912,
+        118607,
+        119055,
+        120015,
+        124001,
+        124449,
+        125409,
+        131209,
+        131657,
+        132617,
+        140769
+      ],
+      "requestedTickCount": 72,
+      "returnedRows": 720,
+      "connectedCandidate": "is_connected (raw output kept; observed number 0, not interpreted)"
+    }
+  },
+  "boundarySummary72Ticks": {
+    "round_start": {
+      "ticks": [
+        {
+          "round": 1,
+          "tick": 65,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 2,
+          "tick": 3861,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 3,
+          "tick": 7330,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 4,
+          "tick": 15416,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 5,
+          "tick": 22105,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 6,
+          "tick": 26524,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 7,
+          "tick": 32961,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 8,
+          "tick": 39757,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 9,
+          "tick": 46499,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 10,
+          "tick": 52965,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 11,
+          "tick": 56734,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 12,
+          "tick": 62468,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 13,
+          "tick": 67110,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 14,
+          "tick": 71844,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 15,
+          "tick": 76300,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 16,
+          "tick": 81219,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 17,
+          "tick": 84823,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 18,
+          "tick": 92538,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 19,
+          "tick": 101306,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 20,
+          "tick": 108218,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 21,
+          "tick": 112952,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 22,
+          "tick": 119055,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 23,
+          "tick": 124449,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 24,
+          "tick": 131657,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        }
+      ],
+      "rowTotal": 240,
+      "aliveTrue": 240,
+      "aliveFalse": 0,
+      "aliveUnknown": 0
+    },
+    "round_freeze_end": {
+      "ticks": [
+        {
+          "round": 1,
+          "tick": 1441,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 2,
+          "tick": 4821,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 3,
+          "tick": 8290,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 4,
+          "tick": 16376,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 5,
+          "tick": 23065,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 6,
+          "tick": 27484,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 7,
+          "tick": 33921,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 8,
+          "tick": 40717,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 9,
+          "tick": 47459,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 10,
+          "tick": 53925,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 11,
+          "tick": 57694,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 12,
+          "tick": 63428,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 13,
+          "tick": 68486,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 14,
+          "tick": 72804,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 15,
+          "tick": 77260,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 16,
+          "tick": 82179,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 17,
+          "tick": 85783,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 18,
+          "tick": 93498,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 19,
+          "tick": 102266,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 20,
+          "tick": 109178,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 21,
+          "tick": 113912,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 22,
+          "tick": 120015,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 23,
+          "tick": 125409,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 24,
+          "tick": 132617,
+          "rows": 10,
+          "aliveTrue": 10,
+          "aliveFalse": 0,
+          "aliveUnknown": 0
+        }
+      ],
+      "rowTotal": 240,
+      "aliveTrue": 240,
+      "aliveFalse": 0,
+      "aliveUnknown": 0
+    },
+    "round_end": {
+      "ticks": [
+        {
+          "round": 1,
+          "tick": 3413,
+          "rows": 10,
+          "aliveTrue": 3,
+          "aliveFalse": 7,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 2,
+          "tick": 6882,
+          "rows": 10,
+          "aliveTrue": 3,
+          "aliveFalse": 7,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 3,
+          "tick": 14968,
+          "rows": 10,
+          "aliveTrue": 3,
+          "aliveFalse": 7,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 4,
+          "tick": 21657,
+          "rows": 10,
+          "aliveTrue": 1,
+          "aliveFalse": 9,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 5,
+          "tick": 26076,
+          "rows": 10,
+          "aliveTrue": 2,
+          "aliveFalse": 8,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 6,
+          "tick": 32513,
+          "rows": 10,
+          "aliveTrue": 3,
+          "aliveFalse": 7,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 7,
+          "tick": 39309,
+          "rows": 10,
+          "aliveTrue": 2,
+          "aliveFalse": 8,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 8,
+          "tick": 46051,
+          "rows": 10,
+          "aliveTrue": 1,
+          "aliveFalse": 9,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 9,
+          "tick": 52517,
+          "rows": 10,
+          "aliveTrue": 2,
+          "aliveFalse": 8,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 10,
+          "tick": 56286,
+          "rows": 10,
+          "aliveTrue": 5,
+          "aliveFalse": 5,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 11,
+          "tick": 62020,
+          "rows": 10,
+          "aliveTrue": 3,
+          "aliveFalse": 7,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 12,
+          "tick": 66566,
+          "rows": 10,
+          "aliveTrue": 3,
+          "aliveFalse": 7,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 13,
+          "tick": 71396,
+          "rows": 10,
+          "aliveTrue": 1,
+          "aliveFalse": 9,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 14,
+          "tick": 75852,
+          "rows": 10,
+          "aliveTrue": 2,
+          "aliveFalse": 8,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 15,
+          "tick": 80771,
+          "rows": 10,
+          "aliveTrue": 5,
+          "aliveFalse": 5,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 16,
+          "tick": 84375,
+          "rows": 10,
+          "aliveTrue": 5,
+          "aliveFalse": 5,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 17,
+          "tick": 92090,
+          "rows": 10,
+          "aliveTrue": 1,
+          "aliveFalse": 9,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 18,
+          "tick": 100858,
+          "rows": 10,
+          "aliveTrue": 3,
+          "aliveFalse": 7,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 19,
+          "tick": 107770,
+          "rows": 10,
+          "aliveTrue": 1,
+          "aliveFalse": 9,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 20,
+          "tick": 112504,
+          "rows": 10,
+          "aliveTrue": 3,
+          "aliveFalse": 7,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 21,
+          "tick": 118607,
+          "rows": 10,
+          "aliveTrue": 4,
+          "aliveFalse": 6,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 22,
+          "tick": 124001,
+          "rows": 10,
+          "aliveTrue": 1,
+          "aliveFalse": 9,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 23,
+          "tick": 131209,
+          "rows": 10,
+          "aliveTrue": 2,
+          "aliveFalse": 8,
+          "aliveUnknown": 0
+        },
+        {
+          "round": 24,
+          "tick": 140769,
+          "rows": 10,
+          "aliveTrue": 1,
+          "aliveFalse": 9,
+          "aliveUnknown": 0
+        }
+      ],
+      "rowTotal": 240,
+      "aliveTrue": 60,
+      "aliveFalse": 180,
+      "aliveUnknown": 0
+    }
+  },
+  "selectedBoundaries": [
+    {
+      "round": 1,
+      "rawEvents": {
+        "round_start": {
+          "event_name": "round_start",
+          "game_time": 38.15625,
+          "is_warmup_period": false,
+          "round": 1,
+          "tick": 65,
+          "total_rounds_played": 0
+        },
+        "round_freeze_end": {
+          "event_name": "round_freeze_end",
+          "game_time": 59.640625,
+          "is_warmup_period": false,
+          "tick": 1441,
+          "total_rounds_played": 0
+        },
+        "round_end": {
+          "event_name": "round_end",
+          "game_time": 90.46875,
+          "is_warmup_period": false,
+          "reason": "ct_killed",
+          "round": 1,
+          "tick": 3413,
+          "total_rounds_played": 1,
+          "winner": "T"
+        }
+      },
+      "snapshots": {
+        "round_start": {
+          "event": {
+            "event_name": "round_start",
+            "game_time": 38.15625,
+            "is_warmup_period": false,
+            "round": 1,
+            "tick": 65,
+            "total_rounds_played": 0
+          },
+          "players": [
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "菠萝抽风",
+              "steamid": "76561199238050274",
+              "team_num": 3,
+              "tick": 65
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "用户0001",
+              "steamid": "76561199700500920",
+              "team_num": 3,
+              "tick": 65
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "76561199642456355",
+              "steamid": "76561199642456355",
+              "team_num": 3,
+              "tick": 65
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "虎嗅蔷薇",
+              "steamid": "76561199189426601",
+              "team_num": 2,
+              "tick": 65
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "8888888888888888888888",
+              "steamid": "76561198431759580",
+              "team_num": 2,
+              "tick": 65
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "山姆烤蛋",
+              "steamid": "76561199382440624",
+              "team_num": 2,
+              "tick": 65
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "tarkz",
+              "steamid": "76561199567278982",
+              "team_num": 2,
+              "tick": 65
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "Makoto Nijima",
+              "steamid": "76561198823508147",
+              "team_num": 2,
+              "tick": 65
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "twinkle",
+              "steamid": "76561198397206664",
+              "team_num": 3,
+              "tick": 65
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "D.B.可乐",
+              "steamid": "76561198427875946",
+              "team_num": 3,
+              "tick": 65
+            }
+          ]
+        },
+        "round_freeze_end": {
+          "event": {
+            "event_name": "round_freeze_end",
+            "game_time": 59.640625,
+            "is_warmup_period": false,
+            "tick": 1441,
+            "total_rounds_played": 0
+          },
+          "players": [
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "菠萝抽风",
+              "steamid": "76561199238050274",
+              "team_num": 3,
+              "tick": 1441
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "用户0001",
+              "steamid": "76561199700500920",
+              "team_num": 3,
+              "tick": 1441
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "76561199642456355",
+              "steamid": "76561199642456355",
+              "team_num": 3,
+              "tick": 1441
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "虎嗅蔷薇",
+              "steamid": "76561199189426601",
+              "team_num": 2,
+              "tick": 1441
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "8888888888888888888888",
+              "steamid": "76561198431759580",
+              "team_num": 2,
+              "tick": 1441
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "山姆烤蛋",
+              "steamid": "76561199382440624",
+              "team_num": 2,
+              "tick": 1441
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "tarkz",
+              "steamid": "76561199567278982",
+              "team_num": 2,
+              "tick": 1441
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "Makoto Nijima",
+              "steamid": "76561198823508147",
+              "team_num": 2,
+              "tick": 1441
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "twinkle",
+              "steamid": "76561198397206664",
+              "team_num": 3,
+              "tick": 1441
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "D.B.可乐",
+              "steamid": "76561198427875946",
+              "team_num": 3,
+              "tick": 1441
+            }
+          ]
+        },
+        "round_end": {
+          "event": {
+            "event_name": "round_end",
+            "game_time": 90.46875,
+            "is_warmup_period": false,
+            "reason": "ct_killed",
+            "round": 1,
+            "tick": 3413,
+            "total_rounds_played": 1,
+            "winner": "T"
+          },
+          "players": [
+            {
+              "is_alive": false,
+              "is_connected": 0,
+              "name": "菠萝抽风",
+              "steamid": "76561199238050274",
+              "team_num": 3,
+              "tick": 3413
+            },
+            {
+              "is_alive": false,
+              "is_connected": 0,
+              "name": "用户0001",
+              "steamid": "76561199700500920",
+              "team_num": 3,
+              "tick": 3413
+            },
+            {
+              "is_alive": false,
+              "is_connected": 0,
+              "name": "76561199642456355",
+              "steamid": "76561199642456355",
+              "team_num": 3,
+              "tick": 3413
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "虎嗅蔷薇",
+              "steamid": "76561199189426601",
+              "team_num": 2,
+              "tick": 3413
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "8888888888888888888888",
+              "steamid": "76561198431759580",
+              "team_num": 2,
+              "tick": 3413
+            },
+            {
+              "is_alive": false,
+              "is_connected": 0,
+              "name": "山姆烤蛋",
+              "steamid": "76561199382440624",
+              "team_num": 2,
+              "tick": 3413
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "tarkz",
+              "steamid": "76561199567278982",
+              "team_num": 2,
+              "tick": 3413
+            },
+            {
+              "is_alive": false,
+              "is_connected": 0,
+              "name": "Makoto Nijima",
+              "steamid": "76561198823508147",
+              "team_num": 2,
+              "tick": 3413
+            },
+            {
+              "is_alive": false,
+              "is_connected": 0,
+              "name": "twinkle",
+              "steamid": "76561198397206664",
+              "team_num": 3,
+              "tick": 3413
+            },
+            {
+              "is_alive": false,
+              "is_connected": 0,
+              "name": "D.B.可乐",
+              "steamid": "76561198427875946",
+              "team_num": 3,
+              "tick": 3413
+            }
+          ]
+        }
+      }
+    },
+    {
+      "round": 13,
+      "rawEvents": {
+        "round_start": {
+          "event_name": "round_start",
+          "game_time": 1085.734375,
+          "is_warmup_period": false,
+          "round": 13,
+          "tick": 67110,
+          "total_rounds_played": 12
+        },
+        "round_freeze_end": {
+          "event_name": "round_freeze_end",
+          "game_time": 1107.21875,
+          "is_warmup_period": false,
+          "tick": 68486,
+          "total_rounds_played": 12
+        },
+        "round_end": {
+          "event_name": "round_end",
+          "game_time": 1152.703125,
+          "is_warmup_period": false,
+          "reason": "ct_killed",
+          "round": 13,
+          "tick": 71396,
+          "total_rounds_played": 13,
+          "winner": "T"
+        }
+      },
+      "snapshots": {
+        "round_start": {
+          "event": {
+            "event_name": "round_start",
+            "game_time": 1085.734375,
+            "is_warmup_period": false,
+            "round": 13,
+            "tick": 67110,
+            "total_rounds_played": 12
+          },
+          "players": [
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "菠萝抽风",
+              "steamid": "76561199238050274",
+              "team_num": 2,
+              "tick": 67110
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "用户0001",
+              "steamid": "76561199700500920",
+              "team_num": 2,
+              "tick": 67110
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "76561199642456355",
+              "steamid": "76561199642456355",
+              "team_num": 2,
+              "tick": 67110
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "虎嗅蔷薇",
+              "steamid": "76561199189426601",
+              "team_num": 3,
+              "tick": 67110
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "8888888888888888888888",
+              "steamid": "76561198431759580",
+              "team_num": 3,
+              "tick": 67110
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "山姆烤蛋",
+              "steamid": "76561199382440624",
+              "team_num": 3,
+              "tick": 67110
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "tarkz",
+              "steamid": "76561199567278982",
+              "team_num": 3,
+              "tick": 67110
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "Makoto Nijima",
+              "steamid": "76561198823508147",
+              "team_num": 3,
+              "tick": 67110
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "twinkle",
+              "steamid": "76561198397206664",
+              "team_num": 2,
+              "tick": 67110
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "D.B.可乐",
+              "steamid": "76561198427875946",
+              "team_num": 2,
+              "tick": 67110
+            }
+          ]
+        },
+        "round_freeze_end": {
+          "event": {
+            "event_name": "round_freeze_end",
+            "game_time": 1107.21875,
+            "is_warmup_period": false,
+            "tick": 68486,
+            "total_rounds_played": 12
+          },
+          "players": [
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "菠萝抽风",
+              "steamid": "76561199238050274",
+              "team_num": 2,
+              "tick": 68486
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "用户0001",
+              "steamid": "76561199700500920",
+              "team_num": 2,
+              "tick": 68486
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "76561199642456355",
+              "steamid": "76561199642456355",
+              "team_num": 2,
+              "tick": 68486
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "虎嗅蔷薇",
+              "steamid": "76561199189426601",
+              "team_num": 3,
+              "tick": 68486
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "8888888888888888888888",
+              "steamid": "76561198431759580",
+              "team_num": 3,
+              "tick": 68486
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "山姆烤蛋",
+              "steamid": "76561199382440624",
+              "team_num": 3,
+              "tick": 68486
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "tarkz",
+              "steamid": "76561199567278982",
+              "team_num": 3,
+              "tick": 68486
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "Makoto Nijima",
+              "steamid": "76561198823508147",
+              "team_num": 3,
+              "tick": 68486
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "twinkle",
+              "steamid": "76561198397206664",
+              "team_num": 2,
+              "tick": 68486
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "D.B.可乐",
+              "steamid": "76561198427875946",
+              "team_num": 2,
+              "tick": 68486
+            }
+          ]
+        },
+        "round_end": {
+          "event": {
+            "event_name": "round_end",
+            "game_time": 1152.703125,
+            "is_warmup_period": false,
+            "reason": "ct_killed",
+            "round": 13,
+            "tick": 71396,
+            "total_rounds_played": 13,
+            "winner": "T"
+          },
+          "players": [
+            {
+              "is_alive": false,
+              "is_connected": 0,
+              "name": "菠萝抽风",
+              "steamid": "76561199238050274",
+              "team_num": 2,
+              "tick": 71396
+            },
+            {
+              "is_alive": false,
+              "is_connected": 0,
+              "name": "用户0001",
+              "steamid": "76561199700500920",
+              "team_num": 2,
+              "tick": 71396
+            },
+            {
+              "is_alive": false,
+              "is_connected": 0,
+              "name": "76561199642456355",
+              "steamid": "76561199642456355",
+              "team_num": 2,
+              "tick": 71396
+            },
+            {
+              "is_alive": false,
+              "is_connected": 0,
+              "name": "虎嗅蔷薇",
+              "steamid": "76561199189426601",
+              "team_num": 3,
+              "tick": 71396
+            },
+            {
+              "is_alive": false,
+              "is_connected": 0,
+              "name": "8888888888888888888888",
+              "steamid": "76561198431759580",
+              "team_num": 3,
+              "tick": 71396
+            },
+            {
+              "is_alive": false,
+              "is_connected": 0,
+              "name": "山姆烤蛋",
+              "steamid": "76561199382440624",
+              "team_num": 3,
+              "tick": 71396
+            },
+            {
+              "is_alive": false,
+              "is_connected": 0,
+              "name": "tarkz",
+              "steamid": "76561199567278982",
+              "team_num": 3,
+              "tick": 71396
+            },
+            {
+              "is_alive": false,
+              "is_connected": 0,
+              "name": "Makoto Nijima",
+              "steamid": "76561198823508147",
+              "team_num": 3,
+              "tick": 71396
+            },
+            {
+              "is_alive": false,
+              "is_connected": 0,
+              "name": "twinkle",
+              "steamid": "76561198397206664",
+              "team_num": 2,
+              "tick": 71396
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "D.B.可乐",
+              "steamid": "76561198427875946",
+              "team_num": 2,
+              "tick": 71396
+            }
+          ]
+        }
+      }
+    },
+    {
+      "round": 24,
+      "rawEvents": {
+        "round_start": {
+          "event_name": "round_start",
+          "game_time": 2094.28125,
+          "is_warmup_period": false,
+          "round": 24,
+          "tick": 131657,
+          "total_rounds_played": 23
+        },
+        "round_freeze_end": {
+          "event_name": "round_freeze_end",
+          "game_time": 2109.265625,
+          "is_warmup_period": false,
+          "tick": 132617,
+          "total_rounds_played": 23
+        },
+        "round_end": {
+          "event_name": "round_end",
+          "game_time": 2236.65625,
+          "is_warmup_period": false,
+          "reason": "ct_killed",
+          "round": 24,
+          "tick": 140769,
+          "total_rounds_played": 24,
+          "winner": "T"
+        }
+      },
+      "snapshots": {
+        "round_start": {
+          "event": {
+            "event_name": "round_start",
+            "game_time": 2094.28125,
+            "is_warmup_period": false,
+            "round": 24,
+            "tick": 131657,
+            "total_rounds_played": 23
+          },
+          "players": [
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "菠萝抽风",
+              "steamid": "76561199238050274",
+              "team_num": 2,
+              "tick": 131657
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "用户0001",
+              "steamid": "76561199700500920",
+              "team_num": 2,
+              "tick": 131657
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "76561199642456355",
+              "steamid": "76561199642456355",
+              "team_num": 2,
+              "tick": 131657
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "虎嗅蔷薇",
+              "steamid": "76561199189426601",
+              "team_num": 3,
+              "tick": 131657
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "8888888888888888888888",
+              "steamid": "76561198431759580",
+              "team_num": 3,
+              "tick": 131657
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "山姆烤蛋",
+              "steamid": "76561199382440624",
+              "team_num": 3,
+              "tick": 131657
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "tarkz",
+              "steamid": "76561199567278982",
+              "team_num": 3,
+              "tick": 131657
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "Makoto Nijima",
+              "steamid": "76561198823508147",
+              "team_num": 3,
+              "tick": 131657
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "twinkle",
+              "steamid": "76561198397206664",
+              "team_num": 2,
+              "tick": 131657
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "D.B.可乐",
+              "steamid": "76561198427875946",
+              "team_num": 2,
+              "tick": 131657
+            }
+          ]
+        },
+        "round_freeze_end": {
+          "event": {
+            "event_name": "round_freeze_end",
+            "game_time": 2109.265625,
+            "is_warmup_period": false,
+            "tick": 132617,
+            "total_rounds_played": 23
+          },
+          "players": [
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "菠萝抽风",
+              "steamid": "76561199238050274",
+              "team_num": 2,
+              "tick": 132617
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "用户0001",
+              "steamid": "76561199700500920",
+              "team_num": 2,
+              "tick": 132617
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "76561199642456355",
+              "steamid": "76561199642456355",
+              "team_num": 2,
+              "tick": 132617
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "虎嗅蔷薇",
+              "steamid": "76561199189426601",
+              "team_num": 3,
+              "tick": 132617
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "8888888888888888888888",
+              "steamid": "76561198431759580",
+              "team_num": 3,
+              "tick": 132617
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "山姆烤蛋",
+              "steamid": "76561199382440624",
+              "team_num": 3,
+              "tick": 132617
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "tarkz",
+              "steamid": "76561199567278982",
+              "team_num": 3,
+              "tick": 132617
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "Makoto Nijima",
+              "steamid": "76561198823508147",
+              "team_num": 3,
+              "tick": 132617
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "twinkle",
+              "steamid": "76561198397206664",
+              "team_num": 2,
+              "tick": 132617
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "D.B.可乐",
+              "steamid": "76561198427875946",
+              "team_num": 2,
+              "tick": 132617
+            }
+          ]
+        },
+        "round_end": {
+          "event": {
+            "event_name": "round_end",
+            "game_time": 2236.65625,
+            "is_warmup_period": false,
+            "reason": "ct_killed",
+            "round": 24,
+            "tick": 140769,
+            "total_rounds_played": 24,
+            "winner": "T"
+          },
+          "players": [
+            {
+              "is_alive": false,
+              "is_connected": 0,
+              "name": "菠萝抽风",
+              "steamid": "76561199238050274",
+              "team_num": 2,
+              "tick": 140769
+            },
+            {
+              "is_alive": false,
+              "is_connected": 0,
+              "name": "用户0001",
+              "steamid": "76561199700500920",
+              "team_num": 2,
+              "tick": 140769
+            },
+            {
+              "is_alive": false,
+              "is_connected": 0,
+              "name": "76561199642456355",
+              "steamid": "76561199642456355",
+              "team_num": 2,
+              "tick": 140769
+            },
+            {
+              "is_alive": false,
+              "is_connected": 0,
+              "name": "虎嗅蔷薇",
+              "steamid": "76561199189426601",
+              "team_num": 3,
+              "tick": 140769
+            },
+            {
+              "is_alive": false,
+              "is_connected": 0,
+              "name": "8888888888888888888888",
+              "steamid": "76561198431759580",
+              "team_num": 3,
+              "tick": 140769
+            },
+            {
+              "is_alive": false,
+              "is_connected": 0,
+              "name": "山姆烤蛋",
+              "steamid": "76561199382440624",
+              "team_num": 3,
+              "tick": 140769
+            },
+            {
+              "is_alive": false,
+              "is_connected": 0,
+              "name": "tarkz",
+              "steamid": "76561199567278982",
+              "team_num": 3,
+              "tick": 140769
+            },
+            {
+              "is_alive": false,
+              "is_connected": 0,
+              "name": "Makoto Nijima",
+              "steamid": "76561198823508147",
+              "team_num": 3,
+              "tick": 140769
+            },
+            {
+              "is_alive": true,
+              "is_connected": 0,
+              "name": "twinkle",
+              "steamid": "76561198397206664",
+              "team_num": 2,
+              "tick": 140769
+            },
+            {
+              "is_alive": false,
+              "is_connected": 0,
+              "name": "D.B.可乐",
+              "steamid": "76561198427875946",
+              "team_num": 2,
+              "tick": 140769
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "lifecycleEvidence": {
+    "player_spawn": {
+      "warmup": {
+        "event_name": "player_spawn",
+        "game_time": 38.140625,
+        "is_warmup_period": true,
+        "tick": 65,
+        "total_rounds_played": 0,
+        "user_is_alive": true,
+        "user_is_connected": 0,
+        "user_name": "twinkle",
+        "user_steamid": "76561198397206664",
+        "user_team_num": 3
+      },
+      "live": {
+        "event_name": "player_spawn",
+        "game_time": 97.453125,
+        "is_warmup_period": false,
+        "tick": 3861,
+        "total_rounds_played": 1,
+        "user_is_alive": false,
+        "user_is_connected": 0,
+        "user_name": "twinkle",
+        "user_steamid": "76561198397206664",
+        "user_team_num": 3
+      }
+    },
+    "player_team": {
+      "disconnect": false,
+      "event_name": "player_team",
+      "game_time": 1085.71875,
+      "is_warmup_period": false,
+      "isbot": false,
+      "oldteam": 3,
+      "silent": true,
+      "team": 2,
+      "tick": 67110,
+      "total_rounds_played": 12,
+      "user_is_alive": false,
+      "user_is_connected": 0,
+      "user_name": "twinkle",
+      "user_steamid": "76561198397206664",
+      "user_team_num": 3
+    },
+    "player_disconnect": {
+      "PlayerID": 0,
+      "event_name": "player_disconnect",
+      "ever_fully_connected": true,
+      "game_time": 2238.03125,
+      "is_warmup_period": false,
+      "name": "tarkz",
+      "networkid": "[U:1:1607013254]",
+      "reason": 2,
+      "tick": 140858,
+      "total_rounds_played": 24,
+      "user_is_alive": false,
+      "user_is_connected": 0,
+      "user_name": "tarkz",
+      "user_steamid": "76561199567278982",
+      "user_team_num": 3,
+      "xuid": "76561199567278982"
+    },
+    "counts": {
+      "player_spawn": 240,
+      "player_team": 10,
+      "player_disconnect": 10,
+      "player_connect": 0,
+      "player_connect_full": 0
+    },
+    "disconnectTicks": [
+      140858,
+      140900,
+      140935,
+      141026,
+      141061,
+      141152,
+      141257,
+      141327,
+      141698,
+      141740
+    ]
+  },
+  "observations": {
+    "playerRowsAtStartTotal": 240,
+    "aliveAtStartTotal": 240,
+    "freezeEndRowsTotal": 240,
+    "aliveAtFreezeEndTotal": 240,
+    "roundEndRowsTotal": 240,
+    "aliveAtRoundEndTotal": 60,
+    "uniqueSteamIds": 10,
+    "nonTcteamRows": 0,
+    "missingSteamRows": 0,
+    "connectedCandidateValues": [
+      "number:0"
+    ],
+    "connectedAliasPresent": false
+  }
+}

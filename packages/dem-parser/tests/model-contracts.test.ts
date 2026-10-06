@@ -1,4 +1,7 @@
 import type { DamageEvent, MatchEvent } from "@cs2-coach/match-model";
+import type {
+  RoundPlayerLifecycleEvent, RoundPlayerState, RoundStateBoundary, RoundStateSnapshot,
+} from "@cs2-coach/match-model";
 
 // Compile the domain contract as a consumer, including discriminant narrowing.
 function evidence(event: MatchEvent): string | number | null | undefined {
@@ -23,4 +26,16 @@ const numericAttacker: DamageEvent["attacker"] = 76561199642456355;
 // @ts-expect-error Full position streams are outside the combat event union.
 const positionStream: MatchEvent = { type: "position", tick: 1 };
 
-void [evidence, emptyDamage, numericAttacker, positionStream];
+const boundary: RoundStateBoundary = "freeze_end";
+const playerState: RoundPlayerState = {
+  steamId: "76561199642456355", side: "CT", alive: null, participant: true,
+};
+const stateSnapshot: RoundStateSnapshot = {
+  boundary, tick: 20, availability: "observed", players: [playerState], unidentifiedPlayerCount: 0,
+};
+const sideChange: RoundPlayerLifecycleEvent = {
+  type: "side_change", tick: 21, player: playerState.steamId,
+  side: "T", previousSide: "CT", disconnect: false,
+};
+
+void [evidence, emptyDamage, numericAttacker, positionStream, stateSnapshot, sideChange];
