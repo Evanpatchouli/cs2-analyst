@@ -1,5 +1,13 @@
 # Agent Handoff
 
+## 2026-10-07 — P5.6.1 玩家名称展示修复 PASS
+
+- 统一规则：nickname 有值且 trim 后非空时原样保留；仅缺失/null/空白显示“未知玩家”。长数字、等于 playerId、首尾空白不改写；DTO 身份 ID 保留。统一覆盖 report.players、Timeline actorName/targetName、Analysis Views、Dropdown；过长文本仅 CSS 省略 + Fluent Tooltip 全文。
+- 测试删除数字昵称隐藏断言，新增长数字/同 ID/首尾空白保留和缺失/null/空白回退，验证 DTO 名称与原始 ID；真实 DEM UI smoke 检查 Timeline、Analysis 与 Dropdown 长数字昵称。
+- 验证全 PASS：pnpm typecheck（11/11）、pnpm build（6/6）、desktop test（10/10）、test:report（真实/损坏/非 DEM）、pnpm test:smoke（dev/preview）、pack:win、pack:win:test、test:installed。
+- 最终生产与测试 seam 安装包均约 107.3 MB。安装版实际安装/启动/卸载通过；ASAR 1.40 MB / 10 条目、原生绑定 unpacked、renderer 无 Node、生产路径注入防护、demo1 golden、Analysis Views 与 Tab 状态保留、长数字昵称、损坏 DEM、中途关闭无残留 worker均通过。
+- 仅桌面 presentation、测试与文档改动；Analytics / Findings / Analysis 逻辑与 UI 布局不变。版本 0.1.0、Windows x64 only；安装包在 ignored release/.tmp，不进入 Git。
+
 ## 2026-10-07 — P5.5.1 与 P5.6 Analysis Views MVP PASS
 
 - 基线 `7f6c130`；P5.5.1 focused commit `0225332`：统一 displayPlayerName，缺失/空白/等于 ID/15～22 位数字名显示未知玩家，短数字昵称保留；名单、Timeline、Analysis 名称统一，原始 ID 保留。8/8 集成与真实桌面 smoke 通过。

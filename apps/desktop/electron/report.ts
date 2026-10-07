@@ -269,7 +269,7 @@ export function buildDesktopReport(match: Match, filePath: string): DesktopMatch
   const a = analyzeMatch(match);
   const valid = a.players.filter(p => p.steamId && p.roundsPlayed > 0);
   if (!valid.length) throw new Error('DEM 没有可报告的有效玩家或完整回合。');
-  const selected = valid.find(p => p.nickname.toLowerCase() === 'twinkle') ?? valid[0];
+  const selected = valid.find(p => p.nickname?.toLowerCase() === 'twinkle') ?? valid[0];
   const clutchIneligible = Boolean(a.coverage.issues['clutch-round-ineligible']);
   const roundTime = roundTimeLookup(match);
   const scores = roundScoreLookup(match);

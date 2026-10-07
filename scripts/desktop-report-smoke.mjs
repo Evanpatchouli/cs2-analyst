@@ -187,8 +187,7 @@ await scenario({
     assert.ok((r24Detail.match(/twinkle →/g) ?? []).length >= 4, 'R24 应包含 twinkle 的关键击杀');
     assert.ok(/\+\d+\.\d{2} 秒/.test(r24Detail), '时间应显示为回合开始后的秒数');
     assert.ok(!/tick\s*\d+/.test(r24Detail), '时间线不应显示原始 tick');
-    assert.ok(r24Detail.includes('twinkle → 未知玩家'), '未知长数字昵称应显示为未知玩家');
-    assert.ok(!/\d{15,22}/.test(r24Detail), '正文不应泄漏长数字标识');
+    assert.ok(r24Detail.includes('twinkle → 8888888888888888888888'), '长数字昵称应原样显示');
     const highlighted = await evaluate(`document.querySelector('[data-timeline-round="24"]')?.getAttribute('data-highlighted')`);
     assert.equal(highlighted, 'true', '联动后应强调对应回合');
 
@@ -221,6 +220,7 @@ await scenario({
       };
     })()`);
     assert.equal(analysis.count, 10);
+    assert.ok(await evaluate(`([...document.querySelectorAll('[data-comparison-player]')].some(r => r.textContent.includes('8888888888888888888888')))`), '分析页保留长数字昵称');
     assert.deepEqual(analysis.values, [...analysis.values].sort((a, b) => b - a));
     assert.equal(analysis.current.length, 1);
     const barColors = await evaluate(`(() => { const rows = [...document.querySelectorAll('[data-comparison-player]')]; return rows.map(r => ({ current: r.textContent.includes('· 当前'), color: getComputedStyle(r.children[1].firstElementChild).backgroundColor })); })()`);
@@ -295,6 +295,7 @@ await scenario({
       return Boolean(trigger);
     })()`);
     assert.equal(opened, true, '未找到目标玩家下拉框');
+    assert.ok(await evaluate(`([...document.querySelectorAll('[role="option"]')].some(o => o.textContent === '8888888888888888888888'))`), 'Dropdown 保留完整长数字昵称');
     await waitFor(async () => evaluate(`(() => {
       const option = [...document.querySelectorAll('[role="option"]')].find(o => o.textContent.trim() === 'tarkz');
       if (!option) return null;

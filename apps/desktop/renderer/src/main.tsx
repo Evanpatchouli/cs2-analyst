@@ -83,6 +83,8 @@ const useStyles = makeStyles({
     ':first-child': { borderTopStyle: 'none' },
   },
   timelineTime: { color: tokens.colorNeutralForeground3, fontVariantNumeric: 'tabular-nums' },
+  playerName: { display: 'block', minWidth: 0, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  playerDropdown: { maxWidth: '250px', '& button': { minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } },
   timelineWeapon: { color: tokens.colorNeutralForeground3, textAlign: 'right', whiteSpace: 'nowrap' },
 });
 
@@ -279,7 +281,7 @@ function RoundTimeline({ rounds, expanded, highlighted, onToggle }: {
             {open ? <div className={s.timelineDetail} data-round-detail={r.round}>
               {r.events.length ? r.events.map(e => <div key={e.id} className={s.timelineEvent}>
                 <span className={s.timelineTime}>{eventTime(e)}</span>
-                <span>{e.description}</span>
+                <Tooltip content={e.description} relationship="description"><span className={s.playerName} tabIndex={0}>{e.description}</span></Tooltip>
                 <span className={s.timelineWeapon}>{e.weapon ? weaponLabel(e.weapon) : ''}</span>
               </div>) : <Caption1 className={s.muted}>本回合没有可展示的关键事件。</Caption1>}
             </div> : null}
@@ -315,9 +317,9 @@ function Report({ report, playerId }: { report: DesktopMatchReport; playerId: st
   return <>
     <div className={s.header}>
       <div className={s.column}><Title1>{report.match.map}</Title1><Body1>{report.match.score ? `${report.match.score.initialCT} : ${report.match.score.initialT}` : '比分不可用'} · 开局 CT 队 / 开局 T 队 · {report.match.rounds} 回合</Body1><Caption1 className={s.muted}>{report.match.fileName}</Caption1></div>
-      <div className={s.column}><Caption1>目标玩家</Caption1><Dropdown aria-label="目标玩家" value={player.nickname} selectedOptions={[playerId]} onOptionSelect={(_, data) => data.optionValue && selectPlayer(data.optionValue)}>
-        {report.players.map(p => <Option key={p.id} value={p.id} text={p.nickname}>{p.nickname}</Option>)}
-      </Dropdown></div>
+      <div className={s.column}><Caption1>目标玩家</Caption1><Tooltip content={player.nickname} relationship="description"><Dropdown className={s.playerDropdown} listbox={{ style: { maxWidth: '250px' } }} aria-label="目标玩家" value={player.nickname} selectedOptions={[playerId]} onOptionSelect={(_, data) => data.optionValue && selectPlayer(data.optionValue)}>
+        {report.players.map(p => <Option key={p.id} value={p.id} text={p.nickname}><Tooltip content={p.nickname} relationship="description"><span className={s.playerName}>{p.nickname}</span></Tooltip></Option>)}
+      </Dropdown></Tooltip></div>
     </div>
     <TabList aria-label="报告页面" selectedValue={activeTab} onTabSelect={(_, data) => setActiveTab(String(data.value))}>
       <Tab id="report-tab" value="report" aria-controls="report-panel">比赛报告</Tab>

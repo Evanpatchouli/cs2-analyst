@@ -294,21 +294,35 @@ test('timeline keeps side, result and score unknown instead of guessing', () => 
 });
 
 
-test('player names hide identifiers while preserving short numeric nicknames and raw IDs', () => {
-  for (const name of [undefined, null, '', '  ', 'id', '8888888888888888888888', '76561198000000000']) {
+test('player names preserve supplied nicknames and raw IDs, falling back only for blank names', () => {
+  for (const name of [undefined, null, '', '  ', '\t\n']) {
     assert.equal(displayPlayerName('id', name), '未知玩家');
   }
-  assert.equal(displayPlayerName('id', '12345'), '12345');
-  assert.equal(displayPlayerName('id', ' twinkle '), 'twinkle');
+  for (const name of ['id', '12345', ' twinkle ', '8888888888888888888888', '76561198000000000', '8'.repeat(30)]) {
+    assert.equal(displayPlayerName('id', name), name);
+    assert.equal(displayPlayerName(name, name), name);
+  }
+  for (const name of [undefined, null, '', '  ', '2', ' twinkle ', '8888888888888888888888']) {
+    const match = syntheticMatch();
+    match.players[1].nickname = name;
+    const report = buildDesktopReport(match, 'synthetic.dem');
+    const expected = name?.trim() ? name : '未知玩家';
+    assert.equal(report.players[1].id, '2');
+    assert.equal(report.players[1].nickname, expected);
+    assert.equal(report.analysis.players.find(p => p.playerId === '2').playerName, expected);
+    const kill = report.timeline[0].rounds[0].events.find(e => e.type === 'kill');
+    assert.equal(kill.targetId, '2');
+    assert.equal(kill.targetName, expected);
+    assert.equal(kill.description, `Alice → ${expected}`);
+    const death = report.timeline[1].rounds[0].events.find(e => e.type === 'death');
+    assert.equal(death.actorId, '1');
+    assert.equal(death.targetId, '2');
+    assert.equal(death.targetName, expected);
+    const actor = report.timeline[1].rounds[0].events.find(e => e.actorId === '2');
+    assert.ok(actor);
+    assert.equal(actor.actorName, expected);
+  }
   const match = syntheticMatch();
-  match.players[1].nickname = '8888888888888888888888';
-  const report = buildDesktopReport(match, 'synthetic.dem');
-  assert.equal(report.players[1].nickname, '未知玩家');
-  const kill = report.timeline[0].rounds[0].events.find(e => e.type === 'kill');
-  assert.equal(kill.targetId, '2');
-  assert.equal(kill.description, 'Alice → 未知玩家');
-  const death = report.timeline[1].rounds[0].events.find(e => e.type === 'death');
-  assert.equal(death.targetName, '未知玩家');
   match.rounds[0].events.find(e => e.type === 'kill').victim = '8888888888888888888888';
   const unknown = buildDesktopReport(match, 'synthetic.dem').timeline[0].rounds[0].events.find(e => e.type === 'kill');
   assert.equal(unknown.targetId, '8888888888888888888888');

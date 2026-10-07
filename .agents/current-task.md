@@ -1,6 +1,10 @@
 # Current Task
 
-Status: complete — P5.6 Analysis Views MVP PASS。
+Status: complete — P5.6.1 玩家名称展示修复与 installed-app smoke PASS。
+
+- P5.6.1：nickname 有值且 trim 后非空时原样保留（含首尾空白、长数字、等于 playerId）；仅缺失/null/空白显示未知玩家。report.players、Timeline actorName/targetName、Analysis Views、Dropdown 统一，原始身份 ID 保留 DTO。长名称仅 CSS 省略 + Fluent Tooltip 全文。
+- 本轮验证：typecheck 11/11、build 6/6、desktop 集成 10/10、test:report 三场景、dev/preview test:smoke、pack:win、pack:win:test、test:installed 全 PASS。安装版新增 Analysis Views / Tab 状态保留与 Timeline / Analysis / Dropdown 长数字昵称检查；生产 seam 防护、真实 DEM golden、损坏 DEM、中途关闭无残留 worker、两版卸载均通过。
+- 未修改 Analytics / Findings / Analysis 逻辑或 UI 布局；版本仍为 0.1.0，Windows x64 only。
 
 基线 `7f6c130`，先完成并提交 P5.5.1 名称修复 `0225332`（8/8 集成 + 真实桌面 smoke）。版本仍为 0.1.0，Windows x64 only。
 
@@ -11,7 +15,7 @@ Status: complete — P5.6 Analysis Views MVP PASS。
 - demo1：twinkle R7 CT/win/3K、R24 T/win/4K/未阵亡、R22 T/loss/1K/阵亡；CT 12/10/10/3/68.25，T 12/15/10/1/114.50。核心 golden 和 Findings 顺序不变。
 - 已验证：desktop 集成 10/10；dev/preview test:smoke 通过；全仓 typecheck 11/11、build 6/6；test:report 三场景通过（七指标、10 玩家、排序、Tooltip、Tab 往返状态、换玩家）；analytics 53/53、findings 17/17、parser 28/28。截图检查 1280×900 / 900×760 与趋势/CT/T；修复 Griffel 样式冲突并加 computedStyle 品牌色断言。
 - 验证脚本：独立临时 Chromium profile 避免争用已有应用缓存，退出等待有界 30 秒。Browser plugin 未提供，使用仓库现有 Electron CDP E2E。
-- 剩余验证范围：未重新构建安装包或测试安装版；降级 DTO 的 UI 分支以静态审查和集成/helper 测试覆盖，真实 DEM smoke 不触发全部降级路径。
+- 剩余验证范围：降级 DTO 的 UI 分支以静态审查和集成/helper 测试覆盖，真实 DEM smoke 不触发全部降级路径。P5.6 缺失的重新打包与安装版 smoke 已在 P5.6.1 补齐。
 - 边界：未修改 P3/P4 实现/契约、未新增算法、图表库、rating、heatmap、播放器、登录、历史库、扫描或 AI。
 
 详细说明见 [桌面比赛报告](../docs/desktop-report.md)。验证通过后创建 focused commit 交接。

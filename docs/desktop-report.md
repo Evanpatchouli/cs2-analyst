@@ -194,9 +194,9 @@ P5.2 已把该链路做成可安装的 Windows 版本（electron-builder + NSIS�
 - Utility 实际致盲时长、战术价值与低影响回合仍未在 Analytics 中证实，报告如实标注而不猜测。
 - Analytics/Findings 语义保持冻结；未来扩展需独立需求与迭代。
 
-## 玩家名称展示（P5.5.1）
+## 玩家名称展示（P5.6.1）
 
-统一由桌面 presenter 的 `displayPlayerName` 处理名单与 Timeline 名称：去除首尾空白，缺失、空白、等于 playerId 或 15～22 位纯数字昵称显示“未知玩家”；短数字昵称（如 12345）保留。原始玩家、actor、target ID 继续保留供追溯，正文不回退到 ID。
+统一由桌面 presenter 的 `displayPlayerName` 处理 report.players、Timeline actorName / targetName 与 Analysis Views 名称，Dropdown 复用 report.players：nickname 有值且 trim 后非空时原样展示（包括首尾空白、长数字、与 playerId 相同的昵称）；仅缺失、null、空白昵称显示“未知玩家”。过长内容只用 CSS 省略并由 Fluent Tooltip 展示全文。原始 playerId / actorId / targetId 保留在 DTO，仅用于身份关联，正文不回退到 ID。
 
 ## 分析视图（P5.6）
 

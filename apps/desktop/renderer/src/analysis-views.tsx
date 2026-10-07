@@ -13,7 +13,7 @@ const useStyles = makeStyles({
   muted: { color: tokens.colorNeutralForeground3 },
   rows: { display: 'flex', flexDirection: 'column', gap: '6px' },
   row: { display: 'grid', gridTemplateColumns: 'minmax(100px, 200px) minmax(40px, 1fr) 132px', alignItems: 'center', gap: '16px', minHeight: '34px', borderRadius: tokens.borderRadiusMedium, ':focus-visible': { outline: `2px solid ${tokens.colorBrandStroke1}` }, '@media (max-width: 650px)': { gridTemplateColumns: 'minmax(85px, 120px) minmax(20px, 1fr) 100px', gap: '8px' } },
-  name: { overflowWrap: 'anywhere' },
+  name: { minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   track: { height: '12px', backgroundColor: palette.pageTop, borderRadius: '2px', overflow: 'hidden' },
   bar: { height: '100%', backgroundColor: palette.textMuted, borderRadius: '2px' },
   currentBar: { backgroundColor: tokens.colorBrandBackground },

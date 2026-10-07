@@ -355,6 +355,27 @@ async function testSeamScenario() {
     }
     const findingCount = await session.evaluate("document.querySelectorAll('[data-rule]').length");
     assert.equal(findingCount, 5, 'twinkle 应显示 5 条 Findings');
+    await session.evaluate(`document.querySelector('[data-round-summary="24"]').click()`);
+    await waitFor(async () => session.evaluate(`document.querySelector('[data-round-detail="24"]')?.textContent.includes('twinkle → 8888888888888888888888')`), 10_000, '安装版 Timeline 长数字昵称');
+    await session.evaluate(`document.getElementById('analysis-tab').click()`);
+    await waitFor(async () => session.evaluate(`!document.getElementById('analysis-panel').hidden`), 10_000, '安装版 Analysis Views');
+    const analysis = await session.evaluate(`(() => {
+      const rows = [...document.querySelectorAll('[data-comparison-player]')];
+      return { count: rows.length, names: rows.map(r => r.textContent),
+        rounds: document.querySelectorAll('[data-trend-round]').length,
+        ct: document.querySelector('[data-analysis-side="CT"]').textContent,
+        t: document.querySelector('[data-analysis-side="T"]').textContent };
+    })()`);
+    assert.equal(analysis.count, 10);
+    assert.ok(analysis.names.some(name => name.includes('8888888888888888888888')), '安装版分析页保留长数字昵称');
+    assert.equal(analysis.rounds, 24);
+    assert.ok(analysis.ct.includes('10 / 10 / 3') && analysis.ct.includes('68.25'));
+    assert.ok(analysis.t.includes('15 / 10 / 1') && analysis.t.includes('114.50'));
+    await session.evaluate(`document.getElementById('report-tab').click()`);
+    assert.equal(await session.evaluate(`document.querySelector('[data-round-summary="24"]').getAttribute('aria-expanded')`), 'true');
+    await session.evaluate(`document.querySelector('[aria-label="目标玩家"]').click()`);
+    await waitFor(async () => session.evaluate(`([...document.querySelectorAll('[role="option"]')].some(o => o.textContent === '8888888888888888888888'))`), 10_000, '安装版 Dropdown 长数字昵称');
+    console.log(variant.label + '：Analysis Views、Tab 状态保留、Timeline / Analysis / Dropdown 长数字昵称通过');
     assertNoStiffEnglish(body);
     assert.deepEqual(session.errors, [], '页面存在未捕获异常');
     const exitCode = await closeGracefully(session);

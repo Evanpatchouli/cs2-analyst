@@ -125,6 +125,8 @@ Renderer bundle 不含 `demoparser2` / `laihoe` / `@cs2-coach/*`，桌面与开�
 
 安装版 E2E 由 `pnpm --filter @cs2-coach/desktop test:installed` 执行；它同时断言 `app.asar` 只含应用内容、renderer bundle 不含 Node/原生 parser、原生绑定以 unpacked 形式存在。
 
+P5.6.1（2026-10-07）重新构建生产与测试 seam 安装包（均约 107.3 MB），补齐 P5.6 installed-app smoke，全 PASS。当前 ASAR 为 1.40 MB / 10 条目；原有安装、启动、注入防护、真实 DEM golden、损坏 DEM、中途关闭无残留 worker、卸载验证均通过，并新增安装版 Analysis Views（10 玩家、24 回合、CT/T golden）、Tab 往返保留 Timeline 展开状态，以及 Timeline / Analysis / Dropdown 长数字昵称原样展示断言。
+
 ## 已知限制
 
 - 安装包未签名，首次运行可能触发 SmartScreen 提示。

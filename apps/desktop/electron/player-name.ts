@@ -1,5 +1,4 @@
-/** Presentation only: retain raw identifiers in DTOs, never use them as names. */
-export function displayPlayerName(playerId: string, nickname?: string | null): string {
-  const name = nickname?.trim();
-  return !name || name === playerId || /^\d{15,22}$/.test(name) ? '未知玩家' : name;
+/** Presentation only: test for blank names without changing supplied nicknames. */
+export function displayPlayerName(_playerId: string, nickname?: string | null): string {
+  return nickname?.trim() ? nickname : '未知玩家';
 }
