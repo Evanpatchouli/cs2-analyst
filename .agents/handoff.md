@@ -8,7 +8,7 @@
 - 原图字节不变，provenance SHA与资源.gitattributes防换行转换保证71图可追溯；Vite静态import/相对base，production不访问原游戏目录。
 - 全命令PASS：typecheck11/11、build6/6、desktop15/15、report三场景、analytics53/findings17/parser28、dev-preview smoke、两pack、installed全链路。两installer107.5MB，ASAR2.13MB/81条目/71官方SVG，生产全部图URL可解码。
 - R24 AK/inferno、R22 posthumous HE/flash、R23真实headshot在开发/安装共享断言通过；Golden与Finding ruleId顺序不变。截图系统临时cs2-coach-p563-qa（1280/900/800/650），实查无白底/拉伸/broken image/整页溢出。独立review无阻塞，SSR4/4及71实际源图一致。
-- 安装防注入测试首次异常，原包/代码不变重跑全通过，原因未确定且未复现，保留docs/desktop-report.md记录。
+- 用户已确认首次安装防注入测试失败是其手动选择DEM触发正常导入造成；生产路径注入防护正常，原包/代码不变重跑全通过。docs/desktop-report.md记录已修正。
 - 完成后一个指定focused commit，不amend/squash；output/保留用户未追踪状态，截图/installer不提交。详细说明与提取命令见docs/cs2-killfeed-assets.md。
 
 ## 2026-10-07 — P5.6.2 Report UX Polish PASS

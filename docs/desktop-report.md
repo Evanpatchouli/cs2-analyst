@@ -252,4 +252,4 @@ P5.6.2 验证全 PASS：pnpm typecheck（11/11）、pnpm build（6/6）、deskto
 - 截图系统临时cs2-coach-p563-qa，1280×900 / 900×760 / 800×600 / 650×760；实查R24/R22/R23无白底、拉伸、broken image或整页溢出，昵称与图标居中。Browser plugin not available，使用项目已有Electron CDP E2E。
 - 当前通过typecheck11/11、build6/6、desktop15/15、test:report三场景、analytics53/53、findings17/17、parser28/28、dev/preview test:smoke。pack:win / pack:win:test / test:installed最终全通过：两安装包均107.5MB；ASAR2.13MB/81条目/71官方SVG，逐图与源码字节一致，生产图片URL全部可解码。生产启动/路径注入防护/卸载、测试seam真实demo共享UX/损坏DEM/中途关闭无worker/卸载通过。独立审查无阻塞；71个资源均与实际提取字节一致，独立Renderer测试4/4。
 
-安装测试记录：补齐headshot后的首次installed run在生产防注入断言处出现demo报告而失败；生产ASAR seam缺省检查与资源检查已通过。未修改产品代码或安装包，随后重跑test:installed全通过。首次异常原因未确定、重跑未复现，保留此记录，不将其归因为资源改动或确定的外部操作。
+安装测试记录：补齐headshot后的首次installed run在生产防注入断言处出现demo报告而失败；生产ASAR seam缺省检查与资源检查已通过。未修改产品代码或安装包，随后重跑test:installed全通过。用户随后确认：测试期间其手动在原生文件对话框选择了DEM，正常导入产生报告，导致自动化“不得出现报告”断言失败。生产路径注入防护正常，此次失败由测试期间的人工操作造成，不是资源改动、路径注入或产品缺陷。
