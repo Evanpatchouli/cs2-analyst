@@ -68,7 +68,19 @@ P5.6.3 Official Kill-feed Assets — **PASS**。击杀播报改用71张官方SVG
 
 P5.6.4 Custom Window Chrome — **PASS**。40px 全宽自绘窗口标题栏、原创 target mark、安全 preload/IPC、原生最大化状态同步与持久错误页壳层已完成；全部指定回归、两安装包和 installed smoke 通过，用户确认真实鼠标拖动正常。
 
-P5.6.5 Branding & App Icon — **IMPLEMENTED / 用户授权提交，验收未全部完成**。正式 CS2 Analyst mark/lockup、七尺寸 Windows ICO、20px mark + CS2 Analyst 标题栏、EXE/NSIS/快捷方式/App ID 与全仓内部命名迁移完成。构建、单测、报告、dev/preview smoke 与两安装包通过；生产图标/快捷方式/卸载注册项验证通过。完整 installed regression 和任务栏/Alt+Tab/真实拖动视觉验收未完成，不记录整体 PASS。见 [Windows 打包记录](./windows-packaging.md)。
+P5.6.5 Branding & App Icon — **FINAL PASS**。正式产品名冻结为 CS2 Analyst；mark/lockup、七尺寸 Windows ICO、20px mark + CS2 Analyst 标题栏、EXE/NSIS/快捷方式/App ID 与全仓 `cs2-analyst` 命名迁移完成。构建、单测、报告、dev/preview smoke、两安装包以及生产图标/快捷方式/卸载注册项验证均已完成。此前未重跑的完整 installed regression 与部分任务栏/Alt+Tab/真实拖动视觉项，由 Product Owner 于 2026-10-08 明确批准不再作为 P5.6.5 的阻塞验收项；FINAL PASS 表示产品验收结论，不代表这些未执行检查被补跑。见 [Windows 打包记录](./windows-packaging.md)。
+
+## v0.1 Final Acceptance
+
+**Status: ACTIVE — waiting for additional real DEM samples.**
+
+- P5 Desktop MVP 已封板；除已确认 bug 外，不再追加 P5.x 功能或 polish。
+- `demo1` 继续作为 deterministic golden，现有 K/D/A、ADR、KAST、Trade、CT/T、Multi-kill、R24 clutch、R22 posthumous HE 与 Findings ruleId 顺序不得回归。
+- Final Acceptance 的核心目标从“继续开发功能”切换为“验证不同真实比赛上的泛化可靠性”。
+- 目标样本约 3～5 场真实玩家 DEM，尽量覆盖不同地图、比分、发挥水平与特殊情况；拿到第 2 份 DEM 即可开始逐场验收，不必等待全部样本收齐。
+- 每场重点抽查最终比分、K/D/A、ADR、KAST、CT/T split、最高多杀、Opening/Trade、Clutch（如有）以及随机 3～5 个 Timeline 回合，并核对 Findings 是否有充分证据。
+- DEM 仍由用户主动选择；不引入自动目录扫描、登录、历史库、AI Coach、热力图或完整播放器。
+- P6 AI Coach 仅在 v0.1 Final Acceptance 完成后再评估。
 
 ## P6 AI Coach
 
