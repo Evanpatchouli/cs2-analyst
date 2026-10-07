@@ -50,6 +50,7 @@ interface DesktopMatchReport {
   analytics: DesktopPlayerAnalytics[];
   findings: Finding[];
   timeline: DesktopPlayerTimeline[];            // 每名有效玩家一份回合时间线（只读投影）
+  analysis: DesktopAnalysisViews;              // 冻结指标投影 + Timeline 回合事实
 }
 
 type ImportPhase = 'selecting' | 'parsing' | 'analyzing';
@@ -188,7 +189,7 @@ P5.2 已把该链路做成可安装的 Windows 版本（electron-builder + NSIS�
 ## 剩余缺口（v0.1 日常使用之前）
 
 - GUI 文件选择之外的便利性：无最近文件、历史比赛库、CS2 demo 目录自动扫描。
-- 报告深度：无完整播放器 / 图表 / 地图热力图 / 多玩家对比；比分只按开局阵营展示，未关联队伍名。
+- 报告深度：无完整播放器 / 地图热力图；比分只按开局阵营展示，未关联队伍名。
 - 大规模 DEM 的进度反馈仍是阶段级（selecting/parsing/analyzing），无百分比。
 - Utility 实际致盲时长、战术价值与低影响回合仍未在 Analytics 中证实，报告如实标注而不猜测。
 - Analytics/Findings 语义保持冻结；未来扩展需独立需求与迭代。
@@ -196,3 +197,22 @@ P5.2 已把该链路做成可安装的 Windows 版本（electron-builder + NSIS�
 ## 玩家名称展示（P5.5.1）
 
 统一由桌面 presenter 的 `displayPlayerName` 处理名单与 Timeline 名称：去除首尾空白，缺失、空白、等于 playerId 或 15～22 位纯数字昵称显示“未知玩家”；短数字昵称（如 12345）保留。原始玩家、actor、target ID 继续保留供追溯，正文不回退到 ID。
+
+## 分析视图（P5.6）
+
+共享比赛头、目标玩家 Dropdown 与重新选择 DEM 按钮下方新增 Fluent UI v9 `TabList / Tab`：默认“比赛报告”，新增“分析”。原有核心数据、Findings、道具、残局与 Timeline 保持在比赛报告中。两个 Tab panel 保持挂载，通过 hidden 切换；不触发导入、解析或 Analytics，保留目标玩家、Findings 展开与 Timeline 展开状态、分析指标选择。
+
+`DesktopMatchReport.analysis` 是 additive JSON-only presentation DTO，schemaVersion 仍为 1：
+
+- `players: DesktopPlayerComparison[]`：直接投影冻结 PlayerMetrics 的 K/D/A、kdRatio、ADR、HS%、KAST percentage/complete、opening winRate、tradeRate/complete/tradeKills；名称统一使用 displayPlayerName。Opening winRate 保留 0～1 fraction，其余 percentage/rate 保留 Analytics 的 0～100 单位；只有显示时格式化。
+- `perPlayer: DesktopPlayerAnalysis[]`：每人 roundTrend 与 sideSplit。CT/T 只投影 `p.side.CT/T` 的 roundsPlayed、K/D/A、ADR，不遍历事件重算。roundTrend 只计数既有 Timeline 中的 kill/death，复用 side/result；不加入伤害、ADR、KAST、rating 或任何新算法。`complete` 表示正式回合窗口存在；窗口缺失时 UI 显示 — 和证据不足，不把空事件当成已证实的零击杀/未阵亡。
+
+分析页三块：
+
+1. 全场玩家对比：完整名单的横向条形图，默认 ADR，支持 K/D、KAST、HS%、首杀对决胜率、死亡后队友补枪率、补枪击杀。当前指标降序、null 排最后；null 无柱且显示 —，零值保留 0。当前玩家品牌色并标“· 当前”，其余中性蓝灰。每行精确值和 Fluent Tooltip 支持 hover/键盘聚焦。KAST/Trade 不完整时显示“部分证据”与提示，tradeKills 同样标记不完整。
+2. 回合表现趋势：当前玩家每回合击杀数离散柱图，不连线、不堆叠 death、无双 Y 轴。回合号、胜负与存/亡标签以及 Tooltip 的阵营、结果、击杀数、死亡状态保留全部事实；窄窗口仅图表内部横向滚动。
+3. CT / T 表现对比：两列展示回合数、K/D/A、ADR；ADR null 显示 — 与证据不足说明。不同单位不共享坐标轴。
+
+简单柱图使用 CSS 布局和 Fluent UI v9 Tooltip/Badge/Card/Dropdown，无新增图表依赖。ADR/KD 两位、各百分比一位、tradeKills 整数；底层 DTO 精度不截断。
+
+Golden：demo1 twinkle R7 = CT/成功/3K，R24 = T/成功/4K/未阵亡，R22 = T/失败/1K/阵亡，保留死后击杀事实；CT = 12 回合、10/10/3、68.25 ADR，T = 12 回合、15/10/1、114.50 ADR。集成测试覆盖指标原值/单位、null、incomplete、排序、格式、窗口缺失与 JSON 序列化；桌面 smoke 覆盖七项指标、10 名玩家、Tooltip、golden、Tab 状态保留与换玩家联动。

@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
 import { spawn, spawnSync } from 'node:child_process';
 import { createRequire } from 'node:module';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { createServer } from 'node:net';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { setTimeout as delay } from 'node:timers/promises';
@@ -18,7 +21,8 @@ async function smoke(mode) {
   const env = { ...process.env };
   delete env.ELECTRON_RUN_AS_NODE;
   delete env.ELECTRON_RENDERER_URL;
-  const child = spawn(process.execPath, [cli, mode, '--', `--remote-debugging-port=${port}`], {
+  const profile = mkdtempSync(join(tmpdir(), 'cs2-coach-shell-profile-'));
+  const child = spawn(process.execPath, [cli, mode, '--', `--remote-debugging-port=${port}`, `--user-data-dir=${profile}`], {
     cwd: desktop,
     env,
     windowsHide: true,
@@ -58,7 +62,7 @@ async function smoke(mode) {
         const timer = setTimeout(() => {
           socket.removeEventListener('message', onMessage);
           reject(new Error(`${method} 超时`));
-        }, 10_000);
+        }, 30_000);
         function onMessage(event) {
           const message = JSON.parse(event.data);
           if (message.id !== requestId) return;
@@ -99,7 +103,7 @@ async function smoke(mode) {
       const timer = setTimeout(() => {
         socket.removeEventListener('message', onLoad);
         reject(new Error('刷新页面超时'));
-      }, 10_000);
+      }, 30_000);
       function onLoad(event) {
         if (JSON.parse(event.data).method !== 'Page.loadEventFired') return;
         clearTimeout(timer);
@@ -120,7 +124,7 @@ async function smoke(mode) {
     assert.deepEqual(errors, [], '存在页面异常或资源加载失败');
     // Electron 退出时会断开协议连接，关闭命令无需等待响应。
     socket.send(JSON.stringify({ id: ++id, method: 'Browser.close' }));
-    for (let attempt = 0; attempt < 50 && child.exitCode === null; attempt++) {
+    for (let attempt = 0; attempt < 300 && child.exitCode === null; attempt++) {
       await delay(100);
     }
     assert.equal(child.exitCode, 0, '关闭窗口后应用未正常退出');
@@ -136,6 +140,7 @@ async function smoke(mode) {
         child.kill();
       }
     }
+    rmSync(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
   }
 }
 

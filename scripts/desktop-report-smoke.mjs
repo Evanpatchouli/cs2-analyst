@@ -47,7 +47,8 @@ async function scenario({ label, demPath, ready, assertReport, assertDom }) {
   const env = { ...process.env, CS2_COACH_DEM_PATH: demPath };
   delete env.ELECTRON_RUN_AS_NODE;
   delete env.ELECTRON_RENDERER_URL;
-  const child = spawn(electron, ['.', `--remote-debugging-port=${port}`], {
+  const profile = mkdtempSync(join(tmpdir(), 'cs2-coach-report-profile-'));
+  const child = spawn(electron, ['.', `--remote-debugging-port=${port}`, `--user-data-dir=${profile}`], {
     cwd: desktop, env, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'],
   });
   let logs = '';
@@ -113,12 +114,12 @@ async function scenario({ label, demPath, ready, assertReport, assertDom }) {
     }, 120_000, label);
     assertReport(body);
     assertNoStiffEnglish(body);
-    await assertDom?.(evaluate);
+    await assertDom?.(evaluate, send);
     assert.deepEqual(errors, [], '页面存在未捕获异常');
     console.log(`${label}：通过`);
 
     socket.send(JSON.stringify({ id: ++id, method: 'Browser.close' }));
-    for (let attempt = 0; attempt < 50 && child.exitCode === null; attempt++) await delay(100);
+    await waitFor(async () => child.exitCode !== null, 30_000, '应用正常退出');
     assert.equal(child.exitCode, 0, '关闭窗口后应用未正常退出');
   } catch (error) {
     throw new Error(`${label} 失败
@@ -129,6 +130,7 @@ ${logs}`, { cause: error });
       if (process.platform === 'win32') spawnSync('taskkill', ['/PID', String(child.pid), '/T', '/F'], { windowsHide: true, stdio: 'ignore' });
       else child.kill();
     }
+    rmSync(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
   }
 }
 
@@ -147,7 +149,7 @@ await scenario({
     }
     assert.ok(!/tick \d+/.test(text), '证据行不应默认显示原始 tick');
   },
-  assertDom: async evaluate => {
+  assertDom: async (evaluate, send) => {
     const helps = await evaluate('document.querySelectorAll(\'button[aria-label$="说明"]\').length');
     assert.ok(helps >= 9, `核心指标与道具面板的 Tooltip 入口不足：${helps}`);
 
@@ -199,6 +201,93 @@ await scenario({
     assert.ok(r7Detail.includes('开始拆弹'), 'R7 应包含开始拆弹');
     assert.equal((r7Detail.match(/twinkle →/g) ?? []).length, 3, 'R7 应为 twinkle 3K');
 
+    // Analysis uses the same parsed report and retains Timeline/Findings state across tabs.
+    assert.equal(await evaluate(`document.getElementById('report-panel').hidden`), false);
+    await evaluate(`document.getElementById('analysis-tab').click()`);
+    await waitFor(async () => evaluate(`!document.getElementById('analysis-panel').hidden`), 10_000, '分析 Tab');
+    assert.equal(await evaluate(`document.getElementById('report-panel').hidden`), true);
+    const analysis = await evaluate(`(() => {
+      const rows = [...document.querySelectorAll('[data-comparison-player]')];
+      return { count: rows.length, values: rows.map(r => Number(r.dataset.metricValue)),
+        current: rows.filter(r => r.textContent.includes('· 当前')).map(r => r.textContent),
+        ct: document.querySelector('[data-analysis-side="CT"]').textContent,
+        t: document.querySelector('[data-analysis-side="T"]').textContent,
+        rounds: document.querySelectorAll('[data-trend-round]').length,
+        r7: document.querySelector('[data-trend-round="7"]').getAttribute('aria-label'),
+        r22: document.querySelector('[data-trend-round="22"]').getAttribute('aria-label'),
+        r24: document.querySelector('[data-trend-round="24"]').getAttribute('aria-label'),
+        player: document.querySelector('[aria-label="目标玩家"]').textContent,
+        shell: document.body.textContent,
+      };
+    })()`);
+    assert.equal(analysis.count, 10);
+    assert.deepEqual(analysis.values, [...analysis.values].sort((a, b) => b - a));
+    assert.equal(analysis.current.length, 1);
+    const barColors = await evaluate(`(() => { const rows = [...document.querySelectorAll('[data-comparison-player]')]; return rows.map(r => ({ current: r.textContent.includes('· 当前'), color: getComputedStyle(r.children[1].firstElementChild).backgroundColor })); })()`);
+    assert.notEqual(barColors.find(r => r.current).color, barColors.find(r => !r.current).color, '当前玩家柱必须使用品牌色');
+    assert.ok(analysis.current[0].includes('twinkle') && analysis.current[0].includes('91.38'));
+    for (const text of ['de_dust2', '13 : 11', '重新选择 DEM']) assert.ok(analysis.shell.includes(text));
+    assert.ok(analysis.player.includes('twinkle'));
+    assert.equal(analysis.rounds, 24);
+    for (const text of ['R7', 'CT', '成功', '3 击杀']) assert.ok(analysis.r7.includes(text));
+    for (const text of ['R22', 'T', '失败', '1 击杀', '阵亡']) assert.ok(analysis.r22.includes(text));
+    for (const text of ['R24', 'T', '成功', '4 击杀', '未阵亡']) assert.ok(analysis.r24.includes(text));
+    for (const text of ['12', '10 / 10 / 3', '68.25']) assert.ok(analysis.ct.includes(text));
+    for (const text of ['12', '15 / 10 / 1', '114.50']) assert.ok(analysis.t.includes(text));
+
+    // Tooltip opens on keyboard focus; labels give an accessible non-colour description.
+    await evaluate(`document.querySelector('[data-trend-round="24"]').focus()`);
+    await waitFor(async () => evaluate(`[...document.querySelectorAll('[role="tooltip"]')].some(t => t.textContent.includes('4 击杀') && t.textContent.includes('未阵亡'))`), 10_000, '回合 Tooltip');
+    await evaluate(`document.querySelector('[data-comparison-player][aria-label^="twinkle"]').focus()`);
+    await waitFor(async () => evaluate(`[...document.querySelectorAll('[role="tooltip"]')].some(t => t.textContent.includes('twinkle') && t.textContent.includes('91.38'))`), 10_000, '玩家对比 Tooltip');
+
+    // All seven choices format the frozen metric values and keep all players visible.
+    for (const [label, expected] of [['K/D', '1.25'], ['KAST', '75.0%'], ['HS%', null],
+      ['首杀对决胜率', '100.0%'], ['死亡后队友补枪率', '22.2%'], ['补枪击杀', '6'], ['ADR', '91.38']]) {
+      await evaluate(`document.querySelector('[aria-label="对比指标"]').click()`);
+      await waitFor(async () => evaluate(`(() => {
+        const option = [...document.querySelectorAll('[role="option"]')].find(o => o.textContent.trim() === ${JSON.stringify(label)});
+        option?.click(); return Boolean(option);
+      })()`), 10_000, `指标 ${label}`);
+      await waitFor(async () => evaluate(`document.querySelector('[aria-label="对比指标"]').textContent === ${JSON.stringify(label)}`), 10_000, '指标切换');
+      const rows = await evaluate(`([...document.querySelectorAll('[data-comparison-player]')].map(r => ({ text: r.textContent, value: r.dataset.metricValue })))`);
+      assert.equal(rows.length, 10);
+      const current = rows.find(r => r.text.includes('· 当前'));
+      if (expected) assert.ok(current.text.includes(expected), `${label} 格式不正确：${current.text}`);
+      const values = rows.filter(r => r.value !== 'null').map(r => Number(r.value));
+      assert.deepEqual(values, [...values].sort((a, b) => b - a));
+      let foundNull = false;
+      for (const row of rows) {
+        if (row.value === 'null') { foundNull = true; assert.ok(row.text.includes('—')); }
+        else assert.equal(foundNull, false, 'null 排在最后');
+      }
+    }
+
+    // Screenshot artifacts outside the checkout; cover desktop and a narrow laptop viewport.
+    if (process.env.CS2_COACH_QA_DIR) {
+      await send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
+      await evaluate(`window.scrollTo(0, 0)`);
+      await delay(1000);
+      const shot = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
+      writeFileSync(join(process.env.CS2_COACH_QA_DIR, 'analysis-desktop.png'), Buffer.from(shot.data, 'base64'));
+      await send('Emulation.setDeviceMetricsOverride', { width: 900, height: 760, deviceScaleFactor: 1, mobile: false });
+      await delay(300);
+      assert.equal(await evaluate('document.documentElement.scrollWidth <= window.innerWidth'), true, '窄窗口不应整页横向溢出');
+      const narrow = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
+      writeFileSync(join(process.env.CS2_COACH_QA_DIR, 'analysis-narrow.png'), Buffer.from(narrow.data, 'base64'));
+      await send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
+      await evaluate(`document.querySelector('[aria-label="回合表现趋势"]').scrollIntoView({ block: 'start' })`);
+      await delay(500);
+      const detail = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
+      writeFileSync(join(process.env.CS2_COACH_QA_DIR, 'analysis-trend-sides.png'), Buffer.from(detail.data, 'base64'));
+      await send('Emulation.clearDeviceMetricsOverride');
+    }
+    await evaluate(`document.getElementById('report-tab').click()`);
+    await waitFor(async () => evaluate(`!document.getElementById('report-panel').hidden`), 10_000, '返回比赛报告');
+    assert.equal(await evaluate(`document.querySelector('[data-round-summary="24"]').getAttribute('aria-expanded')`), 'true');
+    assert.equal(await evaluate(`document.querySelector('[data-round-summary="7"]').getAttribute('aria-expanded')`), 'true');
+    assert.ok(await evaluate(`document.body.textContent.includes('R24 1v3 残局获胜')`));
+
     // Player switch updates side / result / events without re-importing the DEM.
     const opened = await evaluate(`(() => {
       const trigger = document.querySelector('[aria-label="目标玩家"]');
@@ -217,6 +306,15 @@ await scenario({
       return text.includes('CT') && text.includes('失败') ? text : null;
     }, 10_000, '玩家切换后时间线更新');
     assert.ok(r24AfterSwitch.includes('13 : 11'), '比分不随目标玩家变化');
+    await evaluate(`document.getElementById('analysis-tab').click()`);
+    await waitFor(async () => evaluate(`!document.getElementById('analysis-panel').hidden`), 10_000, '其他玩家分析');
+    const other = await evaluate(`({
+      current: [...document.querySelectorAll('[data-comparison-player]')].find(r => r.textContent.includes('· 当前'))?.textContent,
+      r24: document.querySelector('[data-trend-round="24"]').getAttribute('aria-label'),
+    })`);
+    assert.ok(other.current.includes('tarkz'));
+    assert.ok(other.r24.includes('CT') && other.r24.includes('失败'));
+
   },
 });
 

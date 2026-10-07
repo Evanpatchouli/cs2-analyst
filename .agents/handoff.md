@@ -1,5 +1,18 @@
 # Agent Handoff
 
+## 2026-10-07 — P5.5.1 与 P5.6 Analysis Views MVP PASS
+
+- 基线 `7f6c130`；P5.5.1 focused commit `0225332`：统一 displayPlayerName，缺失/空白/等于 ID/15～22 位数字名显示未知玩家，短数字昵称保留；名单、Timeline、Analysis 名称统一，原始 ID 保留。8/8 集成与真实桌面 smoke 通过。
+- P5.6：共享比赛头/目标玩家/重新导入按钮下新增 Fluent UI v9 TabList/Tab，默认比赛报告；analysis panel 与 report panel 保持挂载（hidden 切换），不触发导入或 Analytics，不丢 Timeline/Findings 状态。
+- DTO additive `analysis`（schemaVersion 1）：players 直接投影冻结 PlayerMetrics，perPlayer 的 sideSplit 直接投影 frozen SideMetrics；roundTrend 只统计既有 Timeline kill/death，复用 side/result。complete 标记缺失正式窗口，UI 不把窗口空缺当成已证实零值。全部 JSON-only，无 raw MatchEvent 传 Renderer。
+- 分析页：全场七项指标横向条图（完整名单、降序/null 最后、精确格式、Tooltip、当前玩家品牌色与文字）；离散回合击杀柱图（胜负/存亡标签、键盘 Tooltip）；CT/T 两列 Rounds/KDA/ADR。CSS 图表无新增依赖；null 为 — 且无柱；KAST/Trade/tradeKills incomplete 显示部分证据。Opening 原始 fraction 只在显示时 ×100；Trade 原始 percentage 不再乘 100。
+- demo1 golden：twinkle R7 CT/win/3K，R24 T/win/4K/未阵亡，R22 T/loss/1K/阵亡；CT 12 rounds、10/10/3、68.25 ADR，T 12 rounds、15/10/1、114.50 ADR。补枪击杀为 6、死亡后队友补枪为 4；核心数据与 Findings ruleId 顺序不变。
+- 验证 PASS：desktop 集成 10/10；全仓 typecheck 11/11、build 6/6；test:report 真实/损坏/非 DEM 三场景（10 玩家/七指标/排序/Tooltip/Tab 往返状态/换玩家/品牌色 computedStyle）；dev/preview test:smoke；analytics 53/53、findings 17/17、dem-parser 28/28；独立审查两次无阻塞问题。
+- 截图检查 1280×900、900×760 与趋势/CT/T；发现并修正 Griffel class 冲突（mergeClasses）使当前玩家柱品牌色生效。截图在系统临时目录，不提交。Browser plugin 未提供，沿用仓库 Electron CDP 验证。测试采用独立临时 Chromium profile 避免缓存争用，退出等待有界 30 秒。
+- 文档同步 desktop-report/architecture/roadmap/current-task。未修改 P3/P4 算法、公有契约、阈值或 evidence；版本保持 0.1.0，Windows x64 only。
+- 剩余范围：本轮未重新打包或验证安装版；全部降级 UI 状态未由真实 DEM 触发，null/incomplete/缺窗口由集成/helper 测试与静态审查覆盖。未实现新算法、热力图、完整播放器、登录、历史、扫描或 AI。
+
+
 ## 2026-10-07 — P5.5 Round Timeline MVP PASS
 
 - 基线 `642fd0d`（P5.4 视觉优化 PASS）。本轮只在 Desktop presenter 与 Renderer 展示层新增只读 Round Timeline：不改 P3 Analytics 语义 / 契约、P4 Findings 阈值 / 排序 / ruleId / evidence、demo1 数值、Trade / Clutch / tick 逻辑，也不重新解析 DEM 或重跑 Analytics；未引入图表、播放器、登录、apps/api、历史库、自动扫描或 AI。

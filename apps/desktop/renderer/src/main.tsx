@@ -3,11 +3,12 @@ import { createRoot } from 'react-dom/client';
 import {
   Badge, Body1, Button, Card, Caption1, Divider, Dropdown, FluentProvider,
   MessageBar, MessageBarBody, Option, Spinner, Subtitle1, Title1, Title2,
-  Tooltip, makeStyles, tokens,
+  Tooltip, TabList, Tab, makeStyles, tokens,
 } from '@fluentui/react-components';
 import type {
   DesktopMatchReport, DesktopPlayerAnalytics, DesktopRoundTimeline, DesktopTimelineEvent,
 } from '@cs2-coach/report-contract';
+import { AnalysisViews } from './analysis-views';
 import { useReport } from './store';
 import { QuestionCircleIcon } from './icons';
 import { UtilityIcon } from './utility-icons';
@@ -295,6 +296,7 @@ function Report({ report, playerId }: { report: DesktopMatchReport; playerId: st
   const player = report.players.find(p => p.id === playerId)!;
   const p = report.analytics.find(a => a.playerId === playerId)!;
   const timeline = report.timeline.find(t => t.playerId === playerId)?.rounds ?? [];
+  const [activeTab, setActiveTab] = useState('report');
   const [expanded, setExpanded] = useState<number[]>([]);
   const [highlighted, setHighlighted] = useState<number | null>(null);
   const highlightTimer = useRef<number | undefined>(undefined);
@@ -317,48 +319,59 @@ function Report({ report, playerId }: { report: DesktopMatchReport; playerId: st
         {report.players.map(p => <Option key={p.id} value={p.id} text={p.nickname}>{p.nickname}</Option>)}
       </Dropdown></div>
     </div>
-    {p.coverage.notes.length ? <MessageBar intent="warning"><MessageBarBody>{p.coverage.notes.join(' ')}</MessageBarBody></MessageBar> : null}
-    <div className={s.grid} aria-label="玩家指标">
-      <Stat label="K / D / A" value={`${p.kills} / ${p.deaths} / ${p.assists}`} tip={help.kda} />
-      <Stat label="ADR" value={decimal(p.adr, 2)} hint="每回合平均有效伤害" tip={help.adr} />
-      <Stat label="HS%（爆头率）" value={percent(p.headshotPercentage, 1)} tip={help.hs} />
-      <Stat label="KAST（回合贡献率）" value={percent(p.kast.percentage, 0)} hint={`${p.kast.rounds} / ${p.kast.eligibleRounds} 回合${p.kast.complete ? '' : ' · 部分证据'}`} tip={help.kast} />
-      <Stat label="Trade rate（死亡后队友补枪率）" value={percent(p.trade.rate, 1)}
-        hint={`${count(p.trade.tradedDeaths)} / ${count(p.trade.tradeableDeaths)} 次死亡后队友完成补枪${p.trade.complete ? '' : ' · 部分证据'}`}
-        tip={<>{help.tradeRate}<br />{`死亡时仍有队友存活：${count(p.trade.tradeableDeaths)}`}<br />{`其中 5 秒内队友击杀该敌人：${count(p.trade.tradedDeaths)}`}</>} />
-      <Stat label="Trade kills（补枪击杀）" value={count(p.trade.kills)} tip={help.tradeKills} />
-      <Stat label="Opening（首杀对决）" value={`${p.opening.kills} 首杀 / ${p.opening.deaths} 首死`} hint={p.opening.winRate === null ? undefined : `首杀对决胜率 ${percent(p.opening.winRate * 100, 1)}`} tip={help.opening} />
-      <Stat label="Clutch（残局）" value={`${p.clutch.wins} 胜 / ${p.clutch.opportunities} 次`} hint={p.clutch.complete ? '已证明的 1vN 机会' : '仅已证明的部分机会'} tip={help.clutch} />
-    </div>
-    <Divider />
-    <div className={s.split}>
-      <Findings report={report} playerId={playerId} onShowRounds={showRounds} />
+    <TabList aria-label="报告页面" selectedValue={activeTab} onTabSelect={(_, data) => setActiveTab(String(data.value))}>
+      <Tab id="report-tab" value="report" aria-controls="report-panel">比赛报告</Tab>
+      <Tab id="analysis-tab" value="analysis" aria-controls="analysis-panel">分析</Tab>
+    </TabList>
+    <div id="report-panel" role="tabpanel" aria-labelledby="report-tab" hidden={activeTab !== 'report'}>
       <div className={s.section}>
-        <Title2>道具与残局</Title2>
-        <UtilityPanel utility={p.utility} />
-        <Card className={s.panel}>
-          <Subtitle1>残局</Subtitle1>
-          {p.clutch.list.length ? <>
-            <div className={s.clutchHead}>
-              <Caption1 className={s.muted}>回合</Caption1>
-              <Caption1 className={s.muted}>局面</Caption1>
-              <Caption1 className={s.muted}>结果</Caption1>
-            </div>
-            <div className={s.list}>
-              {p.clutch.list.map(c => {
-                const result = clutchResult(c.won);
-                return <div key={c.round} className={`${s.row} ${s.clutchRow}`}>
-                  <span className={s.numberCell}>R{c.round}</span>
-                  <span className={s.numberCell}>1v{c.opponents}</span>
-                  <span className={s.clutchResult}><Badge appearance="tint" color={result.color}>{result.label}</Badge></span>
-                </div>;
-              })}
-            </div>
-          </> : <Body1>没有可证明的残局机会。</Body1>}
-        </Card>
+      {p.coverage.notes.length ? <MessageBar intent="warning"><MessageBarBody>{p.coverage.notes.join(' ')}</MessageBarBody></MessageBar> : null}
+      <div className={s.grid} aria-label="玩家指标">
+        <Stat label="K / D / A" value={`${p.kills} / ${p.deaths} / ${p.assists}`} tip={help.kda} />
+        <Stat label="ADR" value={decimal(p.adr, 2)} hint="每回合平均有效伤害" tip={help.adr} />
+        <Stat label="HS%（爆头率）" value={percent(p.headshotPercentage, 1)} tip={help.hs} />
+        <Stat label="KAST（回合贡献率）" value={percent(p.kast.percentage, 0)} hint={`${p.kast.rounds} / ${p.kast.eligibleRounds} 回合${p.kast.complete ? '' : ' · 部分证据'}`} tip={help.kast} />
+        <Stat label="Trade rate（死亡后队友补枪率）" value={percent(p.trade.rate, 1)}
+          hint={`${count(p.trade.tradedDeaths)} / ${count(p.trade.tradeableDeaths)} 次死亡后队友完成补枪${p.trade.complete ? '' : ' · 部分证据'}`}
+          tip={<>{help.tradeRate}<br />{`死亡时仍有队友存活：${count(p.trade.tradeableDeaths)}`}<br />{`其中 5 秒内队友击杀该敌人：${count(p.trade.tradedDeaths)}`}</>} />
+        <Stat label="Trade kills（补枪击杀）" value={count(p.trade.kills)} tip={help.tradeKills} />
+        <Stat label="Opening（首杀对决）" value={`${p.opening.kills} 首杀 / ${p.opening.deaths} 首死`} hint={p.opening.winRate === null ? undefined : `首杀对决胜率 ${percent(p.opening.winRate * 100, 1)}`} tip={help.opening} />
+        <Stat label="Clutch（残局）" value={`${p.clutch.wins} 胜 / ${p.clutch.opportunities} 次`} hint={p.clutch.complete ? '已证明的 1vN 机会' : '仅已证明的部分机会'} tip={help.clutch} />
+      </div>
+      <Divider />
+      <div className={s.split}>
+        <Findings report={report} playerId={playerId} onShowRounds={showRounds} />
+        <div className={s.section}>
+          <Title2>道具与残局</Title2>
+          <UtilityPanel utility={p.utility} />
+          <Card className={s.panel}>
+            <Subtitle1>残局</Subtitle1>
+            {p.clutch.list.length ? <>
+              <div className={s.clutchHead}>
+                <Caption1 className={s.muted}>回合</Caption1>
+                <Caption1 className={s.muted}>局面</Caption1>
+                <Caption1 className={s.muted}>结果</Caption1>
+              </div>
+              <div className={s.list}>
+                {p.clutch.list.map(c => {
+                  const result = clutchResult(c.won);
+                  return <div key={c.round} className={`${s.row} ${s.clutchRow}`}>
+                    <span className={s.numberCell}>R{c.round}</span>
+                    <span className={s.numberCell}>1v{c.opponents}</span>
+                    <span className={s.clutchResult}><Badge appearance="tint" color={result.color}>{result.label}</Badge></span>
+                  </div>;
+                })}
+              </div>
+            </> : <Body1>没有可证明的残局机会。</Body1>}
+          </Card>
+        </div>
+      </div>
+      <RoundTimeline rounds={timeline} expanded={expanded} highlighted={highlighted} onToggle={toggleRound} />
       </div>
     </div>
-    <RoundTimeline rounds={timeline} expanded={expanded} highlighted={highlighted} onToggle={toggleRound} />
+    <div id="analysis-panel" role="tabpanel" aria-labelledby="analysis-tab" hidden={activeTab !== 'analysis'}>
+      <AnalysisViews analysis={report.analysis} playerId={playerId} />
+    </div>
   </>;
 }
 

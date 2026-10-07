@@ -58,7 +58,9 @@ P5.5 Round Timeline MVP — **PASS**。报告页底部新增独立“回合时�
 - P5.3 已完成：报告页时间显示、数字格式、Trade 文案、道具面板与指标说明。
 - P5.4 已完成：深蓝灰视觉体系、彩色实心道具图标与卡片一致性。
 - P5.5 已完成：回合时间线与 Findings → Timeline 联动。
-- 未开始：完整播放器、Analysis views（图表/热力图/多玩家对比）。
+- P5.5.1 已完成：名单与 Timeline 统一隐藏原始长数字玩家标识，保留 DTO 追溯 ID。
+- P5.6 已完成：Analysis Views MVP（全场玩家指标对比、回合击杀趋势、CT/T 对比），基于冻结 Analytics 与 Timeline 的只读展示投影。
+- 未开始：完整播放器、地图热力图、额外 Analytics 算法。
 
 ## P6 AI Coach
 

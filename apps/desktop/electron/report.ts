@@ -8,7 +8,7 @@ import type { Finding, FindingEvidence } from '@cs2-coach/findings';
 import type { BombAction, Match, Round } from '@cs2-coach/match-model';
 import type {
   DesktopFinding, DesktopMatchReport, DesktopPlayerTimeline, DesktopRoundTimeline,
-  DesktopTimelineEvent, ImportResult,
+  DesktopTimelineEvent, DesktopAnalysisViews, DesktopSideAnalysis, ImportResult,
 } from '@cs2-coach/report-contract';
 
 /** Stable initial-team membership from the first observed freeze-end roster, or null. */
@@ -230,6 +230,41 @@ function buildTimeline(
   }));
 }
 
+/** No new analytics: metric projections plus counts of existing presentation facts. */
+function buildAnalysisViews(
+  match: Match,
+  players: readonly PlayerMetrics[],
+  timeline: readonly DesktopPlayerTimeline[],
+): DesktopAnalysisViews {
+  const byPlayer = new Map(timeline.map(t => [t.playerId, t.rounds]));
+  const windows = new Map(match.rounds.map(r => [r.number,
+    typeof r.startTick === 'number' && typeof r.endTick === 'number']));
+  const side = (value: PlayerMetrics['side']['CT']): DesktopSideAnalysis => ({
+    roundsPlayed: value.roundsPlayed, kills: value.kills, deaths: value.deaths,
+    assists: value.assists, adr: value.adr,
+  });
+  return {
+    players: players.map(p => ({
+      playerId: p.steamId, playerName: displayPlayerName(p.steamId, p.nickname),
+      kills: p.kills, deaths: p.deaths, assists: p.assists, kdRatio: p.kdRatio,
+      adr: p.adr, headshotPercentage: p.headshotPercentage,
+      kastPercentage: p.kast.percentage, kastComplete: p.kast.complete,
+      openingWinRate: p.opening.winRate, tradeRate: p.trade.tradeRate,
+      tradeComplete: p.trade.complete, tradeKills: p.trade.tradeKills,
+    })),
+    perPlayer: players.map(p => ({
+      playerId: p.steamId,
+      roundTrend: (byPlayer.get(p.steamId) ?? []).map(r => ({
+        round: r.round, side: r.side, result: r.result,
+        kills: r.events.filter(e => e.type === 'kill').length,
+        died: r.events.some(e => e.type === 'death'),
+        complete: windows.get(r.round) === true,
+      })),
+      sideSplit: { CT: side(p.side.CT), T: side(p.side.T) },
+    })),
+  };
+}
+
 export function buildDesktopReport(match: Match, filePath: string): DesktopMatchReport {
   const a = analyzeMatch(match);
   const valid = a.players.filter(p => p.steamId && p.roundsPlayed > 0);
@@ -239,6 +274,7 @@ export function buildDesktopReport(match: Match, filePath: string): DesktopMatch
   const roundTime = roundTimeLookup(match);
   const scores = roundScoreLookup(match);
   const lastRound = [...match.rounds].sort((x, y) => x.number - y.number).at(-1);
+  const timeline = buildTimeline(match, valid, scores);
   return {
     schemaVersion: 1,
     match: { id: match.id, fileName: basename(filePath), map: match.map, rounds: match.rounds.length,
@@ -267,7 +303,8 @@ export function buildDesktopReport(match: Match, filePath: string): DesktopMatch
       };
     }),
     findings: valid.flatMap(p => generateFindings(a, p.steamId).map(finding => withRoundTime(finding, roundTime))),
-    timeline: buildTimeline(match, valid, scores),
+    timeline,
+    analysis: buildAnalysisViews(match, valid, timeline),
   };
 }
 

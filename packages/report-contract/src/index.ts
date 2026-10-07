@@ -87,6 +87,54 @@ export interface DesktopPlayerAnalytics {
   clutch: { opportunities: number; wins: number; complete: boolean; list: { round: number; opponents: number; won: boolean | null }[] };
   coverage: { complete: boolean; notes: string[] };
 }
+/** Direct projection of frozen PlayerMetrics; ratios keep their original units. */
+export interface DesktopPlayerComparison {
+  playerId: string;
+  playerName: string;
+  kills: number;
+  deaths: number;
+  assists: number;
+  kdRatio: number | null;
+  adr: number | null;
+  headshotPercentage: number | null;
+  kastPercentage: number | null;
+  kastComplete: boolean;
+  /** Fraction (0–1), matching Analytics OpeningMetrics.winRate. */
+  openingWinRate: number | null;
+  tradeRate: number | null;
+  tradeComplete: boolean;
+  tradeKills: number;
+}
+
+export interface DesktopRoundTrendPoint {
+  round: number;
+  side: DesktopRoundTimeline['side'];
+  result: DesktopRoundTimeline['result'];
+  kills: number;
+  died: boolean;
+  /** False when Timeline's formal round window is missing: empty events are not zero evidence. */
+  complete: boolean;
+}
+
+export interface DesktopSideAnalysis {
+  roundsPlayed: number;
+  kills: number;
+  deaths: number;
+  assists: number;
+  adr: number | null;
+}
+
+export interface DesktopPlayerAnalysis {
+  playerId: string;
+  roundTrend: DesktopRoundTrendPoint[];
+  sideSplit: { CT: DesktopSideAnalysis; T: DesktopSideAnalysis };
+}
+
+export interface DesktopAnalysisViews {
+  players: DesktopPlayerComparison[];
+  perPlayer: DesktopPlayerAnalysis[];
+}
+
 export interface DesktopMatchReport {
   schemaVersion: 1;
   match: { id: string; fileName: string; map: string; rounds: number; score: { initialCT: number; initialT: number } | null };
@@ -96,6 +144,7 @@ export interface DesktopMatchReport {
   findings: DesktopFinding[];
   /** Full per-player round timelines; the Renderer picks the entry matching the selected player. */
   timeline: DesktopPlayerTimeline[];
+  analysis: DesktopAnalysisViews;
 }
 export type ImportPhase = 'selecting' | 'parsing' | 'analyzing';
 export type ImportResult = { kind: 'success'; report: DesktopMatchReport } | { kind: 'cancelled' } | { kind: 'error'; message: string };

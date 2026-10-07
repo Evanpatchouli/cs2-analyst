@@ -4,6 +4,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
+import { analyzeMatch } from '@cs2-coach/analytics';
+import { comparisonMetrics, comparisonValue, comparisonIncomplete, sortedComparison } from '../renderer/src/analysis-metrics.ts';
 import { displayPlayerName } from '../electron/player-name.ts';
 import { analyzeDemoFile, buildDesktopReport } from '../electron/report.ts';
 
@@ -16,7 +18,7 @@ test('real demo flows through parser -> analytics -> findings into a serializabl
   const report = result.report;
 
   // Renderer-facing shape: JSON only, no domain events or native objects.
-  assert.deepEqual(Object.keys(report), ['schemaVersion', 'match', 'selectedPlayer', 'players', 'analytics', 'findings', 'timeline']);
+  assert.deepEqual(Object.keys(report), ['schemaVersion', 'match', 'selectedPlayer', 'players', 'analytics', 'findings', 'timeline', 'analysis']);
   assert.deepEqual(JSON.parse(JSON.stringify(report)), report);
 
   assert.equal(report.match.map, 'de_dust2');
@@ -132,6 +134,27 @@ test('real demo flows through parser -> analytics -> findings into a serializabl
   assert.equal(posthumous.actorName, 'tarkz');
   assert.equal(posthumous.targetName, 'twinkle');
   assert.ok(r22.events.some(e => e.type === 'kill' && e.tick === 121075), 'the victim-side kill is still shown');
+  assert.equal(report.analysis.players.length, 10);
+  const comparison = report.analysis.players.find(p => p.playerId === twinkle.id);
+  assert.equal(comparison.playerName, 'twinkle');
+  assert.equal(comparison.kdRatio, 1.25);
+  assert.equal(comparison.adr, 91.375);
+  assert.equal(comparison.kastPercentage, 75);
+  assert.equal(comparison.openingWinRate, 1);
+  assert.equal(comparison.tradeRate, p.trade.rate);
+  const analysis = report.analysis.perPlayer.find(p => p.playerId === twinkle.id);
+  assert.equal(analysis.roundTrend.length, 24);
+  for (const [round, side, result, kills, died] of [
+    [7, 'CT', 'win', 3, false], [24, 'T', 'win', 4, false], [22, 'T', 'loss', 1, true],
+  ]) {
+    const point = analysis.roundTrend.find(r => r.round === round);
+    assert.deepEqual(point, { round, side, result, kills, died, complete: true });
+  }
+  assert.deepEqual(analysis.sideSplit, {
+    CT: { roundsPlayed: 12, kills: 10, deaths: 10, assists: 3, adr: 68.25 },
+    T: { roundsPlayed: 12, kills: 15, deaths: 10, assists: 1, adr: 114.5 },
+  });
+
 });
 
 test('an unreadable DEM returns an error result instead of throwing', async () => {
@@ -192,7 +215,7 @@ function syntheticMatch() {
 test('timeline filters to high-value events, maps nicknames and computes round time', () => {
   const match = syntheticMatch();
   const report = buildDesktopReport(match, 'synthetic.dem');
-  assert.deepEqual(Object.keys(report), ['schemaVersion', 'match', 'selectedPlayer', 'players', 'analytics', 'findings', 'timeline']);
+  assert.deepEqual(Object.keys(report), ['schemaVersion', 'match', 'selectedPlayer', 'players', 'analytics', 'findings', 'timeline', 'analysis']);
   assert.deepEqual(report.match.score, { initialCT: 1, initialT: 0 });
 
   const alice = report.timeline.find(t => t.playerId === '1').rounds[0];
@@ -290,4 +313,61 @@ test('player names hide identifiers while preserving short numeric nicknames and
   const unknown = buildDesktopReport(match, 'synthetic.dem').timeline[0].rounds[0].events.find(e => e.type === 'kill');
   assert.equal(unknown.targetId, '8888888888888888888888');
   assert.equal(unknown.targetName, '未知玩家');
+});
+
+
+test('analysis projects frozen metrics exactly, preserving null and incomplete evidence', () => {
+  const match = syntheticMatch();
+  delete match.tickRate;
+  match.players[1].nickname = '8888888888888888888888';
+  const source = analyzeMatch(match);
+  const report = buildDesktopReport(match, 'synthetic.dem');
+  for (const p of source.players) {
+    const projected = report.analysis.players.find(x => x.playerId === p.steamId);
+    assert.deepEqual(projected, {
+      playerId: p.steamId, playerName: displayPlayerName(p.steamId, p.nickname),
+      kills: p.kills, deaths: p.deaths, assists: p.assists, kdRatio: p.kdRatio,
+      adr: p.adr, headshotPercentage: p.headshotPercentage,
+      kastPercentage: p.kast.percentage, kastComplete: p.kast.complete,
+      openingWinRate: p.opening.winRate, tradeRate: p.trade.tradeRate,
+      tradeComplete: p.trade.complete, tradeKills: p.trade.tradeKills,
+    });
+    const projectedSides = report.analysis.perPlayer.find(x => x.playerId === p.steamId).sideSplit;
+    for (const side of ['CT', 'T']) {
+      const original = p.side[side];
+      assert.deepEqual(projectedSides[side], {
+        roundsPlayed: original.roundsPlayed, kills: original.kills, deaths: original.deaths,
+        assists: original.assists, adr: original.adr,
+      });
+    }
+  }
+  const alice = report.analysis.players[0];
+  assert.equal(alice.kdRatio, null, 'zero deaths keeps K/D null');
+  assert.equal(alice.tradeRate, null, 'no applicable deaths keeps trade null');
+  const incomplete = { ...alice, kastComplete: false, tradeComplete: false };
+  assert.equal(comparisonIncomplete(incomplete, 'kastPercentage'), true);
+  assert.equal(comparisonIncomplete(incomplete, 'tradeRate'), true);
+  assert.equal(comparisonIncomplete(incomplete, 'tradeKills'), true);
+  for (const metric of comparisonMetrics) {
+    assert.equal(comparisonValue({ ...alice, [metric.key]: null }, metric), '—');
+    const entries = [{ ...alice, playerId: 'null', [metric.key]: null },
+      { ...alice, playerId: 'zero', [metric.key]: 0 }, { ...alice, playerId: 'high', [metric.key]: 2 }];
+    assert.deepEqual(sortedComparison(entries, metric.key).map(p => p.playerId), ['high', 'zero', 'null']);
+    assert.equal(entries[0].playerId, 'null', 'sorting never mutates DTO');
+  }
+  const formats = { adr: '91.38', kdRatio: '1.25', kastPercentage: '75.0%', headshotPercentage: '40.0%',
+    openingWinRate: '100.0%', tradeRate: '22.2%', tradeKills: '4' };
+  const values = { ...alice, adr: 91.375, kdRatio: 1.25, kastPercentage: 75, headshotPercentage: 40,
+    openingWinRate: 1, tradeRate: 4 / 18 * 100, tradeKills: 4 };
+  for (const metric of comparisonMetrics) assert.equal(comparisonValue(values, metric), formats[metric.key]);
+});
+
+test('round trend distinguishes a missing window from confirmed zero kills', () => {
+  const match = syntheticMatch();
+  const incomplete = { ...match.rounds[0], number: 2 };
+  delete incomplete.endTick;
+  match.rounds.push(incomplete);
+  const report = buildDesktopReport(match, 'synthetic.dem');
+  assert.equal(report.analysis.perPlayer[0].roundTrend[1].complete, false);
+  assert.equal(report.analysis.perPlayer[0].roundTrend[0].complete, true);
 });

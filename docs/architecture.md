@@ -16,6 +16,8 @@ The Electron desktop app runs the native parser and the full deterministic pipel
 
 `report-contract` also carries a read-only per-player Round Timeline projection of existing `Match` facts (round side / result / cumulative score plus filtered kill / death / clutch / bomb events with round-relative seconds). It is built in the Desktop presenter from frozen data, never in the renderer, and adds no new Analytics semantics.
 
+`report-contract.analysis` adds presentation-only player comparisons, per-player round trends and CT/T splits. The Desktop presenter copies frozen `PlayerMetrics` and counts existing Timeline kill/death facts; no raw MatchEvent reaches the renderer and no new Analytics algorithm is introduced. Missing round windows are marked incomplete rather than shown as confirmed zero facts.
+
 **Supported platform: Windows x64 only.** Packaging targets the NSIS x64 installer and stages the `win32-x64-msvc` native binding; there is no cross-platform packaging path.
 
 For Windows distribution the Main and Utility Process bundles inline every workspace package, and the native parser is staged next to the worker bundle as an asar-unpacked binding, so an installed application resolves nothing through pnpm workspace links. Packaging layout, staging script and installed-app verification: [Windows packaging](./windows-packaging.md).
