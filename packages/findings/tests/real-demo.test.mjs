@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import { existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
-import { Demoparser2Provider } from "@cs2-coach/dem-parser";
-import { analyzeMatch } from "@cs2-coach/analytics";
+import { Demoparser2Provider } from "@cs2-analyst/dem-parser";
+import { analyzeMatch } from "@cs2-analyst/analytics";
 import { generateFindings } from "../dist/index.js";
 
 // Golden is specific to this reviewed file; other demos must not masquerade as demo1.

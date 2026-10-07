@@ -1,6 +1,6 @@
 import { Fragment, useState } from 'react';
 import { Badge, Body1, Card, Caption1, Dropdown, Option, Subtitle1, Title2, Tooltip, makeStyles, mergeClasses, tokens } from '@fluentui/react-components';
-import type { DesktopAnalysisViews, DesktopPlayerAnalysis } from '@cs2-coach/report-contract';
+import type { DesktopAnalysisViews, DesktopPlayerAnalysis } from '@cs2-analyst/report-contract';
 import { comparisonMetrics, comparisonValue, comparisonIncomplete, sortedComparison } from './analysis-metrics';
 import type { ComparisonMetricKey } from './analysis-metrics';
 import { palette } from './theme';

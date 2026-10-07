@@ -5,7 +5,7 @@
 ## 使用
 
 ```ts
-import { Demoparser2Provider } from "@cs2-coach/dem-parser";
+import { Demoparser2Provider } from "@cs2-analyst/dem-parser";
 
 const parser = new Demoparser2Provider();
 const match = await parser.parse("E:/demos/match.dem");
@@ -40,7 +40,7 @@ const match = await parser.parse("E:/demos/match.dem");
 
 ```powershell
 pnpm install --frozen-lockfile
-pnpm --filter @cs2-coach/dem-parser test
+pnpm --filter @cs2-analyst/dem-parser test
 pnpm build
 pnpm typecheck
 ```
@@ -53,7 +53,7 @@ pnpm typecheck
 
 ```powershell
 $env:DEM_TEST_FILE = "E:/demos/another.dem"
-pnpm --filter @cs2-coach/dem-parser test
+pnpm --filter @cs2-analyst/dem-parser test
 Remove-Item Env:DEM_TEST_FILE
 ```
 

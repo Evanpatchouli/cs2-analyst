@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { DesktopMatchReport, ImportPhase } from '@cs2-coach/report-contract';
+import type { DesktopMatchReport, ImportPhase } from '@cs2-analyst/report-contract';
 
 type Status = 'idle' | ImportPhase | 'success' | 'error';
 interface ReportState {
@@ -20,7 +20,7 @@ export const useReport = create<ReportState>((set, get) => ({
     if (['selecting', 'parsing', 'analyzing'].includes(get().status)) return;
     set({ status: 'selecting', error: null });
     try {
-      const result = await window.cs2Coach.importDemo();
+      const result = await window.cs2Analyst.importDemo();
       if (result.kind === 'cancelled') set({ status: get().report ? 'success' : 'idle' });
       else if (result.kind === 'error') set({ status: 'error', error: result.message });
       else set({ status: 'success', report: result.report, playerId: result.report.selectedPlayer });

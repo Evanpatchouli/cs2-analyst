@@ -13,7 +13,7 @@ import { fileURLToPath } from 'node:url';
  * require('@laihoe/demoparser2-<triple>'); staging the fallback package keeps the
  * exact code path that runs in the dev workspace.
  *
- * Supported platform: Windows x64 only. CS2 Coach does not ship for other
+ * Supported platform: Windows x64 only. CS2 Analyst does not ship for other
  * platforms, so this script fails instead of staging anything else.
  */
 
@@ -27,7 +27,7 @@ const LOADER_FILES = ['index.js', 'index.d.ts', 'package.json'];
 /** Windows x64 is the only supported product platform: the napi-rs triple is fixed. */
 const triple = 'win32-x64-msvc';
 if (process.platform !== 'win32' || process.arch !== 'x64') {
-  throw new Error(`CS2 Coach only ships Windows x64; cannot stage the native parser for ${process.platform}-${process.arch}`);
+  throw new Error(`CS2 Analyst only ships Windows x64; cannot stage the native parser for ${process.platform}-${process.arch}`);
 }
 
 const loaderDir = dirname(parserRequire.resolve(`${LOADER_PACKAGE}/package.json`));

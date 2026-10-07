@@ -1,11 +1,11 @@
-# CS2 Coach Agent 项目规范 v1
+# CS2 Analyst Agent 项目规范 v1
 
 > 本文件是 Agent 的地图，不是项目百科全书。
 > 项目事实写入代码、测试和 `docs/`；详细流程写入 `.agents/`。
 
 ## Project Positioning
 
-CS2 Coach is a Windows desktop application focused on CS2 DEM post-match analysis.
+CS2 Analyst is a Windows desktop application focused on CS2 DEM post-match analysis.
 
 Scope:
 

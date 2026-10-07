@@ -16,15 +16,15 @@ P5.1 打通了第一条可实际使用的桌面链路：
 
 ```text
 Renderer (sandbox, contextIsolation, nodeIntegration=false)
-  ↓ window.cs2Coach.importDemo()          preload / contextBridge
+  ↓ window.cs2Analyst.importDemo()          preload / contextBridge
   ↓ ipcRenderer.invoke('report:import')
 Main (Electron)
   ↓ dialog.showOpenDialog（仅 .dem）
   ↓ utilityProcess.fork(dist/electron/report-worker.js)
 Utility Process
-  ↓ @cs2-coach/dem-parser（native demoparser2）
-  ↓ @cs2-coach/analytics
-  ↓ @cs2-coach/findings
+  ↓ @cs2-analyst/dem-parser（native demoparser2）
+  ↓ @cs2-analyst/analytics
+  ↓ @cs2-analyst/findings
   ↓ { kind: 'success', report } | { kind: 'cancelled' } | { kind: 'error', message }
 Main
   ↓ IPC resolve
@@ -39,10 +39,10 @@ Renderer（仅渲染 DTO，不访问 Node/fs/demoparser2）
 ## P5.6.4 Custom Window Chrome — PASS
 
 - Windows x64 BrowserWindow 使用 `frame: false`、`resizable: true`，1280×800 / 最小 800×600 / `#111821`；移除原生菜单，不使用 titleBarOverlay。三个安全开关保持原值。
-- Fluent UI v9 自绘标题栏独立占据顶部 40px，左侧仅原创 20px currentColor target mark 与中等字重 CS2 Coach；右侧三个 46×40px 方形按钮，16px 本地 SVG，最大化/双矩形还原图标随真实状态切换。弱 hover 使用现有 cardHover，关闭 hover 为 #c42b1c + 白色。
+- Fluent UI v9 自绘标题栏独立占据顶部 40px，左侧仅原创 20px currentColor target mark 与中等字重 CS2 Analyst；右侧三个 46×40px 方形按钮，16px 本地 SVG，最大化/双矩形还原图标随真实状态切换。弱 hover 使用现有 cardHover，关闭 hover 为 #c42b1c + 白色。
 - 窗口壳层在报告错误边界外持续挂载。仅下方内容区滚动，让纵向滚动条从标题栏下方开始；标题栏和关闭按钮横跨整个窗口，内容最大宽度 1120px 与原 padding/gap 保留。
 - 标题栏为 `-webkit-app-region: drag`；Logo、按钮及按钮容器明确 `no-drag`。页面内容没有 drag。双击由 Chromium/Windows 原生 drag region 处理，无重复 React 双击绑定。
-- `window.cs2Coach.window` 提供 `minimize / toggleMaximize / close / isMaximized / onMaximizedChange`。四个 invoke 分别对应 `window:minimize / window:toggle-maximize / window:close / window:is-maximized`；和 report:import 共用 `trustedWindow`，校验当前窗口未销毁、sender webContents 与 senderFrame 主 frame。无效请求不操作窗口。
+- `window.cs2Analyst.window` 提供 `minimize / toggleMaximize / close / isMaximized / onMaximizedChange`。四个 invoke 分别对应 `window:minimize / window:toggle-maximize / window:close / window:is-maximized`；和 report:import 共用 `trustedWindow`，校验当前窗口未销毁、sender webContents 与 senderFrame 主 frame。无效请求不操作窗口。
 - Main 在 maximize/unmaximize 时发送 `window:maximized-changed`；Renderer 先订阅，再查询初值，忽略落后于通知的初值响应，卸载移除 exact listener。关闭调用 BrowserWindow.close()，沿用 closed worker kill，窗口按钮不调用 app.quit()。
 - 新增 `window-shell.test.mjs`：实际 Main/preload 源码执行于模拟 Electron，覆盖 frameless/security/options、伪 sender/subframe/stale sender、原生事件通知、preload IPC 路由/订阅清理、分析中关闭清理。共享 `window-shell-checks.mjs` 在真实 built/installed Electron 覆盖 DOM、尺寸、drag/no-drag、实际最大化/还原与内容溢出；installed ASAR 同时核对窗口安全配置与菜单移除。
 
@@ -50,8 +50,8 @@ Renderer（仅渲染 DTO，不访问 Node/fs/demoparser2）
 
 - typecheck 11/11、build 6/6、desktop 17/17、analytics 53/53、findings 17/17、parser 28/28；demo1 golden、Finding ruleId 顺序、Timeline/Analysis 与官方 kill-feed 资源不变。
 - 真实 Electron 原生双击最大化/还原、Win+↑/↓图标同步、最小化再激活恢复通过。最终 UI 的 1280×800 / 900×760 / 800×600 为真实 BrowserWindow.setSize，不是 viewport 模拟；标题栏高度 40、关闭右边等于窗口宽度、页面/内容横向溢出均为 false。三个 hover computed styles 与截图通过。
-- Browser plugin 不可用，沿用仓库真实 Electron CDP smoke；Windows 输入使用 Computer Use。截图在系统临时目录 `cs2-coach-p564-qa`，不提交。最大化遵循 Windows 原生 workArea；不做负 margin 或自定义 resize handles。
-- 一次并行构建/验证时报告 smoke 在 caption close 后等待退出超时；原因未证实，保留诊断，无产品修补。停止重叠构建后原脚本与完整 `pnpm --filter @cs2-coach/desktop test:report` 串行重跑三场景均通过。
+- Browser plugin 不可用，沿用仓库真实 Electron CDP smoke；Windows 输入使用 Computer Use。截图在系统临时目录 `cs2-analyst-p564-qa`，不提交。最大化遵循 Windows 原生 workArea；不做负 margin 或自定义 resize handles。
+- 一次并行构建/验证时报告 smoke 在 caption close 后等待退出超时；原因未证实，保留诊断，无产品修补。停止重叠构建后原脚本与完整 `pnpm --filter @cs2-analyst/desktop test:report` 串行重跑三场景均通过。
 - 最终两次 pack 均 107.5MB，production/test-seam installed smoke 全链路通过：安装、ASAR frame/security/no-overlay/no-menu 配置、真实窗口控制、无 Node、路径注入防护、demo1 golden、Tab/Dropdown/Timeline/Analysis、损坏 DEM、caption close 分析中途清理与卸载。ASAR 2.13MB / 81 条目 / 71 官方 SVG 字节不变。
 - 在真实 QA Renderer 临时制造报告 render 错误（不改源码或文件），错误边界显示恢复提示，同时 titlebar 与三个窗口按钮仍存在；恢复按钮可回到导入页。额外截图 error-recovery-shell.png。
 - 真实鼠标拖动 PASS：Computer Use drag 未取得窗口位移证据后，用户用鼠标实测并明确确认“可以，提交并重新汇报吧”。此项依据用户实际操作确认；所有本轮验收已完成。
@@ -62,9 +62,9 @@ Renderer（仅渲染 DTO，不访问 Node/fs/demoparser2）
 - 纵横占位均为 10px；2px 透明 border + padding-box 留出约 6px 圆角 thumb。蓝灰透明度为默认 .28 / hover .46 / active .62；track/corner 透明，无箭头按钮，无新增滚动事件或布局宽度规则。
 - Firefox `thin` / `.36 transparent` 标准属性只在不支持 WebKit scrollbar selector 的引擎生效，避免 Chromium 标准属性覆盖定制尺寸与交互状态（[MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Selectors/::-webkit-scrollbar)）。
 - 2026-10-07：desktop typecheck/build 通过；系统临时脚本复用现有 Electron CDP report smoke，真实 DEM / 损坏 DEM / 非 DEM 三场景通过，无未捕获 Renderer 异常。1280×800 / 800×600 为模拟 Renderer viewport；两尺寸纵向滚轮/拖拽通过，额外 650×600 触发 Analysis 横向溢出并验证横向滚轮/拖拽。三 Tab 无整页横向 overflow，原生最大化后 titlebar/content 右边缘贴合 viewport。
-- 截图在系统临时目录 `cs2-coach-scrollbar-qa`，不提交；两尺寸 thumb 默认 / hover / active 像素分别为 RGB(55,64,76) / (77,87,101) / (97,108,123)，无接近白色状态；透明 corner computed style 通过。Firefox 与实体触控板未实测；业务、IPC、窗口控制逻辑无改动。
+- 截图在系统临时目录 `cs2-analyst-scrollbar-qa`，不提交；两尺寸 thumb 默认 / hover / active 像素分别为 RGB(55,64,76) / (77,87,101) / (97,108,123)，无接近白色状态；透明 corner computed style 通过。Firefox 与实体触控板未实测；业务、IPC、窗口控制逻辑无改动。
 
-## IPC 契约（`@cs2-coach/report-contract`）
+## IPC 契约（`@cs2-analyst/report-contract`）
 
 `report-contract` 是 Electron 与 Renderer 共享的 JSON-only 展示契约，只依赖 `findings` 的类型。
 
@@ -204,12 +204,12 @@ interface DesktopPlayerTimeline { playerId: string; rounds: DesktopRoundTimeline
 - Tooltip 覆盖：核心 8 张指标卡 + 道具面板共 9 个 `?` 入口，桌面端到端 smoke 通过 DOM 断言其数量。
 - 损坏 DEM：错误提示 + 可重新选择，不白屏。
 - 测试：桌面 Node 集成测试 7/7；桌面 Electron 端到端 smoke（真实 DEM + 损坏 DEM + 非 .dem）通过；analytics、findings、dem-parser 全量通过；`pnpm typecheck`、`pnpm build`、现有 UI `test:smoke` 通过。
-- 命令：`pnpm --filter @cs2-coach/desktop test`（Node 集成）、`pnpm --filter @cs2-coach/desktop test:report`（Electron 端到端）、`pnpm test:smoke`（UI/preload/构建）。
-- 安装版：`pnpm --filter @cs2-coach/desktop pack:win` 产出安装包，`pnpm --filter @cs2-coach/desktop test:installed` 对安装后的应用重跑真实 demo1 与损坏 DEM 场景。
+- 命令：`pnpm --filter @cs2-analyst/desktop test`（Node 集成）、`pnpm --filter @cs2-analyst/desktop test:report`（Electron 端到端）、`pnpm test:smoke`（UI/preload/构建）。
+- 安装版：`pnpm --filter @cs2-analyst/desktop pack:win` 产出安装包，`pnpm --filter @cs2-analyst/desktop test:installed` 对安装后的应用重跑真实 demo1 与损坏 DEM 场景。
 
 ## 测试专用路径注入
 
-Electron 端到端测试需要绕过原生文件对话框。Main 在**非打包构建**下读取 `CS2_COACH_DEM_PATH` 作为导入路径；打包应用始终使用原生对话框。Renderer 与 preload 不感知该变量。
+Electron 端到端测试需要绕过原生文件对话框。Main 在**非打包构建**下读取 `CS2_ANALYST_DEM_PATH` 作为导入路径；打包应用始终使用原生对话框。Renderer 与 preload 不感知该变量。
 
 ## 打包与安装
 
@@ -260,7 +260,7 @@ Golden：demo1 twinkle R7 = CT/成功/3K，R24 = T/成功/4K/未阵亡，R22 = T
 - killfeed-icons.tsx 自绘单色 currentColor 简化 SVG（22px），与彩色 utility-icons.tsx 分离。覆盖当前 weaponLabels 武器和 knife_* variants，允许同类武器共用 silhouette；未知 identifier 使用 generic，Tooltip 和整行 aria-label 保留真实文本。图标 aria-hidden；整行可聚焦且可读，姓名省略 + 全名 Tooltip，时间 tabular-nums，图标不被长昵称挤掉。
 - R24 twinkle 使用 AK-47 击杀 tarkz（+122.20 秒），以及 R22 tarkz 死后 HE 击杀 twinkle（+32.78 秒）通过实际 Renderer / installed 断言；长数字昵称保持原样。
 
-验证增加共享 Electron CDP `scripts/report-ux-checks.mjs`，开发构建与安装版使用同一组断言。无 Browser 插件，沿用仓库现有 Electron E2E。Node synthetic 测试覆盖 flag 缺失/false/true、未知武器、world fallback、武器覆盖、全零/部分零 multi-kill 与 fivePlus 文案；真实 DEM 的 DTO 与独立 Frozen Analytics 原值比较。截图输出在系统临时目录 `cs2-coach-p562-qa`，涵盖 1280×900 / 900×760 / 800×600，另测 650px breakpoint。截图、安装包和临时 profile 不提交。
+验证增加共享 Electron CDP `scripts/report-ux-checks.mjs`，开发构建与安装版使用同一组断言。无 Browser 插件，沿用仓库现有 Electron E2E。Node synthetic 测试覆盖 flag 缺失/false/true、未知武器、world fallback、武器覆盖、全零/部分零 multi-kill 与 fivePlus 文案；真实 DEM 的 DTO 与独立 Frozen Analytics 原值比较。截图输出在系统临时目录 `cs2-analyst-p562-qa`，涵盖 1280×900 / 900×760 / 800×600，另测 650px breakpoint。截图、安装包和临时 profile 不提交。
 
 P5.6.2 验证全 PASS：pnpm typecheck（11/11）、pnpm build（6/6）、desktop test（14/14）、test:report（三场景）、analytics（53/53）、findings（17/17）、dem-parser（28/28）、dev/preview test:smoke、pack:win、pack:win:test、test:installed。两轮独立审查无阻塞；安装版重跑共享 UX 断言，生产 seam 防护、原生绑定 unpacked、损坏 DEM、中途关闭无残留 worker、两版卸载均通过。安装包约107.3MB，ASAR 1.41MB / 10条目。
 
@@ -269,7 +269,7 @@ P5.6.2 验证全 PASS：pnpm typecheck（11/11）、pnpm build（6/6）、deskto
 
 基线 f3ddfd89c2d86f32b112706f720b41f4193dff82。只替换 Renderer 资源、asset mapping 与验证；Parser、Analytics、Findings、Timeline DTO / tick / round time / 事件排序均未修改。
 
-- 原始武器来源 E:\cs2-coach\output\equipment，继续复用之前的本机 CS2 提取结果。定向补充来源 output/targeted-deathnotice：使用已有 ValveResourceFormat 从 pak01_dir.vpk 提取10张 HUD SVG与equipment flash assist，不重提equipment、不下载工具。
+- 原始武器来源 <repo>\output\equipment，继续复用之前的本机 CS2 提取结果。定向补充来源 output/targeted-deathnotice：使用已有 ValveResourceFormat 从 pak01_dir.vpk 提取10张 HUD SVG与equipment flash assist，不重提equipment、不下载工具。
 - 正确HUD目录是 panorama/images/hud/deathnotice/，爆头文件为 icon_headshot.vsvg_c。旧 panorama/images/icons/death_notice/ 是错误源路径；项目death-notice目录仅为本地组织。闪光助攻来自 panorama/images/icons/equipment/flashbang_assist.vsvg_c。提取器本机README、筛选路径与映射文件名均已修正；可复现命令与完整来源见 [官方kill-feed资源](./cs2-killfeed-assets.md)。
 - 复制71 SVG / 0 PNG：69武器 + 2 death notice。原图字节未修改，provenance.json保存精确VPK路径与SHA-256。只将当前UI所需素材纳入仓库；其余9张HUD图标留在本地output备用，不打包或新增判定。
 - killfeed-assets.ts 静态 import + 显式72 identifier映射，含knife_bayonet → bayonet、kukri → knife_kukri、p2000 → hkp2000；补齐CZ75、R8、消音器关闭标识。24张官方刀图覆盖26刀标识，各variant使用实际文件，不猜路径。
@@ -277,7 +277,21 @@ P5.6.2 验证全 PASS：pnpm typecheck（11/11）、pnpm build（6/6）、deskto
 - img高22px、自然宽度、object-fit contain，武器最大96px、notice最大24px；alt空且aria-hidden。无白底、背景框、阴影、拉伸、图形编辑或新依赖；四列kill-feed与nickname原值/ellipsis/Tooltip保持既有规则。
 - Vite assetsInlineLimit=0、base='./'，静态图片进入dist/renderer/assets与ASAR，运行时不读取CS2安装目录或提取目录。dev/preview解码全部图片，安装版核对ASAR内源资源字节并实际解码生产图片URL。
 - demo1 R24官方AK-47与inferno、R22死后HE（+32.78秒）与flash assist均通过；R24没有headshot flag，另用R23 M4A1-S爆头死亡验证官方headshot，未修改DTO构造事件。Golden 25/20/4、ADR91.375、KAST75%、Trade22.2%、R24 1v3与Findings ruleId顺序不变。
-- 截图系统临时cs2-coach-p563-qa，1280×900 / 900×760 / 800×600 / 650×760；实查R24/R22/R23无白底、拉伸、broken image或整页溢出，昵称与图标居中。Browser plugin not available，使用项目已有Electron CDP E2E。
+- 截图系统临时cs2-analyst-p563-qa，1280×900 / 900×760 / 800×600 / 650×760；实查R24/R22/R23无白底、拉伸、broken image或整页溢出，昵称与图标居中。Browser plugin not available，使用项目已有Electron CDP E2E。
 - 当前通过typecheck11/11、build6/6、desktop15/15、test:report三场景、analytics53/53、findings17/17、parser28/28、dev/preview test:smoke。pack:win / pack:win:test / test:installed最终全通过：两安装包均107.5MB；ASAR2.13MB/81条目/71官方SVG，逐图与源码字节一致，生产图片URL全部可解码。生产启动/路径注入防护/卸载、测试seam真实demo共享UX/损坏DEM/中途关闭无worker/卸载通过。独立审查无阻塞；71个资源均与实际提取字节一致，独立Renderer测试4/4。
 
 安装测试记录：补齐headshot后的首次installed run在生产防注入断言处出现demo报告而失败；生产ASAR seam缺省检查与资源检查已通过。未修改产品代码或安装包，随后重跑test:installed全通过。用户随后确认：测试期间其手动在原生文件对话框选择了DEM，正常导入产生报告，导致自动化“不得出现报告”断言失败。生产路径注入防护正常，此次失败由测试期间的人工操作造成，不是资源改动、路径注入或产品缺陷。
+
+## 2026-10-08 — P5.6.5 Branding & App Icon — 已实现，用户授权提交（验收未全部完成）
+
+- 正式产品名：CS2 Analyst；mark 为不带文字的 A/准星透明 PNG；lockup 为带 CS2-ANALYST 文字版。源文件来自用户 Downloads/cs2-analyst/logo.png 与 logo_with_appname.png，原图字节保留，项目路径为 apps/desktop/resources/branding/cs2-analyst-mark.png 与 cs2-analyst-logo.png。
+- Windows icon 为真正 multi-resolution ICO：16/24/32/48/64/128/256；alpha 保留，原始画布完整保留，增加对称 4% safe area，独立 Lanczos 缩放。16/24/32 小尺寸图实查可辨，无重绘/改色/背景填充。
+- titlebar：20px PNG mark + CS2 Analyst，object-fit:contain，40px 高度与 logo no-drag 保留；临时 target SVG 已删除。Renderer/favicon 使用 PNG，BrowserWindow dev/preview 使用相对 bundle 路径，安装版使用 extraResources runtime PNG；Windows/NSIS 使用同源 ICO。
+- productName/executableName/shortcutName/uninstallDisplayName：CS2 Analyst。生产 App ID：com.evanpatchouli.cs2analyst；test seam：com.evanpatchouli.cs2analyst.testseam；Main AppUserModelId 同步。
+- 用户追加要求全仓 rename：workspace 包统一 @cs2-analyst/*，bridge 为 window.cs2Analyst，环境变量/编译宏为 CS2_ANALYST_*；lockfile、脚本、测试、文档同步。物理 checkout 路径未搬迁。业务文件仅 import 标识替换，无 DEM/Analytics/Findings/Timeline/Analysis 算法修改，官方 kill-feed SVG 字节不变；provenance 提取目录改为项目相对 output 路径。
+- PASS：pnpm typecheck 11/11、pnpm build 6/6、desktop 17/17、analytics 53/53、findings 17/17、dem-parser 28/28；test:report 真实/损坏/非 DEM 三场景；test:smoke dev/preview；pack:win、pack:win:test。真实 DEM golden 与 Findings 顺序未变。
+- 产物：release/0.1.0/CS2-Analyst-Setup-0.1.0.exe（115186098 字节，109.9 MiB）；test seam .tmp/test-output/0.1.0/CS2-Analyst-TestSeam-Setup-0.1.0.exe（115186071 字节，109.8 MiB）。版本保持 0.1.0。ASAR 3.26 MiB / 82 条目 / 71 官方 SVG；runtime mark 与原图字节一致。
+- 已实际验证：生产 EXE、installer、uninstaller 内嵌七尺寸图标 payload 与项目 ICO 一致；桌面/开始菜单快捷方式图标目标及 AppUserModelId；Programs/Apps DisplayName、DisplayIcon、卸载名称；DisplayIcon 指向 NSIS 安装的 uninstallerIcon.ico，字节与项目 ICO 相同。
+- 未完成：完整 test:installed 首次在新增 DisplayIcon 路径断言失败（误以为应指向 EXE），已修正并对另一次生产安装验证通过，但完整生产/测试 seam installed regression 未重跑；任务栏/Alt+Tab/真实拖动视觉验收未完成，最终 rename 独立复审未完成。
+- 用户按 Escape 停止 Computer Use，之后明确要求“没事，直接提交代码吧”；按此指令提交当前实现，不把整个 P5.6.5 冒记为 PASS。验收用生产安装版保留在 .tmp/branding-qa/installed-visual；installer/profile/logs 不入 Git。此前已完成一次壳层独立审查，未发现阻塞实现问题。
+

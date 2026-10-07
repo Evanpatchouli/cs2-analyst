@@ -1,4 +1,4 @@
-import type { DamageEvent } from "@cs2-coach/match-model";
+import type { DamageEvent } from "@cs2-analyst/match-model";
 
 import type { RoundCoverage } from "./coverage.js";
 

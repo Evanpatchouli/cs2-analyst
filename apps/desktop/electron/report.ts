@@ -1,15 +1,15 @@
 import { displayPlayerName } from './player-name.ts';
 import { basename } from 'node:path';
-import { analyzeMatch } from '@cs2-coach/analytics';
-import type { PlayerMetrics } from '@cs2-coach/analytics';
-import { Demoparser2Provider } from '@cs2-coach/dem-parser';
-import { generateFindings } from '@cs2-coach/findings';
-import type { Finding, FindingEvidence } from '@cs2-coach/findings';
-import type { BombAction, Match, Round } from '@cs2-coach/match-model';
+import { analyzeMatch } from '@cs2-analyst/analytics';
+import type { PlayerMetrics } from '@cs2-analyst/analytics';
+import { Demoparser2Provider } from '@cs2-analyst/dem-parser';
+import { generateFindings } from '@cs2-analyst/findings';
+import type { Finding, FindingEvidence } from '@cs2-analyst/findings';
+import type { BombAction, Match, Round } from '@cs2-analyst/match-model';
 import type {
   DesktopFinding, DesktopMatchReport, DesktopPlayerTimeline, DesktopRoundTimeline,
   DesktopTimelineEvent, DesktopAnalysisViews, DesktopSideAnalysis, ImportResult,
-} from '@cs2-coach/report-contract';
+} from '@cs2-analyst/report-contract';
 
 /** Stable initial-team membership from the first observed freeze-end roster, or null. */
 function initialSides(match: Match): Map<string, string> | null {

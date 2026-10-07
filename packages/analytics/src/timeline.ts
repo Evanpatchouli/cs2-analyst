@@ -1,4 +1,4 @@
-import type { KillEvent } from "@cs2-coach/match-model";
+import type { KillEvent } from "@cs2-analyst/match-model";
 
 import type { KnownSide, RoundCoverage } from "./coverage.js";
 

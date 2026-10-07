@@ -1,4 +1,4 @@
-import type { KillEvent, Match, Player } from "@cs2-coach/match-model";
+import type { KillEvent, Match, Player } from "@cs2-analyst/match-model";
 
 import {
   addIssueCount,

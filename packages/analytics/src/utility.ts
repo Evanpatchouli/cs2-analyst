@@ -1,4 +1,4 @@
-import type { DamageEvent, FlashEvent, KillEvent, UtilityEvent, WeaponFireEvent } from "@cs2-coach/match-model";
+import type { DamageEvent, FlashEvent, KillEvent, UtilityEvent, WeaponFireEvent } from "@cs2-analyst/match-model";
 
 import { isEligibleAssist, isEligibleDamage, type MatchCoverage } from "./coverage.js";
 import type { DamageLedger } from "./damage.js";

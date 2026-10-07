@@ -1,4 +1,4 @@
-import type { Match } from "@cs2-coach/match-model";
+import type { Match } from "@cs2-analyst/match-model";
 
 import type { DemoParser } from "../parser.js";
 import { convertToMatch } from "./converters.js";

@@ -1,4 +1,4 @@
-# CS2 Coach Domain Model
+# CS2 Analyst Domain Model
 
 ## Core Principle
 

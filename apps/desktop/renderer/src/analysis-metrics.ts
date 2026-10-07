@@ -1,4 +1,4 @@
-import type { DesktopPlayerComparison } from '@cs2-coach/report-contract';
+import type { DesktopPlayerComparison } from '@cs2-analyst/report-contract';
 
 export const comparisonMetrics = [
   { key: 'adr', label: 'ADR', digits: 2 },

@@ -23,7 +23,7 @@ VPK：
 ```powershell
 $killfeedCli = 'C:\Users\evanpatchouli\Downloads\cs2-valve-icon-extractor\tools\vrf\Source2Viewer-CLI.exe'
 $killfeedVpk = 'c:\steam\steamapps\common\Counter-Strike Global Offensive\game\csgo\pak01_dir.vpk'
-$killfeedExport = 'E:\cs2-coach\output\targeted-deathnotice'
+$killfeedExport = '<repo>\output\targeted-deathnotice'
 $killfeedFilter = 'panorama/images/hud/deathnotice/,panorama/images/icons/equipment/flashbang_assist'
 & $killfeedCli -i $killfeedVpk -e 'vsvg_c,vsvg' -f $killfeedFilter -l
 New-Item -ItemType Directory -Path $killfeedExport -Force | Out-Null
@@ -33,7 +33,7 @@ if ($LASTEXITCODE -ne 0) { throw '定向提取失败' }
 
 2026-10-07 实际提取 10 张 HUD SVG：blind_kill、domination、icon_headshot、icon_suicide、inairkill、noscope、penetrate、revenge、smoke_kill、smokegrenade_impact，另有 equipment/flashbang_assist。它们保留完整源目录结构于 output/targeted-deathnotice，manifest.json 记录本次结果。只把 icon_headshot 与 flashbang_assist 用于当前 UI；其余9张 HUD SVG 留在本地备用，不入仓库或 installer，不新增对应判定。原始 output/equipment 继续复用，旧 manifest 的 deathNoticeCount=0 是错误筛选路径产生的历史结果，不表示 VPK 中没有 HUD 图标。
 
-提取器本机 README、Extract-CS2-Icons.ps1 筛选路径与 cs2-coach-icon-map.json 爆头文件名也已修正；本项目不依赖这些外部脚本运行。
+提取器本机 README、Extract-CS2-Icons.ps1 筛选路径与 cs2-analyst-icon-map.json 爆头文件名也已修正；本项目不依赖这些外部脚本运行。
 
 ## 项目映射与回退
 

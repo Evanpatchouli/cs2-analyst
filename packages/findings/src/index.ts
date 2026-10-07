@@ -1,4 +1,4 @@
-import type { MatchAnalytics, PlayerMetrics } from "@cs2-coach/analytics";
+import type { MatchAnalytics, PlayerMetrics } from "@cs2-analyst/analytics";
 
 export type FindingCategory = "side-impact" | "trade" | "opening" | "utility" | "discipline" | "clutch";
 export type FindingSeverity = "high" | "medium" | "low" | "positive";

@@ -4,8 +4,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
-import { analyzeMatch } from '@cs2-coach/analytics';
-import { Demoparser2Provider } from '@cs2-coach/dem-parser';
+import { analyzeMatch } from '@cs2-analyst/analytics';
+import { Demoparser2Provider } from '@cs2-analyst/dem-parser';
 import { comparisonMetrics, comparisonValue, comparisonIncomplete, sortedComparison } from '../renderer/src/analysis-metrics.ts';
 import { displayPlayerName } from '../electron/player-name.ts';
 import { analyzeDemoFile, buildDesktopReport } from '../electron/report.ts';
@@ -163,7 +163,7 @@ test('real demo flows through parser -> analytics -> findings into a serializabl
 });
 
 test('an unreadable DEM returns an error result instead of throwing', async () => {
-  const dir = mkdtempSync(join(tmpdir(), 'cs2-coach-'));
+  const dir = mkdtempSync(join(tmpdir(), 'cs2-analyst-'));
   try {
     const bad = join(dir, 'broken.dem');
     writeFileSync(bad, 'not a demo');
@@ -176,7 +176,7 @@ test('an unreadable DEM returns an error result instead of throwing', async () =
 });
 
 test('a missing DEM path returns an error result instead of throwing', async () => {
-  const result = await analyzeDemoFile(join(tmpdir(), 'cs2-coach-missing', 'gone.dem'));
+  const result = await analyzeDemoFile(join(tmpdir(), 'cs2-analyst-missing', 'gone.dem'));
   assert.equal(result.kind, 'error');
   assert.match(result.message, /无法分析此 DEM/);
 });

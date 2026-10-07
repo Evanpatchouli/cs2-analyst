@@ -22,7 +22,7 @@ Analytics public contracts frozen for P4 Findings
 复算命令：
 
 ```powershell
-pnpm --filter @cs2-coach/analytics test
+pnpm --filter @cs2-analyst/analytics test
 ```
 
 测试在缺少 DEM 时跳过真实样本，仅保留合成回归。
@@ -326,8 +326,8 @@ P3.2 新增的降级/跳过路径（合成测试覆盖）：
 ## 验证
 
 ```powershell
-pnpm --filter @cs2-coach/analytics test   # 合成 + P3.2 战斗覆盖 + 真实 DEM golden
-pnpm --filter @cs2-coach/dem-parser test  # parser 回归
+pnpm --filter @cs2-analyst/analytics test   # 合成 + P3.2 战斗覆盖 + 真实 DEM golden
+pnpm --filter @cs2-analyst/dem-parser test  # parser 回归
 pnpm typecheck
 pnpm build
 ```

@@ -1,5 +1,5 @@
 import { Tooltip, makeStyles, tokens } from '@fluentui/react-components';
-import type { DesktopTimelineEvent } from '@cs2-coach/report-contract';
+import type { DesktopTimelineEvent } from '@cs2-analyst/report-contract';
 import { FlashAssistIcon, HeadshotIcon, WeaponIcon, weaponLabel } from './killfeed-icons';
 import { palette } from './theme';
 

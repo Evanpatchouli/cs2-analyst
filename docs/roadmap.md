@@ -1,6 +1,6 @@
-# CS2 Coach Roadmap
+# CS2 Analyst Roadmap
 
-**Supported platform: Windows x64 only.** CS2 Coach 只面向 Windows x64 构建、验证与分发；macOS / Linux 不在路线图内，packaging 流程也不包含跨平台分支。
+**Supported platform: Windows x64 only.** CS2 Analyst 只面向 Windows x64 构建、验证与分发；macOS / Linux 不在路线图内，packaging 流程也不包含跨平台分支。
 
 ## P0 Foundation
 
@@ -45,9 +45,9 @@ Schema、阈值、coverage 门控、priority、真实 twinkle 输出与 future g
 
 ## P5 Desktop Report UI
 
-P5.1 End-to-End Desktop Report MVP — **PASS**。首次打通 `选择 .dem → Main 文件选择 → Utility Process 解析/分析 → Findings → Renderer 报告页`。Renderer 只在 sandbox + contextIsolation 下消费 JSON-only `@cs2-coach/report-contract` DTO，不接触 Node/fs/demoparser2；原生解析与全部确定性计算在 Utility Process 中执行。report-contract `schemaVersion: 1` 为后续演进预留。实现、进程边界、IPC 契约、状态机、UI 结构与剩余缺口见 [桌面比赛报告](./desktop-report.md)。
+P5.1 End-to-End Desktop Report MVP — **PASS**。首次打通 `选择 .dem → Main 文件选择 → Utility Process 解析/分析 → Findings → Renderer 报告页`。Renderer 只在 sandbox + contextIsolation 下消费 JSON-only `@cs2-analyst/report-contract` DTO，不接触 Node/fs/demoparser2；原生解析与全部确定性计算在 Utility Process 中执行。report-contract `schemaVersion: 1` 为后续演进预留。实现、进程边界、IPC 契约、状态机、UI 结构与剩余缺口见 [桌面比赛报告](./desktop-report.md)。
 
-P5.2 Windows Packaging & Installable MVP — **PASS**。使用 electron-builder + NSIS 产出 Windows x64 安装包（`CS2 Coach`，版本沿用项目版本）。Utility Process 的 workspace 依赖全部打进 `report-worker.js`，原生 parser 以 asar-unpacked 形式随安装目录分发，安装版不再依赖 pnpm workspace symlink；仍不包含签名、自动更新或发布流程。安装版 E2E 覆盖安装/启动、Renderer 无 Node 暴露、真实 demo1.dem 报告、损坏 DEM 错误、分析中途关闭无残留 worker 与卸载。见 [Windows 打包与安装](./windows-packaging.md)。
+P5.2 Windows Packaging & Installable MVP — **PASS**。使用 electron-builder + NSIS 产出 Windows x64 安装包（`CS2 Analyst`，版本沿用项目版本）。Utility Process 的 workspace 依赖全部打进 `report-worker.js`，原生 parser 以 asar-unpacked 形式随安装目录分发，安装版不再依赖 pnpm workspace symlink；仍不包含签名、自动更新或发布流程。安装版 E2E 覆盖安装/启动、Renderer 无 Node 暴露、真实 demo1.dem 报告、损坏 DEM 错误、分析中途关闭无残留 worker 与卸载。见 [Windows 打包与安装](./windows-packaging.md)。
 
 P5.3 报告页可读性与说明优化 — **PASS**。纯展示层：Findings 证据不再默认显示原始 tick，改为按 `(eventTick - roundStartTick) / tickRate` 计算的“回合开始后 N 秒”；统一数字格式（秒/ADR 两位小数、百分比一位、整数计数零位）；Trade 文案改为“4 / 18 次死亡后队友完成补枪”；道具面板重做为逐行图标列表（投掷数量 + 道具效果）；8 张核心指标卡与道具面板统一增加 Fluent UI v9 `?` Tooltip。Analytics / Findings 语义、阈值、排序、evidence 数值与 ruleId 顺序全部不变。
 
@@ -67,6 +67,8 @@ P5.6.2 Report UX Polish — **PASS**。比赛报告 / 回合时间线 / 分析�
 P5.6.3 Official Kill-feed Assets — **PASS**。击杀播报改用71张官方SVG（69武器、官方爆头与闪光助攻），72武器identifier与独立刀型映射；删除自绘weapon shapes。HUD正确源目录panorama/images/hud/deathnotice/，仅定向补提缺失素材，修正旧提取路径。全部回归与两安装包/安装版E2E通过，Timeline与Analytics/Findings语义不变。见[官方资源提取](./cs2-killfeed-assets.md)。
 
 P5.6.4 Custom Window Chrome — **PASS**。40px 全宽自绘窗口标题栏、原创 target mark、安全 preload/IPC、原生最大化状态同步与持久错误页壳层已完成；全部指定回归、两安装包和 installed smoke 通过，用户确认真实鼠标拖动正常。
+
+P5.6.5 Branding & App Icon — **IMPLEMENTED / 用户授权提交，验收未全部完成**。正式 CS2 Analyst mark/lockup、七尺寸 Windows ICO、20px mark + CS2 Analyst 标题栏、EXE/NSIS/快捷方式/App ID 与全仓内部命名迁移完成。构建、单测、报告、dev/preview smoke 与两安装包通过；生产图标/快捷方式/卸载注册项验证通过。完整 installed regression 和任务栏/Alt+Tab/真实拖动视觉验收未完成，不记录整体 PASS。见 [Windows 打包记录](./windows-packaging.md)。
 
 ## P6 AI Coach
 

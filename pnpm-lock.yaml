@@ -14,19 +14,19 @@ importers:
 
   apps/desktop:
     dependencies:
-      '@cs2-coach/analytics':
+      '@cs2-analyst/analytics':
         specifier: workspace:^
         version: link:../../packages/analytics
-      '@cs2-coach/dem-parser':
+      '@cs2-analyst/dem-parser':
         specifier: workspace:^
         version: link:../../packages/dem-parser
-      '@cs2-coach/findings':
+      '@cs2-analyst/findings':
         specifier: workspace:^
         version: link:../../packages/findings
-      '@cs2-coach/match-model':
+      '@cs2-analyst/match-model':
         specifier: workspace:^
         version: link:../../packages/match-model
-      '@cs2-coach/report-contract':
+      '@cs2-analyst/report-contract':
         specifier: workspace:^
         version: link:../../packages/report-contract
       '@fluentui/react-components':
@@ -72,11 +72,11 @@ importers:
 
   packages/analytics:
     dependencies:
-      '@cs2-coach/match-model':
+      '@cs2-analyst/match-model':
         specifier: workspace:^
         version: link:../match-model
     devDependencies:
-      '@cs2-coach/dem-parser':
+      '@cs2-analyst/dem-parser':
         specifier: workspace:^
         version: link:../dem-parser
       '@types/node':
@@ -88,7 +88,7 @@ importers:
 
   packages/dem-parser:
     dependencies:
-      '@cs2-coach/match-model':
+      '@cs2-analyst/match-model':
         specifier: workspace:^
         version: link:../match-model
       '@laihoe/demoparser2':
@@ -104,11 +104,11 @@ importers:
 
   packages/findings:
     dependencies:
-      '@cs2-coach/analytics':
+      '@cs2-analyst/analytics':
         specifier: workspace:^
         version: link:../analytics
     devDependencies:
-      '@cs2-coach/dem-parser':
+      '@cs2-analyst/dem-parser':
         specifier: workspace:^
         version: link:../dem-parser
       typescript:
@@ -123,7 +123,7 @@ importers:
 
   packages/report-contract:
     dependencies:
-      '@cs2-coach/findings':
+      '@cs2-analyst/findings':
         specifier: workspace:^
         version: link:../findings
     devDependencies:

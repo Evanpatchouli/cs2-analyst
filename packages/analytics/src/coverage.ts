@@ -8,7 +8,7 @@ import type {
   RoundStateBoundary,
   RoundStateSnapshot,
   TeamSide,
-} from "@cs2-coach/match-model";
+} from "@cs2-analyst/match-model";
 
 /**
  * Central coverage issues. Every consumer reports eligibility with these codes

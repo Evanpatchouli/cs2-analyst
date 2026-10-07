@@ -1,6 +1,6 @@
 {
   "source": "User-extracted Valve CS2 Panorama assets",
-  "extractionDirectory": "E:\\cs2-coach\\output",
+  "extractionDirectory": "output",
   "sourceVpk": "c:\\steam\\steamapps\\common\\Counter-Strike Global Offensive\\game\\csgo\\pak01_dir.vpk",
   "extractedAt": "2026-10-07T05:14:00.1877734Z",
   "unchanged": true,
@@ -436,7 +436,7 @@
     }
   ],
   "targetedExtraction": {
-    "directory": "E:\\cs2-coach\\output\\targeted-deathnotice",
+    "directory": "output\\targeted-deathnotice",
     "extractedAt": "2026-10-07T05:31:11.962Z",
     "tool": "C:\\Users\\evanpatchouli\\Downloads\\cs2-valve-icon-extractor\\tools\\vrf\\Source2Viewer-CLI.exe",
     "vpkFilters": [

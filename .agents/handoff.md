@@ -1,14 +1,27 @@
 # Agent Handoff
 
+## 2026-10-08 — P5.6.5 Branding & App Icon — 已实现，用户授权提交（验收未全部完成）
+
+- 正式产品名：CS2 Analyst；mark 为不带文字的 A/准星透明 PNG；lockup 为带 CS2-ANALYST 文字版。源文件来自用户 Downloads/cs2-analyst/logo.png 与 logo_with_appname.png，原图字节保留，项目路径为 apps/desktop/resources/branding/cs2-analyst-mark.png 与 cs2-analyst-logo.png。
+- Windows icon 为真正 multi-resolution ICO：16/24/32/48/64/128/256；alpha 保留，原始画布完整保留，增加对称 4% safe area，独立 Lanczos 缩放。16/24/32 小尺寸图实查可辨，无重绘/改色/背景填充。
+- titlebar：20px PNG mark + CS2 Analyst，object-fit:contain，40px 高度与 logo no-drag 保留；临时 target SVG 已删除。Renderer/favicon 使用 PNG，BrowserWindow dev/preview 使用相对 bundle 路径，安装版使用 extraResources runtime PNG；Windows/NSIS 使用同源 ICO。
+- productName/executableName/shortcutName/uninstallDisplayName：CS2 Analyst。生产 App ID：com.evanpatchouli.cs2analyst；test seam：com.evanpatchouli.cs2analyst.testseam；Main AppUserModelId 同步。
+- 用户追加要求全仓 rename：workspace 包统一 @cs2-analyst/*，bridge 为 window.cs2Analyst，环境变量/编译宏为 CS2_ANALYST_*；lockfile、脚本、测试、文档同步。物理 checkout 路径未搬迁。业务文件仅 import 标识替换，无 DEM/Analytics/Findings/Timeline/Analysis 算法修改，官方 kill-feed SVG 字节不变；provenance 提取目录改为项目相对 output 路径。
+- PASS：pnpm typecheck 11/11、pnpm build 6/6、desktop 17/17、analytics 53/53、findings 17/17、dem-parser 28/28；test:report 真实/损坏/非 DEM 三场景；test:smoke dev/preview；pack:win、pack:win:test。真实 DEM golden 与 Findings 顺序未变。
+- 产物：release/0.1.0/CS2-Analyst-Setup-0.1.0.exe（115186098 字节，109.9 MiB）；test seam .tmp/test-output/0.1.0/CS2-Analyst-TestSeam-Setup-0.1.0.exe（115186071 字节，109.8 MiB）。版本保持 0.1.0。ASAR 3.26 MiB / 82 条目 / 71 官方 SVG；runtime mark 与原图字节一致。
+- 已实际验证：生产 EXE、installer、uninstaller 内嵌七尺寸图标 payload 与项目 ICO 一致；桌面/开始菜单快捷方式图标目标及 AppUserModelId；Programs/Apps DisplayName、DisplayIcon、卸载名称；DisplayIcon 指向 NSIS 安装的 uninstallerIcon.ico，字节与项目 ICO 相同。
+- 未完成：完整 test:installed 首次在新增 DisplayIcon 路径断言失败（误以为应指向 EXE），已修正并对另一次生产安装验证通过，但完整生产/测试 seam installed regression 未重跑；任务栏/Alt+Tab/真实拖动视觉验收未完成，最终 rename 独立复审未完成。
+- 用户按 Escape 停止 Computer Use，之后明确要求“没事，直接提交代码吧”；按此指令提交当前实现，不把整个 P5.6.5 冒记为 PASS。验收用生产安装版保留在 .tmp/branding-qa/installed-visual；installer/profile/logs 不入 Git。此前已完成一次壳层独立审查，未发现阻塞实现问题。
+
 ## 2026-10-07 — P5.6.4 Custom Window Chrome PASS
 
 - 基线 b353b325b232334d4a01e75a25fc5853220dc017；只修改窗口壳层、DesktopApi window 能力、测试与五份指定文档。业务DTO/Parser/Analytics/Findings/Timeline/Analysis/kill-feed/nickname/version/installer逻辑均不变。
 - Main frame:false / resizable:true / removeMenu；尺寸1280×800、min800×600、背景#111821，三个sandbox安全配置不变。四窗口IPC与report:import共用current BrowserWindow + webContents + mainFrame校验。
-- 40px Fluent标题栏，左侧原创20px currentColor target + CS2 Coach；右侧46×40px按钮、16px本地SVG与真正双矩形还原。native maximize/unmaximize通知，subscribe-first + 初值查询/竞态保护/exact listener cleanup。close调用BrowserWindow.close并沿用closed worker kill。
+- 40px Fluent标题栏，左侧原创20px currentColor target + CS2 Analyst；右侧46×40px按钮、16px本地SVG与真正双矩形还原。native maximize/unmaximize通知，subscribe-first + 初值查询/竞态保护/exact listener cleanup。close调用BrowserWindow.close并沿用closed worker kill。
 - drag标题栏、logo和buttons no-drag；双击原生drag region已实测，不重复绑定。持久窗口壳层在error boundary外，仅下方内容区滚动，避免滚动条挤窗口按钮；原1120px上限/间距不变。
 - 全部回归最终通过：typecheck11/11、build6/6、desktop17/17、report三场景、analytics53/53、findings17/17、parser28/28、dev/preview smoke、最终pack:win / pack:win:test、installed全部场景。两installer107.5MB，ASAR2.13MB/81条目/71官方SVG。真实golden与规则顺序不变。
 - 真实native smoke已通过：双击max/restore、Win+↑↓图标同步、minimize/激活恢复、API真实resize到1280×800 / 900×760 / 800×600、三个hover与close红白反馈；原生maximize bounds虽然含系统8px不可见frame，renderer viewport恰为workArea1920×1032，bar与close无黑边/overflow。不做负margin hack。
-- 在QA Renderer临时制造report render异常，fallback保留titlebar/三controls、恢复按钮可回到import页；不改文件。截图系统临时cs2-coach-p564-qa（report三尺寸/hover/maximized/error-recovery-shell），不提交。
+- 在QA Renderer临时制造report render异常，fallback保留titlebar/三controls、恢复按钮可回到import页；不改文件。截图系统临时cs2-analyst-p564-qa（report三尺寸/hover/maximized/error-recovery-shell），不提交。
 - 一次并行构建/验证的report退出等待超时，原因未证实；无产品修补，停止构建重叠后原脚本及完整pnpm test:report串行重跑均通过。profile清理失败目录保留系统临时，不影响仓库。独立review指出并已修复错误页丢标题栏P2；最终复审无actionable缺陷。
 - 用户实际鼠标拖动确认正常（“可以，提交并重新汇报吧”），最后一项验收完成。Computer Use drag未取得位移证据，此项PASS依据用户实测确认。
 - 五份指定文档同步，Roadmap PASS；唯一focused commit `feat(desktop): add custom Windows title bar`，不amend/squash、不push。无剩余开发或验收待办；截图/installer/profile均不提交。
@@ -20,7 +33,7 @@
 - 来源output/equipment及用户授权的已有VRF定向提取output/targeted-deathnotice。正确源路径panorama/images/hud/deathnotice/icon_headshot.vsvg_c；flash源为panorama/images/icons/equipment/flashbang_assist.vsvg_c。10HUD+flash已导出，额外9HUD仅本地备用；提取文档/脚本筛选/映射旧路径已修正。
 - 原图字节不变，provenance SHA与资源.gitattributes防换行转换保证71图可追溯；Vite静态import/相对base，production不访问原游戏目录。
 - 全命令PASS：typecheck11/11、build6/6、desktop15/15、report三场景、analytics53/findings17/parser28、dev-preview smoke、两pack、installed全链路。两installer107.5MB，ASAR2.13MB/81条目/71官方SVG，生产全部图URL可解码。
-- R24 AK/inferno、R22 posthumous HE/flash、R23真实headshot在开发/安装共享断言通过；Golden与Finding ruleId顺序不变。截图系统临时cs2-coach-p563-qa（1280/900/800/650），实查无白底/拉伸/broken image/整页溢出。独立review无阻塞，SSR4/4及71实际源图一致。
+- R24 AK/inferno、R22 posthumous HE/flash、R23真实headshot在开发/安装共享断言通过；Golden与Finding ruleId顺序不变。截图系统临时cs2-analyst-p563-qa（1280/900/800/650），实查无白底/拉伸/broken image/整页溢出。独立review无阻塞，SSR4/4及71实际源图一致。
 - 用户已确认首次安装防注入测试失败是其手动选择DEM触发正常导入造成；生产路径注入防护正常，原包/代码不变重跑全通过。docs/desktop-report.md记录已修正。
 - 完成后一个指定focused commit，不amend/squash；output/保留用户未追踪状态，截图/installer不提交。详细说明与提取命令见docs/cs2-killfeed-assets.md。
 
@@ -34,7 +47,7 @@
 - 实测 R24 twinkle使用AK-47击杀tarkz +122.20秒，4K含燃烧与完整长数字昵称；R7 3K；R22 tarkz死后HE击杀twinkle +32.78秒保留。Golden 25/20/4、ADR91.375、KAST75%、Trade22.2%、R24 1v3与5条Finding ruleId顺序完全不变。
 - 全部验证PASS：typecheck11/11、build6/6、desktop14/14、test:report真实/损坏/非DEM、analytics53/53、findings17/17、parser28/28、dev/preview test:smoke、pack:win、pack:win:test、test:installed。安装版运行共享CDP UX断言（含scroll时panel可见且展开），生产seam防护、无Node、原生绑定unpacked、损坏DEM、中途关闭无残留worker、两版卸载均通过；两轮独立审查无阻塞。
 - 视觉：1280×900 / 900×760 / 800×600，额外650px breakpoint；三Tab、summary focus、current color、趋势统计、divider、R24/R22截图实查。无Browser插件，沿用现有Electron CDP E2E。针对被遮挡窗口rAF暂停，测试启动禁用native occlusion节流，脚本等待放在Node；profile bounded清理重试避免遮蔽原始断言，不改产品行为。
-- 安装包均107.3MB，生产release/0.1.0与测试.tmp/test-output不入Git；ASAR1.41MB/10条目。截图系统临时目录cs2-coach-p562-qa，不提交。文档同步desktop-report/roadmap/current-task/handoff；本轮仅一个用户指定focused commit，不amend/squash。
+- 安装包均107.3MB，生产release/0.1.0与测试.tmp/test-output不入Git；ASAR1.41MB/10条目。截图系统临时目录cs2-analyst-p562-qa，不提交。文档同步desktop-report/roadmap/current-task/handoff；本轮仅一个用户指定focused commit，不amend/squash。
 - 限制：降级flag/未知weapon/world/全零统计由Node synthetic实际组件渲染覆盖，真实DEM不触发所有降级组合；Windows x64与指定窗口尺寸之外未验证。首次失败遗留的系统临时profile递归清理被审批策略拒绝，保留该目录，不影响仓库。
 
 ## 2026-10-07 — P5.6.1 玩家名称展示修复 PASS
@@ -67,7 +80,7 @@
 - Renderer（`renderer/src/main.tsx`）：报告底部新增 `RoundTimeline` section（`id="round-timeline"`），每回合一行 `R24 / T / 成功 / 13 : 11 / 查看详情`，点击展开逐行 `+109.81 秒　twinkle → 山姆烤蛋　AK-47`，默认全部收起。新增展示 helper `weaponLabels / weaponLabel`（ak47→AK-47、m4a1_silencer→M4A1-S、inferno→燃烧伤害等）、`sideText / scoreAfterText / roundResult / eventTime`；颜色仍只用于 Badge 与联动高亮（中性 `palette.raised`，无新色值）。
 - Findings 联动：带 `relatedRounds` 的 Finding 显示“查看 R24”（单回合）或“查看相关回合”（多回合，如 `team-flash.frequent-effects` 的 7 个回合）；点击 `setExpanded` + `scrollIntoView({ behavior:'smooth', block:'center' })` + 2.4 秒高亮（`data-highlighted="true"`）。无 `relatedRounds` 不显示按钮。切换目标玩家只按 `playerId` 选用 `report.timeline` 中对应数组，不重新导入 / 重跑。
 - 实测 demo1（`.demo/match.json` + 真实 Electron 端到端）：R24 = T / 成功 / 13 : 11，事件按 tick 为 `+47.44 kill twinkle→888…`、`+58.72 进入 1v3 残局`、`+109.81 kill twinkle→山姆烤蛋（燃烧伤害）`、`+117.70 开始安放炸弹`、`+120.83 炸弹安放完成`、`+122.20 kill twinkle→tarkz`、`+142.38 kill twinkle→Makoto Nijima`；R7 = CT / 成功，`+62.70 / +64.95 / +86.20` 三次 twinkle 击杀 + `+89.19 开始拆弹` + `+99.19 炸弹拆除成功`；R22 = T / 失败，`+31.56 twinkle→tarkz` 与 `+32.78 tarkz→twinkle`（tarkz 于 tick 121075 死后 121153 的合法 posthumous kill，保留）；比分逐回合累计 `R1 0:1 … R24 13:11`，与页头一致。
-- 验证：`pnpm typecheck` 11/11、`pnpm build` 6/6；`pnpm --filter @cs2-coach/desktop test` 7/7（新增：DTO 顶层键 + JSON-only、昵称映射、`(138685-131657)/64` 时间、过滤只允许 8 类事件、R7 3K、R22 posthumous、缺 tickRate 无时间、窗口不完整无事件、全 Unknown 不猜测、同输入 deterministic）；`test:report` 通过（新增 DOM 断言：24 摘要、R24 `T/成功/13 : 11`、默认收起、`查看 R24` 展开 + 高亮、`进入 1v3 残局`、`+xx.xx 秒`、正文无 tick、R7 3K、切换到 tarkz 后 `CT/失败`、损坏 DEM 无时间线）；analytics 53/53、findings 17/17、dem-parser 28/28；`pnpm test:smoke`；重新 `pack:win` + `pack:win:test` 后 `test:installed` 通过。
+- 验证：`pnpm typecheck` 11/11、`pnpm build` 6/6；`pnpm --filter @cs2-analyst/desktop test` 7/7（新增：DTO 顶层键 + JSON-only、昵称映射、`(138685-131657)/64` 时间、过滤只允许 8 类事件、R7 3K、R22 posthumous、缺 tickRate 无时间、窗口不完整无事件、全 Unknown 不猜测、同输入 deterministic）；`test:report` 通过（新增 DOM 断言：24 摘要、R24 `T/成功/13 : 11`、默认收起、`查看 R24` 展开 + 高亮、`进入 1v3 残局`、`+xx.xx 秒`、正文无 tick、R7 3K、切换到 tarkz 后 `CT/失败`、损坏 DEM 无时间线）；analytics 53/53、findings 17/17、dem-parser 28/28；`pnpm test:smoke`；重新 `pack:win` + `pack:win:test` 后 `test:installed` 通过。
 - demo1 golden 与 Findings 完全不变：twinkle 25/20/4、ADR 91.38、KAST 75%、Trade 22.2%、R24 1v3 胜、5 条 ruleId 顺序 `side-impact.ct-gap / trade.low-rate / team-flash.frequent-effects / clutch.win.r24 / opening.positive`。
 - 文档：`docs/roadmap.md` 新增 P5.5 PASS 与 “Future — Account & Match History”（apps/api = Auth / Session + 历史摘要；服务端不上传 / 不解析 DEM；Auto DEM discovery / directory scanning: NOT PLANNED）；`docs/desktop-report.md` 新增“回合时间线（P5.5）”；`docs/architecture.md` 补 timeline 投影与 future boundary；`current-task.md` 同步。本 work unit focused commit 后交接。
 
@@ -80,7 +93,7 @@
 - 一致性：`cardSurface` 固定所有卡片 `backgroundColor` / `1px` 弱边框 / `tokens.borderRadiusLarge`(6px) / `boxShadow: none`；道具投掷 / 道具效果 / 残局共用 `row` 基类（34px 行高、`palette.rowDivider` 分隔、`:last-child` 去掉末行分隔）；标题层级 Title1（地图）→ Title2（区块）→ Subtitle1（面板）→ Caption1（说明）；数值列右对齐 + `tabular-nums` 保持白色，名称列改用 `colorNeutralForeground2`，evidence 指标名走 muted。
 - 颜色只做锚点：道具图标、Findings severity 徽章、残局结果徽章、主按钮与少量 hover/focus 态。`clutchResult()` 的“失败”由 `informative` 改为 `danger`（仅展示颜色；标签文案、Clutch 数据与判定未动）。
 - 实测（真实 demo1.dem，Electron 端到端 + CDP 计算样式）：页面背景 `rgb(17,24,33)` + 渐变（旧 `rgb(31,31,31)`）；卡片 `rgb(29,36,46)` + `1px solid rgba(148,163,184,0.12)` + 6px 圆角 + `box-shadow: none`（旧 `rgb(41,41,41)` / 4px / 双层阴影）；6 个道具图标渲染为 22×22，fill 依次为 `#4DB6FF / #B9C7D9 / #FF5A36 / #FF8A1F / #FFB13B / #57D68D`，每项独占一行、图标左 / 名称中 / 数值右仍对齐。
-- 验证：`pnpm typecheck` 11/11、`pnpm build` 6/6；`pnpm --filter @cs2-coach/desktop test` 3/3；`test:report`（真实 / 损坏 / 非 .dem）通过；`pnpm test:smoke`（dev + preview）通过；重新执行 `pack:win` + `pack:win:test` 后 `test:installed` 全通过（生产安装版不含 seam、测试 seam 安装版 demo1 报告与开发环境一致、无残留 worker、损坏 DEM 不白屏、卸载成功）。安装包仍为 `release/0.1.0/CS2-Coach-Setup-0.1.0.exe`（107.3 MB）。
+- 验证：`pnpm typecheck` 11/11、`pnpm build` 6/6；`pnpm --filter @cs2-analyst/desktop test` 3/3；`test:report`（真实 / 损坏 / 非 .dem）通过；`pnpm test:smoke`（dev + preview）通过；重新执行 `pack:win` + `pack:win:test` 后 `test:installed` 全通过（生产安装版不含 seam、测试 seam 安装版 demo1 报告与开发环境一致、无残留 worker、损坏 DEM 不白屏、卸载成功）。安装包仍为 `release/0.1.0/CS2-Analyst-Setup-0.1.0.exe`（107.3 MB）。
 - demo1 golden 与 Findings 完全不变：twinkle 25/20/4、ADR 91.38、KAST 75%、Trade 22.2%、R24 1v3 胜、5 条 Findings ruleId 顺序 `side-impact.ct-gap / trade.low-rate / team-flash.frequent-effects / clutch.win.r24 / opening.positive`；本轮未改任何数据来源、断言或 Tooltip 文案。
 - 文档：`docs/desktop-report.md` 新增“视觉体系（P5.4）”一节并同步图标 / 主题描述；`current-task.md` 同步。本 work unit focused commit 后交接。
 
@@ -101,7 +114,7 @@
 ## 2026-10-07 — P5.2.1 Product Polish PASS
 
 - 基线 `58a7abd`（P5.2 PASS）。本轮只做发布目录规范 + 中文产品化文案：不改 Analytics、不改 Findings 阈值/排序/契约、不改 UI 结构与功能，未引入新规则、timeline、历史、自动扫描或 AI。
-- 发布目录：`build-installer.mjs` 把生产安装包复制到项目根 `release/<version>/`（版本取自 `apps/desktop/package.json`，当前 `release/0.1.0/CS2-Coach-Setup-0.1.0.exe`），测试 seam 产物改投 `.tmp/test-output/<version>/`，两者不再共用 `apps/desktop/release`。`installed-app-smoke.mjs` 的产物路径、`.gitignore` 注释与文档同步。
+- 发布目录：`build-installer.mjs` 把生产安装包复制到项目根 `release/<version>/`（版本取自 `apps/desktop/package.json`，当前 `release/0.1.0/CS2-Analyst-Setup-0.1.0.exe`），测试 seam 产物改投 `.tmp/test-output/<version>/`，两者不再共用 `apps/desktop/release`。`installed-app-smoke.mjs` 的产物路径、`.gitignore` 注释与文档同步。
 - Windows-only：roadmap / architecture / windows-packaging 三处明确 **Supported platform: Windows x64 only**；`prepare-pack.mjs` 删除 TRIPLES 映射，固定 `win32-x64-msvc`，非 win32-x64 抛错。不再把 macOS/Linux 当未来默认目标。
 - UI 术语：展示层加中文解释（HS%（爆头率）、KAST（回合贡献率）、Trade rate（死亡后队友补枪率）、Trade kills（补枪击杀）、Opening（首杀对决）、Clutch（残局）），ADR hint 改为“每回合平均有效伤害”，严重度徽章改为 高/中/低/亮点。底层字段名与 API 未变。
 - 道具区：`Utility → 道具`、`Flash/Smoke/HE/Incendiary/Molotov/Decoy → 闪光弹/烟雾弹/高爆手雷/燃烧弹/燃烧瓶/诱饵弹`、`HE 敌伤/燃烧敌伤 → 高爆手雷对敌伤害/燃烧伤害`（单位改“点”）、受闪说明改为不含 `duration` 的自然中文；残局面板标题改“残局”，`win/loss → 成功/失败`，未加“惜败”。
@@ -110,18 +123,18 @@
 - Findings 证据展示层：新增 metric 路径 → 中文指标名、unit → 中文单位（flag→是/否、ratio/percent→%）的映射，仅影响渲染，contract 未变。
 - 覆盖告警：`report.ts` coverage notes 去掉 `ADR` / `KAST / Trade / Clutch` 直译。
 - 验证：`pnpm typecheck`、`pnpm build`、analytics 53/53、findings 17/17、dem-parser 28/28、desktop Node 集成 3/3、desktop `test:report`（真实/损坏/非 .dem）、`pnpm test:smoke`（dev+preview）、installed-app smoke（安装 → demo1 报告 → 无残留 worker → 损坏 DEM → 卸载）全 PASS。
-- 实测：安装包 `release/0.1.0/CS2-Coach-Setup-0.1.0.exe`（107.3 MB）、测试 seam `.tmp/test-output/0.1.0/CS2-Coach-TestSeam-Setup-0.1.0.exe`；安装版 twinkle 25/20/4、ADR 91.38、KAST 75%、Trade 22.2%、R24 1v3 win、5 条 Findings 与开发环境一致。
+- 实测：安装包 `release/0.1.0/CS2-Analyst-Setup-0.1.0.exe`（107.3 MB）、测试 seam `.tmp/test-output/0.1.0/CS2-Analyst-TestSeam-Setup-0.1.0.exe`；安装版 twinkle 25/20/4、ADR 91.38、KAST 75%、Trade 22.2%、R24 1v3 win、5 条 Findings 与开发环境一致。
 - 本 work unit focused commit 后交接；下一工作按用户新需求确定。
 
 ## 2026-10-07 — P5.2 Windows Packaging & Installable MVP PASS
 
 - 基线 `58b0dc0`（P5.1 PASS）。本轮不改 P3 Analytics 语义、P4 Findings 阈值与 P5.1 报告 UI/DTO；未引入签名、自动更新、GitHub Release、CI 发布、macOS/Linux。
-- 打包方案：electron-builder 26 + NSIS（`apps/desktop/electron-builder.config.cjs`）。Windows x64、per-user、`oneClick:false` 可选安装目录、桌面 + 开始菜单快捷方式、独立卸载器；`productName: CS2 Coach`、版本沿用 `0.1.0`、appId `com.evanpatchouli.cs2coach`；复用工作区 Electron 运行时（`electronDist`）。
-- 产物：`apps/desktop/release/CS2-Coach-Setup-0.1.0.exe`（107.3 MB）与 `apps/desktop/release/test-seam/CS2-Coach-TestSeam-Setup-0.1.0.exe`。打包在系统临时目录完成再复制安装包：工作区文件 watcher 会占用新建的 `app.asar`，导致 electron-builder 无法重置输出目录（`EBUSY: unlink app.asar`）。
-- worker 依赖：`electron.vite.config.ts` 以 `CS2_COACH_PACK` 区分构建形态。打包构建 `externalizeDeps = { exclude: 5 个 workspace 包, include: [@laihoe/demoparser2, @laihoe/demoparser2-win32-x64-msvc] }`，把 workspace 包 inline 成 75 kB 的 `report-worker.js`；非打包构建仍 external，保证 `pnpm dev` / `start` / `test:report` 从 workspace symlink 解析（原生包并未链接到 `apps/desktop`，全量 inline 会让 dev 解析失败）。`scripts/prepare-pack.mjs` 把 loader 包与平台原生包复制到 `dist/electron/node_modules`（与 worker 同级，Node 向上解析命中同一 fallback 路径），electron-builder `asarUnpack: ["**/*.node"]` 把 3.9 MB `.node` 落到 `resources/app.asar.unpacked`。
+- 打包方案：electron-builder 26 + NSIS（`apps/desktop/electron-builder.config.cjs`）。Windows x64、per-user、`oneClick:false` 可选安装目录、桌面 + 开始菜单快捷方式、独立卸载器；`productName: CS2 Analyst`、版本沿用 `0.1.0`、appId `com.evanpatchouli.cs2analyst`；复用工作区 Electron 运行时（`electronDist`）。
+- 产物：`apps/desktop/release/CS2-Analyst-Setup-0.1.0.exe`（107.3 MB）与 `apps/desktop/release/test-seam/CS2-Analyst-TestSeam-Setup-0.1.0.exe`。打包在系统临时目录完成再复制安装包：工作区文件 watcher 会占用新建的 `app.asar`，导致 electron-builder 无法重置输出目录（`EBUSY: unlink app.asar`）。
+- worker 依赖：`electron.vite.config.ts` 以 `CS2_ANALYST_PACK` 区分构建形态。打包构建 `externalizeDeps = { exclude: 5 个 workspace 包, include: [@laihoe/demoparser2, @laihoe/demoparser2-win32-x64-msvc] }`，把 workspace 包 inline 成 75 kB 的 `report-worker.js`；非打包构建仍 external，保证 `pnpm dev` / `start` / `test:report` 从 workspace symlink 解析（原生包并未链接到 `apps/desktop`，全量 inline 会让 dev 解析失败）。`scripts/prepare-pack.mjs` 把 loader 包与平台原生包复制到 `dist/electron/node_modules`（与 worker 同级，Node 向上解析命中同一 fallback 路径），electron-builder `asarUnpack: ["**/*.node"]` 把 3.9 MB `.node` 落到 `resources/app.asar.unpacked`。
 - 路径：`main.js` 中 report-worker / preload / renderer 全部用 `import.meta.url` 相对解析，worker 的原生依赖用 Node 模块解析；无开发目录硬编码，兼容 `app.isPackaged === true`。构建期校验（`build-installer.mjs`）：worker 不得再 external 引用 workspace 包、必须引用原生 parser、生产 `main.js` 不得含 seam 变量。
-- 注入防护：`CS2_COACH_DEM_PATH` 仅非打包构建生效；打包 seam `CS2_COACH_TEST_DEM_PATH` 只在 `CS2_COACH_TEST_SEAM=1` 的测试构建中编译，生产构建里 `__CS2_COACH_TEST_SEAM__` 被 define 成 false 并由 Rollup 消除。安装版实测：带两个环境变量启动并点击“选择 DEM”后 15 秒内不自动出报告。
-- 安装版 E2E `scripts/installed-app-smoke.mjs`（`pnpm --filter @cs2-coach/desktop test:installed`）：asar 只含 `dist/**` 与 `package.json`（1.26 MB / 10 条目）；renderer bundle 不含 Node/原生 parser；原生绑定 unpacked 3.9 MB；启动 → preload → 无 `window.require`/`window.process` → 关闭退出码 0；demo1 报告与开发环境一致（twinkle 25/20/4、ADR 91.38、KAST 75%、Trade 22.2%、R24 1v3 win、5 条 Findings、13 : 11）；分析中途关闭窗口无残留 `CS2 Coach.exe`（含 Utility Process）；损坏 DEM 报错且保留“重新选择 DEM”，不白屏；生产版与测试 seam 版均可静默卸载。
+- 注入防护：`CS2_ANALYST_DEM_PATH` 仅非打包构建生效；打包 seam `CS2_ANALYST_TEST_DEM_PATH` 只在 `CS2_ANALYST_TEST_SEAM=1` 的测试构建中编译，生产构建里 `__CS2_ANALYST_TEST_SEAM__` 被 define 成 false 并由 Rollup 消除。安装版实测：带两个环境变量启动并点击“选择 DEM”后 15 秒内不自动出报告。
+- 安装版 E2E `scripts/installed-app-smoke.mjs`（`pnpm --filter @cs2-analyst/desktop test:installed`）：asar 只含 `dist/**` 与 `package.json`（1.26 MB / 10 条目）；renderer bundle 不含 Node/原生 parser；原生绑定 unpacked 3.9 MB；启动 → preload → 无 `window.require`/`window.process` → 关闭退出码 0；demo1 报告与开发环境一致（twinkle 25/20/4、ADR 91.38、KAST 75%、Trade 22.2%、R24 1v3 win、5 条 Findings、13 : 11）；分析中途关闭窗口无残留 `CS2 Analyst.exe`（含 Utility Process）；损坏 DEM 报错且保留“重新选择 DEM”，不白屏；生产版与测试 seam 版均可静默卸载。
 - 验证：`pnpm typecheck`、`pnpm build`、analytics 53/53、findings 17/17、dem-parser 28/28、desktop Node 集成 3/3、desktop `test:report`（真实/损坏/非 .dem）、`pnpm test:smoke`（dev + preview）、installed-app smoke 全 PASS。
 - 已知限制：安装包未签名，可能触发 SmartScreen；只构建并验证 Windows x64；`disableAsarIntegrity: true`（ASAR integrity 重写会在 exe 刚复制完成时重写约 234 MB，与杀毒扫描竞争而间歇失败；Electron 仅在启用对应 fuse 时校验）；打包中间产物留在系统临时目录。
 - 文档：新增 `docs/windows-packaging.md`；同步 roadmap、architecture、development、desktop-report、current-task、handoff。本 work unit focused commit 后交接；下一工作按用户新需求确定。
@@ -129,11 +142,11 @@
 ## 2026-10-07 — P5.1 End-to-End Desktop Report MVP PASS
 
 - 基线 `f9f9c58e`（P4.1 Findings PASS）。本轮不改 P3 Analytics 语义、不改 P4 Findings 阈值、不在 Renderer 重算指标、不猜 coaching 结论；未引入 AI/云端/登录/历史库/图表/热力图/installer。
-- 新包 `packages/report-contract`：Electron 与 Renderer 共享的 JSON-only 展示契约，只依赖 `@cs2-coach/findings` 类型。`DesktopMatchReport { schemaVersion, match, selectedPlayer, players, analytics, findings }`；`ImportResult` 为 success/cancelled/error 判别联合；`DesktopApi` 只含 `version/importDemo/onProgress`。
+- 新包 `packages/report-contract`：Electron 与 Renderer 共享的 JSON-only 展示契约，只依赖 `@cs2-analyst/findings` 类型。`DesktopMatchReport { schemaVersion, match, selectedPlayer, players, analytics, findings }`；`ImportResult` 为 success/cancelled/error 判别联合；`DesktopApi` 只含 `version/importDemo/onProgress`。
 - 进程边界：Main 用 `dialog.showOpenDialog` 只选 `.dem`，`utilityProcess.fork(dist/electron/report-worker.js)` 运行 native demoparser2 → analytics → findings → DTO；10 分钟超时、单任务互斥、窗口关闭终止 worker。Renderer 在 `contextIsolation:true / nodeIntegration:false / sandbox:true` 下只经 preload/contextBridge 调用 IPC，不接触 Node/fs/demoparser2。
 - DTO 构造 `apps/desktop/electron/report.ts`：`analyzeDemoFile(filePath, onParsed?)` = parse + `buildDesktopReport`，错误返回结构化 message 而非抛出；`teamScore` 只在每个回合胜方能唯一映射回固定队伍时输出“开局 CT 队 / 开局 T 队”比分，否则 null。Utility coverage 告警只针对影响展示数值的不完整证据（计数/伤害/助攻），未证实的 flash 时长由 Utility 卡片 caption 承担。
 - Renderer：Fluent UI v9 `webDarkTheme` 单页报告。页头（选择/重新选择 DEM）→ 进行中 Spinner → 错误 MessageBar → 空状态 → 报告（地图/比分/回合/文件名 + 目标玩家 Dropdown；K/D/A、ADR、HS%、KAST、Trade rate、Trade kills、Opening、Clutch；Findings 左栏最多 3 问题 + 2 亮点、severity 徽章、可展开证据；右栏 Utility 与 Clutch list）。状态机 idle/selecting/parsing/analyzing/success/error，React Error Boundary 兜底，取消/错误均保留上一次成功报告且不白屏。
-- 测试seam：非打包构建下 Main 读取 `CS2_COACH_DEM_PATH` 绕过原生对话框（打包应用始终用对话框），仅用于 Electron 端到端 smoke；Renderer/preload 不感知。
+- 测试seam：非打包构建下 Main 读取 `CS2_ANALYST_DEM_PATH` 绕过原生对话框（打包应用始终用对话框），仅用于 Electron 端到端 smoke；Renderer/preload 不感知。
 - 实测 demo1.dem（267MB，de_dust2，24 回合，13:11）：twinkle 25/20/4、ADR 91.375、KAST 18/24=75%、Trade 4/18=22.222%、Opening 4/0、R24 1v3 win；默认 Findings 顺序 side-impact.ct-gap / trade.low-rate / team-flash.frequent-effects / clutch.win.r24 / opening.positive。损坏 DEM 返回“无法分析此 DEM…”，页面显示错误且保留“重新选择 DEM”。
 - 验证：desktop Node 集成 `test` 3/3；`test:report` Electron 端到端 smoke（真实 + 损坏 DEM）通过；analytics 53/53、findings 17/17、dem-parser 28/28；`pnpm typecheck` 11/11、`pnpm build --force` 6/6、现有 UI `pnpm test:smoke` 通过。
 - 文档：新增 docs/desktop-report.md；同步 roadmap（P5.1 PASS）、architecture（report-contract + 进程模型）、development（桌面测试命令）、current-task、handoff。
@@ -194,7 +207,7 @@
 - Coverage（`src/coverage.ts`）：新增 10 个 issue code，并给出 `coverageIssueSeverity`（unavailable / ambiguous / degraded / informational）与 `CoverageSummary.severity` 合计；`RoundRoster` 增加 `entries`/`tick`，`RoundCoverage` 增加 `endState`、`winner`、`lifecycleEvents`。
 - demo1.dem golden（twinkle）：KAST **18/24 = 75.0%**（K14/A3/S4/T4，全部可证、complete=true）；trade kills **6**、traded deaths **4**、tradeable deaths **18**、trade rate **22.2%**；clutch 3 次（R1 1v3、R17 1v2、R24 1v3）1 win（R24）。全局 tradeKills = tradedDeaths = 34，tradeable 158，clutch 31/7，P3.2 新 issue 全 0。
 - 与人工复盘一致；差异仅来自口径精确化。对账中发现 R22 死后手雷击杀（tarkz 于 121075 死亡后 121153 击杀 twinkle）为合法 posthumous kill，不复活、不作 trade；R13/R23 的复仇击杀分别 395/359 ticks，超出 320 窗口故不算 trade（放宽到 ~6.2s 会得到 6，与人工复盘 4 不符）。
-- 验证：`pnpm --filter @cs2-coach/analytics test` **35/35**（P3.1 19 + P3.2 combat 13 + 真实 DEM 3）、`pnpm --filter @cs2-coach/dem-parser test` **28/28** 无回归、`pnpm typecheck`、`pnpm build` 全 PASS。上一轮 handoff/current-task 记录的 “20/20” 实际为 **21/21**（19 合成 + 2 真实 DEM），已更正。
+- 验证：`pnpm --filter @cs2-analyst/analytics test` **35/35**（P3.1 19 + P3.2 combat 13 + 真实 DEM 3）、`pnpm --filter @cs2-analyst/dem-parser test` **28/28** 无回归、`pnpm typecheck`、`pnpm build` 全 PASS。上一轮 handoff/current-task 记录的 “20/20” 实际为 **21/21**（19 合成 + 2 真实 DEM），已更正。
 - 未实现：utility advanced metrics、Findings、AI、UI。完整定义、issue 码表与 golden：docs/analytics-metrics.md。
 
 ## 2026-10-06 — P3.1 damage / ADR semantics correction
@@ -202,7 +215,7 @@
 - `packages/analytics` 现在区分两套伤害：`reportedDamage`（原始 `dmg_health`，保留 overkill）与 `effectiveDamage`（受害者实际 HP 损失，单发被受击前剩余 HP 截断）。`reportedAdr = reportedDamage / roundsPlayed`，`adr = effectiveDamage / roundsPlayed`（标准 ADR）。CT/T split 同样输出两套。旧的 `adr` 字段语义已改为标准 ADR，原值迁移到 `reportedAdr`。
 - 新增 `packages/analytics/src/damage.ts`：`buildDamageLedger(round)` 为每个 victim 回合从满血 100 重建 HP 轨迹，`loss = preHurtHP - healthRemaining`。自伤/友伤/world 伤害参与轨迹但不归属；`dmg_health` 只用于校验（demo 整数上报与截断余量允许 ±1）。轨迹断裂记 `damage-effective-chain-broken`，同 tick 顺序不可证记 `damage-effective-same-tick-ambiguous`，对应伤害行不计入 effective，绝不猜测。逐玩家 `coverage.effectiveDamageUnresolved` 计数。
 - demo1.dem golden：twinkle reported 2644 / reportedAdr 110.17 / effective 2193 / adr 91.38；CT 1106→819、T 1538→1374；全局 reported 24600 / effective 19351。与之前人工复盘 ~2195 / ~91.5 对照，差 2 点（0.09%）来自逐发整数舍入，不是口径分歧；scoreboard 风格 `min(dmg, hp)` 会得到 2162，明显偏离，说明人工复盘用的是 HP 损失口径。
-- 验证：`pnpm --filter @cs2-coach/analytics test` 20/20（含真实 DEM）、`pnpm --filter @cs2-coach/dem-parser test` 28/28 无回归、`pnpm typecheck`、`pnpm build` 全 PASS。
+- 验证：`pnpm --filter @cs2-analyst/analytics test` 20/20（含真实 DEM）、`pnpm --filter @cs2-analyst/dem-parser test` 28/28 无回归、`pnpm typecheck`、`pnpm build` 全 PASS。
 - P3.2 仍未开始：KAST / Trade / Clutch / utility advanced / Findings / UI / AI 未实现。治疗与回合内重生在本样本未出现，机制上会走 chain-broken 降级，待真实样本验证。
 - 完整定义、issue 码表与 golden 对比：docs/analytics-metrics.md。
 
@@ -213,7 +226,7 @@
 - ADR 口径为 reported damage（保留 overkill，剔除友伤/自伤/未知 side），分母为有确认参与的完整回合。CT/T split 使用逐回合快照 side，不用 `Player.team`。
 - assist 要求 assister 与 killer 同侧；demo 原始 assister 字段会记录友伤助攻（twinkle 2 次），抑制后与人工复盘 25/20/4 一致。
 - demo1.dem golden：twinkle 25/20/4、HS 9、CT 10/10/3/1106、T 15/10/1/1538、ADR 110.17、opening 4/0、multi-kill {2:6,3:1,4:1}；全局有效窗口击杀 180（parser 182 含 2 个 post-round）、助攻 57、伤害 24600、24 次 opening duel。
-- 验证：`pnpm --filter @cs2-coach/analytics test` 15/15（含真实 DEM）、`pnpm --filter @cs2-coach/dem-parser test` 28/28、`pnpm typecheck`、`pnpm build` 全 PASS。analytics 对 dem-parser 仅有 test-only devDependency。
+- 验证：`pnpm --filter @cs2-analyst/analytics test` 15/15（含真实 DEM）、`pnpm --filter @cs2-analyst/dem-parser test` 28/28、`pnpm typecheck`、`pnpm build` 全 PASS。analytics 对 dem-parser 仅有 test-only devDependency。
 - P3.2 KAST / Trade / Clutch 前缺口：存活推进（freeze_end alive + 死亡时间线 + end 快照）、trade 时窗与 tickRate 未知抑制、clutch 起始存活名单、回合内断连/重生/重连真实证据、utility 类型归一与 stage 去重。
 - 完整定义、issue 码表与 golden 对比：docs/analytics-metrics.md。
 

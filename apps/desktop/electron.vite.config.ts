@@ -10,11 +10,11 @@ const resolvePath = (path: string) => fileURLToPath(new URL(path, import.meta.ur
  * in an installed build.
  */
 const WORKSPACE_PACKAGES = [
-  '@cs2-coach/dem-parser',
-  '@cs2-coach/match-model',
-  '@cs2-coach/analytics',
-  '@cs2-coach/findings',
-  '@cs2-coach/report-contract',
+  '@cs2-analyst/dem-parser',
+  '@cs2-analyst/match-model',
+  '@cs2-analyst/analytics',
+  '@cs2-analyst/findings',
+  '@cs2-analyst/report-contract',
 ];
 
 /**
@@ -25,18 +25,18 @@ const WORKSPACE_PACKAGES = [
 const NATIVE_PACKAGES = ['@laihoe/demoparser2', '@laihoe/demoparser2-win32-x64-msvc'];
 
 /** Packaged test seam. Off unless the test-seam installer is explicitly built. */
-const testSeam = process.env.CS2_COACH_TEST_SEAM === '1';
+const testSeam = process.env.CS2_ANALYST_TEST_SEAM === '1';
 
 /**
  * Packaging build (build-installer.mjs). The dev and preview builds keep workspace
  * packages external so they run straight from the pnpm workspace; the packaging
  * build inlines them so the installed app never resolves through workspace symlinks.
  */
-const packaging = process.env.CS2_COACH_PACK === '1';
+const packaging = process.env.CS2_ANALYST_PACK === '1';
 
 export default defineConfig({
   main: {
-    define: { __CS2_COACH_TEST_SEAM__: JSON.stringify(testSeam) },
+    define: { __CS2_ANALYST_TEST_SEAM__: JSON.stringify(testSeam) },
     build: {
       outDir: 'dist/electron',
       externalizeDeps: packaging ? { exclude: WORKSPACE_PACKAGES, include: NATIVE_PACKAGES } : true,

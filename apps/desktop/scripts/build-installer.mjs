@@ -8,10 +8,10 @@ import { fileURLToPath } from 'node:url';
 /**
  * Builds a Windows x64 NSIS installer.
  *
- *   node scripts/build-installer.mjs production   release/<version>/CS2-Coach-Setup-<version>.exe
+ *   node scripts/build-installer.mjs production   release/<version>/CS2-Analyst-Setup-<version>.exe
  *   node scripts/build-installer.mjs test-seam    .tmp/test-output/<version>/… — a
  *                                                 test-only build that accepts
- *                                                 CS2_COACH_TEST_DEM_PATH so the
+ *                                                 CS2_ANALYST_TEST_DEM_PATH so the
  *                                                 installed-app E2E can import a
  *                                                 DEM without the native dialog.
  *
@@ -31,7 +31,7 @@ const { version } = JSON.parse(readFileSync(join(desktopDir, 'package.json'), 'u
 const require = createRequire(import.meta.url);
 // Stage outside the workspace: workspace file watchers hold packaged archives open,
 // which blocks electron-builder when it resets the output directory.
-const stagingDir = join(tmpdir(), 'cs2-coach-packaging', variant);
+const stagingDir = join(tmpdir(), 'cs2-analyst-packaging', variant);
 // Production installers are archived under release/<version>/. The test seam build is a
 // test artifact, so it stays out of the release tree.
 const releaseDir = testSeam
@@ -39,9 +39,9 @@ const releaseDir = testSeam
   : join(projectRoot, 'release', version);
 const env = {
   ...process.env,
-  CS2_COACH_TEST_SEAM: testSeam ? '1' : '0',
-  CS2_COACH_PACK: '1',
-  CS2_COACH_PACK_OUTPUT: stagingDir,
+  CS2_ANALYST_TEST_SEAM: testSeam ? '1' : '0',
+  CS2_ANALYST_PACK: '1',
+  CS2_ANALYST_PACK_OUTPUT: stagingDir,
 };
 
 function run(command, args) {
@@ -60,15 +60,15 @@ const workerBundle = readFileSync(join(desktopDir, 'dist/electron/report-worker.
 // The worker must be self-contained JavaScript: workspace packages bundled in,
 // native parser external so prepare-pack.mjs can provide it at runtime.
 for (const pkg of ['dem-parser', 'match-model', 'analytics', 'findings', 'report-contract']) {
-  if (workerBundle.includes(`"@cs2-coach/${pkg}"`)) {
-    throw new Error(`report-worker.js still imports @cs2-coach/${pkg}; workspace packages must be bundled`);
+  if (workerBundle.includes(`"@cs2-analyst/${pkg}"`)) {
+    throw new Error(`report-worker.js still imports @cs2-analyst/${pkg}; workspace packages must be bundled`);
   }
 }
 if (!workerBundle.includes('@laihoe/demoparser2')) {
   throw new Error('report-worker.js does not reference the native parser; prepare-pack staging would be unused');
 }
 
-const seamMarker = 'CS2_COACH_TEST_DEM_PATH';
+const seamMarker = 'CS2_ANALYST_TEST_DEM_PATH';
 if (testSeam) {
   if (!mainBundle.includes(seamMarker)) throw new Error('test-seam build is missing the packaged import seam');
 } else if (mainBundle.includes(seamMarker)) {

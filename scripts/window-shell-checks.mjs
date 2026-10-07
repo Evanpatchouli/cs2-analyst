@@ -7,7 +7,11 @@ export async function checkWindowLayout(evaluate) {
     const bar = document.querySelector('[data-app-titlebar]');
     const buttons = [...bar.querySelectorAll('[data-window-control]')];
     const rect = bar.getBoundingClientRect();
-    return { title: document.title, logo: !!bar.querySelector('[data-app-logo]'), text: bar.textContent,
+    const logo = bar.querySelector('[data-app-logo]');
+    return { title: document.title, logo: !!logo, text: bar.textContent,
+      mark: { tag: logo.tagName, loaded: logo.complete && logo.naturalWidth > 0,
+        width: logo.getBoundingClientRect().width, height: logo.getBoundingClientRect().height,
+        fit: getComputedStyle(logo).objectFit, draggable: logo.draggable },
       height: rect.height, top: rect.top, left: rect.left, right: rect.right, width: innerWidth,
       drag: getComputedStyle(bar).getPropertyValue('-webkit-app-region'),
       logoDrag: getComputedStyle(bar.querySelector('[data-app-logo]').parentElement).getPropertyValue('-webkit-app-region'),
@@ -19,7 +23,8 @@ export async function checkWindowLayout(evaluate) {
       contentOverflow: document.querySelector('[data-app-content]').scrollWidth > document.querySelector('[data-app-content]').clientWidth,
       contentDrag: getComputedStyle(document.querySelector('main')).getPropertyValue('-webkit-app-region') };
   })()`);
-  assert.equal(shell.title, 'CS2 Coach'); assert.equal(shell.logo, true); assert.equal(shell.text, 'CS2 Coach');
+  assert.equal(shell.title, 'CS2 Analyst'); assert.equal(shell.logo, true); assert.equal(shell.text, 'CS2 Analyst');
+  assert.deepEqual(shell.mark, { tag: 'IMG', loaded: true, width: 20, height: 20, fit: 'contain', draggable: false });
   assert.equal(shell.height, 40); assert.equal(shell.top, 0); assert.equal(shell.left, 0); assert.equal(shell.right, shell.width);
   assert.equal(shell.drag, 'drag'); assert.equal(shell.logoDrag, 'no-drag');
   assert.equal(shell.contentTop, 40); assert.equal(shell.overflow, false);
@@ -40,10 +45,10 @@ export async function checkWindowShell(evaluate, send) {
   };
   await evaluate(`document.querySelector('[data-window-control="maximize"]').click()`);
   await waitLabel('还原');
-  assert.equal(await evaluate('window.cs2Coach.window.isMaximized()'), true);
+  assert.equal(await evaluate('window.cs2Analyst.window.isMaximized()'), true);
   await checkWindowLayout(evaluate);
   await evaluate(`document.querySelector('[data-window-control="maximize"]').click()`);
   await waitLabel('最大化');
-  assert.equal(await evaluate('window.cs2Coach.window.isMaximized()'), false);
+  assert.equal(await evaluate('window.cs2Analyst.window.isMaximized()'), false);
   console.log('Custom window shell: real Main maximize/restore, drag/no-drag and layout PASS');
 }

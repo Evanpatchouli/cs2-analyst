@@ -1,11 +1,11 @@
 {
-  "name": "@cs2-coach/report-contract",
+  "name": "@cs2-analyst/report-contract",
   "version": "0.1.0",
   "private": true,
   "type": "module",
   "types": "./dist/index.d.ts",
   "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
   "scripts": { "build": "tsc -p tsconfig.json", "typecheck": "tsc -p tsconfig.json --noEmit" },
-  "dependencies": { "@cs2-coach/findings": "workspace:^" },
+  "dependencies": { "@cs2-analyst/findings": "workspace:^" },
   "devDependencies": { "typescript": "^7.0.2" }
 }

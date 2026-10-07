@@ -1,10 +1,10 @@
 import { app, BrowserWindow, dialog, ipcMain, utilityProcess } from 'electron';
 import { fileURLToPath } from 'node:url';
-import { extname } from 'node:path';
-import type { ImportPhase, ImportResult } from '@cs2-coach/report-contract';
+import { extname, join } from 'node:path';
+import type { ImportPhase, ImportResult } from '@cs2-analyst/report-contract';
 
 /** Replaced at build time by electron.vite.config.ts. False in production installers. */
-declare const __CS2_COACH_TEST_SEAM__: boolean;
+declare const __CS2_ANALYST_TEST_SEAM__: boolean;
 
 let mainWindow: BrowserWindow | null = null;
 let importing = false;
@@ -30,14 +30,14 @@ ipcMain.handle('window:is-maximized', event => trustedWindow(event)?.isMaximized
 /**
  * Import path used by automated tests instead of the native file dialog.
  *
- * `CS2_COACH_DEM_PATH` only applies to non-packaged builds. The packaged test seam
- * (`CS2_COACH_TEST_DEM_PATH`) is compiled in exclusively for the test-seam installer;
+ * `CS2_ANALYST_DEM_PATH` only applies to non-packaged builds. The packaged test seam
+ * (`CS2_ANALYST_TEST_DEM_PATH`) is compiled in exclusively for the test-seam installer;
  * the production bundle contains neither the variable nor the branch, so an installed
  * production app can only import a DEM chosen through the native dialog.
  */
 function injectedDemoPath(): string | undefined {
-  if (__CS2_COACH_TEST_SEAM__) return process.env.CS2_COACH_TEST_DEM_PATH;
-  if (!app.isPackaged) return process.env.CS2_COACH_DEM_PATH;
+  if (__CS2_ANALYST_TEST_SEAM__) return process.env.CS2_ANALYST_TEST_DEM_PATH;
+  if (!app.isPackaged) return process.env.CS2_ANALYST_DEM_PATH;
   return undefined;
 }
 
@@ -105,7 +105,10 @@ async function createWindow() {
     frame: false,
     resizable: true,
     backgroundColor: '#111821',
-    title: 'CS2 Coach',
+    title: 'CS2 Analyst',
+    icon: app.isPackaged
+      ? join(process.resourcesPath, 'branding/cs2-analyst-mark.png')
+      : fileURLToPath(new URL('../../resources/branding/cs2-analyst-mark.png', import.meta.url)),
     webPreferences: {
       preload: fileURLToPath(new URL('../preload/index.cjs', import.meta.url)),
       contextIsolation: true,
@@ -137,6 +140,7 @@ async function createWindow() {
 }
 
 app.whenReady().then(async () => {
+  app.setAppUserModelId(__CS2_ANALYST_TEST_SEAM__ ? 'com.evanpatchouli.cs2analyst.testseam' : 'com.evanpatchouli.cs2analyst');
   await createWindow();
 
   app.on('activate', () => {

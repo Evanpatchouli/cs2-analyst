@@ -62,9 +62,9 @@ twinkle 正 duration 44 行；possible overlap 6 行：R4 team tick17194；R5 te
 
 ## 验证
 
-`pnpm --filter @cs2-coach/analytics test` 覆盖 release-only、stage 不重复计数、同 tick release 歧义、entity 复用、raw weapon 保留、enemy/friendly/self/world damage chain、overkill、broken chain、unknown weapon/side/actor、multi-victim/team/self flash、其他 thrower 重叠、unknown clock、显式阈值、death flag assist 与 proximity 拒绝、边界/参与门控、空事件、determinism 和真实 demo golden。
+`pnpm --filter @cs2-analyst/analytics test` 覆盖 release-only、stage 不重复计数、同 tick release 歧义、entity 复用、raw weapon 保留、enemy/friendly/self/world damage chain、overkill、broken chain、unknown weapon/side/actor、multi-victim/team/self flash、其他 thrower 重叠、unknown clock、显式阈值、death flag assist 与 proximity 拒绝、边界/参与门控、空事件、determinism 和真实 demo golden。
 
-`pnpm --filter @cs2-coach/dem-parser test`、`pnpm typecheck`、`pnpm build` 为最终验收。未进入 Findings/UI/AI。
+`pnpm --filter @cs2-analyst/dem-parser test`、`pnpm typecheck`、`pnpm build` 为最终验收。未进入 Findings/UI/AI。
 
 P3 Final Acceptance 追加跨模块 invariant 后，analytics **53/53 PASS**（P3.3 47 + Final Acceptance 5 synthetic + 1 real-demo cross-metric），dem-parser **28/28 PASS**，真实 DEM 均执行且 **0 skipped**；`pnpm typecheck`、`pnpm build` PASS，未变包使用 Turbo cache。独立审查提出的 unidentified roster 与缺失 flash assister 门控均已修复并加 regression。
 

@@ -1,4 +1,4 @@
-import type { Finding, FindingEvidence } from '@cs2-coach/findings';
+import type { Finding, FindingEvidence } from '@cs2-analyst/findings';
 
 /**
  * Presentation-only addition to a frozen evidence row. Seconds from the round

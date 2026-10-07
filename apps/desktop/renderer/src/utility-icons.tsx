@@ -5,7 +5,7 @@ import { palette } from './theme';
  * P5.4 道具图标：道具面板使用的彩色实心图标集。
  *
  * 刻意与 `icons.tsx` 分开：后者是界面自身的单色线性图标，道具列表不允许混入另一套风格。
- * 图形与填充色取自 CS2 Coach 道具图标资源包（flashbang / smoke / he-grenade /
+ * 图形与填充色取自 CS2 Analyst 道具图标资源包（flashbang / smoke / he-grenade /
  * incendiary / molotov / decoy），颜色统一登记在 `theme.ts` 的 `palette.utility`。
  *
  * 图标全部为装饰性内容：`aria-hidden`，含义由同一行的中文名称承担，

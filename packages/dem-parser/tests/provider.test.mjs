@@ -13,7 +13,7 @@ test("public parser API does not export native functions or converter", () => {
 });
 
 test("reports missing, invalid and empty DEM files with their original cause", async () => {
-  const directory = await mkdtemp(join(tmpdir(), "cs2-coach-parser-"));
+  const directory = await mkdtemp(join(tmpdir(), "cs2-analyst-parser-"));
   try {
     const parser = new api.Demoparser2Provider();
     const missing = join(directory, "missing.dem");

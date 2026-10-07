@@ -55,6 +55,6 @@ P3 可以开始设计和实现有明确覆盖条件的 Analytics。该完整竞�
 
 ## 验证
 
-运行 `pnpm --filter @cs2-coach/dem-parser test`、`pnpm typecheck` 和 `pnpm build`。原 P2.1 的 182 kills、730 hurts、4399 weapon fires、421 utility effects、282 flash victims、125 bomb events 固定断言继续保留；生命周期不混入 combat union 或统计。真实 DEM 重复解析验证整个 Match 确定性。缺 DEM 时原始 fixture 与合成边界回归测试仍执行。
+运行 `pnpm --filter @cs2-analyst/dem-parser test`、`pnpm typecheck` 和 `pnpm build`。原 P2.1 的 182 kills、730 hurts、4399 weapon fires、421 utility effects、282 flash victims、125 bomb events 固定断言继续保留；生命周期不混入 combat union 或统计。真实 DEM 重复解析验证整个 Match 确定性。缺 DEM 时原始 fixture 与合成边界回归测试仍执行。
 
 API 参考：[上游 JavaScript 文档](https://github.com/LaihoE/demoparser/blob/main/documentation/js/README.md)。该文档随上游变化；本实现的字段证据以安装版本和真实输出为准。

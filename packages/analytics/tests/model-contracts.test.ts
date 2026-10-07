@@ -8,9 +8,9 @@ import type {
   SideMetrics,
   TradeMetrics,
   UtilityMetrics,
-} from "@cs2-coach/analytics";
-import { analyzeMatch, coverageIssueSeverity } from "@cs2-coach/analytics";
-import type { Match } from "@cs2-coach/match-model";
+} from "@cs2-analyst/analytics";
+import { analyzeMatch, coverageIssueSeverity } from "@cs2-analyst/analytics";
+import type { Match } from "@cs2-analyst/match-model";
 
 function summarize(analytics: MatchAnalytics): number {
   return analytics.players.reduce((total: number, player: PlayerMetrics) => total + player.kills, 0);

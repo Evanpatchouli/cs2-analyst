@@ -1,8 +1,8 @@
-# CS2 Coach Architecture
+# CS2 Analyst Architecture
 
 ## Overview
 
-CS2 Coach is structured as a desktop application with a deterministic analysis core.
+CS2 Analyst is structured as a desktop application with a deterministic analysis core.
 
 ## Packages
 
@@ -39,3 +39,9 @@ AI coaching is an optional interpretation layer built on top of structured findi
 Auto DEM discovery / directory scanning is **not planned**: the user always selects the DEM explicitly, and no code scans Steam / CS2 directories. A future `apps/api` may add account / session and match-history summary storage, but DEM parsing, Analytics and Findings stay local to Desktop — the service never receives DEM files and never analyzes them.
 
 `findings` consumes only frozen `MatchAnalytics` via the Analytics public package. `generateFindings` runs pure deterministic rules and returns ranked evidence with per-player caps (3 issues, 2 highlights). It does not parse DEMs or recompute Analytics; parser is a devDependency only for real-demo golden tests. Policy and gaps: [Findings Engine](./findings-engine.md).
+
+## Desktop branding (P5.6.5)
+
+CS2 Analyst uses a 20px transparent PNG mark plus its product name in the 40px titlebar. The text lockup is retained as a canonical resource. Windows EXE/NSIS/uninstaller icons use a seven-resolution ICO (16/24/32/48/64/128/256). BrowserWindow uses the mark from extraResources in installed apps and a bundle-relative path in dev/preview; Renderer imports the PNG through Vite. No shell resource depends on the source machine's Downloads directory.
+
+Workspace packages, the preload bridge and environment variables are now @cs2-analyst/*, window.cs2Analyst and CS2_ANALYST_*. This is an identifier migration with no domain algorithm changes. Production App ID is com.evanpatchouli.cs2analyst; test seam appends .testseam. Full installed and native visual acceptance remains incomplete; see the P5.6.5 validation record in windows-packaging.md.

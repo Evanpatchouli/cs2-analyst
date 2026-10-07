@@ -17,18 +17,18 @@ pnpm build
 pnpm start
 ```
 
-DEM parser 的安装、调用与测试见 [DEM 解析（P2.2）](./dem-parser.md)。核心包 `match-model`、`dem-parser` 和 `analytics` 已纳入根目录构建与类型检查；运行 parser 的测试使用 `pnpm --filter @cs2-coach/dem-parser test`，运行 analytics 的合成、覆盖与真实 DEM golden 测试使用 `pnpm --filter @cs2-coach/analytics test`。指标口径见 [P3 核心指标、KAST / Trade / Clutch 与覆盖机制](./analytics-metrics.md)。
+DEM parser 的安装、调用与测试见 [DEM 解析（P2.2）](./dem-parser.md)。核心包 `match-model`、`dem-parser` 和 `analytics` 已纳入根目录构建与类型检查；运行 parser 的测试使用 `pnpm --filter @cs2-analyst/dem-parser test`，运行 analytics 的合成、覆盖与真实 DEM golden 测试使用 `pnpm --filter @cs2-analyst/analytics test`。指标口径见 [P3 核心指标、KAST / Trade / Clutch 与覆盖机制](./analytics-metrics.md)。
 
-桌面链路测试见 [桌面比赛报告](./desktop-report.md)：`pnpm --filter @cs2-coach/desktop test` 在 Node 中运行 parser → analytics → findings → report DTO 的集成测试；`pnpm --filter @cs2-coach/desktop test:report` 构建应用并通过 Electron 调试协议运行端到端 smoke（真实 demo1.dem 与损坏 DEM）；`pnpm test:smoke` 仍验证开发/生产模式的页面、preload 桥接与关闭流程。
+桌面链路测试见 [桌面比赛报告](./desktop-report.md)：`pnpm --filter @cs2-analyst/desktop test` 在 Node 中运行 parser → analytics → findings → report DTO 的集成测试；`pnpm --filter @cs2-analyst/desktop test:report` 构建应用并通过 Electron 调试协议运行端到端 smoke（真实 demo1.dem 与损坏 DEM）；`pnpm test:smoke` 仍验证开发/生产模式的页面、preload 桥接与关闭流程。
 
 `pnpm test:smoke` 会构建应用，并通过 Electron 调试协议验证开发模式和本地生产模式的 React 页面、preload 桥接、资源加载及窗口关闭。测试会临时打开桌面窗口，结束后清理测试进程。
 
 Windows 打包与安装见 [Windows 打包与安装（P5.2）](./windows-packaging.md)：
 
 ```powershell
-pnpm --filter @cs2-coach/desktop pack:win        # 生产安装包 release/0.1.0/CS2-Coach-Setup-0.1.0.exe
-pnpm --filter @cs2-coach/desktop pack:win:test   # 仅供测试的 seam 安装包，落在 .tmp/test-output/0.1.0/
-pnpm --filter @cs2-coach/desktop test:installed  # 安装 → 驱动安装版应用 → 卸载 的 smoke
+pnpm --filter @cs2-analyst/desktop pack:win        # 生产安装包 release/0.1.0/CS2-Analyst-Setup-0.1.0.exe
+pnpm --filter @cs2-analyst/desktop pack:win:test   # 仅供测试的 seam 安装包，落在 .tmp/test-output/0.1.0/
+pnpm --filter @cs2-analyst/desktop test:installed  # 安装 → 驱动安装版应用 → 卸载 的 smoke
 ```
 
 首次打包需要联网获取 NSIS 组件；Electron 运行时复用工作区已安装的 `node_modules/electron/dist`，不再重复下载。构建在系统临时目录中完成，只把最终安装包按版本复制到项目根目录的 `release/<version>/`；测试 seam 产物单独放在 `.tmp/test-output/<version>/`。

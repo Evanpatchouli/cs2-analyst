@@ -2,7 +2,7 @@ import type {
   BombAction, BombEvent, DamageEvent, FlashEvent, KillEvent, Match, MatchEvent,
   Player, Round, RoundPlayerLifecycleEvent, RoundPlayerState, RoundStateBoundary,
   RoundStateSnapshot, TeamSide, UtilityAction, UtilityEvent, UtilityKind, WeaponFireEvent,
-} from "@cs2-coach/match-model";
+} from "@cs2-analyst/match-model";
 
 type Row = Record<string, unknown>;
 

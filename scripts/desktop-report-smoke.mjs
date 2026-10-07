@@ -43,13 +43,13 @@ async function waitFor(probe, timeoutMs, label) {
   throw new Error(`等待 ${label} 超时`);
 }
 
-/** Launches the built app with CS2_COACH_DEM_PATH so the import skips the native dialog. */
+/** Launches the built app with CS2_ANALYST_DEM_PATH so the import skips the native dialog. */
 async function scenario({ label, demPath, ready, assertReport, assertDom }) {
   const port = await freePort();
-  const env = { ...process.env, CS2_COACH_DEM_PATH: demPath };
+  const env = { ...process.env, CS2_ANALYST_DEM_PATH: demPath };
   delete env.ELECTRON_RUN_AS_NODE;
   delete env.ELECTRON_RENDERER_URL;
-  const profile = mkdtempSync(join(tmpdir(), 'cs2-coach-report-profile-'));
+  const profile = mkdtempSync(join(tmpdir(), 'cs2-analyst-report-profile-'));
   const child = spawn(electron, ['.', `--remote-debugging-port=${port}`, `--user-data-dir=${profile}`, '--disable-features=CalculateNativeWinOcclusion', '--disable-backgrounding-occluded-windows'], {
     cwd: desktop, env, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'],
   });
@@ -105,8 +105,8 @@ async function scenario({ label, demPath, ready, assertReport, assertDom }) {
     await send('Page.enable');
 
     const shell = await waitFor(async () => {
-      const state = await evaluate('({ ready: document.readyState, text: document.body.textContent, node: typeof window.require, version: window.cs2Coach?.version })');
-      return state?.ready === 'complete' && state.text?.includes('CS2 Coach') ? state : null;
+      const state = await evaluate('({ ready: document.readyState, text: document.body.textContent, node: typeof window.require, version: window.cs2Analyst?.version })');
+      return state?.ready === 'complete' && state.text?.includes('CS2 Analyst') ? state : null;
     }, 30_000, 'React 页面');
     assert.equal(shell.node, 'undefined', '渲染进程不应暴露 Node.js');
     assert.equal(shell.version, '0.1.0', 'preload 桥接未加载');
@@ -282,22 +282,22 @@ await scenario({
     }
 
     // Screenshot artifacts outside the checkout; cover desktop and a narrow laptop viewport.
-    if (process.env.CS2_COACH_QA_DIR) {
+    if (process.env.CS2_ANALYST_QA_DIR) {
       await send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
       await evaluate(`document.querySelector('[data-app-content]').scrollTo(0, 0)`);
       await delay(1000);
       const shot = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
-      writeFileSync(join(process.env.CS2_COACH_QA_DIR, 'analysis-desktop.png'), Buffer.from(shot.data, 'base64'));
+      writeFileSync(join(process.env.CS2_ANALYST_QA_DIR, 'analysis-desktop.png'), Buffer.from(shot.data, 'base64'));
       await send('Emulation.setDeviceMetricsOverride', { width: 900, height: 760, deviceScaleFactor: 1, mobile: false });
       await delay(300);
       assert.equal(await evaluate('document.documentElement.scrollWidth <= window.innerWidth'), true, '窄窗口不应整页横向溢出');
       const narrow = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
-      writeFileSync(join(process.env.CS2_COACH_QA_DIR, 'analysis-narrow.png'), Buffer.from(narrow.data, 'base64'));
+      writeFileSync(join(process.env.CS2_ANALYST_QA_DIR, 'analysis-narrow.png'), Buffer.from(narrow.data, 'base64'));
       await send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
       await evaluate(`document.querySelector('[aria-label="回合表现趋势"]').scrollIntoView({ block: 'start' })`);
       await delay(500);
       const detail = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
-      writeFileSync(join(process.env.CS2_COACH_QA_DIR, 'analysis-trend-sides.png'), Buffer.from(detail.data, 'base64'));
+      writeFileSync(join(process.env.CS2_ANALYST_QA_DIR, 'analysis-trend-sides.png'), Buffer.from(detail.data, 'base64'));
       await send('Emulation.clearDeviceMetricsOverride');
     }
     await evaluate(`document.getElementById('report-tab').click()`);
@@ -306,7 +306,7 @@ await scenario({
     assert.equal(await evaluate(`document.querySelector('[data-round-summary="7"]').getAttribute('aria-expanded')`), 'true');
     assert.ok(await evaluate(`document.body.textContent.includes('R24 1v3 残局获胜')`));
 
-    await checkReportUx(evaluate, send, process.env.CS2_COACH_QA_DIR);
+    await checkReportUx(evaluate, send, process.env.CS2_ANALYST_QA_DIR);
 
     // Player switch updates side / result / events without re-importing the DEM.
     const opened = await evaluate(`(() => {
@@ -339,7 +339,7 @@ await scenario({
   },
 });
 
-const dir = mkdtempSync(join(tmpdir(), 'cs2-coach-smoke-'));
+const dir = mkdtempSync(join(tmpdir(), 'cs2-analyst-smoke-'));
 try {
   const broken = join(dir, 'broken.dem');
   writeFileSync(broken, 'this is not a cs2 demo');
@@ -348,7 +348,7 @@ try {
     demPath: broken,
     ready: text => text.includes('无法分析此 DEM'),
     assertReport: text => {
-      assert.ok(text.includes('CS2 Coach'), '错误后页面不应白屏');
+      assert.ok(text.includes('CS2 Analyst'), '错误后页面不应白屏');
       assert.ok(text.includes('重新选择 DEM'), '错误后应保留重新选择入口');
     },
     assertDom: async evaluate => {

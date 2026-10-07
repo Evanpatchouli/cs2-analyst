@@ -19,7 +19,7 @@
     },
     "test:installed": {
       "cache": false,
-      "passThroughEnv": ["ELECTRON_*", "electron_*", "npm_config_*", "CS2_COACH_*"]
+      "passThroughEnv": ["ELECTRON_*", "electron_*", "npm_config_*", "CS2_ANALYST_*"]
     },
     "build": {
       "dependsOn": ["^build"],

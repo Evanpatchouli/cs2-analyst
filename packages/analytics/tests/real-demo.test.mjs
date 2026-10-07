@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
 
-import { Demoparser2Provider } from "@cs2-coach/dem-parser";
+import { Demoparser2Provider } from "@cs2-analyst/dem-parser";
 
 import { analyzeMatch } from "../dist/index.js";
 

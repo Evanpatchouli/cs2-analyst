@@ -1,5 +1,5 @@
 {
-  "name": "@cs2-coach/dem-parser",
+  "name": "@cs2-analyst/dem-parser",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -11,10 +11,10 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "test": "pnpm --filter @cs2-coach/match-model build && pnpm build && tsc -p tests/tsconfig.json && node --test tests/*.test.mjs"
+    "test": "pnpm --filter @cs2-analyst/match-model build && pnpm build && tsc -p tests/tsconfig.json && node --test tests/*.test.mjs"
   },
   "dependencies": {
-    "@cs2-coach/match-model": "workspace:^",
+    "@cs2-analyst/match-model": "workspace:^",
     "@laihoe/demoparser2": "^0.42.0"
   },
   "devDependencies": {

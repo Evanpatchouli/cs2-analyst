@@ -7,7 +7,7 @@ import {
 } from '@fluentui/react-components';
 import type {
   DesktopMatchReport, DesktopPlayerAnalytics, DesktopRoundTimeline, DesktopTimelineEvent,
-} from '@cs2-coach/report-contract';
+} from '@cs2-analyst/report-contract';
 import { KillFeedEvent } from './killfeed-event';
 import { AnalysisViews } from './analysis-views';
 import { useReport } from './store';
@@ -385,11 +385,11 @@ function Report({ report, playerId }: { report: DesktopMatchReport; playerId: st
 function App() {
   const s = useStyles();
   const { status, report, playerId, error, importDemo, setPhase } = useReport();
-  useEffect(() => window.cs2Coach.onProgress(setPhase), [setPhase]);
+  useEffect(() => window.cs2Analyst.onProgress(setPhase), [setPhase]);
   const busy = status === 'selecting' || status === 'parsing' || status === 'analyzing';
   const phase = status === 'selecting' ? '正在选择 DEM…' : status === 'parsing' ? '正在后台解析 DEM…' : '正在生成指标与复盘结论…';
   return <main className={s.content} data-status={status}>
-    <header className={s.header}><div className={s.column}><Subtitle1>CS2 Coach</Subtitle1><Caption1 className={s.muted}>本地赛后报告</Caption1></div><Button appearance="primary" disabled={busy} onClick={() => void importDemo()}>{report || status === 'error' ? '重新选择 DEM' : '选择 DEM'}</Button></header>
+    <header className={s.header}><div className={s.column}><Subtitle1>CS2 Analyst</Subtitle1><Caption1 className={s.muted}>本地赛后报告</Caption1></div><Button appearance="primary" disabled={busy} onClick={() => void importDemo()}>{report || status === 'error' ? '重新选择 DEM' : '选择 DEM'}</Button></header>
     {busy ? <div role="status"><Spinner label={phase} /><Caption1 className={s.muted}>大型录像可能需要数十秒，请保持应用打开。</Caption1></div> : null}
     {error ? <MessageBar intent="error"><MessageBarBody>{error}</MessageBarBody></MessageBar> : null}
     {report ? <>{status === 'error' || busy ? <Caption1>下方为上一次成功导入的报告。</Caption1> : null}<Report report={report} playerId={playerId} /></> : !busy ? <Card className={s.empty}><Title1>从一场比赛开始</Title1><Body1>选择 CS2 .dem 录像，查看玩家表现与有证据的复盘重点。</Body1><Caption1 className={s.muted}>文件只在本机处理。</Caption1></Card> : null}

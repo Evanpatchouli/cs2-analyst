@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import type { DesktopApi, ImportPhase } from '@cs2-coach/report-contract';
+import type { DesktopApi, ImportPhase } from '@cs2-analyst/report-contract';
 
 const api: DesktopApi = {
   version: '0.1.0',
@@ -21,4 +21,4 @@ const api: DesktopApi = {
     return () => ipcRenderer.removeListener('report:progress', handler);
   },
 };
-contextBridge.exposeInMainWorld('cs2Coach', api);
+contextBridge.exposeInMainWorld('cs2Analyst', api);

@@ -1,5 +1,6 @@
 import { checkReportUx } from './report-ux-checks.mjs';
 import { checkWindowShell } from './window-shell-checks.mjs';
+import { checkWindowsInstallBranding } from './windows-branding-checks.mjs';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { spawn, spawnSync } from 'node:child_process';
@@ -12,9 +13,9 @@ import { setTimeout as delay } from 'node:timers/promises';
 /**
  * Installed-app smoke for the Windows packaging MVP.
  *
- *   pnpm --filter @cs2-coach/desktop pack:win        (production installer)
- *   pnpm --filter @cs2-coach/desktop pack:win:test   (test-seam installer)
- *   pnpm --filter @cs2-coach/desktop test:installed
+ *   pnpm --filter @cs2-analyst/desktop pack:win        (production installer)
+ *   pnpm --filter @cs2-analyst/desktop pack:win:test   (test-seam installer)
+ *   pnpm --filter @cs2-analyst/desktop test:installed
  *
  * It silently installs each NSIS artifact into .tmp/installed-smoke, inspects the
  * installed layout and app.asar, drives the packaged app over the Electron debugging
@@ -30,20 +31,20 @@ const workDir = join(root, '.tmp/installed-smoke');
 const brokenDemo = join(workDir, 'broken.dem');
 
 const version = JSON.parse(readFileSync(join(desktopDir, 'package.json'), 'utf8')).version;
-const APP_EXE = 'CS2 Coach.exe';
-const UNINSTALLER = 'Uninstall CS2 Coach.exe';
-const SEAM_MARKER = 'CS2_COACH_TEST_DEM_PATH';
+const APP_EXE = 'CS2 Analyst.exe';
+const UNINSTALLER = 'Uninstall CS2 Analyst.exe';
+const SEAM_MARKER = 'CS2_ANALYST_TEST_DEM_PATH';
 const NATIVE_TRIPLE = 'win32-x64-msvc';
 
 const variants = {
   production: {
     label: '生产安装包',
-    installer: join(root, 'release', version, 'CS2-Coach-Setup-' + version + '.exe'),
+    installer: join(root, 'release', version, 'CS2-Analyst-Setup-' + version + '.exe'),
     installDir: join(workDir, 'app-production'),
   },
   'test-seam': {
     label: '测试 seam 安装包',
-    installer: join(root, '.tmp/test-output', version, 'CS2-Coach-TestSeam-Setup-' + version + '.exe'),
+    installer: join(root, '.tmp/test-output', version, 'CS2-Analyst-TestSeam-Setup-' + version + '.exe'),
     installDir: join(workDir, 'app-test-seam'),
   },
 };
@@ -90,7 +91,7 @@ async function freePort() {
 function appProcesses() {
   const result = runSync('tasklist', ['/FI', 'IMAGENAME eq ' + APP_EXE, '/FO', 'CSV', '/NH']);
   if (result.status !== 0) return [];
-  return result.stdout.split(/\r?\n/).map(line => line.trim()).filter(line => line.toLowerCase().startsWith('"cs2 coach.exe"'));
+  return result.stdout.split(/\r?\n/).map(line => line.trim()).filter(line => line.toLowerCase().startsWith('"cs2 analyst.exe"'));
 }
 
 function killAppProcesses() {
@@ -140,7 +141,7 @@ function readAsarFile(archive, dataOffset, info) {
 // ---------------------------------------------------------------- install lifecycle
 
 async function install(variant) {
-  assert.ok(existsSync(variant.installer), '缺少安装包：' + variant.installer + '（先运行 pnpm --filter @cs2-coach/desktop pack:win 和 pack:win:test）');
+  assert.ok(existsSync(variant.installer), '缺少安装包：' + variant.installer + '（先运行 pnpm --filter @cs2-analyst/desktop pack:win 和 pack:win:test）');
   const installerSize = (statSync(variant.installer).size / 1024 / 1024).toFixed(1);
   rmSync(variant.installDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 500 });
   mkdirSync(variant.installDir, { recursive: true });
@@ -217,8 +218,8 @@ async function launchSession(exePath, extraEnv, label) {
     const evaluate = async expression => (await send('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true })).result.value;
 
     const shell = await waitFor(async () => {
-      const state = await evaluate('({ ready: document.readyState, text: document.body.textContent, node: typeof window.require, nodeProcess: typeof window.process, version: window.cs2Coach?.version })');
-      return state?.ready === 'complete' && state.text?.includes('CS2 Coach') ? state : null;
+      const state = await evaluate('({ ready: document.readyState, text: document.body.textContent, node: typeof window.require, nodeProcess: typeof window.process, version: window.cs2Analyst?.version })');
+      return state?.ready === 'complete' && state.text?.includes('CS2 Analyst') ? state : null;
     }, 60_000, label + ' React 页面');
     await checkWindowShell(evaluate, send);
     return { child, send, evaluate, errors, shell };
@@ -244,6 +245,8 @@ async function closeGracefully(session) {
 
 function checkInstalledLayout(variant, expectSeam) {
   const resources = join(variant.installDir, 'resources');
+  assert.deepEqual(readFileSync(join(resources, 'branding/cs2-analyst-mark.png')),
+    readFileSync(join(desktopDir, 'resources/branding/cs2-analyst-mark.png')), 'runtime mark must be the original PNG');
   const asar = join(resources, 'app.asar');
   assert.ok(existsSync(asar), '缺少 resources/app.asar');
   const asarSizeMb = statSync(asar).size / 1024 / 1024;
@@ -296,19 +299,19 @@ function checkInstalledLayout(variant, expectSeam) {
   } else {
     assert.ok(!mainSource.includes(SEAM_MARKER), '生产安装包不得包含路径注入 seam');
   }
-  for (const forbidden of ['demoparser2', 'laihoe', '@cs2-coach/analytics', '@cs2-coach/dem-parser']) {
+  for (const forbidden of ['demoparser2', 'laihoe', '@cs2-analyst/analytics', '@cs2-analyst/dem-parser']) {
     assert.ok(!rendererSource.includes(forbidden), 'renderer bundle 不应包含 ' + forbidden);
   }
   assert.ok(workerSource.includes('@laihoe/demoparser2'), 'worker bundle 应引用原生 parser');
-  assert.ok(!workerSource.includes('@cs2-coach/'), 'worker bundle 不应外部依赖 workspace 包');
+  assert.ok(!workerSource.includes('@cs2-analyst/'), 'worker bundle 不应外部依赖 workspace 包');
 
   console.log(variant.label + '：asar ' + asarSizeMb.toFixed(2) + ' MB、' + entries.length + ' 个条目、原生绑定 ' + nativeMb.toFixed(1) + ' MB unpacked、renderer 无 Node/原生 parser');
 }
 
 function checkShortcut() {
   const candidates = [
-    join(process.env.APPDATA ?? '', 'Microsoft/Windows/Start Menu/Programs/CS2 Coach.lnk'),
-    join(process.env.USERPROFILE ?? '', 'Desktop/CS2 Coach.lnk'),
+    join(process.env.APPDATA ?? '', 'Microsoft/Windows/Start Menu/Programs/CS2 Analyst.lnk'),
+    join(process.env.USERPROFILE ?? '', 'Desktop/CS2 Analyst.lnk'),
   ];
   const found = candidates.filter(candidate => candidate && existsSync(candidate));
   console.log('快捷方式：' + (found.length ? found.join('；') : '未在默认位置找到（可能被系统重定向）'));
@@ -321,7 +324,7 @@ async function productionScenario() {
   await install(variant);
   try {
     checkInstalledLayout(variant, false);
-    checkShortcut();
+    checkWindowsInstallBranding(variant, false);
     const exe = join(variant.installDir, APP_EXE);
 
     // 1. 正常启动 / Renderer 无 Node 暴露 / 正常关闭。
@@ -338,7 +341,7 @@ async function productionScenario() {
 
     // 2. 环境变量注入在正式安装版必须无效：点击选择 DEM 后仍走原生对话框，不自动导入。
     killAppProcesses();
-    const injected = await launchSession(exe, { CS2_COACH_DEM_PATH: demo, CS2_COACH_TEST_DEM_PATH: demo }, variant.label + '（注入测试）');
+    const injected = await launchSession(exe, { CS2_ANALYST_DEM_PATH: demo, CS2_ANALYST_TEST_DEM_PATH: demo }, variant.label + '（注入测试）');
     await clickSelectDemo(injected);
     await waitFor(async () => {
       const text = await injected.evaluate('document.body.textContent');
@@ -347,7 +350,7 @@ async function productionScenario() {
     await delay(15_000);
     const afterWait = await injected.evaluate('document.body.textContent');
     assert.ok(!afterWait.includes('twinkle') && !afterWait.includes('25 / 20 / 4'), '正式安装版不得接受注入的 DEM 路径');
-    assert.ok(afterWait.includes('CS2 Coach'), '页面不应白屏');
+    assert.ok(afterWait.includes('CS2 Analyst'), '页面不应白屏');
     killAppProcesses();
     await waitFor(() => appProcesses().length === 0, 15_000, '强制结束应用进程');
     console.log(variant.label + '：注入 DEM 路径无效，正式安装版只能通过原生文件对话框选择');
@@ -362,10 +365,11 @@ async function testSeamScenario() {
   await install(variant);
   try {
     checkInstalledLayout(variant, true);
+    checkWindowsInstallBranding(variant, true);
     const exe = join(variant.installDir, APP_EXE);
 
     // 3. 真实 demo1.dem 全链路报告。
-    const session = await launchSession(exe, { CS2_COACH_TEST_DEM_PATH: demo }, variant.label);
+    const session = await launchSession(exe, { CS2_ANALYST_TEST_DEM_PATH: demo }, variant.label);
     await clickSelectDemo(session);
     const body = await waitFor(async () => {
       const text = await session.evaluate('document.body.textContent');
@@ -410,7 +414,7 @@ async function testSeamScenario() {
 
     // 4. 分析进行中关闭应用不得残留 analysis worker。
     killAppProcesses();
-    const mid = await launchSession(exe, { CS2_COACH_TEST_DEM_PATH: demo }, variant.label + '（中途关闭）');
+    const mid = await launchSession(exe, { CS2_ANALYST_TEST_DEM_PATH: demo }, variant.label + '（中途关闭）');
     await clickSelectDemo(mid);
     await waitFor(async () => {
       const text = await mid.evaluate('document.body.textContent');
@@ -424,14 +428,14 @@ async function testSeamScenario() {
 
     // 5. 损坏 DEM 仍显示错误且不白屏。
     killAppProcesses();
-    const broken = await launchSession(exe, { CS2_COACH_TEST_DEM_PATH: brokenDemo }, variant.label + '（损坏 DEM）');
+    const broken = await launchSession(exe, { CS2_ANALYST_TEST_DEM_PATH: brokenDemo }, variant.label + '（损坏 DEM）');
     await clickSelectDemo(broken);
     const errorText = await waitFor(async () => {
       const text = await broken.evaluate('document.body.textContent');
       return text?.includes('无法分析此 DEM') ? text : null;
     }, 90_000, variant.label + ' 损坏 DEM 错误');
     assert.ok(errorText.includes('重新选择 DEM'), '错误后应保留重新选择入口');
-    assert.ok(errorText.includes('CS2 Coach'), '错误后页面不应白屏');
+    assert.ok(errorText.includes('CS2 Analyst'), '错误后页面不应白屏');
     assertNoStiffEnglish(errorText);
     await closeGracefully(broken);
     console.log(variant.label + '：损坏 DEM 显示错误且不白屏');

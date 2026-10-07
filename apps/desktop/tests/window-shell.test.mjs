@@ -10,10 +10,10 @@ const { transformSync } = createRequire(require.resolve('vite'))('esbuild');
 function execute(file, electron, extra = {}) {
   const source = readFileSync(new URL(file, import.meta.url), 'utf8');
   const code = transformSync(source, { loader: 'ts', format: 'cjs', define: {
-    'import.meta.url': JSON.stringify(new URL(file, import.meta.url).href), '__CS2_COACH_TEST_SEAM__': 'false',
+    'import.meta.url': JSON.stringify(new URL(file, import.meta.url).href), '__CS2_ANALYST_TEST_SEAM__': 'false',
   } }).code;
   vm.runInNewContext(code, { require: name => name === 'electron' ? electron : require(name),
-    process: { platform: 'win32', env: { CS2_COACH_DEM_PATH: 'sample.dem' } }, URL, console, setTimeout, clearTimeout, ...extra });
+    process: { platform: 'win32', env: { CS2_ANALYST_DEM_PATH: 'sample.dem' } }, URL, console, setTimeout, clearTimeout, ...extra });
 }
 
 test('frameless window preserves sandbox and guards every privileged window action', async () => {
@@ -37,7 +37,8 @@ test('frameless window preserves sandbox and guards every privileged window acti
     async loadFile() {}
     static getAllWindows() { return windows; }
   }
-  const app = Object.assign(new EventEmitter(), { whenReady: () => Promise.resolve(), quit: () => calls.push('quit'), isPackaged: false });
+  const app = Object.assign(new EventEmitter(), { whenReady: () => Promise.resolve(), quit: () => calls.push('quit'), isPackaged: false,
+    setAppUserModelId: value => calls.push(['appId', value]) });
   execute('../electron/main.ts', { app, BrowserWindow: Window, dialog: {},
     ipcMain: { handle: (name, fn) => handlers.set(name, fn) }, utilityProcess: { fork: () => {
       worker = Object.assign(new EventEmitter(), { kill: () => calls.push('kill-worker'), postMessage() {} }); return worker;
@@ -45,6 +46,9 @@ test('frameless window preserves sandbox and guards every privileged window acti
   await new Promise(resolve => setImmediate(resolve));
   const window = windows[0];
   assert.equal(window.options.frame, false);
+  assert.equal(window.options.title, 'CS2 Analyst');
+  assert.ok(window.options.icon.endsWith('resources\\branding\\cs2-analyst-mark.png'));
+  assert.ok(calls.some(call => call[0] === 'appId' && call[1] === 'com.evanpatchouli.cs2analyst'));
   assert.equal(window.menuRemoved, true);
   assert.equal(window.options.resizable, true);
   for (const [key, value] of Object.entries({ width: 1280, height: 800, minWidth: 800, minHeight: 600, backgroundColor: '#111821' })) assert.equal(window.options[key], value);
@@ -82,7 +86,7 @@ test('preload exposes only named window operations and removes the exact event l
   let api;
   const calls = [];
   const ipcRenderer = Object.assign(new EventEmitter(), { invoke: async name => { calls.push(name); return name === 'window:is-maximized'; } });
-  execute('../preload/index.ts', { ipcRenderer, contextBridge: { exposeInMainWorld: (name, value) => { assert.equal(name, 'cs2Coach'); api = value; } } });
+  execute('../preload/index.ts', { ipcRenderer, contextBridge: { exposeInMainWorld: (name, value) => { assert.equal(name, 'cs2Analyst'); api = value; } } });
   await api.window.minimize(); await api.window.toggleMaximize(); await api.window.close();
   assert.equal(await api.window.isMaximized(), true);
   assert.deepEqual(calls, ['window:minimize', 'window:toggle-maximize', 'window:close', 'window:is-maximized']);

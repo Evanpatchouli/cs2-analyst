@@ -1,7 +1,7 @@
-import type { DamageEvent, MatchEvent } from "@cs2-coach/match-model";
+import type { DamageEvent, MatchEvent } from "@cs2-analyst/match-model";
 import type {
   RoundPlayerLifecycleEvent, RoundPlayerState, RoundStateBoundary, RoundStateSnapshot,
-} from "@cs2-coach/match-model";
+} from "@cs2-analyst/match-model";
 
 // Compile the domain contract as a consumer, including discriminant narrowing.
 function evidence(event: MatchEvent): string | number | null | undefined {

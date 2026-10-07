@@ -21,7 +21,7 @@ async function smoke(mode) {
   const env = { ...process.env };
   delete env.ELECTRON_RUN_AS_NODE;
   delete env.ELECTRON_RENDERER_URL;
-  const profile = mkdtempSync(join(tmpdir(), 'cs2-coach-shell-profile-'));
+  const profile = mkdtempSync(join(tmpdir(), 'cs2-analyst-shell-profile-'));
   const child = spawn(process.execPath, [cli, mode, '--', `--remote-debugging-port=${port}`, `--user-data-dir=${profile}`], {
     cwd: desktop,
     env,
@@ -87,11 +87,11 @@ async function smoke(mode) {
     async function waitForPage() {
       for (let attempt = 0; attempt < 100; attempt++) {
         const result = await send('Runtime.evaluate', {
-          expression: '({ ready: document.readyState, text: document.getElementById("root")?.textContent, version: window.cs2Coach?.version, importDemo: typeof window.cs2Coach?.importDemo, url: location.href, node: typeof window.require })',
+          expression: '({ ready: document.readyState, text: document.getElementById("root")?.textContent, version: window.cs2Analyst?.version, importDemo: typeof window.cs2Analyst?.importDemo, url: location.href, node: typeof window.require })',
           returnByValue: true,
         });
         state = result.result.value;
-        if (state?.ready === 'complete' && state.text?.includes('CS2 Coach') && state.version === '0.1.0') return;
+        if (state?.ready === 'complete' && state.text?.includes('CS2 Analyst') && state.version === '0.1.0') return;
         await delay(200);
       }
     }
@@ -115,7 +115,7 @@ async function smoke(mode) {
     await send('Page.reload');
     await loaded;
     await waitForPage();
-    assert.ok(state?.text?.includes('CS2 Coach'), 'React 页面未渲染');
+    assert.ok(state?.text?.includes('CS2 Analyst'), 'React 页面未渲染');
     assert.ok(state.text.includes('选择 DEM'), '“选择 DEM”入口未渲染');
     assert.equal(state.version, '0.1.0', 'preload 桥接未加载');
     assert.equal(state.importDemo, 'function', 'preload importDemo 未暴露');
