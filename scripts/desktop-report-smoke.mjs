@@ -1,4 +1,5 @@
 import { checkReportUx } from './report-ux-checks.mjs';
+import { checkWindowShell } from './window-shell-checks.mjs';
 import assert from 'node:assert/strict';
 import { spawn, spawnSync } from 'node:child_process';
 import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
@@ -109,6 +110,7 @@ async function scenario({ label, demPath, ready, assertReport, assertDom }) {
     }, 30_000, 'React 页面');
     assert.equal(shell.node, 'undefined', '渲染进程不应暴露 Node.js');
     assert.equal(shell.version, '0.1.0', 'preload 桥接未加载');
+    await checkWindowShell(evaluate, send);
 
     const clicked = await evaluate(`(() => { const b = [...document.querySelectorAll('button')].find(x => x.textContent.includes('选择 DEM')); b?.click(); return Boolean(b); })()`);
     assert.equal(clicked, true, '未找到“选择 DEM”按钮');
@@ -122,7 +124,7 @@ async function scenario({ label, demPath, ready, assertReport, assertDom }) {
     assert.deepEqual(errors, [], '页面存在未捕获异常');
     console.log(`${label}：通过`);
 
-    socket.send(JSON.stringify({ id: ++id, method: 'Browser.close' }));
+    void evaluate(`document.querySelector('[data-window-control="close"]').click()`).catch(() => {});
     await waitFor(async () => child.exitCode !== null, 30_000, '应用正常退出');
     assert.equal(child.exitCode, 0, '关闭窗口后应用未正常退出');
   } catch (error) {
@@ -282,7 +284,7 @@ await scenario({
     // Screenshot artifacts outside the checkout; cover desktop and a narrow laptop viewport.
     if (process.env.CS2_COACH_QA_DIR) {
       await send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
-      await evaluate(`window.scrollTo(0, 0)`);
+      await evaluate(`document.querySelector('[data-app-content]').scrollTo(0, 0)`);
       await delay(1000);
       const shot = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
       writeFileSync(join(process.env.CS2_COACH_QA_DIR, 'analysis-desktop.png'), Buffer.from(shot.data, 'base64'));

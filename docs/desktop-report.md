@@ -32,9 +32,29 @@ Renderer（仅渲染 DTO，不访问 Node/fs/demoparser2）
 ```
 
 - 原生解析与全部确定性计算都在 Utility Process（独立 OS 进程）中执行，200MB+ DEM 不会阻塞 Main 或 Renderer 线程。
-- Main 只负责文件选择、任务互斥、进度转发与超时（10 分钟）。
+- Main 负责文件选择、任务互斥、进度转发、超时（10 分钟）与受信窗口控制。
 - Renderer 通过 preload 暴露的最小 API 访问能力；无 `require`、无 `fs`、无 parser 依赖。
-- preload 暴露面：`version`、`importDemo()`、`onProgress(listener)`；`contextIsolation: true`、`nodeIntegration: false`、`sandbox: true`。
+- preload 暴露面：`version`、`importDemo()`、`onProgress(listener)` 与 `window` 的四个操作/查询及最大化状态订阅；`contextIsolation: true`、`nodeIntegration: false`、`sandbox: true`。
+
+## P5.6.4 Custom Window Chrome — PASS
+
+- Windows x64 BrowserWindow 使用 `frame: false`、`resizable: true`，1280×800 / 最小 800×600 / `#111821`；移除原生菜单，不使用 titleBarOverlay。三个安全开关保持原值。
+- Fluent UI v9 自绘标题栏独立占据顶部 40px，左侧仅原创 20px currentColor target mark 与中等字重 CS2 Coach；右侧三个 46×40px 方形按钮，16px 本地 SVG，最大化/双矩形还原图标随真实状态切换。弱 hover 使用现有 cardHover，关闭 hover 为 #c42b1c + 白色。
+- 窗口壳层在报告错误边界外持续挂载。仅下方内容区滚动，让纵向滚动条从标题栏下方开始；标题栏和关闭按钮横跨整个窗口，内容最大宽度 1120px 与原 padding/gap 保留。
+- 标题栏为 `-webkit-app-region: drag`；Logo、按钮及按钮容器明确 `no-drag`。页面内容没有 drag。双击由 Chromium/Windows 原生 drag region 处理，无重复 React 双击绑定。
+- `window.cs2Coach.window` 提供 `minimize / toggleMaximize / close / isMaximized / onMaximizedChange`。四个 invoke 分别对应 `window:minimize / window:toggle-maximize / window:close / window:is-maximized`；和 report:import 共用 `trustedWindow`，校验当前窗口未销毁、sender webContents 与 senderFrame 主 frame。无效请求不操作窗口。
+- Main 在 maximize/unmaximize 时发送 `window:maximized-changed`；Renderer 先订阅，再查询初值，忽略落后于通知的初值响应，卸载移除 exact listener。关闭调用 BrowserWindow.close()，沿用 closed worker kill，窗口按钮不调用 app.quit()。
+- 新增 `window-shell.test.mjs`：实际 Main/preload 源码执行于模拟 Electron，覆盖 frameless/security/options、伪 sender/subframe/stale sender、原生事件通知、preload IPC 路由/订阅清理、分析中关闭清理。共享 `window-shell-checks.mjs` 在真实 built/installed Electron 覆盖 DOM、尺寸、drag/no-drag、实际最大化/还原与内容溢出；installed ASAR 同时核对窗口安全配置与菜单移除。
+
+2026-10-07 验证记录（基线 b353b325b232334d4a01e75a25fc5853220dc017）：
+
+- typecheck 11/11、build 6/6、desktop 17/17、analytics 53/53、findings 17/17、parser 28/28；demo1 golden、Finding ruleId 顺序、Timeline/Analysis 与官方 kill-feed 资源不变。
+- 真实 Electron 原生双击最大化/还原、Win+↑/↓图标同步、最小化再激活恢复通过。最终 UI 的 1280×800 / 900×760 / 800×600 为真实 BrowserWindow.setSize，不是 viewport 模拟；标题栏高度 40、关闭右边等于窗口宽度、页面/内容横向溢出均为 false。三个 hover computed styles 与截图通过。
+- Browser plugin 不可用，沿用仓库真实 Electron CDP smoke；Windows 输入使用 Computer Use。截图在系统临时目录 `cs2-coach-p564-qa`，不提交。最大化遵循 Windows 原生 workArea；不做负 margin 或自定义 resize handles。
+- 一次并行构建/验证时报告 smoke 在 caption close 后等待退出超时；原因未证实，保留诊断，无产品修补。停止重叠构建后原脚本与完整 `pnpm --filter @cs2-coach/desktop test:report` 串行重跑三场景均通过。
+- 最终两次 pack 均 107.5MB，production/test-seam installed smoke 全链路通过：安装、ASAR frame/security/no-overlay/no-menu 配置、真实窗口控制、无 Node、路径注入防护、demo1 golden、Tab/Dropdown/Timeline/Analysis、损坏 DEM、caption close 分析中途清理与卸载。ASAR 2.13MB / 81 条目 / 71 官方 SVG 字节不变。
+- 在真实 QA Renderer 临时制造报告 render 错误（不改源码或文件），错误边界显示恢复提示，同时 titlebar 与三个窗口按钮仍存在；恢复按钮可回到导入页。额外截图 error-recovery-shell.png。
+- 真实鼠标拖动 PASS：Computer Use drag 未取得窗口位移证据后，用户用鼠标实测并明确确认“可以，提交并重新汇报吧”。此项依据用户实际操作确认；所有本轮验收已完成。
 
 ## IPC 契约（`@cs2-coach/report-contract`）
 

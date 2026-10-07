@@ -1,5 +1,18 @@
 # Agent Handoff
 
+## 2026-10-07 — P5.6.4 Custom Window Chrome PASS
+
+- 基线 b353b325b232334d4a01e75a25fc5853220dc017；只修改窗口壳层、DesktopApi window 能力、测试与五份指定文档。业务DTO/Parser/Analytics/Findings/Timeline/Analysis/kill-feed/nickname/version/installer逻辑均不变。
+- Main frame:false / resizable:true / removeMenu；尺寸1280×800、min800×600、背景#111821，三个sandbox安全配置不变。四窗口IPC与report:import共用current BrowserWindow + webContents + mainFrame校验。
+- 40px Fluent标题栏，左侧原创20px currentColor target + CS2 Coach；右侧46×40px按钮、16px本地SVG与真正双矩形还原。native maximize/unmaximize通知，subscribe-first + 初值查询/竞态保护/exact listener cleanup。close调用BrowserWindow.close并沿用closed worker kill。
+- drag标题栏、logo和buttons no-drag；双击原生drag region已实测，不重复绑定。持久窗口壳层在error boundary外，仅下方内容区滚动，避免滚动条挤窗口按钮；原1120px上限/间距不变。
+- 全部回归最终通过：typecheck11/11、build6/6、desktop17/17、report三场景、analytics53/53、findings17/17、parser28/28、dev/preview smoke、最终pack:win / pack:win:test、installed全部场景。两installer107.5MB，ASAR2.13MB/81条目/71官方SVG。真实golden与规则顺序不变。
+- 真实native smoke已通过：双击max/restore、Win+↑↓图标同步、minimize/激活恢复、API真实resize到1280×800 / 900×760 / 800×600、三个hover与close红白反馈；原生maximize bounds虽然含系统8px不可见frame，renderer viewport恰为workArea1920×1032，bar与close无黑边/overflow。不做负margin hack。
+- 在QA Renderer临时制造report render异常，fallback保留titlebar/三controls、恢复按钮可回到import页；不改文件。截图系统临时cs2-coach-p564-qa（report三尺寸/hover/maximized/error-recovery-shell），不提交。
+- 一次并行构建/验证的report退出等待超时，原因未证实；无产品修补，停止构建重叠后原脚本及完整pnpm test:report串行重跑均通过。profile清理失败目录保留系统临时，不影响仓库。独立review指出并已修复错误页丢标题栏P2；最终复审无actionable缺陷。
+- 用户实际鼠标拖动确认正常（“可以，提交并重新汇报吧”），最后一项验收完成。Computer Use drag未取得位移证据，此项PASS依据用户实测确认。
+- 五份指定文档同步，Roadmap PASS；唯一focused commit `feat(desktop): add custom Windows title bar`，不amend/squash、不push。无剩余开发或验收待办；截图/installer/profile均不提交。
+
 ## 2026-10-07 — P5.6.3 Official Kill-feed Assets PASS
 
 - 基线f3ddfd89c2d86f32b112706f720b41f4193dff82。只替换展示资源；Parser / Analytics / Findings / Timeline DTO、事件tick/time/顺序、nickname规则不变。

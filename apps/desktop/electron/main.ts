@@ -10,6 +10,23 @@ let mainWindow: BrowserWindow | null = null;
 let importing = false;
 let activeWorker: Electron.UtilityProcess | null = null;
 
+/** Only the current application's main frame can invoke privileged actions. */
+function trustedWindow(event: Electron.IpcMainInvokeEvent): BrowserWindow | null {
+  const window = mainWindow;
+  return window && !window.isDestroyed() && event.sender === window.webContents
+    && event.senderFrame === window.webContents.mainFrame ? window : null;
+}
+
+ipcMain.handle('window:minimize', event => { trustedWindow(event)?.minimize(); });
+ipcMain.handle('window:toggle-maximize', event => {
+  const window = trustedWindow(event);
+  if (!window) return;
+  if (window.isMaximized()) window.unmaximize();
+  else window.maximize();
+});
+ipcMain.handle('window:close', event => { trustedWindow(event)?.close(); });
+ipcMain.handle('window:is-maximized', event => trustedWindow(event)?.isMaximized() ?? false);
+
 /**
  * Import path used by automated tests instead of the native file dialog.
  *
@@ -50,8 +67,8 @@ function analyzeDemo(filePath: string, window: BrowserWindow): Promise<ImportRes
 }
 
 ipcMain.handle('report:import', async (event): Promise<ImportResult> => {
-  const window = mainWindow;
-  if (!window || event.sender !== window.webContents || event.senderFrame !== window.webContents.mainFrame) {
+  const window = trustedWindow(event);
+  if (!window) {
     return { kind: 'error', message: '无效的报告请求。' };
   }
   if (importing) return { kind: 'error', message: '已有分析任务正在运行。' };
@@ -85,6 +102,8 @@ async function createWindow() {
     height: 800,
     minWidth: 800,
     minHeight: 600,
+    frame: false,
+    resizable: true,
     backgroundColor: '#111821',
     title: 'CS2 Coach',
     webPreferences: {
@@ -94,6 +113,14 @@ async function createWindow() {
       sandbox: true,
     },
   });
+
+  const window = mainWindow;
+  window.removeMenu();
+  const maximizedChanged = () => {
+    if (!window.isDestroyed()) window.webContents.send('window:maximized-changed', window.isMaximized());
+  };
+  window.on('maximize', maximizedChanged);
+  window.on('unmaximize', maximizedChanged);
 
   mainWindow.on('closed', () => {
     activeWorker?.kill();

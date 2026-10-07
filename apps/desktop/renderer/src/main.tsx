@@ -15,6 +15,7 @@ import { QuestionCircleIcon } from './icons';
 import { UtilityIcon } from './utility-icons';
 import type { UtilityIconKind } from './utility-icons';
 import { coachTheme, palette } from './theme';
+import { AppTitlebar } from './app-titlebar';
 
 /** One surface for every card on the page: same background, same weak border, same radius, no shadows. */
 const cardSurface = {
@@ -28,7 +29,8 @@ const cardSurface = {
 const rowHeight = '34px';
 
 const useStyles = makeStyles({
-  page: { minHeight: '100vh', backgroundColor: palette.pageBottom, backgroundImage: palette.pageGradient, color: tokens.colorNeutralForeground1 },
+  page: { height: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: palette.pageBottom, backgroundImage: palette.pageGradient, color: tokens.colorNeutralForeground1 },
+  body: { flex: 1, minHeight: 0, overflowY: 'auto' },
   content: { maxWidth: '1120px', margin: '0 auto', padding: '28px 32px 44px', display: 'flex', flexDirection: 'column', gap: '20px' },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px' },
   column: { display: 'flex', flexDirection: 'column', gap: '8px' },
@@ -386,12 +388,12 @@ function App() {
   useEffect(() => window.cs2Coach.onProgress(setPhase), [setPhase]);
   const busy = status === 'selecting' || status === 'parsing' || status === 'analyzing';
   const phase = status === 'selecting' ? '正在选择 DEM…' : status === 'parsing' ? '正在后台解析 DEM…' : '正在生成指标与复盘结论…';
-  return <div className={s.page}><main className={s.content} data-status={status}>
+  return <main className={s.content} data-status={status}>
     <header className={s.header}><div className={s.column}><Subtitle1>CS2 Coach</Subtitle1><Caption1 className={s.muted}>本地赛后报告</Caption1></div><Button appearance="primary" disabled={busy} onClick={() => void importDemo()}>{report || status === 'error' ? '重新选择 DEM' : '选择 DEM'}</Button></header>
     {busy ? <div role="status"><Spinner label={phase} /><Caption1 className={s.muted}>大型录像可能需要数十秒，请保持应用打开。</Caption1></div> : null}
     {error ? <MessageBar intent="error"><MessageBarBody>{error}</MessageBarBody></MessageBar> : null}
     {report ? <>{status === 'error' || busy ? <Caption1>下方为上一次成功导入的报告。</Caption1> : null}<Report report={report} playerId={playerId} /></> : !busy ? <Card className={s.empty}><Title1>从一场比赛开始</Title1><Body1>选择 CS2 .dem 录像，查看玩家表现与有证据的复盘重点。</Body1><Caption1 className={s.muted}>文件只在本机处理。</Caption1></Card> : null}
-  </main></div>;
+  </main>;
 }
 
 class ReportErrorBoundary extends React.Component<React.PropsWithChildren, { failed: boolean }> {
@@ -401,7 +403,11 @@ class ReportErrorBoundary extends React.Component<React.PropsWithChildren, { fai
     return this.state.failed ? <MessageBar intent="error"><MessageBarBody>报告展示失败。<Button onClick={() => { useReport.setState({ status: 'idle', report: null, error: null }); this.setState({ failed: false }); }}>重新选择 DEM</Button></MessageBarBody></MessageBar> : this.props.children;
   }
 }
+function DesktopShell() {
+  const s = useStyles();
+  return <div className={s.page}><AppTitlebar /><div className={s.body} data-app-content><ReportErrorBoundary><App /></ReportErrorBoundary></div></div>;
+}
 document.body.style.margin = '0';
 createRoot(document.getElementById('root')!).render(
-  <React.StrictMode><FluentProvider theme={coachTheme}><ReportErrorBoundary><App /></ReportErrorBoundary></FluentProvider></React.StrictMode>,
+  <React.StrictMode><FluentProvider theme={coachTheme}><DesktopShell /></FluentProvider></React.StrictMode>,
 );

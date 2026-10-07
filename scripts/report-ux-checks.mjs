@@ -1,10 +1,13 @@
 import assert from 'node:assert/strict';
+import { checkWindowLayout } from './window-shell-checks.mjs';
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 
 /** Shared CDP assertions for built and installed renderers, after demo1 import. */
 export async function checkReportUx(evaluate, send, qaDir) {
+  await evaluate("document.querySelector('[data-app-content]').scrollTo(0, 0)");
+  await checkWindowLayout(evaluate);
   // Wait in Node: occluded Electron windows can pause renderer animation frames.
   const settle = () => delay(100);
   await send('Emulation.setFocusEmulationEnabled', { enabled: true });
@@ -92,7 +95,7 @@ export async function checkReportUx(evaluate, send, qaDir) {
     const divider = await evaluate(`(() => { const s = getComputedStyle(document.querySelector('[data-side-divider]')); return { display: s.display, top: s.marginTop, bottom: s.marginBottom, width: s.width }; })()`);
     if (width <= 650) assert.equal(divider.display, 'none');
     else { assert.notEqual(divider.display, 'none'); assert.equal(divider.top, '16px'); assert.equal(divider.bottom, '16px'); assert.equal(divider.width, '1px'); }
-    await evaluate('window.scrollTo(0, 0)');
+    await evaluate("document.querySelector('[data-app-content]').scrollTo(0, 0)");
     await screenshot(`comparison-${width}`);
     await evaluate(`document.querySelector('[aria-label="回合表现趋势"]').scrollIntoView({ block: 'start' })`);
     await screenshot(`trend-sides-${width}`);
@@ -107,7 +110,7 @@ export async function checkReportUx(evaluate, send, qaDir) {
     await screenshot(`killfeed-r22-${width}`);
     await evaluate(`document.getElementById('round-r23').scrollIntoView({ block: 'center' })`);
     await screenshot(`killfeed-headshot-r23-${width}`);
-    await evaluate(`document.getElementById('report-tab').click(); window.scrollTo(0, 0)`);
+    await evaluate(`document.getElementById('report-tab').click(); document.querySelector('[data-app-content]').scrollTo(0, 0)`);
     await settle();
     await screenshot(`report-tabs-${width}`);
     await evaluate(`document.querySelector('summary').scrollIntoView({ block: 'center' }); document.querySelector('summary').focus()`);

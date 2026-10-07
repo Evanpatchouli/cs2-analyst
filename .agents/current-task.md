@@ -1,12 +1,13 @@
 # Current Task
 
-Status: complete — PASS — P5.6.3 Official Kill-feed Assets，基线 f3ddfd89c2d86f32b112706f720b41f4193dff82。
+Status: complete — PASS — P5.6.4 Custom Window Chrome，基线 b353b325b232334d4a01e75a25fc5853220dc017。
 
-- 71官方SVG（69武器+官方icon_headshot/flashbang_assist）、0PNG，72武器identifier、24刀图/26刀标识；自绘weapon shapes完全删除。
-- 复用output/equipment；按用户授权使用已有VRF定向提取10HUD+flash assist，正确源目录panorama/images/hud/deathnotice/。项目只纳入当前需要的两notice；其他HUD保留本地备用。原图未改，provenance与Git字节保持检查覆盖全部71图。
-- Parser / Analytics / Findings / Timeline DTO、tick/time/顺序不变。真实R24 AK/inferno、R22 posthumous HE/flash、R23 headshot与Golden通过；截图系统临时cs2-coach-p563-qa。
-- 全部命令已验证：typecheck11/11、build6/6、desktop15/15、report三场景、analytics53/53、findings17/17、parser28/28、dev/preview smoke、pack:win、pack:win:test、test:installed。两installer107.5MB，ASAR2.13MB/81条目/71SVG。
-- 用户已确认首次安装防注入断言失败由其手动选择DEM触发正常导入造成；不是路径注入或产品缺陷，原包重跑全通过。详见desktop-report验证记录。独立review无阻塞。
-- 文档及提取器旧路径已修正，当前无待办；只创建一个指定focused commit，不amend/squash。output/仍为用户本地未追踪资源，不提交截图或installer。
-
-详细说明见 [桌面比赛报告](../docs/desktop-report.md) 与 [官方资源提取](../docs/cs2-killfeed-assets.md)。
+- Windows x64 / Electron / 0.1.0；frame:false，原安全开关不变，无 titleBarOverlay / native menu。
+- Fluent UI v9 40px 全宽标题栏，原创20px currentColor target mark + CS2 Coach；46×40px 三窗口按钮 / 16px本地SVG / 双矩形还原。
+- DesktopApi只新增window五项API；四IPC与report:import共用current-window/main-frame校验。Main通知真实maximize/unmaximize；Renderer订阅先于初始查询，清理监听、防落后响应。
+- 持久标题栏在报告error boundary外；仅内容区滚动，不挤入窗口按钮。1120px内容上限与原间距不变。
+- typecheck11/11、build6/6、desktop17/17、analytics53/53、findings17/17、parser28/28；dev/preview smoke通过。真实demo1/损坏/非DEM原脚本及完整pnpm test:report串行重跑通过；一次并行验证退出超时原因未证实，无产品修补。
+- 实机双击max/restore、Win+↑↓、minimize/activate restore、三个hover、真实1280×800 / 900×760 / 800×600截图与无横向overflow通过；截图系统临时cs2-coach-p564-qa不入Git。
+- 最终两pack均107.5MB；installed生产/测试两版完整链路全部通过（含caption close中途worker清理与卸载）。独立review修复错误页丢失标题栏P2，复审无actionable缺陷。
+- 真实鼠标拖动由用户实测确认正常，补齐最后一项验收；Computer Use drag未取得位移证据，未把自动化失败冒记为成功。
+- 全部验收完成，Roadmap PASS；唯一focused commit：feat(desktop): add custom Windows title bar，不amend/squash、不push。详细验证记录见docs/desktop-report.md与.agents/handoff.md。

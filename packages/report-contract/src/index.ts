@@ -155,6 +155,13 @@ export type ImportPhase = 'selecting' | 'parsing' | 'analyzing';
 export type ImportResult = { kind: 'success'; report: DesktopMatchReport } | { kind: 'cancelled' } | { kind: 'error'; message: string };
 export interface DesktopApi {
   version: string;
+  window: {
+    minimize(): Promise<void>;
+    toggleMaximize(): Promise<void>;
+    close(): Promise<void>;
+    isMaximized(): Promise<boolean>;
+    onMaximizedChange(listener: (maximized: boolean) => void): () => void;
+  };
   importDemo(): Promise<ImportResult>;
   onProgress(listener: (phase: ImportPhase) => void): () => void;
 }

@@ -14,6 +14,8 @@ CS2 Coach is structured as a desktop application with a deterministic analysis c
 
 The Electron desktop app runs the native parser and the full deterministic pipeline in a Utility Process and sends a serializable report DTO to the sandboxed renderer over contextBridge IPC. The renderer never imports `dem-parser`, Node builtins or Analytics, and never recomputes metrics. Process model, IPC contract and UI: [desktop report](./desktop-report.md).
 
+The Windows window shell is frameless (`frame: false`), with a persistent 40px Fluent UI title bar outside the report error boundary. Only the report content scrolls. Renderer window controls cross the named preload/contextBridge API; Main validates the current webContents and main frame for every invoke, shares the same gate with report import, and broadcasts native maximize/unmaximize state. Caption close calls BrowserWindow.close(), retaining worker cleanup in closed. There is no native titleBarOverlay, menu, renderer Electron access, or change to report data DTOs.
+
 `report-contract` also carries a read-only per-player Round Timeline projection of existing `Match` facts (round side / result / cumulative score plus filtered kill / death / clutch / bomb events with round-relative seconds). It is built in the Desktop presenter from frozen data, never in the renderer, and adds no new Analytics semantics.
 
 `report-contract.analysis` adds presentation-only player comparisons, per-player round trends and CT/T splits. The Desktop presenter copies frozen `PlayerMetrics` and counts existing Timeline kill/death facts; no raw MatchEvent reaches the renderer and no new Analytics algorithm is introduced. Missing round windows are marked incomplete rather than shown as confirmed zero facts.

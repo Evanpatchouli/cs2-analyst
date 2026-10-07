@@ -1,4 +1,5 @@
 import { checkReportUx } from './report-ux-checks.mjs';
+import { checkWindowShell } from './window-shell-checks.mjs';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import { spawn, spawnSync } from 'node:child_process';
@@ -219,6 +220,7 @@ async function launchSession(exePath, extraEnv, label) {
       const state = await evaluate('({ ready: document.readyState, text: document.body.textContent, node: typeof window.require, nodeProcess: typeof window.process, version: window.cs2Coach?.version })');
       return state?.ready === 'complete' && state.text?.includes('CS2 Coach') ? state : null;
     }, 60_000, label + ' React 页面');
+    await checkWindowShell(evaluate, send);
     return { child, send, evaluate, errors, shell };
   } catch (error) {
     socket?.close();
@@ -233,7 +235,7 @@ async function clickSelectDemo(session) {
 }
 
 async function closeGracefully(session) {
-  session.send('Browser.close').catch(() => { /* Electron 退出时会断开协议连接。 */ });
+  session.evaluate(`document.querySelector('[data-window-control="close"]').click()`).catch(() => { /* Electron 退出时会断开协议连接。 */ });
   for (let attempt = 0; attempt < 150 && session.child.exitCode === null; attempt++) await delay(100);
   return session.child.exitCode;
 }
@@ -267,6 +269,11 @@ function checkInstalledLayout(variant, expectSeam) {
   assert.ok(nativeMb > 3, '原生绑定体积异常：' + nativeMb.toFixed(1) + ' MB');
 
   const mainSource = readAsarFile(asar, dataOffset, files.get('dist/electron/main.js')).toString('utf8');
+  for (const option of ['frame: false', 'resizable: true', 'contextIsolation: true', 'nodeIntegration: false', 'sandbox: true']) {
+    assert.ok(mainSource.includes(option), 'installed BrowserWindow missing ' + option);
+  }
+  assert.ok(mainSource.includes('window.removeMenu()'), 'installed window must remove native menu');
+  assert.ok(!mainSource.includes('titleBarOverlay'), 'installed window must use custom caption buttons');
   const workerSource = readAsarFile(asar, dataOffset, files.get('dist/electron/report-worker.js')).toString('utf8');
   const rendererEntry = entries.find(entry => /^dist\/renderer\/assets\/index-.*\.js$/.test(entry));
   assert.ok(rendererEntry, '缺少 renderer bundle');
