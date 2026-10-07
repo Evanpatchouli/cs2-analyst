@@ -56,6 +56,14 @@ Renderer（仅渲染 DTO，不访问 Node/fs/demoparser2）
 - 在真实 QA Renderer 临时制造报告 render 错误（不改源码或文件），错误边界显示恢复提示，同时 titlebar 与三个窗口按钮仍存在；恢复按钮可回到导入页。额外截图 error-recovery-shell.png。
 - 真实鼠标拖动 PASS：Computer Use drag 未取得窗口位移证据后，用户用鼠标实测并明确确认“可以，提交并重新汇报吧”。此项依据用户实际操作确认；所有本轮验收已完成。
 
+### P5.6.4 追加：全局滚动条 polish
+
+- `theme.ts` 集中维护 scrollbar palette；Fluent UI `makeStaticStyles` 在 `DesktopShell` 挂载全局 pseudo selectors，页面、Timeline、Analysis 及 portal 滚动容器共用。
+- 纵横占位均为 10px；2px 透明 border + padding-box 留出约 6px 圆角 thumb。蓝灰透明度为默认 .28 / hover .46 / active .62；track/corner 透明，无箭头按钮，无新增滚动事件或布局宽度规则。
+- Firefox `thin` / `.36 transparent` 标准属性只在不支持 WebKit scrollbar selector 的引擎生效，避免 Chromium 标准属性覆盖定制尺寸与交互状态（[MDN](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Selectors/::-webkit-scrollbar)）。
+- 2026-10-07：desktop typecheck/build 通过；系统临时脚本复用现有 Electron CDP report smoke，真实 DEM / 损坏 DEM / 非 DEM 三场景通过，无未捕获 Renderer 异常。1280×800 / 800×600 为模拟 Renderer viewport；两尺寸纵向滚轮/拖拽通过，额外 650×600 触发 Analysis 横向溢出并验证横向滚轮/拖拽。三 Tab 无整页横向 overflow，原生最大化后 titlebar/content 右边缘贴合 viewport。
+- 截图在系统临时目录 `cs2-coach-scrollbar-qa`，不提交；两尺寸 thumb 默认 / hover / active 像素分别为 RGB(55,64,76) / (77,87,101) / (97,108,123)，无接近白色状态；透明 corner computed style 通过。Firefox 与实体触控板未实测；业务、IPC、窗口控制逻辑无改动。
+
 ## IPC 契约（`@cs2-coach/report-contract`）
 
 `report-contract` 是 Electron 与 Renderer 共享的 JSON-only 展示契约，只依赖 `findings` 的类型。

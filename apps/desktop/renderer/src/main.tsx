@@ -14,7 +14,7 @@ import { useReport } from './store';
 import { QuestionCircleIcon } from './icons';
 import { UtilityIcon } from './utility-icons';
 import type { UtilityIconKind } from './utility-icons';
-import { coachTheme, palette } from './theme';
+import { coachTheme, palette, useScrollbarStyles } from './theme';
 import { AppTitlebar } from './app-titlebar';
 
 /** One surface for every card on the page: same background, same weak border, same radius, no shadows. */
@@ -404,6 +404,7 @@ class ReportErrorBoundary extends React.Component<React.PropsWithChildren, { fai
   }
 }
 function DesktopShell() {
+  useScrollbarStyles();
   const s = useStyles();
   return <div className={s.page}><AppTitlebar /><div className={s.body} data-app-content><ReportErrorBoundary><App /></ReportErrorBoundary></div></div>;
 }

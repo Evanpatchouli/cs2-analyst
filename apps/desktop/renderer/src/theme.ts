@@ -1,4 +1,4 @@
-import { webDarkTheme } from '@fluentui/react-components';
+import { makeStaticStyles, webDarkTheme } from '@fluentui/react-components';
 import type { Theme } from '@fluentui/react-components';
 
 /**
@@ -27,6 +27,11 @@ export const palette = {
   text: '#e8eef6',
   textSecondary: '#c5cfdc',
   textMuted: '#8f9db0',
+  /** Scrollbar thumbs use the same blue-grey as muted text. */
+  scrollbarThumb: 'rgba(143, 157, 176, 0.28)',
+  scrollbarThumbHover: 'rgba(143, 157, 176, 0.46)',
+  scrollbarThumbActive: 'rgba(143, 157, 176, 0.62)',
+  scrollbarThumbFallback: 'rgba(143, 157, 176, 0.36)',
   currentPlayer: '#62abf5',
   /** Colours reserved for the utility icons; every one is a visual anchor, not a data encoding. */
   utility: {
@@ -38,6 +43,27 @@ export const palette = {
     decoy: '#57D68D',
   },
 } as const;
+
+/** Global selectors cover page, nested scroll regions and Fluent portals alike. */
+export const useScrollbarStyles = makeStaticStyles({
+  '::-webkit-scrollbar': { width: '10px', height: '10px' },
+  '::-webkit-scrollbar-track': { backgroundColor: 'transparent' },
+  '::-webkit-scrollbar-thumb': {
+    backgroundColor: palette.scrollbarThumb,
+    border: '2px solid transparent',
+    backgroundClip: 'padding-box',
+    borderRadius: '999px',
+  },
+  '::-webkit-scrollbar-thumb:hover': { backgroundColor: palette.scrollbarThumbHover },
+  '::-webkit-scrollbar-thumb:active': { backgroundColor: palette.scrollbarThumbActive },
+  '::-webkit-scrollbar-corner': { backgroundColor: 'transparent' },
+  '::-webkit-scrollbar-button': { display: 'none', width: 0, height: 0 },
+  // Non-auto standard properties override WebKit styling in Chromium. Keep the
+  // Firefox fallback isolated so Electron retains the 10px hit area and states.
+  '@supports not selector(::-webkit-scrollbar)': {
+    '*': { scrollbarWidth: 'thin', scrollbarColor: `${palette.scrollbarThumbFallback} transparent` },
+  },
+});
 
 /**
  * Fluent UI neutral tokens re-pointed at the blue-grey palette so every Fluent component
