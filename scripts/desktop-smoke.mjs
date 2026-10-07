@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { spawn, spawnSync } from 'node:child_process';
 import { createRequire } from 'node:module';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, rmSync, readdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createServer } from 'node:net';
@@ -121,6 +121,14 @@ async function smoke(mode) {
     assert.equal(state.importDemo, 'function', 'preload importDemo 未暴露');
     assert.equal(state.node, 'undefined', '渲染页面不应开放 Node.js');
     assert.match(state.url, mode === 'dev' ? /^http:\/\/localhost:/ : /^file:\/\//);
+    const assetUrls = mode === 'dev'
+      ? ['weapons', 'death-notice'].flatMap(folder => readdirSync(join(desktop, 'renderer/src/assets/killfeed', folder)).filter(f => f.endsWith('.svg')).map(f => '/src/assets/killfeed/' + folder + '/' + f))
+      : readdirSync(join(desktop, 'dist/renderer/assets')).filter(f => f.endsWith('.svg')).map(f => './assets/' + f);
+    const imageResult = await send('Runtime.evaluate', {
+      expression: `Promise.all(${JSON.stringify(assetUrls)}.map(async src => { const i = new Image(); i.src = new URL(src, location.href).href; await i.decode(); return i.complete && i.naturalWidth > 0; }))`,
+      awaitPromise: true, returnByValue: true,
+    });
+    assert.ok(!imageResult.exceptionDetails && imageResult.result.value?.length === assetUrls.length && imageResult.result.value.every(Boolean), '官方图片必须全部可加载');
     assert.deepEqual(errors, [], '存在页面异常或资源加载失败');
     // Electron 退出时会断开协议连接，关闭命令无需等待响应。
     socket.send(JSON.stringify({ id: ++id, method: 'Browser.close' }));

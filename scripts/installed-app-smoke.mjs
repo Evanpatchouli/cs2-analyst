@@ -1,7 +1,8 @@
 import { checkReportUx } from './report-ux-checks.mjs';
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { spawn, spawnSync } from 'node:child_process';
-import { closeSync, existsSync, mkdirSync, openSync, readFileSync, readSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { closeSync, existsSync, mkdirSync, openSync, readFileSync, readdirSync, readSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:net';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -271,6 +272,18 @@ function checkInstalledLayout(variant, expectSeam) {
   assert.ok(rendererEntry, '缺少 renderer bundle');
   const rendererSource = readAsarFile(asar, dataOffset, files.get(rendererEntry)).toString('utf8');
 
+  const officialEntries = entries.filter(e => e.startsWith('dist/renderer/assets/') && e.endsWith('.svg'));
+  const officialHashes = new Set(officialEntries.map(e => createHash('sha256').update(readAsarFile(asar, dataOffset, files.get(e))).digest('hex')));
+  for (const folder of ['weapons', 'death-notice']) {
+    const sourceDir = join(desktopDir, 'renderer/src/assets/killfeed', folder);
+    for (const file of readdirSync(sourceDir).filter(f => f.endsWith('.svg'))) {
+      const hash = createHash('sha256').update(readFileSync(join(sourceDir, file))).digest('hex');
+      assert.ok(officialHashes.has(hash), 'ASAR missing unmodified official asset: ' + file);
+    }
+  }
+  variant.officialAssetUrls = officialEntries.map(e => './' + e.slice('dist/renderer/'.length));
+  console.log(variant.label + '：' + officialEntries.length + ' 个官方 SVG（Vite 按内容去重），与源文件字节一致');
+
   if (expectSeam) {
     assert.ok(mainSource.includes(SEAM_MARKER), '测试 seam 构建应包含 ' + SEAM_MARKER);
   } else {
@@ -309,6 +322,8 @@ async function productionScenario() {
     assert.equal(session.shell.node, 'undefined', '渲染进程不应暴露 Node.js');
     assert.equal(session.shell.nodeProcess, 'undefined', '渲染进程不应暴露 process');
     assert.equal(session.shell.version, version, 'preload 桥接未加载');
+    const loadedAssets = await session.evaluate(`Promise.all(${JSON.stringify(variant.officialAssetUrls)}.map(async src => { const i = new Image(); i.src = new URL(src, location.href).href; await i.decode(); return i.complete && i.naturalWidth > 0; }))`);
+    assert.ok(loadedAssets.length > 0 && loadedAssets.every(Boolean), '生产安装版官方图片 URL 必须全部可加载');
     const exitCode = await closeGracefully(session);
     assert.equal(exitCode, 0, '关闭窗口后应用未正常退出');
     await waitFor(() => appProcesses().length === 0, 15_000, '应用进程退出');

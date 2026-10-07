@@ -64,6 +64,8 @@ P5.5 Round Timeline MVP — **PASS**。报告页底部新增独立“回合时�
 
 P5.6.2 Report UX Polish — **PASS**。比赛报告 / 回合时间线 / 分析三个 mounted Tab；Findings 原生证据入口 hover/focus 与先切 Tab 的回合联动；当前玩家姓名和条图统一 #62abf5；Frozen multiKills counts 直接投影、零项隐藏；CT/T 独立内缩 divider；Timeline 单色自绘 SVG kill-feed、爆头/闪光助攻原样投影与未知武器 fallback。严格保持 P3/P4 与 Timeline 筛选、round time、nickname 原样规则；无新增算法或产品模块。
 
+P5.6.3 Official Kill-feed Assets — **PASS**。击杀播报改用71张官方SVG（69武器、官方爆头与闪光助攻），72武器identifier与独立刀型映射；删除自绘weapon shapes。HUD正确源目录panorama/images/hud/deathnotice/，仅定向补提缺失素材，修正旧提取路径。全部回归与两安装包/安装版E2E通过，Timeline与Analytics/Findings语义不变。见[官方资源提取](./cs2-killfeed-assets.md)。
+
 ## P6 AI Coach
 
 - Optional AI explanation layer

@@ -1,0 +1,2 @@
+# Preserve extracted Valve SVG bytes and upstream whitespace across platforms.
+*.svg -text -whitespace

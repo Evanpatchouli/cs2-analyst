@@ -1,5 +1,16 @@
 # Agent Handoff
 
+## 2026-10-07 — P5.6.3 Official Kill-feed Assets PASS
+
+- 基线f3ddfd89c2d86f32b112706f720b41f4193dff82。只替换展示资源；Parser / Analytics / Findings / Timeline DTO、事件tick/time/顺序、nickname规则不变。
+- 71SVG/0PNG、72武器标识、24刀图/26刀标识，HeadshotIcon和FlashAssistIcon全部官方img；自绘weapon shapes完全删除，仅未知/world保留简单圆环占位与原accessible文本。
+- 来源output/equipment及用户授权的已有VRF定向提取output/targeted-deathnotice。正确源路径panorama/images/hud/deathnotice/icon_headshot.vsvg_c；flash源为panorama/images/icons/equipment/flashbang_assist.vsvg_c。10HUD+flash已导出，额外9HUD仅本地备用；提取文档/脚本筛选/映射旧路径已修正。
+- 原图字节不变，provenance SHA与资源.gitattributes防换行转换保证71图可追溯；Vite静态import/相对base，production不访问原游戏目录。
+- 全命令PASS：typecheck11/11、build6/6、desktop15/15、report三场景、analytics53/findings17/parser28、dev-preview smoke、两pack、installed全链路。两installer107.5MB，ASAR2.13MB/81条目/71官方SVG，生产全部图URL可解码。
+- R24 AK/inferno、R22 posthumous HE/flash、R23真实headshot在开发/安装共享断言通过；Golden与Finding ruleId顺序不变。截图系统临时cs2-coach-p563-qa（1280/900/800/650），实查无白底/拉伸/broken image/整页溢出。独立review无阻塞，SSR4/4及71实际源图一致。
+- 安装防注入测试首次异常，原包/代码不变重跑全通过，原因未确定且未复现，保留docs/desktop-report.md记录。
+- 完成后一个指定focused commit，不amend/squash；output/保留用户未追踪状态，截图/installer不提交。详细说明与提取命令见docs/cs2-killfeed-assets.md。
+
 ## 2026-10-07 — P5.6.2 Report UX Polish PASS
 
 - 基线 e0d5f4c7cec6d7dbd59c46d44f9784dc1bdc1b6e；严格完成指定八项 UX，无 P3/P4 public contract、算法、阈值、ranking、事件筛选、round time、nickname 原样或 installer 架构改动；Windows x64 only、0.1.0。

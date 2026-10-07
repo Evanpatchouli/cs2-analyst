@@ -235,3 +235,21 @@ Golden：demo1 twinkle R7 = CT/成功/3K，R24 = T/成功/4K/未阵亡，R22 = T
 验证增加共享 Electron CDP `scripts/report-ux-checks.mjs`，开发构建与安装版使用同一组断言。无 Browser 插件，沿用仓库现有 Electron E2E。Node synthetic 测试覆盖 flag 缺失/false/true、未知武器、world fallback、武器覆盖、全零/部分零 multi-kill 与 fivePlus 文案；真实 DEM 的 DTO 与独立 Frozen Analytics 原值比较。截图输出在系统临时目录 `cs2-coach-p562-qa`，涵盖 1280×900 / 900×760 / 800×600，另测 650px breakpoint。截图、安装包和临时 profile 不提交。
 
 P5.6.2 验证全 PASS：pnpm typecheck（11/11）、pnpm build（6/6）、desktop test（14/14）、test:report（三场景）、analytics（53/53）、findings（17/17）、dem-parser（28/28）、dev/preview test:smoke、pack:win、pack:win:test、test:installed。两轮独立审查无阻塞；安装版重跑共享 UX 断言，生产 seam 防护、原生绑定 unpacked、损坏 DEM、中途关闭无残留 worker、两版卸载均通过。安装包约107.3MB，ASAR 1.41MB / 10条目。
+
+
+## Official Kill-feed Assets（P5.6.3 PASS）
+
+基线 f3ddfd89c2d86f32b112706f720b41f4193dff82。只替换 Renderer 资源、asset mapping 与验证；Parser、Analytics、Findings、Timeline DTO / tick / round time / 事件排序均未修改。
+
+- 原始武器来源 E:\cs2-coach\output\equipment，继续复用之前的本机 CS2 提取结果。定向补充来源 output/targeted-deathnotice：使用已有 ValveResourceFormat 从 pak01_dir.vpk 提取10张 HUD SVG与equipment flash assist，不重提equipment、不下载工具。
+- 正确HUD目录是 panorama/images/hud/deathnotice/，爆头文件为 icon_headshot.vsvg_c。旧 panorama/images/icons/death_notice/ 是错误源路径；项目death-notice目录仅为本地组织。闪光助攻来自 panorama/images/icons/equipment/flashbang_assist.vsvg_c。提取器本机README、筛选路径与映射文件名均已修正；可复现命令与完整来源见 [官方kill-feed资源](./cs2-killfeed-assets.md)。
+- 复制71 SVG / 0 PNG：69武器 + 2 death notice。原图字节未修改，provenance.json保存精确VPK路径与SHA-256。只将当前UI所需素材纳入仓库；其余9张HUD图标留在本地output备用，不打包或新增判定。
+- killfeed-assets.ts 静态 import + 显式72 identifier映射，含knife_bayonet → bayonet、kukri → knife_kukri、p2000 → hkp2000；补齐CZ75、R8、消音器关闭标识。24张官方刀图覆盖26刀标识，各variant使用实际文件，不猜路径。
+- HeadshotIcon / FlashAssistIcon 均使用官方img，仅当原DTO flag === true时显示；没有自绘回退。未知weapon / 未知刀型与空world.svg使用简单圆环neutral fallback；Tooltip和整行aria-label保留原有完整事实。自绘weapon shapes全部删除，无双套实现。
+- img高22px、自然宽度、object-fit contain，武器最大96px、notice最大24px；alt空且aria-hidden。无白底、背景框、阴影、拉伸、图形编辑或新依赖；四列kill-feed与nickname原值/ellipsis/Tooltip保持既有规则。
+- Vite assetsInlineLimit=0、base='./'，静态图片进入dist/renderer/assets与ASAR，运行时不读取CS2安装目录或提取目录。dev/preview解码全部图片，安装版核对ASAR内源资源字节并实际解码生产图片URL。
+- demo1 R24官方AK-47与inferno、R22死后HE（+32.78秒）与flash assist均通过；R24没有headshot flag，另用R23 M4A1-S爆头死亡验证官方headshot，未修改DTO构造事件。Golden 25/20/4、ADR91.375、KAST75%、Trade22.2%、R24 1v3与Findings ruleId顺序不变。
+- 截图系统临时cs2-coach-p563-qa，1280×900 / 900×760 / 800×600 / 650×760；实查R24/R22/R23无白底、拉伸、broken image或整页溢出，昵称与图标居中。Browser plugin not available，使用项目已有Electron CDP E2E。
+- 当前通过typecheck11/11、build6/6、desktop15/15、test:report三场景、analytics53/53、findings17/17、parser28/28、dev/preview test:smoke。pack:win / pack:win:test / test:installed最终全通过：两安装包均107.5MB；ASAR2.13MB/81条目/71官方SVG，逐图与源码字节一致，生产图片URL全部可解码。生产启动/路径注入防护/卸载、测试seam真实demo共享UX/损坏DEM/中途关闭无worker/卸载通过。独立审查无阻塞；71个资源均与实际提取字节一致，独立Renderer测试4/4。
+
+安装测试记录：补齐headshot后的首次installed run在生产防注入断言处出现demo报告而失败；生产ASAR seam缺省检查与资源检查已通过。未修改产品代码或安装包，随后重跑test:installed全通过。首次异常原因未确定、重跑未复现，保留此记录，不将其归因为资源改动或确定的外部操作。

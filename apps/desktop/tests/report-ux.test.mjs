@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, existsSync } from 'node:fs';
 import { registerHooks, createRequire } from 'node:module';
 import { test } from 'node:test';
+import { createHash } from 'node:crypto';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { SSRProvider } from '@fluentui/react-components';
@@ -18,12 +19,14 @@ registerHooks({ resolve(specifier, context, nextResolve) {
   }
   return nextResolve(specifier, context);
 }, load(url, context, nextLoad) {
+  if (url.endsWith('.svg')) return { format: 'module', shortCircuit: true, source: 'export default ' + JSON.stringify(new URL(url).pathname) + ';' };
   if (url.endsWith('.tsx')) return { format: 'module', shortCircuit: true,
     source: transformSync(readFileSync(new URL(url), 'utf8'), { loader: 'tsx', jsx: 'automatic', format: 'esm' }).code };
   return nextLoad(url, context);
 } });
 const { KillFeedEvent } = await import('../renderer/src/killfeed-event.tsx');
 const { WeaponIcon, weaponLabels } = await import('../renderer/src/killfeed-icons.tsx');
+const { weaponAsset, killfeedWeaponAssets, killfeedDeathNoticeAssets } = await import('../renderer/src/killfeed-assets.ts');
 const { AnalysisViews } = await import('../renderer/src/analysis-views.tsx');
 const render = element => renderToStaticMarkup(createElement(SSRProvider, null, element));
 
@@ -37,6 +40,8 @@ test('kill feed renders flags only when true, fallback weapon and complete acces
     assert.ok(html.includes('R24 回合开始后 122.20 秒'));
     assert.ok(html.includes(' twinkle ') && html.includes(event.targetName));
     assert.equal(html.includes('data-killfeed-icon="headshot"'), headshot === true);
+    assert.equal(html.includes('/death-notice/icon_headshot.svg'), headshot === true);
+    assert.equal(html.includes('/death-notice/flashbang_assist.svg'), headshot === true);
     assert.equal(html.includes('data-killfeed-icon="flash"'), headshot === true);
     assert.ok(!html.includes('→'));
   }
@@ -46,12 +51,49 @@ test('kill feed renders flags only when true, fallback weapon and complete acces
   assert.ok(world.includes('阵亡'));
 });
 
-test('known weapons and common knife variants have monochrome non-generic silhouettes', () => {
-  for (const weapon of [...Object.keys(weaponLabels), 'knife_m9_bayonet', 'knife_tactical', 'knife_falchion', 'knife_push', 'knife_survival_bowie', 'knife_ursus', 'knife_stiletto', 'knife_widowmaker', 'knife_skeleton', 'knife_kukri']) {
+test('all mapped weapons use bundled official images, with distinct knife variants', () => {
+  for (const weapon of Object.keys(killfeedWeaponAssets)) {
     const html = renderToStaticMarkup(createElement(WeaponIcon, { weapon }));
-    assert.ok(!html.includes('data-killfeed-icon="generic"'), weapon);
-    assert.ok(html.includes('fill="currentColor"') && html.includes('aria-hidden="true"'));
+    assert.ok(html.includes('<img') && html.includes('alt=""') && html.includes('aria-hidden="true"'), weapon);
+    assert.ok(!html.includes('<path') && !html.includes('data-killfeed-icon="generic"'), weapon);
+    assert.ok(existsSync(new URL('file://' + weaponAsset(weapon))), weapon);
   }
+  for (const weapon of ['ak47', 'awp', 'm4a1_silencer', 'hegrenade', 'inferno', 'knife_butterfly']) {
+    assert.ok(weaponAsset(weapon).endsWith('/' + weapon + '.svg'), weapon);
+  }
+  assert.notEqual(weaponAsset('knife_butterfly'), weaponAsset('knife'));
+  assert.equal(weaponAsset('knife_bayonet'), weaponAsset('bayonet'));
+  assert.equal(weaponAsset('kukri'), weaponAsset('knife_kukri'));
+  for (const weapon of [undefined, 'unknown_weapon', 'knife_unknown', '__proto__', 'constructor', 'toString', 'world']) {
+    assert.equal(weaponAsset(weapon), undefined);
+    assert.ok(renderToStaticMarkup(createElement(WeaponIcon, { weapon })).includes('<svg'));
+  }
+  for (const weapon of Object.keys(weaponLabels).filter(w => w !== 'world')) assert.ok(weaponAsset(weapon), weapon);
+  assert.ok(killfeedDeathNoticeAssets.headshot.endsWith('/icon_headshot.svg'));
+  assert.ok(killfeedDeathNoticeAssets.flashAssist.endsWith('/flashbang_assist.svg'));
+});
+
+test('official assets retain extraction bytes and independently gated death notices', () => {
+  const base = new URL('../renderer/src/assets/killfeed/', import.meta.url);
+  const provenance = JSON.parse(readFileSync(new URL('provenance.json', base), 'utf8'));
+  for (const asset of provenance.assets) {
+    const bytes = readFileSync(new URL(asset.asset, base));
+    assert.equal(createHash('sha256').update(bytes).digest('hex'), asset.sha256, asset.asset);
+  }
+  const html = render(createElement(KillFeedEvent, { round: 1, event: {
+    id: 'flash', type: 'kill', tick: 100, actorId: 'a', actorName: 'A', targetName: 'B',
+    weapon: 'ak47', assistedFlash: true, headshot: false,
+  } }));
+  assert.ok(html.includes('/death-notice/flashbang_assist.svg'));
+  assert.ok(html.includes('data-killfeed-icon="flash"'));
+  assert.ok(!html.includes('data-killfeed-icon="headshot"'));
+  const headshotHtml = render(createElement(KillFeedEvent, { round: 1, event: {
+    id: 'headshot', type: 'kill', tick: 100, actorId: 'a', actorName: 'A', targetName: 'B',
+    weapon: 'awp', headshot: true, assistedFlash: false,
+  } }));
+  assert.ok(headshotHtml.includes('/death-notice/icon_headshot.svg'));
+  assert.ok(headshotHtml.includes('data-killfeed-icon="headshot"'));
+  assert.ok(!headshotHtml.includes('data-killfeed-icon="flash"'));
 });
 
 test('multi-kill summary omits zeros and the whole empty group, retaining five-or-more wording', () => {

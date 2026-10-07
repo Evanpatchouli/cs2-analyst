@@ -63,6 +63,8 @@ export default defineConfig({
     plugins: [react()],
     build: {
       outDir: resolvePath('./dist/renderer'),
+      // Keep official SVGs as inspectable files in the installer ASAR.
+      assetsInlineLimit: 0,
       rollupOptions: {
         input: resolvePath('./renderer/index.html'),
       },

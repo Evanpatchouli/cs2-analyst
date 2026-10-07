@@ -1,12 +1,12 @@
 # Current Task
 
-Status: complete — PASS — P5.6.2 Report UX Polish，基线 e0d5f4c7cec6d7dbd59c46d44f9784dc1bdc1b6e。
+Status: complete — PASS — P5.6.3 Official Kill-feed Assets，基线 f3ddfd89c2d86f32b112706f720b41f4193dff82。
 
-- 本轮只做用户列出的八项 presentation UX：三 Tab、summary hover/focus、currentPlayer 名称与 bar、趋势说明分组、frozen Multi-kill summary、CT/T divider、kill-feed。
-- presentation DTO additive headshot / assistedFlash、每人 multiKills double/triple/quad/fivePlus；无 P3/P4/筛选/时间/昵称/安装架构改动，Windows x64 only，0.1.0。
-- 已通过：typecheck 11/11、build 6/6、desktop 14/14、test:report 三场景、analytics 53/53、findings 17/17、dem-parser 28/28、dev/preview test:smoke，独立审查两轮无阻塞。
-- 真实 demo1 R24 4K、R7 3K、R22 posthumous HE；multi-kill 原值 6/1/1/0，Golden 与 Findings ruleId 顺序不变；nickname 原样。
-- 截图检查 1280×900 / 900×760 / 800×600，另测 650px breakpoint；截图系统临时目录 cs2-coach-p562-qa，不提交。
-- pack:win / pack:win:test（均约107.3MB）与 test:installed 全 PASS：生产 seam 防护、Renderer 无 Node、真实 DEM golden + 共享 UX 断言、损坏 DEM、中途关闭无残留 worker、两版卸载。按用户要求仅创建一个 focused commit，不 amend/squash。
+- 71官方SVG（69武器+官方icon_headshot/flashbang_assist）、0PNG，72武器identifier、24刀图/26刀标识；自绘weapon shapes完全删除。
+- 复用output/equipment；按用户授权使用已有VRF定向提取10HUD+flash assist，正确源目录panorama/images/hud/deathnotice/。项目只纳入当前需要的两notice；其他HUD保留本地备用。原图未改，provenance与Git字节保持检查覆盖全部71图。
+- Parser / Analytics / Findings / Timeline DTO、tick/time/顺序不变。真实R24 AK/inferno、R22 posthumous HE/flash、R23 headshot与Golden通过；截图系统临时cs2-coach-p563-qa。
+- 全部命令已验证：typecheck11/11、build6/6、desktop15/15、report三场景、analytics53/53、findings17/17、parser28/28、dev/preview smoke、pack:win、pack:win:test、test:installed。两installer107.5MB，ASAR2.13MB/81条目/71SVG。
+- 安装防注入断言首次异常、原包无代码改动重跑全通过，原因未确定且未复现；详见desktop-report验证记录。独立review无阻塞。
+- 文档及提取器旧路径已修正，当前无待办；只创建一个指定focused commit，不amend/squash。output/仍为用户本地未追踪资源，不提交截图或installer。
 
-详细说明见 [桌面比赛报告](../docs/desktop-report.md)。
+详细说明见 [桌面比赛报告](../docs/desktop-report.md) 与 [官方资源提取](../docs/cs2-killfeed-assets.md)。

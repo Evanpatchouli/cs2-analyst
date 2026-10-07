@@ -1,0 +1,449 @@
+{
+  "source": "User-extracted Valve CS2 Panorama assets",
+  "extractionDirectory": "E:\\cs2-coach\\output",
+  "sourceVpk": "c:\\steam\\steamapps\\common\\Counter-Strike Global Offensive\\game\\csgo\\pak01_dir.vpk",
+  "extractedAt": "2026-10-07T05:14:00.1877734Z",
+  "unchanged": true,
+  "excluded": {
+    "equipment/world.svg": "Empty SVG; neutral fallback instead"
+  },
+  "assets": [
+    {
+      "asset": "weapons/ak47.svg",
+      "source": "equipment/ak47.svg",
+      "sha256": "d0f98522d69a90d2dae644e29e114e9520ec7186e0cd462f1541ab0ef3289bfe",
+      "vpkResource": "panorama/images/icons/equipment/ak47.vsvg_c"
+    },
+    {
+      "asset": "weapons/aug.svg",
+      "source": "equipment/aug.svg",
+      "sha256": "145aa54e61b616544e86ec895ba303c7a6480a197c6176a07265f5f234b5bc52",
+      "vpkResource": "panorama/images/icons/equipment/aug.vsvg_c"
+    },
+    {
+      "asset": "weapons/awp.svg",
+      "source": "equipment/awp.svg",
+      "sha256": "21e1c6ccbef3a93bc5e984587fa97a0de64417646a48a789864d0e5731a625d6",
+      "vpkResource": "panorama/images/icons/equipment/awp.vsvg_c"
+    },
+    {
+      "asset": "weapons/bayonet.svg",
+      "source": "equipment/bayonet.svg",
+      "sha256": "2dfdb1d3e1e2f9f3374d49cd7589b4fc450cfc91111e0670d5739327e82d2a86",
+      "vpkResource": "panorama/images/icons/equipment/bayonet.vsvg_c"
+    },
+    {
+      "asset": "weapons/bizon.svg",
+      "source": "equipment/bizon.svg",
+      "sha256": "ae6259ba48323e132d37a2df13d162101898c35b3a1873e1b8913c8c193f9905",
+      "vpkResource": "panorama/images/icons/equipment/bizon.vsvg_c"
+    },
+    {
+      "asset": "weapons/c4.svg",
+      "source": "equipment/c4.svg",
+      "sha256": "4ccfa5c0b98f54e3815f92779814d5ef3ddb6f01d2f3ccebd049372efb2ee310",
+      "vpkResource": "panorama/images/icons/equipment/c4.vsvg_c"
+    },
+    {
+      "asset": "weapons/cz75a.svg",
+      "source": "equipment/cz75a.svg",
+      "sha256": "bc0fdaf5d7806adca94a9d4224d73d4819a6966ec989570682ffa62febcff89b",
+      "vpkResource": "panorama/images/icons/equipment/cz75a.vsvg_c"
+    },
+    {
+      "asset": "weapons/deagle.svg",
+      "source": "equipment/deagle.svg",
+      "sha256": "5ab139d7151ceaa530deb352a08146ce625ce5a9f0fcf1b8554c57c42999b950",
+      "vpkResource": "panorama/images/icons/equipment/deagle.vsvg_c"
+    },
+    {
+      "asset": "weapons/decoy.svg",
+      "source": "equipment/decoy.svg",
+      "sha256": "2d49015e12f7ad1217d89509fedd5801e0103c646a22d144509004147a3b67b0",
+      "vpkResource": "panorama/images/icons/equipment/decoy.vsvg_c"
+    },
+    {
+      "asset": "weapons/elite.svg",
+      "source": "equipment/elite.svg",
+      "sha256": "f8e43a50d1b21bc30843c61b543bd965d108010d5f4998e6ffa44a9f96b3630f",
+      "vpkResource": "panorama/images/icons/equipment/elite.vsvg_c"
+    },
+    {
+      "asset": "weapons/famas.svg",
+      "source": "equipment/famas.svg",
+      "sha256": "ba5d5bed81d8efd6fcd049d8400c5a78a587a9f62f0585910b4cff593d8030ec",
+      "vpkResource": "panorama/images/icons/equipment/famas.vsvg_c"
+    },
+    {
+      "asset": "weapons/fiveseven.svg",
+      "source": "equipment/fiveseven.svg",
+      "sha256": "7b9aa3b6fdb84329a43e537dff69275b224d548cbd73e7eb1272fa973322dcda",
+      "vpkResource": "panorama/images/icons/equipment/fiveseven.vsvg_c"
+    },
+    {
+      "asset": "weapons/flashbang.svg",
+      "source": "equipment/flashbang.svg",
+      "sha256": "bccb65a3452c6695a342654566510e6f20352d4449740ad477c2a4eeea3d3645",
+      "vpkResource": "panorama/images/icons/equipment/flashbang.vsvg_c"
+    },
+    {
+      "asset": "weapons/g3sg1.svg",
+      "source": "equipment/g3sg1.svg",
+      "sha256": "a4806843e5010f9cdf6349b58998a976703ec65d44b0862ddaf78673609d583a",
+      "vpkResource": "panorama/images/icons/equipment/g3sg1.vsvg_c"
+    },
+    {
+      "asset": "weapons/galilar.svg",
+      "source": "equipment/galilar.svg",
+      "sha256": "935b679077b5a6ea4264e66541260fb905a058f5b999e82191b79e1d94452c56",
+      "vpkResource": "panorama/images/icons/equipment/galilar.vsvg_c"
+    },
+    {
+      "asset": "weapons/glock.svg",
+      "source": "equipment/glock.svg",
+      "sha256": "0ca4c81b4888d84e54e699cc4831a69992005e246dc24ffb9aa52cade6133692",
+      "vpkResource": "panorama/images/icons/equipment/glock.vsvg_c"
+    },
+    {
+      "asset": "weapons/hegrenade.svg",
+      "source": "equipment/hegrenade.svg",
+      "sha256": "8c33330ea8db7626d62fd6cd60139e2242be9e4b5adde54a5d43a967c462e479",
+      "vpkResource": "panorama/images/icons/equipment/hegrenade.vsvg_c"
+    },
+    {
+      "asset": "weapons/hkp2000.svg",
+      "source": "equipment/hkp2000.svg",
+      "sha256": "66fe96c04579615f3491d662770511785d57557c2bcc21ac81dddfc0ba65238a",
+      "vpkResource": "panorama/images/icons/equipment/hkp2000.vsvg_c"
+    },
+    {
+      "asset": "weapons/incgrenade.svg",
+      "source": "equipment/incgrenade.svg",
+      "sha256": "7c87dec72d1c0c622ba248fa88a6cd75f91671086a995e6a72201c9404a205d2",
+      "vpkResource": "panorama/images/icons/equipment/incgrenade.vsvg_c"
+    },
+    {
+      "asset": "weapons/inferno.svg",
+      "source": "equipment/inferno.svg",
+      "sha256": "80d8a8d339b5fd2560705c0410f7c74101279a4fba9186e86712adcfcb3cd229",
+      "vpkResource": "panorama/images/icons/equipment/inferno.vsvg_c"
+    },
+    {
+      "asset": "weapons/knife.svg",
+      "source": "equipment/knife.svg",
+      "sha256": "865edd79e600f5812dbaf910438af1f4ca2fb74a75fa815cc00d95802de25185",
+      "vpkResource": "panorama/images/icons/equipment/knife.vsvg_c"
+    },
+    {
+      "asset": "weapons/knife_bowie.svg",
+      "source": "equipment/knife_bowie.svg",
+      "sha256": "4045c643ee98ed91a02ec90780e35ce38045c9aacb4cfa294a6d80588cb02e5c",
+      "vpkResource": "panorama/images/icons/equipment/knife_bowie.vsvg_c"
+    },
+    {
+      "asset": "weapons/knife_butterfly.svg",
+      "source": "equipment/knife_butterfly.svg",
+      "sha256": "efe285cdfd79b518544ccf6fc0203b8c25517c4ae36f27d640caff37c1db34fc",
+      "vpkResource": "panorama/images/icons/equipment/knife_butterfly.vsvg_c"
+    },
+    {
+      "asset": "weapons/knife_canis.svg",
+      "source": "equipment/knife_canis.svg",
+      "sha256": "e67136c2bf4fe95c637fa5ef897ec22852419f7326a7a4b9a77d488b1faf675a",
+      "vpkResource": "panorama/images/icons/equipment/knife_canis.vsvg_c"
+    },
+    {
+      "asset": "weapons/knife_cord.svg",
+      "source": "equipment/knife_cord.svg",
+      "sha256": "1ca8f25a7272c9ac68938409a23eb5e5cd6667d8c46167e1217ef7f34ff892ac",
+      "vpkResource": "panorama/images/icons/equipment/knife_cord.vsvg_c"
+    },
+    {
+      "asset": "weapons/knife_css.svg",
+      "source": "equipment/knife_css.svg",
+      "sha256": "a5a8ae19f0d669524f63697b3364e3405dc0e233343b62fa3ed8eaed2a64dcd9",
+      "vpkResource": "panorama/images/icons/equipment/knife_css.vsvg_c"
+    },
+    {
+      "asset": "weapons/knife_falchion.svg",
+      "source": "equipment/knife_falchion.svg",
+      "sha256": "ae2f359bed8616c1d84e02c39211888a2ad2ca403e0fd6a9702a11d06e0223cc",
+      "vpkResource": "panorama/images/icons/equipment/knife_falchion.vsvg_c"
+    },
+    {
+      "asset": "weapons/knife_flip.svg",
+      "source": "equipment/knife_flip.svg",
+      "sha256": "60d0c80a50a1c0bc868022a66b0dcf04f1581a15374f44bf7fb9e60b13a276de",
+      "vpkResource": "panorama/images/icons/equipment/knife_flip.vsvg_c"
+    },
+    {
+      "asset": "weapons/knife_gut.svg",
+      "source": "equipment/knife_gut.svg",
+      "sha256": "fd99f93a3f13ce2ea0707ecec0782b64df15800ddcdc48923f021450886e7b17",
+      "vpkResource": "panorama/images/icons/equipment/knife_gut.vsvg_c"
+    },
+    {
+      "asset": "weapons/knife_gypsy_jackknife.svg",
+      "source": "equipment/knife_gypsy_jackknife.svg",
+      "sha256": "79fd9c5895ecd945a98f90c6da25d07bf564be0d1b0c75bbf92c8675c152161f",
+      "vpkResource": "panorama/images/icons/equipment/knife_gypsy_jackknife.vsvg_c"
+    },
+    {
+      "asset": "weapons/knife_karambit.svg",
+      "source": "equipment/knife_karambit.svg",
+      "sha256": "6331908a5dd5b8133619910a8435bd4f466a9332d82971eb8cacc005637d00e2",
+      "vpkResource": "panorama/images/icons/equipment/knife_karambit.vsvg_c"
+    },
+    {
+      "asset": "weapons/knife_kukri.svg",
+      "source": "equipment/knife_kukri.svg",
+      "sha256": "6da3005441cf3b8070c191cf0c65249dae59dd7b7d6ba91043f621467c889bb3",
+      "vpkResource": "panorama/images/icons/equipment/knife_kukri.vsvg_c"
+    },
+    {
+      "asset": "weapons/knife_m9_bayonet.svg",
+      "source": "equipment/knife_m9_bayonet.svg",
+      "sha256": "24f15d95965434cd9335868ede8c0dcae120e7fcea028179e5039daeaac81ac8",
+      "vpkResource": "panorama/images/icons/equipment/knife_m9_bayonet.vsvg_c"
+    },
+    {
+      "asset": "weapons/knife_outdoor.svg",
+      "source": "equipment/knife_outdoor.svg",
+      "sha256": "408f30849b86d7bf5a8ac190bf3588943b660df88d9dc8c4ad8bbb57a66fe395",
+      "vpkResource": "panorama/images/icons/equipment/knife_outdoor.vsvg_c"
+    },
+    {
+      "asset": "weapons/knife_push.svg",
+      "source": "equipment/knife_push.svg",
+      "sha256": "673892df666df0e5d1cbc470e00a19b123e9d05539ee10d063483d2c1cbe1645",
+      "vpkResource": "panorama/images/icons/equipment/knife_push.vsvg_c"
+    },
+    {
+      "asset": "weapons/knife_skeleton.svg",
+      "source": "equipment/knife_skeleton.svg",
+      "sha256": "e9d657fa897d5976d9ceff048687e73a2097d76f96b12556c17d353703e31847",
+      "vpkResource": "panorama/images/icons/equipment/knife_skeleton.vsvg_c"
+    },
+    {
+      "asset": "weapons/knife_stiletto.svg",
+      "source": "equipment/knife_stiletto.svg",
+      "sha256": "10f28d76011b29fa9bae8e539df3c6c8448bf6fc8f6e2f3f820471412e2f95f5",
+      "vpkResource": "panorama/images/icons/equipment/knife_stiletto.vsvg_c"
+    },
+    {
+      "asset": "weapons/knife_survival_bowie.svg",
+      "source": "equipment/knife_survival_bowie.svg",
+      "sha256": "7a6373010cb3e0f7426be334e01ae19beb684399b48ca2c5196be6ae72c38222",
+      "vpkResource": "panorama/images/icons/equipment/knife_survival_bowie.vsvg_c"
+    },
+    {
+      "asset": "weapons/knife_t.svg",
+      "source": "equipment/knife_t.svg",
+      "sha256": "0eeccd8864c3398a05fa09817a86d93bb359d7f63b97155945da9f8c1cf9eae7",
+      "vpkResource": "panorama/images/icons/equipment/knife_t.vsvg_c"
+    },
+    {
+      "asset": "weapons/knife_tactical.svg",
+      "source": "equipment/knife_tactical.svg",
+      "sha256": "2b115d5911c397c20fb3c7130c392ec27498c3b6b00fd59015bcd74ae40f6d02",
+      "vpkResource": "panorama/images/icons/equipment/knife_tactical.vsvg_c"
+    },
+    {
+      "asset": "weapons/knife_twinblade.svg",
+      "source": "equipment/knife_twinblade.svg",
+      "sha256": "ac5ae164dd93119fcb8a5bfad7cea06f5c7a9d61710eefef0991af3e9d86e9c6",
+      "vpkResource": "panorama/images/icons/equipment/knife_twinblade.vsvg_c"
+    },
+    {
+      "asset": "weapons/knife_ursus.svg",
+      "source": "equipment/knife_ursus.svg",
+      "sha256": "9adbc60d84e303ff08c159330db3e31ae8c350292b9c261289e34b14bec7db63",
+      "vpkResource": "panorama/images/icons/equipment/knife_ursus.vsvg_c"
+    },
+    {
+      "asset": "weapons/knife_widowmaker.svg",
+      "source": "equipment/knife_widowmaker.svg",
+      "sha256": "5c6d3a1a62f0cf2321cd6243ccf27e8512935d86154d91cdb6ae5e78ceb8f0c7",
+      "vpkResource": "panorama/images/icons/equipment/knife_widowmaker.vsvg_c"
+    },
+    {
+      "asset": "weapons/m249.svg",
+      "source": "equipment/m249.svg",
+      "sha256": "7c1b49390f87bdf8ce3f4b1fa0f54ef058b42b52ece09c6e4da92b5cd5f49787",
+      "vpkResource": "panorama/images/icons/equipment/m249.vsvg_c"
+    },
+    {
+      "asset": "weapons/m4a1.svg",
+      "source": "equipment/m4a1.svg",
+      "sha256": "4e80e247608b65016e4606c00f49d55492a0f1dc34e71a6b7c7ca88d27cdc650",
+      "vpkResource": "panorama/images/icons/equipment/m4a1.vsvg_c"
+    },
+    {
+      "asset": "weapons/m4a1_silencer.svg",
+      "source": "equipment/m4a1_silencer.svg",
+      "sha256": "3565857c155b80c0d2289454c1f63c231994229b3e4b347ab594e67203f65035",
+      "vpkResource": "panorama/images/icons/equipment/m4a1_silencer.vsvg_c"
+    },
+    {
+      "asset": "weapons/m4a1_silencer_off.svg",
+      "source": "equipment/m4a1_silencer_off.svg",
+      "sha256": "ccc44d5f7c5b33704b24ada16f17420fbe471416454a0ac1e2e471e85f8bc341",
+      "vpkResource": "panorama/images/icons/equipment/m4a1_silencer_off.vsvg_c"
+    },
+    {
+      "asset": "weapons/mac10.svg",
+      "source": "equipment/mac10.svg",
+      "sha256": "2aafac43011b01bf92f05729bacd09dc939ed492b06e3b6f0a4c33b200d37362",
+      "vpkResource": "panorama/images/icons/equipment/mac10.vsvg_c"
+    },
+    {
+      "asset": "weapons/mag7.svg",
+      "source": "equipment/mag7.svg",
+      "sha256": "6c6324b36f5ba9512ea32334222f4a84e4c8f00efe3e7bd0bcd32aeacd5ea272",
+      "vpkResource": "panorama/images/icons/equipment/mag7.vsvg_c"
+    },
+    {
+      "asset": "weapons/molotov.svg",
+      "source": "equipment/molotov.svg",
+      "sha256": "bb4b5a04eefa1f4cbe7312969a09d2dc70dd2c2cc02b9938fa8e48c0ea4a2a4d",
+      "vpkResource": "panorama/images/icons/equipment/molotov.vsvg_c"
+    },
+    {
+      "asset": "weapons/mp5sd.svg",
+      "source": "equipment/mp5sd.svg",
+      "sha256": "293459424fa4f707e2633db6e25897f34a12795bee702fc6caaf5e83902593d2",
+      "vpkResource": "panorama/images/icons/equipment/mp5sd.vsvg_c"
+    },
+    {
+      "asset": "weapons/mp7.svg",
+      "source": "equipment/mp7.svg",
+      "sha256": "21d90992afa8a726542e861a4dfb07a154a36a06c875d3096709944a85768813",
+      "vpkResource": "panorama/images/icons/equipment/mp7.vsvg_c"
+    },
+    {
+      "asset": "weapons/mp9.svg",
+      "source": "equipment/mp9.svg",
+      "sha256": "6e62964b1ebe9e50c2584a771e24eaa4c6f63fc5204648c3d178fb81a938c799",
+      "vpkResource": "panorama/images/icons/equipment/mp9.vsvg_c"
+    },
+    {
+      "asset": "weapons/negev.svg",
+      "source": "equipment/negev.svg",
+      "sha256": "743eccc4dace49146e82a68c1dcd333a9b5be30aa08aba3c86db7fca9a360dc0",
+      "vpkResource": "panorama/images/icons/equipment/negev.vsvg_c"
+    },
+    {
+      "asset": "weapons/nova.svg",
+      "source": "equipment/nova.svg",
+      "sha256": "9a2d5e7db9dcf0211a588d73f6dbbfbff22d79d0a858bb8cc34b6de5302c6467",
+      "vpkResource": "panorama/images/icons/equipment/nova.vsvg_c"
+    },
+    {
+      "asset": "weapons/p250.svg",
+      "source": "equipment/p250.svg",
+      "sha256": "df86b3b3a4f2168610dfcde2796577f9aaa4049ad23f9b7cca60b8d78c4ee0ea",
+      "vpkResource": "panorama/images/icons/equipment/p250.vsvg_c"
+    },
+    {
+      "asset": "weapons/p90.svg",
+      "source": "equipment/p90.svg",
+      "sha256": "13d3a3fa692b16c280f08cceba7bad8bf89225526a70e9be10a00cd0c64c4057",
+      "vpkResource": "panorama/images/icons/equipment/p90.vsvg_c"
+    },
+    {
+      "asset": "weapons/revolver.svg",
+      "source": "equipment/revolver.svg",
+      "sha256": "e0c5ba5ba7b0cdad3b775dd345ec7cb34243346fb84645e2e17ea8a39194a855",
+      "vpkResource": "panorama/images/icons/equipment/revolver.vsvg_c"
+    },
+    {
+      "asset": "weapons/sawedoff.svg",
+      "source": "equipment/sawedoff.svg",
+      "sha256": "45a3f55fa526d6948033d99a50cd965b7ecfa6c3eb810785f3d74ffb5556b061",
+      "vpkResource": "panorama/images/icons/equipment/sawedoff.vsvg_c"
+    },
+    {
+      "asset": "weapons/scar20.svg",
+      "source": "equipment/scar20.svg",
+      "sha256": "177b6a4490be9a2d456f9cc933ae7aa14b7ff6d7fb858473fb7cae019a790b0e",
+      "vpkResource": "panorama/images/icons/equipment/scar20.vsvg_c"
+    },
+    {
+      "asset": "weapons/sg556.svg",
+      "source": "equipment/sg556.svg",
+      "sha256": "6c0105235017802611d302d11bac4bdf9e83e9edeb6b5d91bbf449052128d3f3",
+      "vpkResource": "panorama/images/icons/equipment/sg556.vsvg_c"
+    },
+    {
+      "asset": "weapons/smokegrenade.svg",
+      "source": "equipment/smokegrenade.svg",
+      "sha256": "fdf505befaa9d3dbf04d27204088b93e5941ba62ed8744e9675c907aa69056f9",
+      "vpkResource": "panorama/images/icons/equipment/smokegrenade.vsvg_c"
+    },
+    {
+      "asset": "weapons/ssg08.svg",
+      "source": "equipment/ssg08.svg",
+      "sha256": "82bbb1b093f405a26f87c2e85d07909267814f117ce7a9035ef4ee3e23fd2ced",
+      "vpkResource": "panorama/images/icons/equipment/ssg08.vsvg_c"
+    },
+    {
+      "asset": "weapons/taser.svg",
+      "source": "equipment/taser.svg",
+      "sha256": "a3e119853a03ebbb0267ff7721246c5ae5132dd6b325ec21d74638dc72a7b7ec",
+      "vpkResource": "panorama/images/icons/equipment/taser.vsvg_c"
+    },
+    {
+      "asset": "weapons/tec9.svg",
+      "source": "equipment/tec9.svg",
+      "sha256": "dce734f0a08b42aa6ebb7946d1c3653823c4c70da99d05f2b23afa6ba80b27a6",
+      "vpkResource": "panorama/images/icons/equipment/tec9.vsvg_c"
+    },
+    {
+      "asset": "weapons/ump45.svg",
+      "source": "equipment/ump45.svg",
+      "sha256": "db234c16c85e5f7aa81821cdd41303857783673ca96792072c9ba51205108124",
+      "vpkResource": "panorama/images/icons/equipment/ump45.vsvg_c"
+    },
+    {
+      "asset": "weapons/usp_silencer.svg",
+      "source": "equipment/usp_silencer.svg",
+      "sha256": "6f2693049050b883cbabeac89437fbcb8504520ec779156d4f7877e077ec3d7c",
+      "vpkResource": "panorama/images/icons/equipment/usp_silencer.vsvg_c"
+    },
+    {
+      "asset": "weapons/usp_silencer_off.svg",
+      "source": "equipment/usp_silencer_off.svg",
+      "sha256": "6ea28119e8c9fedfe46d354389810200e2f9803eecc3c4e9c6a21ad290a2567d",
+      "vpkResource": "panorama/images/icons/equipment/usp_silencer_off.vsvg_c"
+    },
+    {
+      "asset": "weapons/xm1014.svg",
+      "source": "equipment/xm1014.svg",
+      "sha256": "ec202a1ccdda27830262f764ac741eba5349211eb72776e4f8e65e78ec0ccea5",
+      "vpkResource": "panorama/images/icons/equipment/xm1014.vsvg_c"
+    },
+    {
+      "asset": "death-notice/flashbang_assist.svg",
+      "source": "targeted-deathnotice/panorama/images/icons/equipment/flashbang_assist.svg",
+      "sha256": "d539c69c5124a692478f1ae52c566663c88a1615dd909a96a73773f55d9342d0",
+      "vpkResource": "panorama/images/icons/equipment/flashbang_assist.vsvg_c"
+    },
+    {
+      "asset": "death-notice/icon_headshot.svg",
+      "source": "targeted-deathnotice/panorama/images/hud/deathnotice/icon_headshot.svg",
+      "vpkResource": "panorama/images/hud/deathnotice/icon_headshot.vsvg_c",
+      "sha256": "0ce669fdfc510b4463b9cc0a2759671be4c6e2d835676495713a30fa839f3557"
+    }
+  ],
+  "targetedExtraction": {
+    "directory": "E:\\cs2-coach\\output\\targeted-deathnotice",
+    "extractedAt": "2026-10-07T05:31:11.962Z",
+    "tool": "C:\\Users\\evanpatchouli\\Downloads\\cs2-valve-icon-extractor\\tools\\vrf\\Source2Viewer-CLI.exe",
+    "vpkFilters": [
+      "panorama/images/hud/deathnotice/",
+      "panorama/images/icons/equipment/flashbang_assist"
+    ],
+    "compiledExtension": "vsvg_c",
+    "hudDeathNoticeCount": 10
+  }
+}

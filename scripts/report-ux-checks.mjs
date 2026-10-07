@@ -40,7 +40,7 @@ export async function checkReportUx(evaluate, send, qaDir) {
   assert.deepEqual(await evaluate('window.__roundScroll'), { visible: true, expanded: 'true' });
   await evaluate('window.__restoreRoundScroll(); delete window.__restoreRoundScroll; delete window.__roundScroll');
   assert.equal(await evaluate(`document.querySelector('[data-timeline-round="24"]').dataset.highlighted`), 'true');
-  const kills = await evaluate(`([...document.querySelectorAll('[data-round-detail="24"] [data-killfeed-event="kill"]')].map(r => ({ attacker: r.querySelector('[data-killfeed-attacker]').textContent, victim: r.querySelector('[data-killfeed-victim]').textContent, weapon: r.querySelector('[data-killfeed-weapon]').dataset.killfeedWeapon, label: r.getAttribute('aria-label'), icons: r.querySelectorAll('svg').length })))`);
+  const kills = await evaluate(`([...document.querySelectorAll('[data-round-detail="24"] [data-killfeed-event="kill"]')].map(r => ({ attacker: r.querySelector('[data-killfeed-attacker]').textContent, victim: r.querySelector('[data-killfeed-victim]').textContent, weapon: r.querySelector('[data-killfeed-weapon]').dataset.killfeedWeapon, label: r.getAttribute('aria-label'), icons: r.querySelectorAll('img').length })))`);
   assert.equal(kills.length, 4);
   assert.ok(kills.every(k => k.attacker === 'twinkle' && k.icons >= 1));
   assert.ok(kills.some(k => k.weapon === 'ak47' && k.victim === 'tarkz' && k.label.includes('122.20 秒')));
@@ -50,6 +50,16 @@ export async function checkReportUx(evaluate, send, qaDir) {
   await settle();
   const posthumous = await evaluate(`([...document.querySelectorAll('[data-round-detail="22"] [data-killfeed-event="death"]')].map(r => ({ attacker: r.querySelector('[data-killfeed-attacker]').textContent, victim: r.querySelector('[data-killfeed-victim]').textContent, weapon: r.querySelector('[data-killfeed-weapon]').dataset.killfeedWeapon, label: r.getAttribute('aria-label') })))`);
   assert.ok(posthumous.some(k => k.attacker === 'tarkz' && k.victim === 'twinkle' && k.weapon === 'hegrenade' && k.label.includes('32.78 秒')));
+  // R24 has no headshot flag; R23 contains a real headshot death for twinkle.
+  await evaluate(`(() => { const b = document.querySelector('[data-round-summary="23"]'); if (b.getAttribute('aria-expanded') === 'false') b.click(); })()`);
+  await settle();
+  const images = await evaluate(`Promise.all([...document.querySelectorAll('[data-round-detail="24"] img, [data-round-detail="22"] img, [data-round-detail="23"] img')].map(async i => { await i.decode(); const r = i.getBoundingClientRect(); return { round: i.closest('[data-round-detail]').dataset.roundDetail, icon: i.dataset.killfeedIcon, src: i.getAttribute('src'), loaded: i.complete && i.naturalWidth > 0, fit: getComputedStyle(i).objectFit, height: r.height, width: r.width, alt: i.alt }; }))`);
+  for (const [icon, file] of [['ak47', 'ak47'], ['inferno', 'inferno'], ['hegrenade', 'hegrenade'], ['headshot', 'icon_headshot'], ['flash', 'flashbang_assist']]) {
+    assert.ok(images.some(i => i.icon === icon && i.src.includes(file + '-') && i.loaded), icon + ' official asset must load');
+  }
+  assert.ok(images.some(i => i.round === '23' && i.icon === 'headshot' && i.loaded), 'R23 official headshot');
+  assert.ok(images.some(i => i.round === '22' && i.icon === 'flash' && i.loaded), 'R22 official flash assist');
+  assert.ok(images.every(i => i.loaded && i.fit === 'contain' && i.height === 22 && i.width <= 96 && i.alt === ''));
   await evaluate(`document.getElementById('analysis-tab').click()`);
   await settle();
   const colors = await evaluate(`([...document.querySelectorAll('[data-comparison-player]')].map(r => ({ current: r.textContent.includes('· 当前'), name: getComputedStyle(r.firstElementChild).color, bar: r.children[1].firstElementChild ? getComputedStyle(r.children[1].firstElementChild).backgroundColor : null })))`);
@@ -95,6 +105,8 @@ export async function checkReportUx(evaluate, send, qaDir) {
     assert.ok(layout.every(r => r.icon >= 22 && r.name === 'ellipsis'));
     await evaluate(`document.getElementById('round-r22').scrollIntoView({ block: 'center' })`);
     await screenshot(`killfeed-r22-${width}`);
+    await evaluate(`document.getElementById('round-r23').scrollIntoView({ block: 'center' })`);
+    await screenshot(`killfeed-headshot-r23-${width}`);
     await evaluate(`document.getElementById('report-tab').click(); window.scrollTo(0, 0)`);
     await settle();
     await screenshot(`report-tabs-${width}`);
