@@ -1,3 +1,4 @@
+import { displayPlayerName } from './player-name.ts';
 import { basename } from 'node:path';
 import { analyzeMatch } from '@cs2-coach/analytics';
 import type { PlayerMetrics } from '@cs2-coach/analytics';
@@ -154,28 +155,28 @@ function buildRoundEvents(
     if (event.tick < round.startTick || event.tick > round.endTick) continue;
     if (event.type === 'kill') {
       if (event.killer === steamId && event.killer !== event.victim && event.teamkill !== true) {
-        const actorName = nickname.get(event.killer);
-        const targetName = nickname.get(event.victim) ?? event.victim;
+        const actorName = displayPlayerName(event.killer, nickname.get(event.killer));
+        const targetName = displayPlayerName(event.victim, nickname.get(event.victim));
         push({ type: 'kill', tick: event.tick, actorId: event.killer, ...(actorName ? { actorName } : {}),
           targetId: event.victim, targetName, ...(event.weapon ? { weapon: event.weapon } : {}),
-          description: `${actorName ?? event.killer} → ${targetName}` });
+          description: `${actorName} → ${targetName}` });
       } else if (event.victim === steamId) {
-        const actorName = event.killer === 'world' ? undefined : nickname.get(event.killer);
-        const targetName = nickname.get(steamId) ?? steamId;
-        push({ type: 'death', tick: event.tick, ...(actorName ? { actorId: event.killer, actorName } : {}),
+        const actorName = event.killer === 'world' ? undefined : displayPlayerName(event.killer, nickname.get(event.killer));
+        const targetName = displayPlayerName(steamId, nickname.get(steamId));
+        push({ type: 'death', tick: event.tick, ...(event.killer === 'world' ? {} : { actorId: event.killer, actorName }),
           targetId: steamId, targetName, ...(event.weapon ? { weapon: event.weapon } : {}),
           description: actorName ? `${actorName} → ${targetName}` : `${targetName} 阵亡` });
       }
     } else if (event.type === 'bomb') {
       const mapped = bombTimeline[event.action];
       if (!mapped) continue;
-      const actorName = event.player === null ? undefined : nickname.get(event.player);
+      const actorName = event.player === null ? undefined : displayPlayerName(event.player, nickname.get(event.player));
       push({ type: mapped.type, tick: event.tick, ...(event.player && actorName ? { actorId: event.player, actorName } : {}),
         description: mapped.description });
     }
   }
   if (clutch && clutch.tick >= round.startTick && clutch.tick <= round.endTick) {
-    const actorName = nickname.get(steamId);
+    const actorName = displayPlayerName(steamId, nickname.get(steamId));
     push({ type: 'clutch-start', tick: clutch.tick, actorId: steamId, ...(actorName ? { actorName } : {}),
       opponents: clutch.opponents, description: `进入 1v${clutch.opponents} 残局` });
   }
@@ -243,7 +244,7 @@ export function buildDesktopReport(match: Match, filePath: string): DesktopMatch
     match: { id: match.id, fileName: basename(filePath), map: match.map, rounds: match.rounds.length,
       score: lastRound ? scores.get(lastRound.number) ?? null : null },
     selectedPlayer: selected.steamId,
-    players: valid.map(p => ({ id: p.steamId, nickname: p.nickname })),
+    players: valid.map(p => ({ id: p.steamId, nickname: displayPlayerName(p.steamId, p.nickname) })),
     analytics: valid.map(p => {
       const notes = coverageNotes(p, clutchIneligible);
       return {

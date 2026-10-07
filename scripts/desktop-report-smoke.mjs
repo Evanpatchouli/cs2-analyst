@@ -185,6 +185,8 @@ await scenario({
     assert.ok((r24Detail.match(/twinkle →/g) ?? []).length >= 4, 'R24 应包含 twinkle 的关键击杀');
     assert.ok(/\+\d+\.\d{2} 秒/.test(r24Detail), '时间应显示为回合开始后的秒数');
     assert.ok(!/tick\s*\d+/.test(r24Detail), '时间线不应显示原始 tick');
+    assert.ok(r24Detail.includes('twinkle → 未知玩家'), '未知长数字昵称应显示为未知玩家');
+    assert.ok(!/\d{15,22}/.test(r24Detail), '正文不应泄漏长数字标识');
     const highlighted = await evaluate(`document.querySelector('[data-timeline-round="24"]')?.getAttribute('data-highlighted')`);
     assert.equal(highlighted, 'true', '联动后应强调对应回合');
 

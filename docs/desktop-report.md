@@ -192,3 +192,7 @@ P5.2 已把该链路做成可安装的 Windows 版本（electron-builder + NSIS�
 - 大规模 DEM 的进度反馈仍是阶段级（selecting/parsing/analyzing），无百分比。
 - Utility 实际致盲时长、战术价值与低影响回合仍未在 Analytics 中证实，报告如实标注而不猜测。
 - Analytics/Findings 语义保持冻结；未来扩展需独立需求与迭代。
+
+## 玩家名称展示（P5.5.1）
+
+统一由桌面 presenter 的 `displayPlayerName` 处理名单与 Timeline 名称：去除首尾空白，缺失、空白、等于 playerId 或 15～22 位纯数字昵称显示“未知玩家”；短数字昵称（如 12345）保留。原始玩家、actor、target ID 继续保留供追溯，正文不回退到 ID。
