@@ -98,7 +98,7 @@ idle → selecting → parsing → analyzing → success
    - 数字格式（仅展示层）：秒数与 ADR 两位小数、百分比一位小数（KAST 保持整数）、整数计数零位；`—` 表示证据不足。底层 evidence 数值不截断。
    - 证据告警：仅当展示的数值受不完整证据影响时显示（参与、伤害归属、回合贡献率 / 补枪 / 残局、道具计数/伤害/助攻）。
    - Findings（视觉重点，左侧宽栏）：最多 3 个问题 + 2 个亮点，显示中文严重度徽章、标题、summary 与可展开的逐条证据。证据行只做展示层中文化（中文指标名与中文单位），数据仍然是契约里的 metric / value / unit；带 `round` 的证据显示 `R4 · 回合开始后 26.63 秒`（由 `roundTimeSeconds` 计算），原始 `tick` 只在 `title` 次级提示中保留，默认不展示。
-   - 回合时间线（报告底部独立 section）：每回合一行摘要（回合号 / 目标玩家阵营 / 胜负 Badge / 回合结束比分 / 查看详情），点击展开该回合关键事件，默认全部收起；Findings 的 `relatedRounds` 提供“查看 R24 / 查看相关回合”联动（展开 + 滚动 + 短暂高亮）。详见下节。
+   - 回合时间线（独立一级 Tab）：每回合一行摘要（回合号 / 目标玩家阵营 / 胜负 Badge / 回合结束比分 / 查看详情），点击展开该回合关键事件，默认全部收起；Findings 的 `relatedRounds` 提供“查看 R24 / 查看相关回合”联动（先切 Timeline Tab + 展开 + 滚动 + 短暂高亮）。详见下节。
    - 道具与残局（右侧）：道具面板标题为“道具”，先按“投掷数量”逐行显示闪光弹 / 烟雾弹 / 高爆手雷 / 燃烧弹 / 燃烧瓶 / 诱饵弹（每行统一风格图标 + 中文名称 + 右对齐计数），分隔线后按“道具效果”逐行显示高爆手雷对敌伤害、燃烧伤害、敌人受闪效果、队友受闪效果、闪光助攻。道具图标来自渲染层本地彩色实心图标集 `renderer/src/utility-icons.tsx`（24px 网格、统一 22px 显示尺寸，颜色登记在 `theme.ts` 的 `palette.utility`），与界面自身的单色线性图标 `renderer/src/icons.tsx` 分开存放，道具列表不混用两套风格；图标 `aria-hidden`，含义由同一行的中文名称承担，不依赖颜色表达数据含义。面板底部保留受闪口径说明。残局面板与道具面板同样逐行对齐：`回合 / 局面 / 结果` 三列（`R24`、`1v3`），结果用 `Badge` 标签展示（成功 / 失败 / 结果未知，成功为绿色、失败为红色、未知为琥珀色，颜色只强化标签文本），不新增任何结果推断。
 
 ## 视觉体系（P5.4）
@@ -114,10 +114,10 @@ idle → selecting → parsing → analyzing → success
 
 ## 回合时间线（P5.5）
 
-报告页底部新增独立“回合时间线” section（`renderer/src/main.tsx` 的 `RoundTimeline`）：
+独立一级“回合时间线” Tab 内提供 section（`renderer/src/main.tsx` 的 `RoundTimeline`）：
 
 - 每回合一行摘要：`R24 · T · 成功 · 13 : 11 · 查看详情`。点击该行展开 / 收起该回合关键事件，默认全部收起，不会一次展开 24 回合。
-- 展开后逐行显示 `+109.81 秒　twinkle → 山姆烤蛋　AK-47`：时间为回合开始后的秒数，武器按展示名映射，昵称来自玩家映射；不显示 SteamID，也不显示原始 tick。
+- 展开后击杀 / 死亡逐行显示 kill-feed：`+122.20 秒　twinkle　[AK-47 图标]　tarkz`：时间为回合开始后的秒数，武器按展示名映射，昵称来自玩家映射；不显示 SteamID，也不显示原始 tick。
 - 颜色只用于成功 / 失败 / 结果未知 Badge 与联动时的短暂高亮，正文保持中性色。
 
 ### DTO
@@ -134,6 +134,7 @@ interface DesktopTimelineEvent {
   actorId?: string; actorName?: string;
   targetId?: string; targetName?: string;
   weapon?: string;
+  headshot?: boolean; assistedFlash?: boolean; // KillEvent 原样投影，缺失不猜测
   opponents?: number;
   description: string;
 }
@@ -164,7 +165,7 @@ interface DesktopPlayerTimeline { playerId: string; rounds: DesktopRoundTimeline
 
 ### Findings → Timeline 联动
 
-带 `relatedRounds` 的 Finding 显示“查看 R24”（单回合）或“查看相关回合”（多回合）。点击后展开对应回合、平滑滚动到第一个相关回合并短暂高亮（约 2.4 秒）。没有 `relatedRounds` 的 Finding 不显示按钮；`relatedRounds` 与 Findings 排序仍由 Findings Engine 决定，UI 不重算。
+带 `relatedRounds` 的 Finding 显示“查看 R24”（单回合）或“查看相关回合”（多回合）。点击后切换到回合时间线 Tab，展开对应回合，在 React 提交可见 panel 后平滑滚动到第一个相关回合并短暂高亮（约 2.4 秒）。没有 `relatedRounds` 的 Finding 不显示按钮；`relatedRounds` 与 Findings 排序仍由 Findings Engine 决定，UI 不重算。
 
 ## 验证
 
@@ -200,19 +201,37 @@ P5.2 已把该链路做成可安装的 Windows 版本（electron-builder + NSIS�
 
 ## 分析视图（P5.6）
 
-共享比赛头、目标玩家 Dropdown 与重新选择 DEM 按钮下方新增 Fluent UI v9 `TabList / Tab`：默认“比赛报告”，新增“分析”。原有核心数据、Findings、道具、残局与 Timeline 保持在比赛报告中。两个 Tab panel 保持挂载，通过 hidden 切换；不触发导入、解析或 Analytics，保留目标玩家、Findings 展开与 Timeline 展开状态、分析指标选择。
+共享比赛头、目标玩家 Dropdown 与重新选择 DEM 按钮下方新增 Fluent UI v9 `TabList / Tab`：默认“比赛报告”，另有“回合时间线”和“分析”。核心数据、Findings、道具、残局在比赛报告中；完整 Timeline 在回合时间线中。三个 Tab panel 保持挂载，通过 hidden 切换；不触发导入、解析或 Analytics，保留目标玩家、Findings 展开与 Timeline 展开状态、分析指标选择。
 
 `DesktopMatchReport.analysis` 是 additive JSON-only presentation DTO，schemaVersion 仍为 1：
 
 - `players: DesktopPlayerComparison[]`：直接投影冻结 PlayerMetrics 的 K/D/A、kdRatio、ADR、HS%、KAST percentage/complete、opening winRate、tradeRate/complete/tradeKills；名称统一使用 displayPlayerName。Opening winRate 保留 0～1 fraction，其余 percentage/rate 保留 Analytics 的 0～100 单位；只有显示时格式化。
-- `perPlayer: DesktopPlayerAnalysis[]`：每人 roundTrend 与 sideSplit。CT/T 只投影 `p.side.CT/T` 的 roundsPlayed、K/D/A、ADR，不遍历事件重算。roundTrend 只计数既有 Timeline 中的 kill/death，复用 side/result；不加入伤害、ADR、KAST、rating 或任何新算法。`complete` 表示正式回合窗口存在；窗口缺失时 UI 显示 — 和证据不足，不把空事件当成已证实的零击杀/未阵亡。
+- `perPlayer: DesktopPlayerAnalysis[]`：每人 roundTrend、sideSplit 与 multiKills。multiKills 直接投影 frozen `PlayerMetrics.multiKills.counts[2/3/4/5]` 为 double/triple/quad/fivePlus，最后一项是单回合 5 次及以上击杀。CT/T 只投影 `p.side.CT/T` 的 roundsPlayed、K/D/A、ADR，不遍历事件重算。roundTrend 只计数既有 Timeline 中的 kill/death，复用 side/result；不加入伤害、ADR、KAST、rating 或任何新算法。`complete` 表示正式回合窗口存在；窗口缺失时 UI 显示 — 和证据不足，不把空事件当成已证实的零击杀/未阵亡。
 
 分析页三块：
 
-1. 全场玩家对比：完整名单的横向条形图，默认 ADR，支持 K/D、KAST、HS%、首杀对决胜率、死亡后队友补枪率、补枪击杀。当前指标降序、null 排最后；null 无柱且显示 —，零值保留 0。当前玩家品牌色并标“· 当前”，其余中性蓝灰。每行精确值和 Fluent Tooltip 支持 hover/键盘聚焦。KAST/Trade 不完整时显示“部分证据”与提示，tradeKills 同样标记不完整。
+1. 全场玩家对比：完整名单的横向条形图，默认 ADR，支持 K/D、KAST、HS%、首杀对决胜率、死亡后队友补枪率、补枪击杀。当前指标降序、null 排最后；null 无柱且显示 —，零值保留 0。当前玩家名称与柱统一使用 `palette.currentPlayer = #62abf5` 并标“· 当前”，其余中性蓝灰。每行精确值和 Fluent Tooltip 支持 hover/键盘聚焦。KAST/Trade 不完整时显示“部分证据”与提示，tradeKills 同样标记不完整。
 2. 回合表现趋势：当前玩家每回合击杀数离散柱图，不连线、不堆叠 death、无双 Y 轴。回合号、胜负与存/亡标签以及 Tooltip 的阵营、结果、击杀数、死亡状态保留全部事实；窄窗口仅图表内部横向滚动。
 3. CT / T 表现对比：两列展示回合数、K/D/A、ADR；ADR null 显示 — 与证据不足说明。不同单位不共享坐标轴。
 
 简单柱图使用 CSS 布局和 Fluent UI v9 Tooltip/Badge/Card/Dropdown，无新增图表依赖。ADR/KD 两位、各百分比一位、tradeKills 整数；底层 DTO 精度不截断。
 
 Golden：demo1 twinkle R7 = CT/成功/3K，R24 = T/成功/4K/未阵亡，R22 = T/失败/1K/阵亡，保留死后击杀事实；CT = 12 回合、10/10/3、68.25 ADR，T = 12 回合、15/10/1、114.50 ADR。集成测试覆盖指标原值/单位、null、incomplete、排序、格式、窗口缺失与 JSON 序列化；桌面 smoke 覆盖七项指标、10 名玩家、Tooltip、golden、Tab 状态保留与换玩家联动。
+
+
+## Report UX Polish（P5.6.2）
+
+仅扩展 presentation DTO 和 Renderer：不改 Analytics / Findings 公有契约、算法、阈值、排名、Timeline 事件筛选、回合时间或 nickname 原样规则。schemaVersion 仍为 1，Windows x64 only，版本 0.1.0。
+
+- 三个一级 Tab：比赛报告 / 回合时间线 / 分析。所有 panel mounted，通过 hidden 切换；目标玩家、Timeline 展开、Findings details 与 Analysis 指标选择保留，不重新解析或重跑 Analytics。Finding 查看回合入口切换 Timeline，展开后由提交后 effect + requestAnimationFrame 滚动，保留约 2.4 秒高亮。
+- 原生 evidence summary 使用 pointer、轻量 hover 背景和 2px focus-visible outline；仍支持原生键盘展开。
+- 玩家对比当前名称（含“· 当前”）与 bar 都读 currentPlayer token；其他玩家保留中性色。
+- 趋势底部用 flex / 48px column gap / wrap 分隔存亡说明与多杀统计。稳定按双杀、三杀、四杀、五杀+ 排序；0 项完全省略，全 0 不渲染整组。demo1 twinkle 原始 counts 投影为 6 / 1 / 1 / 0，展示“双杀 6 三杀 1 四杀 1”。R7 3K、R24 4K 与原有趋势事实一致。
+- CT/T 使用中间独立 1px divider（palette.rowDivider），上下各留 16px；≤650px 改为上下排列并隐藏竖线。
+- Timeline kill/death 使用独立 KillFeedEvent 四列：时间 / attacker / icon cluster / victim。原有 bomb/clutch 事件继续文字展示。新增 headshot、assistedFlash 可选字段只从 KillEvent 投影，true 才展示对应图标；无攻击者以世界伤害 / 无已知攻击者降级，不伪造名字。
+- killfeed-icons.tsx 自绘单色 currentColor 简化 SVG（22px），与彩色 utility-icons.tsx 分离。覆盖当前 weaponLabels 武器和 knife_* variants，允许同类武器共用 silhouette；未知 identifier 使用 generic，Tooltip 和整行 aria-label 保留真实文本。图标 aria-hidden；整行可聚焦且可读，姓名省略 + 全名 Tooltip，时间 tabular-nums，图标不被长昵称挤掉。
+- R24 twinkle 使用 AK-47 击杀 tarkz（+122.20 秒），以及 R22 tarkz 死后 HE 击杀 twinkle（+32.78 秒）通过实际 Renderer / installed 断言；长数字昵称保持原样。
+
+验证增加共享 Electron CDP `scripts/report-ux-checks.mjs`，开发构建与安装版使用同一组断言。无 Browser 插件，沿用仓库现有 Electron E2E。Node synthetic 测试覆盖 flag 缺失/false/true、未知武器、world fallback、武器覆盖、全零/部分零 multi-kill 与 fivePlus 文案；真实 DEM 的 DTO 与独立 Frozen Analytics 原值比较。截图输出在系统临时目录 `cs2-coach-p562-qa`，涵盖 1280×900 / 900×760 / 800×600，另测 650px breakpoint。截图、安装包和临时 profile 不提交。
+
+P5.6.2 验证全 PASS：pnpm typecheck（11/11）、pnpm build（6/6）、desktop test（14/14）、test:report（三场景）、analytics（53/53）、findings（17/17）、dem-parser（28/28）、dev/preview test:smoke、pack:win、pack:win:test、test:installed。两轮独立审查无阻塞；安装版重跑共享 UX 断言，生产 seam 防护、原生绑定 unpacked、损坏 DEM、中途关闭无残留 worker、两版卸载均通过。安装包约107.3MB，ASAR 1.41MB / 10条目。

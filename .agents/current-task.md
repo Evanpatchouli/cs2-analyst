@@ -1,21 +1,12 @@
 # Current Task
 
-Status: complete — P5.6.1 玩家名称展示修复与 installed-app smoke PASS。
+Status: complete — PASS — P5.6.2 Report UX Polish，基线 e0d5f4c7cec6d7dbd59c46d44f9784dc1bdc1b6e。
 
-- P5.6.1：nickname 有值且 trim 后非空时原样保留（含首尾空白、长数字、等于 playerId）；仅缺失/null/空白显示未知玩家。report.players、Timeline actorName/targetName、Analysis Views、Dropdown 统一，原始身份 ID 保留 DTO。长名称仅 CSS 省略 + Fluent Tooltip 全文。
-- 本轮验证：typecheck 11/11、build 6/6、desktop 集成 10/10、test:report 三场景、dev/preview test:smoke、pack:win、pack:win:test、test:installed 全 PASS。安装版新增 Analysis Views / Tab 状态保留与 Timeline / Analysis / Dropdown 长数字昵称检查；生产 seam 防护、真实 DEM golden、损坏 DEM、中途关闭无残留 worker、两版卸载均通过。
-- 未修改 Analytics / Findings / Analysis 逻辑或 UI 布局；版本仍为 0.1.0，Windows x64 only。
+- 本轮只做用户列出的八项 presentation UX：三 Tab、summary hover/focus、currentPlayer 名称与 bar、趋势说明分组、frozen Multi-kill summary、CT/T divider、kill-feed。
+- presentation DTO additive headshot / assistedFlash、每人 multiKills double/triple/quad/fivePlus；无 P3/P4/筛选/时间/昵称/安装架构改动，Windows x64 only，0.1.0。
+- 已通过：typecheck 11/11、build 6/6、desktop 14/14、test:report 三场景、analytics 53/53、findings 17/17、dem-parser 28/28、dev/preview test:smoke，独立审查两轮无阻塞。
+- 真实 demo1 R24 4K、R7 3K、R22 posthumous HE；multi-kill 原值 6/1/1/0，Golden 与 Findings ruleId 顺序不变；nickname 原样。
+- 截图检查 1280×900 / 900×760 / 800×600，另测 650px breakpoint；截图系统临时目录 cs2-coach-p562-qa，不提交。
+- pack:win / pack:win:test（均约107.3MB）与 test:installed 全 PASS：生产 seam 防护、Renderer 无 Node、真实 DEM golden + 共享 UX 断言、损坏 DEM、中途关闭无残留 worker、两版卸载。按用户要求仅创建一个 focused commit，不 amend/squash。
 
-基线 `7f6c130`，先完成并提交 P5.5.1 名称修复 `0225332`（8/8 集成 + 真实桌面 smoke）。版本仍为 0.1.0，Windows x64 only。
-
-- P5.6：共享比赛 Shell 下新增 Fluent UI v9 比赛报告 / 分析 Tab，默认比赛报告；hidden 保持两个 panel 挂载，玩家、Findings 与 Timeline 状态保留，不重解析或重跑 Analytics。
-- report-contract additive `analysis`：完整玩家指标对比、每人 roundTrend、CT/T sideSplit，JSON-only；schemaVersion 仍为 1。对比指标和 CT/T 直接投影 frozen PlayerMetrics；roundTrend 只计数现有 Timeline kill/death 并复用 side/result，complete 标记缺失正式窗口。
-- Renderer：全场七项指标横向条图（默认 ADR、降序、null 最后、完整名单、当前玩家品牌色与文字标识）；离散回合击杀柱图 + 胜负/存亡/Tooltip；CT/T 两列回合数/KDA/ADR。
-- null 显示 — 且无柱；KAST 与 Trade（含 tradeKills）不完整标部分证据；缺回合窗口不猜零击杀/未阵亡。Opening winRate fraction 仅显示时 ×100，Trade 保留百分比单位。
-- demo1：twinkle R7 CT/win/3K、R24 T/win/4K/未阵亡、R22 T/loss/1K/阵亡；CT 12/10/10/3/68.25，T 12/15/10/1/114.50。核心 golden 和 Findings 顺序不变。
-- 已验证：desktop 集成 10/10；dev/preview test:smoke 通过；全仓 typecheck 11/11、build 6/6；test:report 三场景通过（七指标、10 玩家、排序、Tooltip、Tab 往返状态、换玩家）；analytics 53/53、findings 17/17、parser 28/28。截图检查 1280×900 / 900×760 与趋势/CT/T；修复 Griffel 样式冲突并加 computedStyle 品牌色断言。
-- 验证脚本：独立临时 Chromium profile 避免争用已有应用缓存，退出等待有界 30 秒。Browser plugin 未提供，使用仓库现有 Electron CDP E2E。
-- 剩余验证范围：降级 DTO 的 UI 分支以静态审查和集成/helper 测试覆盖，真实 DEM smoke 不触发全部降级路径。P5.6 缺失的重新打包与安装版 smoke 已在 P5.6.1 补齐。
-- 边界：未修改 P3/P4 实现/契约、未新增算法、图表库、rating、heatmap、播放器、登录、历史库、扫描或 AI。
-
-详细说明见 [桌面比赛报告](../docs/desktop-report.md)。验证通过后创建 focused commit 交接。
+详细说明见 [桌面比赛报告](../docs/desktop-report.md)。

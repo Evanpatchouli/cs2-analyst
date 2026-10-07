@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { Badge, Body1, Card, Caption1, Dropdown, Option, Subtitle1, Title2, Tooltip, makeStyles, mergeClasses, tokens } from '@fluentui/react-components';
 import type { DesktopAnalysisViews, DesktopPlayerAnalysis } from '@cs2-coach/report-contract';
 import { comparisonMetrics, comparisonValue, comparisonIncomplete, sortedComparison } from './analysis-metrics';
@@ -16,14 +16,18 @@ const useStyles = makeStyles({
   name: { minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   track: { height: '12px', backgroundColor: palette.pageTop, borderRadius: '2px', overflow: 'hidden' },
   bar: { height: '100%', backgroundColor: palette.textMuted, borderRadius: '2px' },
-  currentBar: { backgroundColor: tokens.colorBrandBackground },
+  currentBar: { backgroundColor: palette.currentPlayer },
+  currentName: { color: palette.currentPlayer },
+  trendFooter: { display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', columnGap: '48px', rowGap: '12px' },
+  multiKills: { display: 'flex', flexWrap: 'wrap', gap: '16px', fontVariantNumeric: 'tabular-nums' },
   number: { textAlign: 'right', fontVariantNumeric: 'tabular-nums' },
   scroll: { overflowX: 'auto' },
   trend: { display: 'flex', gap: '6px', alignItems: 'stretch', minWidth: '680px', paddingTop: '8px' },
   round: { flex: '1 0 22px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', borderRadius: tokens.borderRadiusMedium, ':focus-visible': { outline: `2px solid ${tokens.colorBrandStroke1}` } },
   roundTrack: { height: '144px', width: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', alignItems: 'center', borderBottom: `1px solid ${palette.borderStrong}`, backgroundColor: palette.pageTop },
   roundBar: { width: '68%', backgroundColor: tokens.colorBrandBackground, borderTopLeftRadius: '2px', borderTopRightRadius: '2px' },
-  sides: { display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0, 1fr))', gap: '20px', '@media (max-width: 650px)': { gridTemplateColumns: '1fr' } },
+  sides: { display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 1px minmax(0, 1fr)', gap: '20px', '@media (max-width: 650px)': { gridTemplateColumns: '1fr' } },
+  sideDivider: { backgroundColor: palette.rowDivider, marginTop: '16px', marginBottom: '16px', '@media (max-width: 650px)': { display: 'none' } },
   side: { display: 'flex', flexDirection: 'column', gap: '12px' },
   stat: { display: 'flex', justifyContent: 'space-between', gap: '16px', padding: '8px 0', borderBottom: `1px solid ${palette.rowDivider}` },
 });
@@ -35,6 +39,8 @@ const partialEvidence = '当前 DEM 的相关证据不完整，该数值可能�
 function RoundTrend({ player }: { player: DesktopPlayerAnalysis }) {
   const s = useStyles();
   const maxKills = Math.max(1, ...player.roundTrend.filter(r => r.complete).map(r => r.kills));
+  const multiKills = ([['double', '双杀'], ['triple', '三杀'], ['quad', '四杀'], ['fivePlus', '五杀+']] as const)
+    .filter(([key]) => player.multiKills[key] > 0);
   return <Card className={s.panel} aria-label="回合表现趋势">
     <Title2>回合表现趋势</Title2>
     <Caption1 className={s.muted}>每回合击杀数 · 独立回合，柱高按击杀数缩放 · 阵亡与胜负见标签或提示</Caption1>
@@ -55,7 +61,11 @@ function RoundTrend({ player }: { player: DesktopPlayerAnalysis }) {
         </Tooltip>;
       })}
     </div></div>
-    <Caption1 className={s.muted}>亡：阵亡 · 存：未阵亡 · —：回合窗口证据不足 · 最大柱：{maxKills} 击杀</Caption1>
+    <div className={s.trendFooter}>
+      <Caption1 className={s.muted}>亡：阵亡 · 存：未阵亡 · —：回合窗口证据不足</Caption1>
+      {multiKills.length ? <div className={s.multiKills} aria-label="多杀回合统计">{multiKills.map(([key, label]) =>
+        <Caption1 key={key} data-multi-kill={key}>{label} {player.multiKills[key]}</Caption1>)}</div> : null}
+    </div>
   </Card>;
 }
 
@@ -66,13 +76,13 @@ function SideComparison({ player }: { player: DesktopPlayerAnalysis }) {
     <Caption1 className={s.muted}>当前目标玩家 · ADR 为每回合平均有效伤害</Caption1>
     <div className={s.sides}>{(['CT', 'T'] as const).map(side => {
       const p = player.sideSplit[side];
-      return <div key={side} className={s.side} data-analysis-side={side}>
+      return <Fragment key={side}>{side === 'T' ? <div className={s.sideDivider} data-side-divider aria-hidden="true" /> : null}<div className={s.side} data-analysis-side={side}>
         <Subtitle1>{side}</Subtitle1>
         <div className={s.stat}><Body1>回合</Body1><Body1 className={s.number}>{p.roundsPlayed}</Body1></div>
         <div className={s.stat}><Body1>K / D / A</Body1><Body1 className={s.number}>{p.kills} / {p.deaths} / {p.assists}</Body1></div>
         <div className={s.stat}><Body1>ADR</Body1><Body1 className={s.number}>{p.adr === null ? '—' : p.adr.toFixed(2)}</Body1></div>
         {p.adr === null ? <Caption1 className={s.muted}>ADR 证据不足或该阵营无已确认参与回合。</Caption1> : null}
-      </div>;
+      </div></Fragment>;
     })}</div>
   </Card>;
 }
@@ -102,7 +112,7 @@ export function AnalysisViews({ analysis, playerId }: { analysis: DesktopAnalysi
           const detail = `${name} · ${metric.label} ${formatted}${value === null ? ' · 证据不足或无适用样本' : ''}${incomplete ? ` · 部分证据：${partialEvidence}` : ''}`;
           return <Tooltip key={p.playerId} content={detail} relationship="description">
             <div role="listitem" tabIndex={0} className={s.row} aria-label={detail} data-comparison-player={p.playerId} data-metric-value={value === null ? 'null' : value}>
-              <Body1 className={s.name}>{name}</Body1>
+              <Body1 className={mergeClasses(s.name, p.playerId === playerId && s.currentName)}>{name}</Body1>
               <div className={s.track} aria-hidden="true">{value !== null ? <div className={mergeClasses(s.bar, p.playerId === playerId && s.currentBar)} style={{ width: `${value / max * 100}%` }} /> : null}</div>
               <div className={s.number}><Body1>{formatted}</Body1>{incomplete ? <div><Caption1 className={s.muted}>部分证据</Caption1></div> : null}</div>
             </div>

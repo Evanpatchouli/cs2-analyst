@@ -1,5 +1,18 @@
 # Agent Handoff
 
+## 2026-10-07 — P5.6.2 Report UX Polish PASS
+
+- 基线 e0d5f4c7cec6d7dbd59c46d44f9784dc1bdc1b6e；严格完成指定八项 UX，无 P3/P4 public contract、算法、阈值、ranking、事件筛选、round time、nickname 原样或 installer 架构改动；Windows x64 only、0.1.0。
+- 三一级 Tab：比赛报告（核心/Findings/道具/残局）、回合时间线（完整 Timeline）、分析（对比/趋势/CT-T）。三个 panel hidden 切换且 mounted，保留展开、玩家与指标。Finding 入口先切 Timeline、展开，在提交后 effect + rAF 滚动并高亮约2.4秒，timer/frame 有清理。
+- 原生 summary pointer、轻量 hover 与明确键盘 focus；当前玩家名称含“· 当前”和 bar 共用 palette.currentPlayer #62abf5，其余中性色。
+- Analysis DTO additive multiKills 直接读 frozen counts[2/3/4/5]；UI 稳定排序、0项隐藏、全0省略整组、fivePlus 标“五杀+”。demo1 twinkle 6/1/1/0 与冻结原值一致；趋势存亡说明与统计 flex分组、48px gap、可wrap。CT/T 中间独立1px divider，上下16px，≤650px隐藏并上下排列。
+- Timeline DTO additive headshot / assistedFlash 原样投影缺省/false/true。独立 KillFeedEvent（时间/攻击者/图标/受害者），Bomb/clutch 保持文字。killfeed-icons.tsx 自绘22px currentColor单色SVG，覆盖既有weaponLabels/knife_*，同类武器可共享silhouette；未知weapon generic并保留label；图标aria-hidden、整行完整aria-label；昵称ellipsis + Tooltip、不挤图标；无攻击者明确world降级。无Valve资源/Emoji/新依赖。
+- 实测 R24 twinkle使用AK-47击杀tarkz +122.20秒，4K含燃烧与完整长数字昵称；R7 3K；R22 tarkz死后HE击杀twinkle +32.78秒保留。Golden 25/20/4、ADR91.375、KAST75%、Trade22.2%、R24 1v3与5条Finding ruleId顺序完全不变。
+- 全部验证PASS：typecheck11/11、build6/6、desktop14/14、test:report真实/损坏/非DEM、analytics53/53、findings17/17、parser28/28、dev/preview test:smoke、pack:win、pack:win:test、test:installed。安装版运行共享CDP UX断言（含scroll时panel可见且展开），生产seam防护、无Node、原生绑定unpacked、损坏DEM、中途关闭无残留worker、两版卸载均通过；两轮独立审查无阻塞。
+- 视觉：1280×900 / 900×760 / 800×600，额外650px breakpoint；三Tab、summary focus、current color、趋势统计、divider、R24/R22截图实查。无Browser插件，沿用现有Electron CDP E2E。针对被遮挡窗口rAF暂停，测试启动禁用native occlusion节流，脚本等待放在Node；profile bounded清理重试避免遮蔽原始断言，不改产品行为。
+- 安装包均107.3MB，生产release/0.1.0与测试.tmp/test-output不入Git；ASAR1.41MB/10条目。截图系统临时目录cs2-coach-p562-qa，不提交。文档同步desktop-report/roadmap/current-task/handoff；本轮仅一个用户指定focused commit，不amend/squash。
+- 限制：降级flag/未知weapon/world/全零统计由Node synthetic实际组件渲染覆盖，真实DEM不触发所有降级组合；Windows x64与指定窗口尺寸之外未验证。首次失败遗留的系统临时profile递归清理被审批策略拒绝，保留该目录，不影响仓库。
+
 ## 2026-10-07 — P5.6.1 玩家名称展示修复 PASS
 
 - 统一规则：nickname 有值且 trim 后非空时原样保留；仅缺失/null/空白显示“未知玩家”。长数字、等于 playerId、首尾空白不改写；DTO 身份 ID 保留。统一覆盖 report.players、Timeline actorName/targetName、Analysis Views、Dropdown；过长文本仅 CSS 省略 + Fluent Tooltip 全文。

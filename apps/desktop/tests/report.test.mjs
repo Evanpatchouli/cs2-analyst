@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { analyzeMatch } from '@cs2-coach/analytics';
+import { Demoparser2Provider } from '@cs2-coach/dem-parser';
 import { comparisonMetrics, comparisonValue, comparisonIncomplete, sortedComparison } from '../renderer/src/analysis-metrics.ts';
 import { displayPlayerName } from '../electron/player-name.ts';
 import { analyzeDemoFile, buildDesktopReport } from '../electron/report.ts';
@@ -143,6 +144,10 @@ test('real demo flows through parser -> analytics -> findings into a serializabl
   assert.equal(comparison.openingWinRate, 1);
   assert.equal(comparison.tradeRate, p.trade.rate);
   const analysis = report.analysis.perPlayer.find(p => p.playerId === twinkle.id);
+  assert.deepEqual(analysis.multiKills, { double: 6, triple: 1, quad: 1, fivePlus: 0 });
+  const frozen = analyzeMatch(await new Demoparser2Provider().parse(demo)).players.find(p => p.steamId === twinkle.id);
+  assert.deepEqual(analysis.multiKills, { double: frozen.multiKills.counts[2], triple: frozen.multiKills.counts[3],
+    quad: frozen.multiKills.counts[4], fivePlus: frozen.multiKills.counts[5] });
   assert.equal(analysis.roundTrend.length, 24);
   for (const [round, side, result, kills, died] of [
     [7, 'CT', 'win', 3, false], [24, 'T', 'win', 4, false], [22, 'T', 'loss', 1, true],
@@ -347,6 +352,10 @@ test('analysis projects frozen metrics exactly, preserving null and incomplete e
       tradeComplete: p.trade.complete, tradeKills: p.trade.tradeKills,
     });
     const projectedSides = report.analysis.perPlayer.find(x => x.playerId === p.steamId).sideSplit;
+    assert.deepEqual(report.analysis.perPlayer.find(x => x.playerId === p.steamId).multiKills, {
+      double: p.multiKills.counts[2], triple: p.multiKills.counts[3],
+      quad: p.multiKills.counts[4], fivePlus: p.multiKills.counts[5],
+    });
     for (const side of ['CT', 'T']) {
       const original = p.side[side];
       assert.deepEqual(projectedSides[side], {
@@ -384,4 +393,21 @@ test('round trend distinguishes a missing window from confirmed zero kills', () 
   const report = buildDesktopReport(match, 'synthetic.dem');
   assert.equal(report.analysis.perPlayer[0].roundTrend[1].complete, false);
   assert.equal(report.analysis.perPlayer[0].roundTrend[0].complete, true);
+});
+
+test('kill/death DTO copies optional kill flags without inventing absent evidence', () => {
+  for (const flags of [{}, { headshot: false, assistedFlash: false }, { headshot: true, assistedFlash: true }]) {
+    const match = syntheticMatch();
+    const event = match.rounds[0].events.find(e => e.type === 'kill');
+    delete event.headshot;
+    Object.assign(event, flags);
+    const report = buildDesktopReport(match, 'synthetic.dem');
+    for (const player of report.timeline) {
+      const projected = player.rounds[0].events.find(e => e.type === 'kill' || e.type === 'death');
+      for (const key of ['headshot', 'assistedFlash']) {
+        assert.equal(projected[key], flags[key]);
+        assert.equal(key in projected, key in flags);
+      }
+    }
+  }
 });

@@ -1,3 +1,4 @@
+import { checkReportUx } from './report-ux-checks.mjs';
 import assert from 'node:assert/strict';
 import { spawn, spawnSync } from 'node:child_process';
 import { closeSync, existsSync, mkdirSync, openSync, readFileSync, readSync, rmSync, statSync, writeFileSync } from 'node:fs';
@@ -163,7 +164,7 @@ async function launchSession(exePath, extraEnv, label) {
   const env = { ...process.env, ...extraEnv };
   delete env.ELECTRON_RUN_AS_NODE;
   delete env.ELECTRON_RENDERER_URL;
-  const child = spawn(exePath, ['--remote-debugging-port=' + port], { cwd: join(exePath, '..'), env, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
+  const child = spawn(exePath, ['--remote-debugging-port=' + port, '--disable-features=CalculateNativeWinOcclusion', '--disable-backgrounding-occluded-windows'], { cwd: join(exePath, '..'), env, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
   let logs = '';
   child.stdout.on('data', data => { logs += data; });
   child.stderr.on('data', data => { logs += data; });
@@ -355,8 +356,9 @@ async function testSeamScenario() {
     }
     const findingCount = await session.evaluate("document.querySelectorAll('[data-rule]').length");
     assert.equal(findingCount, 5, 'twinkle 应显示 5 条 Findings');
-    await session.evaluate(`document.querySelector('[data-round-summary="24"]').click()`);
-    await waitFor(async () => session.evaluate(`document.querySelector('[data-round-detail="24"]')?.textContent.includes('twinkle → 8888888888888888888888')`), 10_000, '安装版 Timeline 长数字昵称');
+    await session.evaluate(`[...document.querySelectorAll('button')].find(b => b.textContent.trim() === '查看 R24').click()`);
+    await waitFor(async () => session.evaluate(`!document.getElementById('timeline-panel').hidden`), 10_000, '安装版 Finding 切换 Timeline');
+    await waitFor(async () => session.evaluate(`document.querySelector('[data-round-detail="24"]')?.textContent.includes('8888888888888888888888')`), 10_000, '安装版 Timeline 长数字昵称');
     await session.evaluate(`document.getElementById('analysis-tab').click()`);
     await waitFor(async () => session.evaluate(`!document.getElementById('analysis-panel').hidden`), 10_000, '安装版 Analysis Views');
     const analysis = await session.evaluate(`(() => {
@@ -373,6 +375,7 @@ async function testSeamScenario() {
     assert.ok(analysis.t.includes('15 / 10 / 1') && analysis.t.includes('114.50'));
     await session.evaluate(`document.getElementById('report-tab').click()`);
     assert.equal(await session.evaluate(`document.querySelector('[data-round-summary="24"]').getAttribute('aria-expanded')`), 'true');
+    await checkReportUx(session.evaluate, session.send);
     await session.evaluate(`document.querySelector('[aria-label="目标玩家"]').click()`);
     await waitFor(async () => session.evaluate(`([...document.querySelectorAll('[role="option"]')].some(o => o.textContent === '8888888888888888888888'))`), 10_000, '安装版 Dropdown 长数字昵称');
     console.log(variant.label + '：Analysis Views、Tab 状态保留、Timeline / Analysis / Dropdown 长数字昵称通过');

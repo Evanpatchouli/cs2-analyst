@@ -27,6 +27,7 @@ export const palette = {
   text: '#e8eef6',
   textSecondary: '#c5cfdc',
   textMuted: '#8f9db0',
+  currentPlayer: '#62abf5',
   /** Colours reserved for the utility icons; every one is a visual anchor, not a data encoding. */
   utility: {
     flashbang: '#4DB6FF',

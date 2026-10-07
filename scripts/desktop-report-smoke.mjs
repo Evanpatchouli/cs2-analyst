@@ -1,3 +1,4 @@
+import { checkReportUx } from './report-ux-checks.mjs';
 import assert from 'node:assert/strict';
 import { spawn, spawnSync } from 'node:child_process';
 import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
@@ -48,7 +49,7 @@ async function scenario({ label, demPath, ready, assertReport, assertDom }) {
   delete env.ELECTRON_RUN_AS_NODE;
   delete env.ELECTRON_RENDERER_URL;
   const profile = mkdtempSync(join(tmpdir(), 'cs2-coach-report-profile-'));
-  const child = spawn(electron, ['.', `--remote-debugging-port=${port}`, `--user-data-dir=${profile}`], {
+  const child = spawn(electron, ['.', `--remote-debugging-port=${port}`, `--user-data-dir=${profile}`, '--disable-features=CalculateNativeWinOcclusion', '--disable-backgrounding-occluded-windows'], {
     cwd: desktop, env, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'],
   });
   let logs = '';
@@ -95,7 +96,10 @@ async function scenario({ label, demPath, ready, assertReport, assertDom }) {
         socket.send(JSON.stringify({ id: requestId, method, params }));
       });
     };
-    const evaluate = async expression => (await send('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true })).result.value;
+    const evaluate = async expression => {
+      try { return (await send('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true })).result.value; }
+      catch (error) { throw new Error(`CDP evaluate: ${expression.slice(0, 200)}`, { cause: error }); }
+    };
     await send('Runtime.enable');
     await send('Page.enable');
 
@@ -130,7 +134,15 @@ ${logs}`, { cause: error });
       if (process.platform === 'win32') spawnSync('taskkill', ['/PID', String(child.pid), '/T', '/F'], { windowsHide: true, stdio: 'ignore' });
       else child.kill();
     }
-    rmSync(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 });
+    // Windows helpers may briefly hold profile handles after the parent exits.
+    // Keep cleanup from masking the assertion that caused the scenario to fail.
+    for (let attempt = 0; attempt < 10; attempt++) {
+      try { rmSync(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 }); break; }
+      catch (error) {
+        if (attempt === 9) console.warn(`临时 profile 清理失败：${error.message}`);
+        else await delay(500);
+      }
+    }
   }
 }
 
@@ -150,6 +162,7 @@ await scenario({
     assert.ok(!/tick \d+/.test(text), '证据行不应默认显示原始 tick');
   },
   assertDom: async (evaluate, send) => {
+    assert.equal(await evaluate(`document.getElementById('report-panel').hidden`), false);
     const helps = await evaluate('document.querySelectorAll(\'button[aria-label$="说明"]\').length');
     assert.ok(helps >= 9, `核心指标与道具面板的 Tooltip 入口不足：${helps}`);
 
@@ -184,10 +197,12 @@ await scenario({
     }, 10_000, 'R24 展开');
     assert.ok(r24Detail.includes('开始安放炸弹'), 'R24 应包含炸弹安放事件');
     assert.ok(r24Detail.includes('炸弹安放完成'), 'R24 应包含炸弹安放完成事件');
-    assert.ok((r24Detail.match(/twinkle →/g) ?? []).length >= 4, 'R24 应包含 twinkle 的关键击杀');
+    assert.equal(await evaluate(`document.querySelectorAll('[data-round-detail="24"] [data-killfeed-event="kill"]').length`), 4);
+    assert.ok(!r24Detail.includes('twinkle →'), '击杀正文不再使用箭头');
     assert.ok(/\+\d+\.\d{2} 秒/.test(r24Detail), '时间应显示为回合开始后的秒数');
     assert.ok(!/tick\s*\d+/.test(r24Detail), '时间线不应显示原始 tick');
-    assert.ok(r24Detail.includes('twinkle → 8888888888888888888888'), '长数字昵称应原样显示');
+    assert.ok(r24Detail.includes('8888888888888888888888'), '长数字昵称应原样显示');
+    assert.equal(await evaluate(`document.getElementById('timeline-panel').hidden`), false);
     const highlighted = await evaluate(`document.querySelector('[data-timeline-round="24"]')?.getAttribute('data-highlighted')`);
     assert.equal(highlighted, 'true', '联动后应强调对应回合');
 
@@ -198,10 +213,10 @@ await scenario({
       return text.includes('炸弹拆除成功') ? text : null;
     }, 10_000, 'R7 展开');
     assert.ok(r7Detail.includes('开始拆弹'), 'R7 应包含开始拆弹');
-    assert.equal((r7Detail.match(/twinkle →/g) ?? []).length, 3, 'R7 应为 twinkle 3K');
+    assert.equal(await evaluate(`document.querySelectorAll('[data-round-detail="7"] [data-killfeed-event="kill"]').length`), 3);
 
     // Analysis uses the same parsed report and retains Timeline/Findings state across tabs.
-    assert.equal(await evaluate(`document.getElementById('report-panel').hidden`), false);
+    assert.equal(await evaluate(`document.getElementById('timeline-panel').hidden`), false);
     await evaluate(`document.getElementById('analysis-tab').click()`);
     await waitFor(async () => evaluate(`!document.getElementById('analysis-panel').hidden`), 10_000, '分析 Tab');
     assert.equal(await evaluate(`document.getElementById('report-panel').hidden`), true);
@@ -224,7 +239,8 @@ await scenario({
     assert.deepEqual(analysis.values, [...analysis.values].sort((a, b) => b - a));
     assert.equal(analysis.current.length, 1);
     const barColors = await evaluate(`(() => { const rows = [...document.querySelectorAll('[data-comparison-player]')]; return rows.map(r => ({ current: r.textContent.includes('· 当前'), color: getComputedStyle(r.children[1].firstElementChild).backgroundColor })); })()`);
-    assert.notEqual(barColors.find(r => r.current).color, barColors.find(r => !r.current).color, '当前玩家柱必须使用品牌色');
+    assert.equal(barColors.find(r => r.current).color, 'rgb(98, 171, 245)');
+    assert.notEqual(barColors.find(r => r.current).color, barColors.find(r => !r.current).color);
     assert.ok(analysis.current[0].includes('twinkle') && analysis.current[0].includes('91.38'));
     for (const text of ['de_dust2', '13 : 11', '重新选择 DEM']) assert.ok(analysis.shell.includes(text));
     assert.ok(analysis.player.includes('twinkle'));
@@ -287,6 +303,8 @@ await scenario({
     assert.equal(await evaluate(`document.querySelector('[data-round-summary="24"]').getAttribute('aria-expanded')`), 'true');
     assert.equal(await evaluate(`document.querySelector('[data-round-summary="7"]').getAttribute('aria-expanded')`), 'true');
     assert.ok(await evaluate(`document.body.textContent.includes('R24 1v3 残局获胜')`));
+
+    await checkReportUx(evaluate, send, process.env.CS2_COACH_QA_DIR);
 
     // Player switch updates side / result / events without re-importing the DEM.
     const opened = await evaluate(`(() => {

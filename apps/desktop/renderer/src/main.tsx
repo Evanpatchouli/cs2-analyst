@@ -8,6 +8,7 @@ import {
 import type {
   DesktopMatchReport, DesktopPlayerAnalytics, DesktopRoundTimeline, DesktopTimelineEvent,
 } from '@cs2-coach/report-contract';
+import { KillFeedEvent } from './killfeed-event';
 import { AnalysisViews } from './analysis-views';
 import { useReport } from './store';
 import { QuestionCircleIcon } from './icons';
@@ -59,6 +60,7 @@ const useStyles = makeStyles({
   clutchResult: { display: 'flex', justifyContent: 'flex-end' },
   rowValue: { textAlign: 'right', fontVariantNumeric: 'tabular-nums' },
   finding: { ...cardSurface, padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' },
+  evidenceSummary: { cursor: 'pointer', borderRadius: tokens.borderRadiusMedium, padding: '4px', ':hover': { backgroundColor: palette.cardHover }, ':focus-visible': { outline: `2px solid ${tokens.colorBrandStroke1}`, outlineOffset: '2px' } },
   evidence: { padding: '8px 0', display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: '12px', borderBottom: `1px solid ${palette.rowDivider}`, overflowWrap: 'anywhere' },
   empty: { ...cardSurface, padding: '72px 32px', alignItems: 'center', textAlign: 'center' },
   timelineRound: {
@@ -76,7 +78,7 @@ const useStyles = makeStyles({
   },
   timelineSide: { color: tokens.colorNeutralForeground2 },
   timelineToggle: { color: tokens.colorNeutralForeground3 },
-  timelineDetail: { display: 'flex', flexDirection: 'column', padding: '2px 6px 10px 72px' },
+  timelineDetail: { display: 'flex', flexDirection: 'column', padding: '2px 6px 10px 72px', '@media (max-width: 650px)': { paddingLeft: '6px' } },
   timelineEvent: {
     display: 'grid', gridTemplateColumns: '88px minmax(0, 1fr) auto', alignItems: 'baseline',
     columnGap: '10px', padding: '4px 0', borderTop: `1px solid ${palette.rowDivider}`,
@@ -85,7 +87,6 @@ const useStyles = makeStyles({
   timelineTime: { color: tokens.colorNeutralForeground3, fontVariantNumeric: 'tabular-nums' },
   playerName: { display: 'block', minWidth: 0, maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   playerDropdown: { maxWidth: '250px', '& button': { minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } },
-  timelineWeapon: { color: tokens.colorNeutralForeground3, textAlign: 'right', whiteSpace: 'nowrap' },
 });
 
 /** Display-only number rules: counts 0, ADR/seconds 2, percentages 1, KAST integer. */
@@ -138,18 +139,6 @@ const roundResult = (result: DesktopRoundTimeline['result']): { label: string; c
     : result === 'loss' ? { label: '失败', color: 'danger' } : { label: '结果未知', color: 'warning' };
 const eventTime = (event: DesktopTimelineEvent) =>
   event.roundTimeSeconds === undefined ? '—' : `+${event.roundTimeSeconds.toFixed(2)} 秒`;
-/** Display names for the weapon identifiers the parser reports; unknown ids pass through. */
-const weaponLabels: Record<string, string> = {
-  ak47: 'AK-47', m4a1: 'M4A4', m4a1_silencer: 'M4A1-S', awp: 'AWP', deagle: '沙漠之鹰', glock: 'Glock-18',
-  usp_silencer: 'USP-S', hkp2000: 'P2000', p250: 'P250', fiveseven: 'FN 57', tec9: 'Tec-9', elite: '双持贝瑞塔',
-  mp9: 'MP9', mac10: 'MAC-10', mp7: 'MP7', mp5sd: 'MP5-SD', ump45: 'UMP-45', p90: 'P90', bizon: 'PP-野牛',
-  galilar: 'Galil AR', famas: 'FAMAS', sg556: 'SG 553', aug: 'AUG', ssg08: 'SSG 08', g3sg1: 'G3SG1',
-  scar20: 'SCAR-20', nova: 'Nova', xm1014: 'XM1014', mag7: 'MAG-7', sawedoff: '截短霰弹枪', m249: 'M249',
-  negev: '内格夫', taser: '电击枪', c4: 'C4', hegrenade: '高爆手雷', flashbang: '闪光弹',
-  smokegrenade: '烟雾弹', molotov: '燃烧瓶', incgrenade: '燃烧弹', decoy: '诱饵弹',
-  knife: '匕首', knife_karambit: '爪子刀', knife_butterfly: '蝴蝶刀', inferno: '燃烧伤害', world: '坠落 / 世界伤害',
-};
-const weaponLabel = (weapon: string) => weaponLabels[weapon] ?? weapon;
 const severityText: Record<string, string> = { high: "高", medium: "中", low: "低", positive: "亮点" };
 const evidenceText = (value: number | boolean | string, unit: string): string => {
   if (unit === "flag") return value === true ? "是" : value === false ? "否" : String(value);
@@ -198,7 +187,7 @@ function Findings({ report, playerId, onShowRounds }: {
           {f.relatedRounds.length === 1 ? `查看 R${f.relatedRounds[0]}` : '查看相关回合'}
         </Button>
       </div> : null}
-      <details><summary>查看证据（{f.evidence.length}）</summary>
+      <details><summary className={s.evidenceSummary}>查看证据（{f.evidence.length}）</summary>
         {f.evidence.map((e, i) => {
           const when = [e.round === undefined ? null : `R${e.round}`, e.roundTimeSeconds === undefined ? null : `回合开始后 ${seconds(e.roundTimeSeconds)}`].filter(Boolean).join(' · ');
           return <div key={i} className={s.evidence}>
@@ -279,10 +268,9 @@ function RoundTimeline({ rounds, expanded, highlighted, onToggle }: {
               <span className={s.timelineToggle}>{open ? '收起' : '查看详情'}</span>
             </button>
             {open ? <div className={s.timelineDetail} data-round-detail={r.round}>
-              {r.events.length ? r.events.map(e => <div key={e.id} className={s.timelineEvent}>
+              {r.events.length ? r.events.map(e => e.type === 'kill' || e.type === 'death' ? <KillFeedEvent key={e.id} event={e} round={r.round} /> : <div key={e.id} className={s.timelineEvent}>
                 <span className={s.timelineTime}>{eventTime(e)}</span>
                 <Tooltip content={e.description} relationship="description"><span className={s.playerName} tabIndex={0}>{e.description}</span></Tooltip>
-                <span className={s.timelineWeapon}>{e.weapon ? weaponLabel(e.weapon) : ''}</span>
               </div>) : <Caption1 className={s.muted}>本回合没有可展示的关键事件。</Caption1>}
             </div> : null}
           </div>;
@@ -301,6 +289,7 @@ function Report({ report, playerId }: { report: DesktopMatchReport; playerId: st
   const [activeTab, setActiveTab] = useState('report');
   const [expanded, setExpanded] = useState<number[]>([]);
   const [highlighted, setHighlighted] = useState<number | null>(null);
+  const [scrollRound, setScrollRound] = useState<number | null>(null);
   const highlightTimer = useRef<number | undefined>(undefined);
   const toggleRound = (round: number) =>
     setExpanded(prev => prev.includes(round) ? prev.filter(x => x !== round) : [...prev, round]);
@@ -308,12 +297,23 @@ function Report({ report, playerId }: { report: DesktopMatchReport; playerId: st
   const showRounds = (rounds: number[]) => {
     const known = rounds.filter(round => timeline.some(r => r.round === round));
     if (!known.length) return;
+    setActiveTab('timeline');
+    setScrollRound(known[0]);
     setExpanded(prev => Array.from(new Set([...prev, ...known])));
     setHighlighted(known[0]);
-    requestAnimationFrame(() => document.getElementById(`round-r${known[0]}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
     if (highlightTimer.current !== undefined) window.clearTimeout(highlightTimer.current);
     highlightTimer.current = window.setTimeout(() => setHighlighted(null), 2400);
   };
+  // Effects run after React commits hidden=false and expanded content to the DOM.
+  useEffect(() => {
+    if (activeTab !== 'timeline' || scrollRound === null) return;
+    const frame = requestAnimationFrame(() => {
+      document.getElementById(`round-r${scrollRound}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setScrollRound(null);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [activeTab, scrollRound]);
+  useEffect(() => () => { if (highlightTimer.current !== undefined) window.clearTimeout(highlightTimer.current); }, []);
   return <>
     <div className={s.header}>
       <div className={s.column}><Title1>{report.match.map}</Title1><Body1>{report.match.score ? `${report.match.score.initialCT} : ${report.match.score.initialT}` : '比分不可用'} · 开局 CT 队 / 开局 T 队 · {report.match.rounds} 回合</Body1><Caption1 className={s.muted}>{report.match.fileName}</Caption1></div>
@@ -323,6 +323,7 @@ function Report({ report, playerId }: { report: DesktopMatchReport; playerId: st
     </div>
     <TabList aria-label="报告页面" selectedValue={activeTab} onTabSelect={(_, data) => setActiveTab(String(data.value))}>
       <Tab id="report-tab" value="report" aria-controls="report-panel">比赛报告</Tab>
+      <Tab id="timeline-tab" value="timeline" aria-controls="timeline-panel">回合时间线</Tab>
       <Tab id="analysis-tab" value="analysis" aria-controls="analysis-panel">分析</Tab>
     </TabList>
     <div id="report-panel" role="tabpanel" aria-labelledby="report-tab" hidden={activeTab !== 'report'}>
@@ -368,8 +369,10 @@ function Report({ report, playerId }: { report: DesktopMatchReport; playerId: st
           </Card>
         </div>
       </div>
-      <RoundTimeline rounds={timeline} expanded={expanded} highlighted={highlighted} onToggle={toggleRound} />
       </div>
+    </div>
+    <div id="timeline-panel" role="tabpanel" aria-labelledby="timeline-tab" hidden={activeTab !== 'timeline'}>
+      <RoundTimeline rounds={timeline} expanded={expanded} highlighted={highlighted} onToggle={toggleRound} />
     </div>
     <div id="analysis-panel" role="tabpanel" aria-labelledby="analysis-tab" hidden={activeTab !== 'analysis'}>
       <AnalysisViews analysis={report.analysis} playerId={playerId} />

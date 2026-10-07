@@ -159,12 +159,16 @@ function buildRoundEvents(
         const targetName = displayPlayerName(event.victim, nickname.get(event.victim));
         push({ type: 'kill', tick: event.tick, actorId: event.killer, ...(actorName ? { actorName } : {}),
           targetId: event.victim, targetName, ...(event.weapon ? { weapon: event.weapon } : {}),
+          ...(event.headshot === undefined ? {} : { headshot: event.headshot }),
+          ...(event.assistedFlash === undefined ? {} : { assistedFlash: event.assistedFlash }),
           description: `${actorName} → ${targetName}` });
       } else if (event.victim === steamId) {
         const actorName = event.killer === 'world' ? undefined : displayPlayerName(event.killer, nickname.get(event.killer));
         const targetName = displayPlayerName(steamId, nickname.get(steamId));
         push({ type: 'death', tick: event.tick, ...(event.killer === 'world' ? {} : { actorId: event.killer, actorName }),
           targetId: steamId, targetName, ...(event.weapon ? { weapon: event.weapon } : {}),
+          ...(event.headshot === undefined ? {} : { headshot: event.headshot }),
+          ...(event.assistedFlash === undefined ? {} : { assistedFlash: event.assistedFlash }),
           description: actorName ? `${actorName} → ${targetName}` : `${targetName} 阵亡` });
       }
     } else if (event.type === 'bomb') {
@@ -254,6 +258,8 @@ function buildAnalysisViews(
     })),
     perPlayer: players.map(p => ({
       playerId: p.steamId,
+      multiKills: { double: p.multiKills.counts[2], triple: p.multiKills.counts[3],
+        quad: p.multiKills.counts[4], fivePlus: p.multiKills.counts[5] },
       roundTrend: (byPlayer.get(p.steamId) ?? []).map(r => ({
         round: r.round, side: r.side, result: r.result,
         kills: r.events.filter(e => e.type === 'kill').length,

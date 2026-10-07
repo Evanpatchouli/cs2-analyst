@@ -39,6 +39,9 @@ export interface DesktopTimelineEvent {
   targetId?: string;
   targetName?: string;
   weapon?: string;
+  /** Copied from KillEvent; absent means the DEM did not provide this evidence. */
+  headshot?: boolean;
+  assistedFlash?: boolean;
   opponents?: number;
   description: string;
 }
@@ -126,6 +129,8 @@ export interface DesktopSideAnalysis {
 
 export interface DesktopPlayerAnalysis {
   playerId: string;
+  /** Frozen Analytics counts; fivePlus means five or more kills in one round. */
+  multiKills: { double: number; triple: number; quad: number; fivePlus: number };
   roundTrend: DesktopRoundTrendPoint[];
   sideSplit: { CT: DesktopSideAnalysis; T: DesktopSideAnalysis };
 }
