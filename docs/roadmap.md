@@ -80,9 +80,13 @@ Current: **P5.7 Deep Review**。
 - P5.7.1 Spatial Evidence Foundation：**PASS**，正式领域contract、事件引用、core优先稀疏采样、coverage与共享输入实现，GOTV验证完成；见 [Deep Review](./deep-review-evidence.md) / [Spatial contract](./spatial-evidence.md)。
 - P5.7.2 Engagement Engine：**PASS**；独立deep-review包、敌对direct contacts、共享participant/time-gap连通分组、空间exact join与分离coverage，默认3s与2/3/4/5s sensitivity；见 [Engagement analysis](./engagement-analysis.md)。
 - P5.7.3 Kill / Multi-kill Impact：**PASS**；独立alive-state resolver、same-tick atomic groups、敌对KillImpact与round MultiKill、exact Engagement join、最终round result，三层coverage；21回合142death、29多杀（19×2K/9×3K/1×4K），自动抽样；见 [Kill impact analysis](./kill-impact-analysis.md)。
-- P5.7.4 Teamplay / Decision Evidence（当前任务）：实现与Nuke结构验证完成，产品验收待定；独立TeamplayAnalysis、direct-contact角色/atomic tiers、双向死亡响应、posthumous/same-tick保守门控、exact-event XY/Z/XYZ facts、四层coverage；284contexts、568teammate pairs、142player deaths，结构自动抽样。无评分/coaching或距离支援推断；见 [Teamplay evidence](./teamplay-evidence.md)。
+- P5.7.4 Teamplay / Decision Evidence：**PASS**；独立TeamplayAnalysis、direct-contact角色/atomic tiers、双向死亡响应、posthumous/same-tick保守门控、exact-event XY/Z/XYZ facts、四层coverage；284contexts、568teammate pairs、142player deaths，结构自动抽样。无评分/coaching或距离支援推断；见 [Teamplay evidence](./teamplay-evidence.md)。
+- P5.7.5 Utility Context（当前任务）：实现与Nuke结构验证完成，产品验收待定；逐UtilityEvent effect、exact at-event spatial、deterministic alive/bomb context、严格HE/flash linkage、fire attribution unavailable、六层coverage。404effects、15 HE damage refs、144 flash victim refs；见 [Utility context](./utility-context.md)。
+- P5.7.6 Combat Execution Evidence：下一阶段；在有充分执行证据前，不能负责任地区分交火执行问题与决策/配合问题。
+- P5.7.7 Findings V2：在Combat Execution Evidence后推进，不直接跳入新结论。
+- P5.7.8 Deep Review Desktop UX：在证据与Findings契约稳定后推进。
 - Personal DEM spatial compatibility = **UNVERIFIED**；不阻塞本轮foundation，但正式Deep Review FINAL Acceptance前至少用一份真实个人DEM补验。峰内存UNKNOWN。
-- 未进入P5.7.5 Utility Context、P5.7.6 Findings V2；不新增Findings/coaching conclusion或Renderer，P3 public contracts继续冻结。
+- 本轮不进入P5.7.6–P5.7.8，不新增Findings/coaching conclusion或Renderer，P3 public contracts继续冻结。
 - GitHub repository：`Evanpatchouli/cs2-analyst`（已正式改名）。
 
 - P5 Desktop MVP 已封板；当前仅推进已明确授权的P5.7 Deep Review evidence工作，不追加其他功能或polish。

@@ -1,5 +1,17 @@
 # Agent Handoff
 
+## 2026-10-08 — P5.7.5 Utility Context
+
+- 基线 `caa08865ae23ef4f2563aff8e4ed4cc0faefc86f`；P5.7.0 **PARTIAL PASS**、P5.7.1–P5.7.4 **PASS**；P5.7.5当前任务实现/GOTV结构验证完成，产品验收待定；Final Acceptance仍 **PAUSED**。
+- analyzeUtilityContext(Match, optional Spatial, optional KillImpact)；完整调用提供二者，缺证据独立降级。JSON-only逐Effect，不猜throw/release；UtilityEffectRef四键+kind/action保留eventIndex。全部404效果行保留，post-round不冒充正式context。生产仅deep-review→match-model，无P3/Findings V1/parser/model/desktop/packaging修改。
+- effect origin与at-event exact player XYZ、RoundAliveState资格/人数、same-tick原子歧义、observed bomb stages、可靠时钟秒数；XY/absZ/XYZ保留、nearest仅完整观测子集，缺位置partial。未知/冲突阵营不强选，alive timeline验证拒绝stale输入；key order不影响语义。六层coverage独立。
+- Nuke：404effects=136smoke/74HE/88flash/105fire/1decoy；XYZ/thrower404、空间403complete+1post-round unavailable；0same-tick alive/bomb（synthetic-only）。HE74/15严格同actor/tick：15damage refs全关联、9exact有伤effects，41exact/33partial contexts，17缺weapon damage使回合完整性保守降级。Fire105/114无stable entity damage linkage，effect伤害全null，candidate delta -13..437不是attribution。Flash88/158 entity完整，144unique victim rows/80exact effects，8reused effects/14ambiguous victim rows、0actor mismatch/unmatched。
+- 自动10类结构案例保存于docs/deep-review-utility-nuke.json；完整refs/thrower/XYZ/alive/bomb/敌友距离/outcome/coverage与研究histograms。无hardcoded队伍/姓名/比分/故事；nearest/high-Z按geometry自动选，不定义有效范围。404空间独立oracle、15HE/144flash源行与unique claim、determinism/immutability/no-Spatial invariant通过。人工数据读取复核，不称画面复盘。
+- HE为reported damage子集，不算P3 effective HP；Fire伤害unavailable不是0。Flash raw duration不是actual time；KillEvent官方assister没有effect ID，confirmedFlashAssists=null。无战术价值/意图/LOS/nav/map geometry/quality/评分/AI；不实现可选Engagement proximity。
+- Personal DEM **UNVERIFIED**、demo1缺失golden SKIP；source feed completeness/entity freshness/其他录制模式/peak memory UNKNOWN。Deep Review FINAL前补个人DEM与demo1，GOTV不替代。无当前实现blocker。
+- 最终验证：typecheck12/12、build7/7 PASS（11/6个未变任务缓存），match-model contracts PASS；dem-parser38PASS/1SKIP、analytics48/5、findings16/1、deep-review119/0、desktop16/1，0FAIL。8SKIP均缺demo1。35新synthetic+Nuke独立重跑PASS；修复未知HE candidate、actor side冲突、JSON key顺序和非法ref/NaN-null数值边界，最终独立复审PASS无遗留finding。修复后重跑typecheck/build/deep-review全部119；UTF-8无BOM、whitespace、生产依赖边界通过。
+- 下一任务 **P5.7.6 Combat Execution Evidence**；其后P5.7.7 Findings V2、P5.7.8 Deep Review Desktop UX。本轮不进入后续任务，无installer E2E；focused commit `feat(analysis): add utility context evidence`，不push。
+
 ## 2026-10-08 — P5.7.4 Teamplay / Decision Evidence
 
 - 基线 `7b8700ae45aa3196fc1f2b142dbfeb9d3f5d2abd`；P5.7.0 **PARTIAL PASS**、P5.7.1 / P5.7.2 / P5.7.3 **PASS**；P5.7.4当前任务实现/GOTV结构验证完成，产品验收待定；Final Acceptance仍 **PAUSED**。

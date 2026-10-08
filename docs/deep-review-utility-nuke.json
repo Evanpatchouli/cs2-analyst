@@ -1,0 +1,1760 @@
+{
+  "schemaVersion": 1,
+  "demoSha256": "dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c",
+  "semantics": "Utility Effect Context; observed reported damage and raw blind durations; no intent, LOS, radius or causal inference",
+  "researchScope": "All Match round.events, including post-round rows; candidate delta pairs never attribute fire damage",
+  "research": {
+    "he": {
+      "effectCount": 74,
+      "damageCount": 15,
+      "exactSameThrowerTickDamageRows": 15,
+      "ambiguousSameThrowerTickDamageRows": 0,
+      "unlinkedDamageRows": 0,
+      "sameThrowerRoundEffectMultiplicity": {
+        "1": 74
+      },
+      "allSameThrowerRoundCandidateTickDeltas": {
+        "0": 15
+      },
+      "singleEffectSameThrowerRoundTickDeltas": {
+        "0": 15
+      },
+      "stableDamageEntityLinkAvailable": false
+    },
+    "fire": {
+      "effectCount": 105,
+      "damageCount": 114,
+      "exactSameThrowerTickDamageRows": 0,
+      "ambiguousSameThrowerTickDamageRows": 0,
+      "unlinkedDamageRows": 114,
+      "sameThrowerRoundEffectMultiplicity": {
+        "1": 97,
+        "2": 8
+      },
+      "allSameThrowerRoundCandidateTickDeltas": {
+        "27": 11,
+        "40": 9,
+        "53": 9,
+        "65": 1,
+        "66": 6,
+        "78": 5,
+        "91": 6,
+        "104": 7,
+        "117": 8,
+        "130": 8,
+        "142": 7,
+        "155": 4,
+        "168": 5,
+        "181": 6,
+        "193": 1,
+        "194": 4,
+        "206": 3,
+        "219": 2,
+        "232": 2,
+        "295": 1,
+        "296": 1,
+        "308": 1,
+        "309": 1,
+        "321": 1,
+        "334": 1,
+        "346": 1,
+        "437": 1,
+        "-13": 2
+      },
+      "singleEffectSameThrowerRoundTickDeltas": {
+        "27": 11,
+        "40": 9,
+        "53": 9,
+        "65": 1,
+        "66": 6,
+        "78": 5,
+        "91": 6,
+        "104": 7,
+        "117": 8,
+        "130": 8,
+        "142": 7,
+        "155": 4,
+        "168": 5,
+        "181": 6,
+        "193": 1,
+        "194": 4,
+        "206": 3,
+        "219": 2,
+        "232": 2,
+        "295": 1,
+        "296": 1,
+        "308": 1,
+        "309": 1,
+        "321": 1,
+        "334": 1,
+        "346": 1,
+        "437": 1,
+        "-13": 2
+      },
+      "stableDamageEntityLinkAvailable": false
+    },
+    "flash": {
+      "detonationCount": 88,
+      "detonationEntityIdPresent": 88,
+      "victimEffectCount": 158,
+      "victimEffectEntityIdPresent": 158,
+      "exactUniqueRoundEntityActorVictimRows": 144,
+      "reusedRoundEntityEffectRows": 8,
+      "ambiguousVictimRows": 14,
+      "actorMismatchVictimRows": 0,
+      "unmatchedVictimRows": 0,
+      "exactEntityActorTickDeltas": {
+        "0": 144
+      }
+    }
+  },
+  "diagnostics": {
+    "effectsTotal": 404,
+    "smokeEffects": 136,
+    "heEffects": 74,
+    "flashEffects": 88,
+    "fireEffects": 105,
+    "decoyEffects": 1,
+    "effectsWithPosition": 404,
+    "effectsWithThrower": 404,
+    "effectsWithCompleteSpatial": 403,
+    "heExactDamageLinked": 9,
+    "heUnlinked": 33,
+    "flashExactLinked": 80,
+    "flashAmbiguous": 8,
+    "fireDamageAttributionUnavailable": 105,
+    "sameTickAliveAmbiguities": 0,
+    "bombStateAmbiguities": 0
+  },
+  "coverage": {
+    "actorAttribution": {
+      "status": "complete",
+      "reasons": []
+    },
+    "position": {
+      "status": "complete",
+      "reasons": []
+    },
+    "roundState": {
+      "status": "partial",
+      "reasons": [
+        "event-outside-round",
+        "round-state-unavailable"
+      ]
+    },
+    "bombContext": {
+      "status": "partial",
+      "reasons": [
+        "bomb-state-unavailable"
+      ]
+    },
+    "spatialContext": {
+      "status": "partial",
+      "reasons": [
+        "round-state-unavailable"
+      ]
+    },
+    "directOutcome": {
+      "status": "partial",
+      "reasons": [
+        "damage-link-ambiguous",
+        "effect-outcome-link-unavailable",
+        "entity-id-ambiguous",
+        "flash-link-ambiguous"
+      ]
+    }
+  },
+  "linkageCoverage": {
+    "heEffectStatuses": {
+      "exact": 41,
+      "partial": 33,
+      "unavailable": 0
+    },
+    "heConfirmedDamageRows": 15,
+    "flashConfirmedVictimRows": 144,
+    "heUnknownWeaponRoundDamageRows": 17,
+    "boundaryUnavailableEffects": [
+      {
+        "round": 14,
+        "type": "utility",
+        "tick": 118737,
+        "eventIndex": 220,
+        "utility": "smoke",
+        "action": "detonate"
+      }
+    ]
+  },
+  "verification": {
+    "spatialChecks": 404,
+    "damageChecks": 15,
+    "flashChecks": 144,
+    "deterministic": true,
+    "immutable": true,
+    "noSpatialOutcomeInvariant": true
+  },
+  "selection": "First structural predicate in round/tick/index order; nearest and highest Z cases use observed geometry only, no effective range threshold",
+  "samples": {
+    "heConfirmedDamage": {
+      "effectRef": {
+        "round": 4,
+        "type": "utility",
+        "tick": 30875,
+        "eventIndex": 20,
+        "utility": "hegrenade",
+        "action": "detonate"
+      },
+      "throwerId": "76561199063238565",
+      "throwerSide": "CT",
+      "entityId": 265,
+      "position": {
+        "x": 193.09625244140625,
+        "y": -1148.454345703125,
+        "z": -317.3874206542969
+      },
+      "roundContext": {
+        "teamAlive": 5,
+        "enemyAlive": 5,
+        "beforeAtomicGroup": null,
+        "afterAtomicGroup": null,
+        "bombState": "pre-plant",
+        "bombBeforeSameTick": null,
+        "bombSameTickActions": [],
+        "secondsFromRoundStart": 35.8125,
+        "secondsFromFreezeEnd": 15.8125
+      },
+      "nearestEnemy": {
+        "playerId": "76561198068422762",
+        "sideRelation": "enemy",
+        "horizontalDistance": 108.32254061187524,
+        "verticalDelta": 98.58132934570312,
+        "directDistance": 146.4651880146861
+      },
+      "nearestTeammate": {
+        "playerId": "76561198045898864",
+        "sideRelation": "teammate",
+        "horizontalDistance": 600.6466190397239,
+        "verticalDelta": 98.58132934570312,
+        "directDistance": 608.6827083624252
+      },
+      "enemiesWithPosition": [
+        {
+          "playerId": "76561198068422762",
+          "sideRelation": "enemy",
+          "horizontalDistance": 108.32254061187524,
+          "verticalDelta": 98.58132934570312,
+          "directDistance": 146.4651880146861
+        },
+        {
+          "playerId": "76561197997351207",
+          "sideRelation": "enemy",
+          "horizontalDistance": 224.81140060669068,
+          "verticalDelta": 98.58132934570312,
+          "directDistance": 245.4759547049526
+        },
+        {
+          "playerId": "76561198201620490",
+          "sideRelation": "enemy",
+          "horizontalDistance": 296.0796446441648,
+          "verticalDelta": 98.58132934570312,
+          "directDistance": 312.05998536848796
+        },
+        {
+          "playerId": "76561197989430253",
+          "sideRelation": "enemy",
+          "horizontalDistance": 335.4671393020662,
+          "verticalDelta": 98.58132934570312,
+          "directDistance": 349.6519412888735
+        },
+        {
+          "playerId": "76561197991272318",
+          "sideRelation": "enemy",
+          "horizontalDistance": 972.5184041145985,
+          "verticalDelta": 98.58132934570312,
+          "directDistance": 977.5020843134666
+        }
+      ],
+      "teammatesWithPosition": [
+        {
+          "playerId": "76561198045898864",
+          "sideRelation": "teammate",
+          "horizontalDistance": 600.6466190397239,
+          "verticalDelta": 98.58132934570312,
+          "directDistance": 608.6827083624252
+        },
+        {
+          "playerId": "76561198081484775",
+          "sideRelation": "teammate",
+          "horizontalDistance": 1333.862431188976,
+          "verticalDelta": 189.91867065429688,
+          "directDistance": 1347.315140121442
+        },
+        {
+          "playerId": "76561198995880877",
+          "sideRelation": "teammate",
+          "horizontalDistance": 1540.6223556214811,
+          "verticalDelta": 98.58132934570312,
+          "directDistance": 1543.773144324077
+        },
+        {
+          "playerId": "76561198386265483",
+          "sideRelation": "teammate",
+          "horizontalDistance": 1557.0462060308869,
+          "verticalDelta": 98.58132934570312,
+          "directDistance": 1560.1638267216506
+        }
+      ],
+      "sameTickAliveAmbiguousIds": [],
+      "missingPositionPlayerIds": [],
+      "directOutcome": {
+        "kind": "he",
+        "damageEvents": [
+          {
+            "eventRef": {
+              "round": 4,
+              "type": "damage",
+              "tick": 30875,
+              "eventIndex": 21
+            },
+            "victimId": "76561198068422762",
+            "reportedHealthDamage": 60,
+            "sideRelation": "enemy"
+          },
+          {
+            "eventRef": {
+              "round": 4,
+              "type": "damage",
+              "tick": 30875,
+              "eventIndex": 22
+            },
+            "victimId": "76561197997351207",
+            "reportedHealthDamage": 13,
+            "sideRelation": "enemy"
+          }
+        ],
+        "reportedEnemyDamage": 73,
+        "damagedEnemyIds": [
+          "76561197997351207",
+          "76561198068422762"
+        ],
+        "linkage": "exact"
+      },
+      "coverage": {
+        "actorAttribution": {
+          "status": "complete",
+          "reasons": []
+        },
+        "position": {
+          "status": "complete",
+          "reasons": []
+        },
+        "roundState": {
+          "status": "complete",
+          "reasons": []
+        },
+        "bombContext": {
+          "status": "complete",
+          "reasons": []
+        },
+        "spatialContext": {
+          "status": "complete",
+          "reasons": []
+        },
+        "directOutcome": {
+          "status": "complete",
+          "reasons": []
+        }
+      }
+    },
+    "heZeroConfirmedDamage": {
+      "effectRef": {
+        "round": 2,
+        "type": "utility",
+        "tick": 16123,
+        "eventIndex": 24,
+        "utility": "hegrenade",
+        "action": "detonate"
+      },
+      "throwerId": "76561197991272318",
+      "throwerSide": "T",
+      "entityId": 275,
+      "position": {
+        "x": 231.4202117919922,
+        "y": -1250.032958984375,
+        "z": -413.96875
+      },
+      "roundContext": {
+        "teamAlive": 5,
+        "enemyAlive": 5,
+        "beforeAtomicGroup": null,
+        "afterAtomicGroup": null,
+        "bombState": "pre-plant",
+        "bombBeforeSameTick": null,
+        "bombSameTickActions": [],
+        "secondsFromRoundStart": 113.90625,
+        "secondsFromFreezeEnd": 9.828125
+      },
+      "nearestEnemy": {
+        "playerId": "76561198045898864",
+        "sideRelation": "enemy",
+        "horizontalDistance": 711.5790566620284,
+        "verticalDelta": 207,
+        "directDistance": 741.0760783347565
+      },
+      "nearestTeammate": {
+        "playerId": "76561197997351207",
+        "sideRelation": "teammate",
+        "horizontalDistance": 672.3420960378048,
+        "verticalDelta": 2,
+        "directDistance": 672.3450707073778
+      },
+      "enemiesWithPosition": [
+        {
+          "playerId": "76561198045898864",
+          "sideRelation": "enemy",
+          "horizontalDistance": 711.5790566620284,
+          "verticalDelta": 207,
+          "directDistance": 741.0760783347565
+        },
+        {
+          "playerId": "76561199063238565",
+          "sideRelation": "enemy",
+          "horizontalDistance": 1045.0860019781526,
+          "verticalDelta": 17.21875,
+          "directDistance": 1045.2278396991928
+        },
+        {
+          "playerId": "76561198386265483",
+          "sideRelation": "enemy",
+          "horizontalDistance": 1330.777591137798,
+          "verticalDelta": 2,
+          "directDistance": 1330.7790940176812
+        },
+        {
+          "playerId": "76561198995880877",
+          "sideRelation": "enemy",
+          "horizontalDistance": 1617.743467255134,
+          "verticalDelta": 39,
+          "directDistance": 1618.2134982278026
+        },
+        {
+          "playerId": "76561198081484775",
+          "sideRelation": "enemy",
+          "horizontalDistance": 1907.5634373844964,
+          "verticalDelta": 53.8209228515625,
+          "directDistance": 1908.3225511906392
+        }
+      ],
+      "teammatesWithPosition": [
+        {
+          "playerId": "76561197997351207",
+          "sideRelation": "teammate",
+          "horizontalDistance": 672.3420960378048,
+          "verticalDelta": 2,
+          "directDistance": 672.3450707073778
+        },
+        {
+          "playerId": "76561198068422762",
+          "sideRelation": "teammate",
+          "horizontalDistance": 708.6340622859868,
+          "verticalDelta": 1.5,
+          "directDistance": 708.6356498454899
+        },
+        {
+          "playerId": "76561198201620490",
+          "sideRelation": "teammate",
+          "horizontalDistance": 958.4395754235918,
+          "verticalDelta": 6,
+          "directDistance": 958.4583557662559
+        },
+        {
+          "playerId": "76561197989430253",
+          "sideRelation": "teammate",
+          "horizontalDistance": 1869.0093985161263,
+          "verticalDelta": 6,
+          "directDistance": 1869.0190292615034
+        }
+      ],
+      "sameTickAliveAmbiguousIds": [],
+      "missingPositionPlayerIds": [],
+      "directOutcome": {
+        "kind": "he",
+        "damageEvents": [],
+        "reportedEnemyDamage": 0,
+        "damagedEnemyIds": [],
+        "linkage": "exact"
+      },
+      "coverage": {
+        "actorAttribution": {
+          "status": "complete",
+          "reasons": []
+        },
+        "position": {
+          "status": "complete",
+          "reasons": []
+        },
+        "roundState": {
+          "status": "complete",
+          "reasons": []
+        },
+        "bombContext": {
+          "status": "complete",
+          "reasons": []
+        },
+        "spatialContext": {
+          "status": "complete",
+          "reasons": []
+        },
+        "directOutcome": {
+          "status": "complete",
+          "reasons": []
+        }
+      }
+    },
+    "heMinimumObservedEnemyDistance": {
+      "effectRef": {
+        "round": 7,
+        "type": "utility",
+        "tick": 58504,
+        "eventIndex": 211,
+        "utility": "hegrenade",
+        "action": "detonate"
+      },
+      "throwerId": "76561197997351207",
+      "throwerSide": "T",
+      "entityId": 175,
+      "position": {
+        "x": 1056.056640625,
+        "y": -1279.255615234375,
+        "z": -405.96875
+      },
+      "roundContext": {
+        "teamAlive": 3,
+        "enemyAlive": 4,
+        "beforeAtomicGroup": null,
+        "afterAtomicGroup": null,
+        "bombState": "pre-plant",
+        "bombBeforeSameTick": null,
+        "bombSameTickActions": [],
+        "secondsFromRoundStart": 112.6875,
+        "secondsFromFreezeEnd": 51.65625
+      },
+      "nearestEnemy": {
+        "playerId": "76561198045898864",
+        "sideRelation": "enemy",
+        "horizontalDistance": 80.5299751114582,
+        "verticalDelta": 10,
+        "directDistance": 81.14848668614884
+      },
+      "nearestTeammate": {
+        "playerId": "76561197989430253",
+        "sideRelation": "teammate",
+        "horizontalDistance": 569.3028282498415,
+        "verticalDelta": 2,
+        "directDistance": 569.3063413077958
+      },
+      "enemiesWithPosition": [
+        {
+          "playerId": "76561198045898864",
+          "sideRelation": "enemy",
+          "horizontalDistance": 80.5299751114582,
+          "verticalDelta": 10,
+          "directDistance": 81.14848668614884
+        },
+        {
+          "playerId": "76561199063238565",
+          "sideRelation": "enemy",
+          "horizontalDistance": 687.0867588095624,
+          "verticalDelta": 278,
+          "directDistance": 741.1964747160025
+        },
+        {
+          "playerId": "76561198081484775",
+          "sideRelation": "enemy",
+          "horizontalDistance": 973.1833577638828,
+          "verticalDelta": 54,
+          "directDistance": 974.680382396499
+        },
+        {
+          "playerId": "76561198995880877",
+          "sideRelation": "enemy",
+          "horizontalDistance": 1254.6689260887615,
+          "verticalDelta": 10,
+          "directDistance": 1254.7087766062393
+        }
+      ],
+      "teammatesWithPosition": [
+        {
+          "playerId": "76561197989430253",
+          "sideRelation": "teammate",
+          "horizontalDistance": 569.3028282498415,
+          "verticalDelta": 2,
+          "directDistance": 569.3063413077958
+        },
+        {
+          "playerId": "76561197991272318",
+          "sideRelation": "teammate",
+          "horizontalDistance": 1374.809070483417,
+          "verticalDelta": 10,
+          "directDistance": 1374.8454386888284
+        }
+      ],
+      "sameTickAliveAmbiguousIds": [],
+      "missingPositionPlayerIds": [],
+      "directOutcome": {
+        "kind": "he",
+        "damageEvents": [
+          {
+            "eventRef": {
+              "round": 7,
+              "type": "damage",
+              "tick": 58504,
+              "eventIndex": 212
+            },
+            "victimId": "76561198045898864",
+            "reportedHealthDamage": 43,
+            "sideRelation": "enemy"
+          }
+        ],
+        "reportedEnemyDamage": 43,
+        "damagedEnemyIds": [
+          "76561198045898864"
+        ],
+        "linkage": "exact"
+      },
+      "coverage": {
+        "actorAttribution": {
+          "status": "complete",
+          "reasons": []
+        },
+        "position": {
+          "status": "complete",
+          "reasons": []
+        },
+        "roundState": {
+          "status": "complete",
+          "reasons": []
+        },
+        "bombContext": {
+          "status": "complete",
+          "reasons": []
+        },
+        "spatialContext": {
+          "status": "complete",
+          "reasons": []
+        },
+        "directOutcome": {
+          "status": "complete",
+          "reasons": []
+        }
+      }
+    },
+    "smokePositionedEnemies": {
+      "effectRef": {
+        "round": 1,
+        "type": "utility",
+        "tick": 3863,
+        "eventIndex": 37,
+        "utility": "smoke",
+        "action": "detonate"
+      },
+      "throwerId": "76561197997351207",
+      "throwerSide": "T",
+      "entityId": 365,
+      "position": {
+        "x": 848.2391967773438,
+        "y": -1679.727294921875,
+        "z": -237.96875
+      },
+      "roundContext": {
+        "teamAlive": 5,
+        "enemyAlive": 5,
+        "beforeAtomicGroup": null,
+        "afterAtomicGroup": null,
+        "bombState": "pre-plant",
+        "bombBeforeSameTick": null,
+        "bombSameTickActions": [],
+        "secondsFromRoundStart": 44.484375,
+        "secondsFromFreezeEnd": 17.984375
+      },
+      "nearestEnemy": {
+        "playerId": "76561198386265483",
+        "sideRelation": "enemy",
+        "horizontalDistance": 386.35743865593133,
+        "verticalDelta": 178,
+        "directDistance": 425.3893162795367
+      },
+      "nearestTeammate": {
+        "playerId": "76561198068422762",
+        "sideRelation": "teammate",
+        "horizontalDistance": 528.9826940060357,
+        "verticalDelta": 124.828125,
+        "directDistance": 543.5115006592766
+      },
+      "enemiesWithPosition": [
+        {
+          "playerId": "76561198386265483",
+          "sideRelation": "enemy",
+          "horizontalDistance": 386.35743865593133,
+          "verticalDelta": 178,
+          "directDistance": 425.3893162795367
+        },
+        {
+          "playerId": "76561199063238565",
+          "sideRelation": "enemy",
+          "horizontalDistance": 564.8735281677431,
+          "verticalDelta": 178,
+          "directDistance": 592.2550994501222
+        },
+        {
+          "playerId": "76561198045898864",
+          "sideRelation": "enemy",
+          "horizontalDistance": 1309.9005789784133,
+          "verticalDelta": 110,
+          "directDistance": 1314.5111360532412
+        },
+        {
+          "playerId": "76561198995880877",
+          "sideRelation": "enemy",
+          "horizontalDistance": 1526.314856098219,
+          "verticalDelta": 178,
+          "directDistance": 1536.6590513012727
+        },
+        {
+          "playerId": "76561198081484775",
+          "sideRelation": "enemy",
+          "horizontalDistance": 1700.6631245798621,
+          "verticalDelta": 178,
+          "directDistance": 1709.9529418395525
+        }
+      ],
+      "teammatesWithPosition": [
+        {
+          "playerId": "76561198068422762",
+          "sideRelation": "teammate",
+          "horizontalDistance": 528.9826940060357,
+          "verticalDelta": 124.828125,
+          "directDistance": 543.5115006592766
+        },
+        {
+          "playerId": "76561197989430253",
+          "sideRelation": "teammate",
+          "horizontalDistance": 1221.6066095288732,
+          "verticalDelta": 216,
+          "directDistance": 1240.5558062596897
+        },
+        {
+          "playerId": "76561197991272318",
+          "sideRelation": "teammate",
+          "horizontalDistance": 1438.4983739770425,
+          "verticalDelta": 178,
+          "directDistance": 1449.4694104859873
+        },
+        {
+          "playerId": "76561198201620490",
+          "sideRelation": "teammate",
+          "horizontalDistance": 1578.0632023285107,
+          "verticalDelta": 178,
+          "directDistance": 1588.0703607029868
+        }
+      ],
+      "sameTickAliveAmbiguousIds": [],
+      "missingPositionPlayerIds": [],
+      "directOutcome": {
+        "kind": "smoke",
+        "linkage": "not-applicable"
+      },
+      "coverage": {
+        "actorAttribution": {
+          "status": "complete",
+          "reasons": []
+        },
+        "position": {
+          "status": "complete",
+          "reasons": []
+        },
+        "roundState": {
+          "status": "complete",
+          "reasons": []
+        },
+        "bombContext": {
+          "status": "complete",
+          "reasons": []
+        },
+        "spatialContext": {
+          "status": "complete",
+          "reasons": []
+        },
+        "directOutcome": {
+          "status": "complete",
+          "reasons": []
+        }
+      }
+    },
+    "firePositionedEnemies": {
+      "effectRef": {
+        "round": 1,
+        "type": "utility",
+        "tick": 4219,
+        "eventIndex": 42,
+        "utility": "fire",
+        "action": "start_burn"
+      },
+      "throwerId": "76561197989430253",
+      "throwerSide": "T",
+      "entityId": 87,
+      "position": {
+        "x": 427.1812744140625,
+        "y": -1008.2437744140625,
+        "z": -256
+      },
+      "roundContext": {
+        "teamAlive": 5,
+        "enemyAlive": 5,
+        "beforeAtomicGroup": null,
+        "afterAtomicGroup": null,
+        "bombState": "pre-plant",
+        "bombBeforeSameTick": null,
+        "bombSameTickActions": [],
+        "secondsFromRoundStart": 50.046875,
+        "secondsFromFreezeEnd": 23.546875
+      },
+      "nearestEnemy": {
+        "playerId": "76561199063238565",
+        "sideRelation": "enemy",
+        "horizontalDistance": 464.7082072052216,
+        "verticalDelta": 159.96875,
+        "directDistance": 491.4709745452458
+      },
+      "nearestTeammate": {
+        "playerId": "76561197991272318",
+        "sideRelation": "teammate",
+        "horizontalDistance": 673.8807347263856,
+        "verticalDelta": 159.96875,
+        "directDistance": 692.6075697044726
+      },
+      "enemiesWithPosition": [
+        {
+          "playerId": "76561199063238565",
+          "sideRelation": "enemy",
+          "horizontalDistance": 464.7082072052216,
+          "verticalDelta": 159.96875,
+          "directDistance": 491.4709745452458
+        },
+        {
+          "playerId": "76561198995880877",
+          "sideRelation": "enemy",
+          "horizontalDistance": 917.3704304577141,
+          "verticalDelta": 159.96875,
+          "directDistance": 931.2134597688836
+        },
+        {
+          "playerId": "76561198045898864",
+          "sideRelation": "enemy",
+          "horizontalDistance": 1041.0901176626937,
+          "verticalDelta": 32.53125,
+          "directDistance": 1041.5982504408712
+        },
+        {
+          "playerId": "76561198081484775",
+          "sideRelation": "enemy",
+          "horizontalDistance": 1216.8035615648284,
+          "verticalDelta": 159.96875,
+          "directDistance": 1227.2737707673107
+        },
+        {
+          "playerId": "76561198386265483",
+          "sideRelation": "enemy",
+          "horizontalDistance": 1369.230920923729,
+          "verticalDelta": 151.96875,
+          "directDistance": 1377.638492417443
+        }
+      ],
+      "teammatesWithPosition": [
+        {
+          "playerId": "76561197991272318",
+          "sideRelation": "teammate",
+          "horizontalDistance": 673.8807347263856,
+          "verticalDelta": 159.96875,
+          "directDistance": 692.6075697044726
+        },
+        {
+          "playerId": "76561198201620490",
+          "sideRelation": "teammate",
+          "horizontalDistance": 784.2492173576957,
+          "verticalDelta": 159.96875,
+          "directDistance": 800.3979234747682
+        },
+        {
+          "playerId": "76561198068422762",
+          "sideRelation": "teammate",
+          "horizontalDistance": 892.2508794175933,
+          "verticalDelta": 151.96875,
+          "directDistance": 905.1000678367178
+        },
+        {
+          "playerId": "76561197997351207",
+          "sideRelation": "teammate",
+          "horizontalDistance": 1365.5244655583285,
+          "verticalDelta": 159.96875,
+          "directDistance": 1374.8625629549017
+        }
+      ],
+      "sameTickAliveAmbiguousIds": [],
+      "missingPositionPlayerIds": [],
+      "directOutcome": {
+        "kind": "fire",
+        "reportedEnemyDamage": null,
+        "linkage": "unavailable"
+      },
+      "coverage": {
+        "actorAttribution": {
+          "status": "complete",
+          "reasons": []
+        },
+        "position": {
+          "status": "complete",
+          "reasons": []
+        },
+        "roundState": {
+          "status": "complete",
+          "reasons": []
+        },
+        "bombContext": {
+          "status": "complete",
+          "reasons": []
+        },
+        "spatialContext": {
+          "status": "complete",
+          "reasons": []
+        },
+        "directOutcome": {
+          "status": "unavailable",
+          "reasons": [
+            "effect-outcome-link-unavailable"
+          ]
+        }
+      }
+    },
+    "flashEnemyEffects": {
+      "effectRef": {
+        "round": 1,
+        "type": "utility",
+        "tick": 3809,
+        "eventIndex": 32,
+        "utility": "flashbang",
+        "action": "detonate"
+      },
+      "throwerId": "76561198045898864",
+      "throwerSide": "CT",
+      "entityId": 311,
+      "position": {
+        "x": 1329.662109375,
+        "y": -1756.5692138671875,
+        "z": 2.6935272216796875
+      },
+      "roundContext": {
+        "teamAlive": 5,
+        "enemyAlive": 5,
+        "beforeAtomicGroup": null,
+        "afterAtomicGroup": null,
+        "bombState": "pre-plant",
+        "bombBeforeSameTick": null,
+        "bombSameTickActions": [],
+        "secondsFromRoundStart": 43.640625,
+        "secondsFromFreezeEnd": 17.140625
+      },
+      "nearestEnemy": {
+        "playerId": "76561198068422762",
+        "sideRelation": "enemy",
+        "horizontalDistance": 1015.5645381371125,
+        "verticalDelta": 418.6622772216797,
+        "directDistance": 1098.4759594502236
+      },
+      "nearestTeammate": {
+        "playerId": "76561198386265483",
+        "sideRelation": "teammate",
+        "horizontalDistance": 328.8202228840128,
+        "verticalDelta": 418.6622772216797,
+        "directDistance": 532.3540563815912
+      },
+      "enemiesWithPosition": [
+        {
+          "playerId": "76561198068422762",
+          "sideRelation": "enemy",
+          "horizontalDistance": 1015.5645381371125,
+          "verticalDelta": 418.6622772216797,
+          "directDistance": 1098.4759594502236
+        },
+        {
+          "playerId": "76561197997351207",
+          "sideRelation": "enemy",
+          "horizontalDistance": 1318.4428335707867,
+          "verticalDelta": 418.6622772216797,
+          "directDistance": 1383.3183320416915
+        },
+        {
+          "playerId": "76561197989430253",
+          "sideRelation": "enemy",
+          "horizontalDistance": 1643.155208273176,
+          "verticalDelta": 24.662277221679688,
+          "directDistance": 1643.3402771164049
+        },
+        {
+          "playerId": "76561197991272318",
+          "sideRelation": "enemy",
+          "horizontalDistance": 1830.3843130858368,
+          "verticalDelta": 418.6622772216797,
+          "directDistance": 1877.654077821352
+        },
+        {
+          "playerId": "76561198201620490",
+          "sideRelation": "enemy",
+          "horizontalDistance": 1978.093993955635,
+          "verticalDelta": 418.6622772216797,
+          "directDistance": 2021.913438130277
+        }
+      ],
+      "teammatesWithPosition": [
+        {
+          "playerId": "76561198386265483",
+          "sideRelation": "teammate",
+          "horizontalDistance": 328.8202228840128,
+          "verticalDelta": 418.6622772216797,
+          "directDistance": 532.3540563815912
+        },
+        {
+          "playerId": "76561199063238565",
+          "sideRelation": "teammate",
+          "horizontalDistance": 967.3355043270286,
+          "verticalDelta": 418.6622772216797,
+          "directDistance": 1054.0474753539659
+        },
+        {
+          "playerId": "76561198995880877",
+          "sideRelation": "teammate",
+          "horizontalDistance": 1729.0014557500847,
+          "verticalDelta": 418.6622772216797,
+          "directDistance": 1778.9671543776053
+        },
+        {
+          "playerId": "76561198081484775",
+          "sideRelation": "teammate",
+          "horizontalDistance": 1742.8467191437737,
+          "verticalDelta": 418.6622772216797,
+          "directDistance": 1792.4265086185983
+        }
+      ],
+      "sameTickAliveAmbiguousIds": [],
+      "missingPositionPlayerIds": [],
+      "directOutcome": {
+        "kind": "flash",
+        "enemyEffects": [
+          {
+            "eventRef": {
+              "round": 1,
+              "type": "flash",
+              "tick": 3809,
+              "eventIndex": 34
+            },
+            "victimId": "76561197997351207",
+            "tick": 3809,
+            "rawBlindDurationSeconds": 2.9185469150543213
+          },
+          {
+            "eventRef": {
+              "round": 1,
+              "type": "flash",
+              "tick": 3809,
+              "eventIndex": 35
+            },
+            "victimId": "76561198068422762",
+            "tick": 3809,
+            "rawBlindDurationSeconds": 3.43554425239563
+          }
+        ],
+        "teammateEffects": [
+          {
+            "eventRef": {
+              "round": 1,
+              "type": "flash",
+              "tick": 3809,
+              "eventIndex": 36
+            },
+            "victimId": "76561198386265483",
+            "tick": 3809,
+            "rawBlindDurationSeconds": 0.8983957767486572
+          }
+        ],
+        "selfEffects": [
+          {
+            "eventRef": {
+              "round": 1,
+              "type": "flash",
+              "tick": 3809,
+              "eventIndex": 33
+            },
+            "victimId": "76561198045898864",
+            "tick": 3809,
+            "rawBlindDurationSeconds": 0.5846987366676331
+          }
+        ],
+        "unknownEffects": [],
+        "linkage": "exact",
+        "confirmedFlashAssists": null,
+        "assistLinkage": "unavailable"
+      },
+      "coverage": {
+        "actorAttribution": {
+          "status": "complete",
+          "reasons": []
+        },
+        "position": {
+          "status": "complete",
+          "reasons": []
+        },
+        "roundState": {
+          "status": "complete",
+          "reasons": []
+        },
+        "bombContext": {
+          "status": "complete",
+          "reasons": []
+        },
+        "spatialContext": {
+          "status": "complete",
+          "reasons": []
+        },
+        "directOutcome": {
+          "status": "complete",
+          "reasons": []
+        }
+      }
+    },
+    "flashTeammateEffects": {
+      "effectRef": {
+        "round": 1,
+        "type": "utility",
+        "tick": 3809,
+        "eventIndex": 32,
+        "utility": "flashbang",
+        "action": "detonate"
+      },
+      "throwerId": "76561198045898864",
+      "throwerSide": "CT",
+      "entityId": 311,
+      "position": {
+        "x": 1329.662109375,
+        "y": -1756.5692138671875,
+        "z": 2.6935272216796875
+      },
+      "roundContext": {
+        "teamAlive": 5,
+        "enemyAlive": 5,
+        "beforeAtomicGroup": null,
+        "afterAtomicGroup": null,
+        "bombState": "pre-plant",
+        "bombBeforeSameTick": null,
+        "bombSameTickActions": [],
+        "secondsFromRoundStart": 43.640625,
+        "secondsFromFreezeEnd": 17.140625
+      },
+      "nearestEnemy": {
+        "playerId": "76561198068422762",
+        "sideRelation": "enemy",
+        "horizontalDistance": 1015.5645381371125,
+        "verticalDelta": 418.6622772216797,
+        "directDistance": 1098.4759594502236
+      },
+      "nearestTeammate": {
+        "playerId": "76561198386265483",
+        "sideRelation": "teammate",
+        "horizontalDistance": 328.8202228840128,
+        "verticalDelta": 418.6622772216797,
+        "directDistance": 532.3540563815912
+      },
+      "enemiesWithPosition": [
+        {
+          "playerId": "76561198068422762",
+          "sideRelation": "enemy",
+          "horizontalDistance": 1015.5645381371125,
+          "verticalDelta": 418.6622772216797,
+          "directDistance": 1098.4759594502236
+        },
+        {
+          "playerId": "76561197997351207",
+          "sideRelation": "enemy",
+          "horizontalDistance": 1318.4428335707867,
+          "verticalDelta": 418.6622772216797,
+          "directDistance": 1383.3183320416915
+        },
+        {
+          "playerId": "76561197989430253",
+          "sideRelation": "enemy",
+          "horizontalDistance": 1643.155208273176,
+          "verticalDelta": 24.662277221679688,
+          "directDistance": 1643.3402771164049
+        },
+        {
+          "playerId": "76561197991272318",
+          "sideRelation": "enemy",
+          "horizontalDistance": 1830.3843130858368,
+          "verticalDelta": 418.6622772216797,
+          "directDistance": 1877.654077821352
+        },
+        {
+          "playerId": "76561198201620490",
+          "sideRelation": "enemy",
+          "horizontalDistance": 1978.093993955635,
+          "verticalDelta": 418.6622772216797,
+          "directDistance": 2021.913438130277
+        }
+      ],
+      "teammatesWithPosition": [
+        {
+          "playerId": "76561198386265483",
+          "sideRelation": "teammate",
+          "horizontalDistance": 328.8202228840128,
+          "verticalDelta": 418.6622772216797,
+          "directDistance": 532.3540563815912
+        },
+        {
+          "playerId": "76561199063238565",
+          "sideRelation": "teammate",
+          "horizontalDistance": 967.3355043270286,
+          "verticalDelta": 418.6622772216797,
+          "directDistance": 1054.0474753539659
+        },
+        {
+          "playerId": "76561198995880877",
+          "sideRelation": "teammate",
+          "horizontalDistance": 1729.0014557500847,
+          "verticalDelta": 418.6622772216797,
+          "directDistance": 1778.9671543776053
+        },
+        {
+          "playerId": "76561198081484775",
+          "sideRelation": "teammate",
+          "horizontalDistance": 1742.8467191437737,
+          "verticalDelta": 418.6622772216797,
+          "directDistance": 1792.4265086185983
+        }
+      ],
+      "sameTickAliveAmbiguousIds": [],
+      "missingPositionPlayerIds": [],
+      "directOutcome": {
+        "kind": "flash",
+        "enemyEffects": [
+          {
+            "eventRef": {
+              "round": 1,
+              "type": "flash",
+              "tick": 3809,
+              "eventIndex": 34
+            },
+            "victimId": "76561197997351207",
+            "tick": 3809,
+            "rawBlindDurationSeconds": 2.9185469150543213
+          },
+          {
+            "eventRef": {
+              "round": 1,
+              "type": "flash",
+              "tick": 3809,
+              "eventIndex": 35
+            },
+            "victimId": "76561198068422762",
+            "tick": 3809,
+            "rawBlindDurationSeconds": 3.43554425239563
+          }
+        ],
+        "teammateEffects": [
+          {
+            "eventRef": {
+              "round": 1,
+              "type": "flash",
+              "tick": 3809,
+              "eventIndex": 36
+            },
+            "victimId": "76561198386265483",
+            "tick": 3809,
+            "rawBlindDurationSeconds": 0.8983957767486572
+          }
+        ],
+        "selfEffects": [
+          {
+            "eventRef": {
+              "round": 1,
+              "type": "flash",
+              "tick": 3809,
+              "eventIndex": 33
+            },
+            "victimId": "76561198045898864",
+            "tick": 3809,
+            "rawBlindDurationSeconds": 0.5846987366676331
+          }
+        ],
+        "unknownEffects": [],
+        "linkage": "exact",
+        "confirmedFlashAssists": null,
+        "assistLinkage": "unavailable"
+      },
+      "coverage": {
+        "actorAttribution": {
+          "status": "complete",
+          "reasons": []
+        },
+        "position": {
+          "status": "complete",
+          "reasons": []
+        },
+        "roundState": {
+          "status": "complete",
+          "reasons": []
+        },
+        "bombContext": {
+          "status": "complete",
+          "reasons": []
+        },
+        "spatialContext": {
+          "status": "complete",
+          "reasons": []
+        },
+        "directOutcome": {
+          "status": "complete",
+          "reasons": []
+        }
+      }
+    },
+    "plantedBombUtility": {
+      "effectRef": {
+        "round": 8,
+        "type": "utility",
+        "tick": 70218,
+        "eventIndex": 228,
+        "utility": "fire",
+        "action": "start_burn"
+      },
+      "throwerId": "76561198081484775",
+      "throwerSide": "CT",
+      "entityId": 355,
+      "position": {
+        "x": 925.2727661132812,
+        "y": -1420.043212890625,
+        "z": -413.96875
+      },
+      "roundContext": {
+        "teamAlive": 1,
+        "enemyAlive": 2,
+        "beforeAtomicGroup": null,
+        "afterAtomicGroup": null,
+        "bombState": "planted",
+        "bombBeforeSameTick": null,
+        "bombSameTickActions": [],
+        "secondsFromRoundStart": 139.71875,
+        "secondsFromFreezeEnd": 119.71875
+      },
+      "nearestEnemy": {
+        "playerId": "76561197997351207",
+        "sideRelation": "enemy",
+        "horizontalDistance": 403.7531949650801,
+        "verticalDelta": 2,
+        "directDistance": 403.75814845586706
+      },
+      "nearestTeammate": null,
+      "enemiesWithPosition": [
+        {
+          "playerId": "76561197997351207",
+          "sideRelation": "enemy",
+          "horizontalDistance": 403.7531949650801,
+          "verticalDelta": 2,
+          "directDistance": 403.75814845586706
+        },
+        {
+          "playerId": "76561198201620490",
+          "sideRelation": "enemy",
+          "horizontalDistance": 710.5107127743548,
+          "verticalDelta": 2,
+          "directDistance": 710.5135276454079
+        }
+      ],
+      "teammatesWithPosition": [],
+      "sameTickAliveAmbiguousIds": [],
+      "missingPositionPlayerIds": [],
+      "directOutcome": {
+        "kind": "fire",
+        "reportedEnemyDamage": null,
+        "linkage": "unavailable"
+      },
+      "coverage": {
+        "actorAttribution": {
+          "status": "complete",
+          "reasons": []
+        },
+        "position": {
+          "status": "complete",
+          "reasons": []
+        },
+        "roundState": {
+          "status": "complete",
+          "reasons": []
+        },
+        "bombContext": {
+          "status": "complete",
+          "reasons": []
+        },
+        "spatialContext": {
+          "status": "complete",
+          "reasons": []
+        },
+        "directOutcome": {
+          "status": "unavailable",
+          "reasons": [
+            "effect-outcome-link-unavailable"
+          ]
+        }
+      }
+    },
+    "maximumObservedEnemyVerticalDelta": {
+      "effectRef": {
+        "round": 14,
+        "type": "utility",
+        "tick": 114961,
+        "eventIndex": 39,
+        "utility": "flashbang",
+        "action": "detonate"
+      },
+      "throwerId": "76561198045898864",
+      "throwerSide": "T",
+      "entityId": 95,
+      "position": {
+        "x": 1185.3963623046875,
+        "y": -1334.4046630859375,
+        "z": 373.5917053222656
+      },
+      "roundContext": {
+        "teamAlive": 5,
+        "enemyAlive": 5,
+        "beforeAtomicGroup": null,
+        "afterAtomicGroup": null,
+        "bombState": "pre-plant",
+        "bombBeforeSameTick": null,
+        "bombSameTickActions": [],
+        "secondsFromRoundStart": 45.703125,
+        "secondsFromFreezeEnd": 25.703125
+      },
+      "nearestEnemy": {
+        "playerId": "76561197989430253",
+        "sideRelation": "enemy",
+        "horizontalDistance": 687.947417153037,
+        "verticalDelta": 789.5604553222656,
+        "directDistance": 1047.22364439323
+      },
+      "nearestTeammate": {
+        "playerId": "76561198386265483",
+        "sideRelation": "teammate",
+        "horizontalDistance": 1150.3789885579713,
+        "verticalDelta": 789.5604553222656,
+        "directDistance": 1395.2696979166303
+      },
+      "enemiesWithPosition": [
+        {
+          "playerId": "76561197989430253",
+          "sideRelation": "enemy",
+          "horizontalDistance": 687.947417153037,
+          "verticalDelta": 789.5604553222656,
+          "directDistance": 1047.22364439323
+        },
+        {
+          "playerId": "76561198068422762",
+          "sideRelation": "enemy",
+          "horizontalDistance": 938.0383814678568,
+          "verticalDelta": 501.5604553222656,
+          "directDistance": 1063.7099677308258
+        },
+        {
+          "playerId": "76561197997351207",
+          "sideRelation": "enemy",
+          "horizontalDistance": 175.22636096574024,
+          "verticalDelta": 1072.6791687011719,
+          "directDistance": 1086.8969024441706
+        },
+        {
+          "playerId": "76561198201620490",
+          "sideRelation": "enemy",
+          "horizontalDistance": 472.9285435562504,
+          "verticalDelta": 1013.5604553222656,
+          "directDistance": 1118.4660048044889
+        },
+        {
+          "playerId": "76561197991272318",
+          "sideRelation": "enemy",
+          "horizontalDistance": 1402.0128794261634,
+          "verticalDelta": 789.5604553222656,
+          "directDistance": 1609.0512194102294
+        }
+      ],
+      "teammatesWithPosition": [
+        {
+          "playerId": "76561198386265483",
+          "sideRelation": "teammate",
+          "horizontalDistance": 1150.3789885579713,
+          "verticalDelta": 789.5604553222656,
+          "directDistance": 1395.2696979166303
+        },
+        {
+          "playerId": "76561199063238565",
+          "sideRelation": "teammate",
+          "horizontalDistance": 1192.46890879627,
+          "verticalDelta": 789.5604553222656,
+          "directDistance": 1430.1705531349994
+        },
+        {
+          "playerId": "76561198081484775",
+          "sideRelation": "teammate",
+          "horizontalDistance": 1308.4486425052094,
+          "verticalDelta": 789.5604553222656,
+          "directDistance": 1528.2158102448843
+        },
+        {
+          "playerId": "76561198995880877",
+          "sideRelation": "teammate",
+          "horizontalDistance": 1659.447867031397,
+          "verticalDelta": 545.5604553222656,
+          "directDistance": 1746.8266753763783
+        }
+      ],
+      "sameTickAliveAmbiguousIds": [],
+      "missingPositionPlayerIds": [],
+      "directOutcome": {
+        "kind": "flash",
+        "enemyEffects": [],
+        "teammateEffects": [
+          {
+            "eventRef": {
+              "round": 14,
+              "type": "flash",
+              "tick": 114961,
+              "eventIndex": 40
+            },
+            "victimId": "76561199063238565",
+            "tick": 114961,
+            "rawBlindDurationSeconds": 2.004422903060913
+          },
+          {
+            "eventRef": {
+              "round": 14,
+              "type": "flash",
+              "tick": 114961,
+              "eventIndex": 41
+            },
+            "victimId": "76561198081484775",
+            "tick": 114961,
+            "rawBlindDurationSeconds": 2.684434652328491
+          },
+          {
+            "eventRef": {
+              "round": 14,
+              "type": "flash",
+              "tick": 114961,
+              "eventIndex": 42
+            },
+            "victimId": "76561198386265483",
+            "tick": 114961,
+            "rawBlindDurationSeconds": 2.0370070934295654
+          }
+        ],
+        "selfEffects": [],
+        "unknownEffects": [],
+        "linkage": "exact",
+        "confirmedFlashAssists": null,
+        "assistLinkage": "unavailable"
+      },
+      "coverage": {
+        "actorAttribution": {
+          "status": "complete",
+          "reasons": []
+        },
+        "position": {
+          "status": "complete",
+          "reasons": []
+        },
+        "roundState": {
+          "status": "complete",
+          "reasons": []
+        },
+        "bombContext": {
+          "status": "complete",
+          "reasons": []
+        },
+        "spatialContext": {
+          "status": "complete",
+          "reasons": []
+        },
+        "directOutcome": {
+          "status": "complete",
+          "reasons": []
+        }
+      }
+    },
+    "incompleteOrAmbiguous": {
+      "effectRef": {
+        "round": 7,
+        "type": "utility",
+        "tick": 55794,
+        "eventIndex": 37,
+        "utility": "flashbang",
+        "action": "detonate"
+      },
+      "throwerId": "76561197997351207",
+      "throwerSide": "T",
+      "entityId": 348,
+      "position": {
+        "x": 856.659423828125,
+        "y": -2084.032958984375,
+        "z": -393.81597900390625
+      },
+      "roundContext": {
+        "teamAlive": 5,
+        "enemyAlive": 5,
+        "beforeAtomicGroup": null,
+        "afterAtomicGroup": null,
+        "bombState": "pre-plant",
+        "bombBeforeSameTick": null,
+        "bombSameTickActions": [],
+        "secondsFromRoundStart": 70.34375,
+        "secondsFromFreezeEnd": 9.3125
+      },
+      "nearestEnemy": {
+        "playerId": "76561198386265483",
+        "sideRelation": "enemy",
+        "horizontalDistance": 716.381969422537,
+        "verticalDelta": 105.84722900390625,
+        "directDistance": 724.1593484872774
+      },
+      "nearestTeammate": {
+        "playerId": "76561198068422762",
+        "sideRelation": "teammate",
+        "horizontalDistance": 1265.2455611787943,
+        "verticalDelta": 264.62847900390625,
+        "directDistance": 1292.6231322325013
+      },
+      "enemiesWithPosition": [
+        {
+          "playerId": "76561198386265483",
+          "sideRelation": "enemy",
+          "horizontalDistance": 716.381969422537,
+          "verticalDelta": 105.84722900390625,
+          "directDistance": 724.1593484872774
+        },
+        {
+          "playerId": "76561198081484775",
+          "sideRelation": "enemy",
+          "horizontalDistance": 1045.883811671049,
+          "verticalDelta": 22.15277099609375,
+          "directDistance": 1046.1183932893866
+        },
+        {
+          "playerId": "76561198045898864",
+          "sideRelation": "enemy",
+          "horizontalDistance": 1500.8994077055784,
+          "verticalDelta": 304.05035400390625,
+          "directDistance": 1531.386838725231
+        },
+        {
+          "playerId": "76561199063238565",
+          "sideRelation": "enemy",
+          "horizontalDistance": 1632.8423523616837,
+          "verticalDelta": 265.84722900390625,
+          "directDistance": 1654.3424363882746
+        },
+        {
+          "playerId": "76561198995880877",
+          "sideRelation": "enemy",
+          "horizontalDistance": 2405.4411803989533,
+          "verticalDelta": 18.84722900390625,
+          "directDistance": 2405.515015625601
+        }
+      ],
+      "teammatesWithPosition": [
+        {
+          "playerId": "76561198068422762",
+          "sideRelation": "teammate",
+          "horizontalDistance": 1265.2455611787943,
+          "verticalDelta": 264.62847900390625,
+          "directDistance": 1292.6231322325013
+        },
+        {
+          "playerId": "76561198201620490",
+          "sideRelation": "teammate",
+          "horizontalDistance": 1682.6197389425902,
+          "verticalDelta": 22.15277099609375,
+          "directDistance": 1682.765560362475
+        },
+        {
+          "playerId": "76561197989430253",
+          "sideRelation": "teammate",
+          "horizontalDistance": 1756.2852189474138,
+          "verticalDelta": 22.15277099609375,
+          "directDistance": 1756.4249245430249
+        },
+        {
+          "playerId": "76561197991272318",
+          "sideRelation": "teammate",
+          "horizontalDistance": 1776.2018583027327,
+          "verticalDelta": 22.15277099609375,
+          "directDistance": 1776.3399974950985
+        }
+      ],
+      "sameTickAliveAmbiguousIds": [],
+      "missingPositionPlayerIds": [],
+      "directOutcome": {
+        "kind": "flash",
+        "enemyEffects": [],
+        "teammateEffects": [],
+        "selfEffects": [],
+        "unknownEffects": [],
+        "linkage": "unavailable",
+        "confirmedFlashAssists": null,
+        "assistLinkage": "unavailable"
+      },
+      "coverage": {
+        "actorAttribution": {
+          "status": "complete",
+          "reasons": []
+        },
+        "position": {
+          "status": "complete",
+          "reasons": []
+        },
+        "roundState": {
+          "status": "complete",
+          "reasons": []
+        },
+        "bombContext": {
+          "status": "complete",
+          "reasons": []
+        },
+        "spatialContext": {
+          "status": "complete",
+          "reasons": []
+        },
+        "directOutcome": {
+          "status": "unavailable",
+          "reasons": [
+            "entity-id-ambiguous",
+            "flash-link-ambiguous"
+          ]
+        }
+      }
+    }
+  },
+  "personalDemCompatibility": "UNVERIFIED",
+  "unknowns": [
+    "source feed completeness",
+    "entity freshness",
+    "map geometry and LOS",
+    "recording modes",
+    "peak memory",
+    "effect-level flash assists"
+  ]
+}

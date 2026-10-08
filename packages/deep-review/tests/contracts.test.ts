@@ -35,3 +35,15 @@ teamplay.teamplayScore;
 // @ts-expect-error No distance-based support inference.
 teamplay.playerEngagementContexts[0].spatialContext.nearestConfirmedAliveTeammate?.closeEnough;
 void [firstRole];
+import { analyzeUtilityContext } from "../src/index.js";
+import type { UtilityContextAnalysis, UtilityEffectRef } from "../src/index.js";
+const utility: UtilityContextAnalysis = analyzeUtilityContext(match, spatial, impact);
+const effectRef: UtilityEffectRef = utility.effects[0].effectRef;
+const effectIndex: number = effectRef.eventIndex;
+// @ts-expect-error Context does not claim a release trajectory.
+utility.effects[0].releaseRef;
+// @ts-expect-error No utility quality score.
+utility.effects[0].utilityScore;
+// @ts-expect-error Distance does not prove effective range.
+utility.effects[0].nearestEnemy?.inRange;
+void [effectIndex];

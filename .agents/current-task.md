@@ -2,7 +2,18 @@
 
 Status: v0.1 Final Acceptance **PAUSED — Deep Review product gap discovered**。
 
-Current: **P5.7 Deep Review / P5.7.4 Teamplay / Decision Evidence**；实现与Nuke结构验证完成，产品验收待定。
+Current: **P5.7 Deep Review / P5.7.5 Utility Context**；实现与Nuke结构验证完成，产品验收待定。
+
+## 2026-10-08 — P5.7.5
+
+- 基线 `caa08865ae23ef4f2563aff8e4ed4cc0faefc86f`；正式状态 P5.7.0 **PARTIAL PASS**、P5.7.1 / P5.7.2 / P5.7.3 / P5.7.4 **PASS**；P5.7.5 当前任务；Final Acceptance 继续 **PAUSED**。
+- 新analyzeUtilityContext与JSON-only UtilityEffectRef/Context/Analysis；生产仅deep-review，依赖match-model。effect而非throw，不猜release/FIFO/nearest；eventIndex保留，same-tick非subtick顺序。P3/Findings V1/parser/model/Renderer/Electron/packaging未改。
+- effect XYZ→exact utility at-event XY/absZ/XYZ敌友facts；KillImpact RoundAliveState语义核验驱动alive、same-tick排除/null人数+atomic前后。actor side conflict抑制人数/关系，entity is_alive不决定资格。observed bomb lifecycle与same-tick ambiguity独立；只输出可靠时钟秒数，无范围/LOS/战术/意图/评分/AI。
+- Nuke404effects=136smoke/74HE/88flash/105fire/1decoy，position/thrower404，spatial403complete+1post-round unavailable。HE15damage全部严格same-actor/tick关联，9exact有伤effects；41exact/33partial contexts，17缺weapon伤害行导致保守回合级完整性降级。Fire114damage无stable entity linkage，全部105effects damage unavailable；candidate deltas -13..437不配对。Flash88/158 entity完整，80exact effects/144victim refs，8reuse effects/14ambiguous victim rows，0mismatch/unmatched。same-tick alive/bomb实样本均0，synthetic覆盖。
+- docs/utility-context.md与docs/deep-review-utility-nuke.json含研究histograms、10类自动结构抽样、完整refs/XYZ/人数/bomb/敌友距离/outcome/coverage。404空间oracle、15HE、144flash源行/唯一消费、determinism/immutability/no-Spatial invariant通过；数据人工复核不冒充画面回放。
+- Personal DEM compatibility **UNVERIFIED**；feed completeness/entity freshness/其他录制模式/peak memory UNKNOWN，effect-level flash assist unavailable；Final Acceptance前补个人DEM+demo1。无当前实现blocker。本轮不做可选Engagement proximity。
+- 后续顺序：**P5.7.6 Combat Execution Evidence → P5.7.7 Findings V2 → P5.7.8 Deep Review Desktop UX**；不直接进入Findings V2。
+- typecheck12/12、build7/7 PASS（未变任务Turbo缓存复用）；model contracts PASS，dem-parser38/1SKIP、analytics48/5、findings16/1、deep-review119/0、desktop16/1，0FAIL。8SKIP全因缺demo1；35新synthetic+Nuke独立复核。独立review修复未知HE候选/side conflict/key顺序/非法effect identity/NaN-null混同，最终复审PASS无遗留finding；UTF-8无BOM/whitespace/生产边界通过。focused commit `feat(analysis): add utility context evidence`，不push，无installer E2E。
 
 ## 2026-10-08 — P5.7.4
 
