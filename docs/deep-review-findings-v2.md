@@ -1,3 +1,58 @@
+# P5.7.7.1 Findings V2 Calibration / Semantic Repair — PASS
+
+2026-10-09, baseline `bae40582e1156fe5187248719a42d536aec543d1`. **P5.7.7 — PASS** after this repair. P5.7.8 remains **NOT STARTED / HOLD**. P5.7.0 remains PARTIAL PASS; P5.7.1–P5.7.6 PASS; Final Acceptance PAUSED. The original P5.7.7 implementation was technically valid; product calibration exposed overbroad/misaligned rules. The original implementation record below is historical, not the current rule contract.
+
+## Current semantics
+
+- Execution eligibility uses exact refs: firstReceivedRef exists and firstDealtRef is absent or strictly later. Equal tick is excluded. Required engagementLinkage/contactEvidence/returnContact layers remain complete without reasons; only kill/damage/none-observed outcomes enter the shared denominator. Received-only remains upstream role=unknown, and now contributes legitimate none-observed occurrences. No P5.7.6 contract or analyzer changed.
+- Negative review remains 5 eligible / 3 none / rate >=0.5; positive highlight remains 5 eligible / 4 successes / rate >=0.6. Contradiction guard is retained. No delay is reaction time; no aim, miss or skill conclusion follows.
+- No-follow now requires complete engagementParticipation and non-null sideParticipantCount in addition to alive/timing/outcome gates. Source validation independently verifies exact death Engagement, actual player membership and side participant count against direct contacts. This excludes unrelated alive teammates. Membership covers the **whole Engagement**, including possible contacts after death; it is not a temporal opportunity proxy. Therefore the rule is **context**, explicitly not P3 Trade, LOS or a formal trade opportunity. No distance threshold is used.
+- Lone-contact death is **context**, retaining its existing 5/3/0.5 noise gate and complete death/teamResponse participation/alive/timing evidence. Occurrence still requires onlyConfirmedSideParticipant=true and teamResponse=none-observed. This proves direct-contact membership and observed follow-up only; it does not prove spatial isolation, wrong positioning, forward aggression or support feasibility.
+- Teamflash is **context**. The exact effect linkage and 3 effects / 5 teammate rows noise gate remain. Duration probes below do not establish a robust negative severity gate; no new raw-duration threshold is adopted. Raw per-effect maximum/sum and per-player totals are descriptive parser facts, not continuous blind duration or a flash quality score.
+- Impact swing, sole-survivor and unconverted multi-kill rules are unchanged. Having at least one Finding for every professional player is not a failure; synthetic empty contracts remain valid.
+
+## Occurrence refs, ranking and dedup
+
+`evidenceRefs` and `relatedRounds` contain **triggering occurrences only**: execution negative none, positive kill/damage, lone qualifying deaths, no-follow qualifying none, flash actual teammate-hit effects. Denominator information remains in eligibleOccurrences and facts. Denominator-only rounds cannot appear. Every related round must have emitted occurrence evidence; all seven maps verify this, including unchanged impact rules. Synthetic mixed-denominator cases verify it for each pattern rule.
+
+The old teamplay same-killer/window overlap merge is removed. Lone and teammate-death occurrences are distinct identities and remain separate; same round or overlapping window cannot merge them. Caps remain reviews 3 / highlights 2 / contexts 1. Context deterministic priority is unconverted impact → lone-contact → teamflash → same-Engagement no-follow; occurrence/eligible/earliest-round/ruleId tie-breaks remain. No score is introduced.
+
+## Calibration observations
+
+[Calibration JSON](./deep-review-findings-calibration.json) contains seven-map identities, raw quantiles/bins, per-effect max/total distributions, per-player raw teammate totals/unique victims, duration sensitivity and exact verification. [Updated core report](./deep-review-findings-cross-map.json) and [Nuke samples](./deep-review-findings-nuke.json) use current production rules. These are development observations, never match-count goldens or professional skill truth.
+
+Execution column: two-sided + received-only = eligible. Outcomes: kill / damage / none. Follow columns: eligible / none / triggered players. Flash: exact effects / teammate-hit effects / teammate rows.
+
+| Fixture | Execution denominator | Return outcomes | Negative / positive players | Old alive follow | Same Engagement follow | Flash |
+| --- | --- | --- | --- | --- | --- | --- |
+| nuke.dem | 38 + 63 = 101 | 18 / 20 / 63 | 7 / 1 | 235/200/10 | 52/20/1 | 80/32/42 |
+| inferno.dem | 42 + 70 = 112 | 19 / 23 / 70 | 9 / 0 | 323/286/10 | 55/23/4 | 164/0/0 |
+| dust2.dem | 29 + 80 = 109 | 10 / 19 / 80 | 9 / 0 | 285/239/10 | 79/37/5 | 229/123/188 |
+| mirage.dem | 32 + 78 = 110 | 15 / 17 / 78 | 10 / 0 | 283/238/10 | 56/18/1 | 84/0/0 |
+| ancient.dem | 48 + 72 = 120 | 26 / 22 / 72 | 9 / 1 | 261/212/10 | 76/35/6 | 131/76/118 |
+| anubis.dem | 32 + 69 = 101 | 14 / 18 / 69 | 7 / 2 | 226/180/10 | 57/18/1 | 101/0/0 |
+| overpass.dem | 32 + 60 = 92 | 18 / 14 / 60 | 10 / 0 | 239/193/10 | 65/26/3 | 125/0/0 |
+
+Core no-follow rates fall from 85.1/88.5/83.9/84.1% to 38.5/41.8/46.8/32.1%; candidate trigger counts fall from 10 each to 1/4/5/1. This demonstrates narrower membership, not supportability. Extended same-Engagement triggers are 6/1/3. The time/opportunity limitation is why context is retained even with better discrimination.
+
+Dust2 raw teammate duration median=0.965s, p90=3.178s, max=4.605s; 97/188 rows are below 1s. Nuke median=0.953s, p90=3.353s; Ancient median=1.478s, p90=3.905s. Repeated exact effects can mix short and longer raw observations. The report probes 0.1/0.5/1/2/3s descriptively; none becomes a product severity policy. Teamflash candidate triggers remain core 3/0/10/0 and extended 8/0/0, now context rather than negative review. Zero teammate rows only describe eligible exact linked evidence, not a claim of absolute feed completeness.
+
+Execution negative triggers 35/40 core players after repairing the missing received-only set. This high rate remains an overbreadth sanity observation, not proof of poor play or proof that the rule is correct. Eligibility now matches literal first-received/no-return wording; no causal/tactical diagnosis or fabricated beautiful rate is claimed. Lone candidate triggers remain 21/40 but are context. All seven maps have zero input issues/contradictions and exact occurrence refs; cap competition is deterministic.
+
+Ancient/Anubis/Overpass ran as one-time extended calibration observations only. Filename/SHA-256/header map/size/tickRate/round/player counts are recorded in calibration JSON; no fixed identity/count CI gate was added. Train is **REMOVED / NOT REQUIRED** and was never run.
+
+## Regression and acceptance
+
+33 Findings synthetic tests PASS, including received-only 5-eligible and mixed 3-none/2-success negative, later damage/kill, same-tick/unavailable exclusions, occurrence-only refs/rounds, forged participation/count/Engagement suppression, context priority, contradiction and no-Finding contracts. Independent reviewer reproduced the missing source gate, then verified the fix and independently reran 33/33 PASS; no actionable blocker remains.
+
+`pnpm typecheck` 12/12, `pnpm build` 7/7; match-model contracts PASS; parser 39, analytics 53, Findings V1 17, deep-review 210, desktop 17 PASS, zero FAIL/SKIP. demo1 historical goldens actually run. Final standalone extended calibration is 8/8 PASS. No installer or Renderer E2E required. Production changes are confined to deep-review Findings; parser/model/P3/P4/Desktop contracts remain frozen. No push.
+
+Personal matchmaking / Perfect World DEM compatibility remains **UNVERIFIED**. A confirmed personal DEM is still required before Final Acceptance; demo1 filename is not proof of provenance. Native feed absolute completeness, entity freshness, other recording modes and peak memory remain UNKNOWN. P5.7.8 has not begun.
+
+---
+
+# Original P5.7.7 implementation record (historical, superseded by calibration above)
+
 # P5.7.7 Findings V2
 
 2026-10-09. Baseline `065f0f316f9b2366864b0b5a66be796bbad659fa`; fixture migration commit `c8b0100` precedes this work. Status: **implementation complete / product acceptance pending**. P5.7.0 **PARTIAL PASS**, P5.7.1–P5.7.6 **PASS**; P5.7.8 is next, Final Acceptance **PAUSED**.

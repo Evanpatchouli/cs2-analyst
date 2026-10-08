@@ -1,0 +1,2606 @@
+{
+  "schemaVersion": 1,
+  "baseline": "bae40582e1156fe5187248719a42d536aec543d1",
+  "purpose": "Denominator/semantic calibration; observations are not count goldens or skill truth",
+  "train": "REMOVED / NOT REQUIRED",
+  "personalDemCompatibility": "UNVERIFIED",
+  "maps": [
+    {
+      "fixture": {
+        "filename": "nuke.dem",
+        "sha256": "dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c",
+        "headerMap": "de_nuke",
+        "fileSize": 471606780,
+        "tickRate": 64,
+        "roundCount": 21,
+        "playerCount": 10,
+        "role": "mandatory core"
+      },
+      "execution": {
+        "receivedFirstWithTwoSidedContact": 38,
+        "receivedOnly": 63,
+        "eligibleAfterFix": 101,
+        "returnKill": 18,
+        "returnDamage": 20,
+        "noneObserved": 63,
+        "negativeTriggerPlayers": 7,
+        "positiveTriggerPlayers": 1,
+        "players": [
+          {
+            "playerId": "76561197989430253",
+            "eligible": 10,
+            "none": 8
+          },
+          {
+            "playerId": "76561197991272318",
+            "eligible": 9,
+            "none": 6
+          },
+          {
+            "playerId": "76561197997351207",
+            "eligible": 13,
+            "none": 6
+          },
+          {
+            "playerId": "76561198045898864",
+            "eligible": 10,
+            "none": 7
+          },
+          {
+            "playerId": "76561198068422762",
+            "eligible": 10,
+            "none": 6
+          },
+          {
+            "playerId": "76561198081484775",
+            "eligible": 3,
+            "none": 2
+          },
+          {
+            "playerId": "76561198201620490",
+            "eligible": 15,
+            "none": 12
+          },
+          {
+            "playerId": "76561198386265483",
+            "eligible": 10,
+            "none": 7
+          },
+          {
+            "playerId": "76561198995880877",
+            "eligible": 6,
+            "none": 3
+          },
+          {
+            "playerId": "76561199063238565",
+            "eligible": 15,
+            "none": 6
+          }
+        ]
+      },
+      "noFollow": {
+        "oldAlivePlayer": {
+          "eligible": 235,
+          "none": 200,
+          "rate": 0.851063829787234,
+          "playersTriggered": 10
+        },
+        "sameEngagementParticipant": {
+          "eligible": 52,
+          "none": 20,
+          "rate": 0.38461538461538464,
+          "playersTriggered": 1
+        },
+        "finalKind": "context",
+        "semanticLimit": "Membership is over the whole Engagement, not proof of direct contact before death, LOS, supportability or P3 Trade opportunity"
+      },
+      "loneContact": {
+        "eligible": 103,
+        "none": 51,
+        "rate": 0.49514563106796117,
+        "playersTriggered": 6,
+        "occurrences": 51,
+        "finalKind": "context"
+      },
+      "teamflash": {
+        "observedFlashEffects": 88,
+        "linkageCounts": {
+          "exact": 80,
+          "ambiguous": 0,
+          "unavailable": 8
+        },
+        "requiredCoverageExcluded": 8,
+        "exactEffects": 80,
+        "teammateHitEffects": 32,
+        "teammateEffectRows": 42,
+        "rawDuration": {
+          "count": 42,
+          "min": 0.12840087711811066,
+          "p25": 0.7120572924613953,
+          "median": 0.9531864523887634,
+          "p75": 2.5405921936035156,
+          "p90": 3.353153705596924,
+          "p95": 3.691910982131958,
+          "max": 4.837810516357422,
+          "bins": {
+            "[0,0.1)": 0,
+            "[0.1,0.5)": 3,
+            "[0.5,1)": 19,
+            "[1,2)": 5,
+            "[2,3)": 7,
+            "[3,Infinity)": 8
+          }
+        },
+        "perEffectMaxRawDuration": {
+          "count": 32,
+          "min": 0.12840087711811066,
+          "p25": 0.7631140947341919,
+          "median": 0.9531864523887634,
+          "p75": 2.891265630722046,
+          "p90": 3.4776628017425537,
+          "p95": 3.8938004970550537,
+          "max": 4.837810516357422,
+          "bins": {
+            "[0,0.1)": 0,
+            "[0.1,0.5)": 2,
+            "[0.5,1)": 15,
+            "[1,2)": 3,
+            "[2,3)": 4,
+            "[3,Infinity)": 8
+          }
+        },
+        "perEffectTotalRawDuration": {
+          "count": 32,
+          "min": 0.12840087711811066,
+          "p25": 0.8518139719963074,
+          "median": 1.4811886548995972,
+          "p75": 3.353153705596924,
+          "p90": 4.837810516357422,
+          "p95": 5.014020204544067,
+          "max": 6.72586464881897,
+          "bins": {
+            "[0,0.1)": 0,
+            "[0.1,0.5)": 2,
+            "[0.5,1)": 12,
+            "[1,2)": 5,
+            "[2,3)": 3,
+            "[3,Infinity)": 10
+          }
+        },
+        "players": [
+          {
+            "playerId": "76561197989430253",
+            "totalRawTeammateDuration": 7.135934308171272,
+            "uniqueTeammateVictims": 2
+          },
+          {
+            "playerId": "76561197991272318",
+            "totalRawTeammateDuration": 3.682215094566345,
+            "uniqueTeammateVictims": 2
+          },
+          {
+            "playerId": "76561197997351207",
+            "totalRawTeammateDuration": 2.587592303752899,
+            "uniqueTeammateVictims": 1
+          },
+          {
+            "playerId": "76561198045898864",
+            "totalRawTeammateDuration": 21.988617330789566,
+            "uniqueTeammateVictims": 4
+          },
+          {
+            "playerId": "76561198068422762",
+            "totalRawTeammateDuration": 4.016915321350098,
+            "uniqueTeammateVictims": 2
+          },
+          {
+            "playerId": "76561198081484775",
+            "totalRawTeammateDuration": 10.24767541885376,
+            "uniqueTeammateVictims": 3
+          },
+          {
+            "playerId": "76561198201620490",
+            "totalRawTeammateDuration": 19.91432559490204,
+            "uniqueTeammateVictims": 4
+          },
+          {
+            "playerId": "76561198386265483",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561198995880877",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561199063238565",
+            "totalRawTeammateDuration": 1.7076107859611511,
+            "uniqueTeammateVictims": 2
+          }
+        ],
+        "triggerPlayers": 3,
+        "finalKind": "context",
+        "finalRuleSemantics": "Repeated exact teammate-hit effects; raw duration is not continuous blind duration or flash quality score",
+        "severitySensitivity": [
+          {
+            "seconds": 0.1,
+            "effects": 32,
+            "rows": 42
+          },
+          {
+            "seconds": 0.5,
+            "effects": 30,
+            "rows": 39
+          },
+          {
+            "seconds": 1,
+            "effects": 15,
+            "rows": 20
+          },
+          {
+            "seconds": 2,
+            "effects": 12,
+            "rows": 15
+          },
+          {
+            "seconds": 3,
+            "effects": 8,
+            "rows": 8
+          }
+        ]
+      },
+      "verification": {
+        "contradictions": 0,
+        "inputIssues": 0,
+        "exactOccurrenceRefs": true,
+        "relatedRoundsOnlyOccurrences": true,
+        "deterministic": true,
+        "immutable": true
+      },
+      "emitted": [
+        {
+          "playerId": "76561197989430253",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": []
+        },
+        {
+          "playerId": "76561197991272318",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": [
+            "deep.teamplay.lone-contact-death-pattern"
+          ]
+        },
+        {
+          "playerId": "76561197997351207",
+          "reviews": [],
+          "highlights": [
+            "deep.impact.sole-survivor-sequence",
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": [
+            "deep.teamplay.lone-contact-death-pattern"
+          ]
+        },
+        {
+          "playerId": "76561198045898864",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": [
+            "deep.utility.teamflash-repeated"
+          ]
+        },
+        {
+          "playerId": "76561198068422762",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": []
+        },
+        {
+          "playerId": "76561198081484775",
+          "reviews": [],
+          "highlights": [
+            "deep.impact.sole-survivor-sequence"
+          ],
+          "contexts": [
+            "deep.teamplay.lone-contact-death-pattern"
+          ]
+        },
+        {
+          "playerId": "76561198201620490",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.sole-survivor-sequence"
+          ],
+          "contexts": [
+            "deep.teamplay.lone-contact-death-pattern"
+          ]
+        },
+        {
+          "playerId": "76561198386265483",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.sole-survivor-sequence"
+          ],
+          "contexts": [
+            "deep.teamplay.lone-contact-death-pattern"
+          ]
+        },
+        {
+          "playerId": "76561198995880877",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": [
+            "deep.teamplay.lone-contact-death-pattern"
+          ]
+        },
+        {
+          "playerId": "76561199063238565",
+          "reviews": [],
+          "highlights": [
+            "deep.impact.multikill-swing",
+            "deep.execution.return-contact-consistent"
+          ],
+          "contexts": [
+            "deep.teamplay.no-followup-pattern"
+          ]
+        }
+      ]
+    },
+    {
+      "fixture": {
+        "filename": "inferno.dem",
+        "sha256": "b61c040074f84f1f2c1b683642923243dbe123c2a0c70ed3c0670b0e4cd7a265",
+        "headerMap": "de_inferno",
+        "fileSize": 592871000,
+        "tickRate": 64,
+        "roundCount": 24,
+        "playerCount": 10,
+        "role": "mandatory core"
+      },
+      "execution": {
+        "receivedFirstWithTwoSidedContact": 42,
+        "receivedOnly": 70,
+        "eligibleAfterFix": 112,
+        "returnKill": 19,
+        "returnDamage": 23,
+        "noneObserved": 70,
+        "negativeTriggerPlayers": 9,
+        "positiveTriggerPlayers": 0,
+        "players": [
+          {
+            "playerId": "76561197973140692",
+            "eligible": 9,
+            "none": 7
+          },
+          {
+            "playerId": "76561197978835160",
+            "eligible": 14,
+            "none": 8
+          },
+          {
+            "playerId": "76561197989430253",
+            "eligible": 10,
+            "none": 8
+          },
+          {
+            "playerId": "76561197989744167",
+            "eligible": 6,
+            "none": 4
+          },
+          {
+            "playerId": "76561197991272318",
+            "eligible": 8,
+            "none": 4
+          },
+          {
+            "playerId": "76561197996678278",
+            "eligible": 14,
+            "none": 8
+          },
+          {
+            "playerId": "76561198041683378",
+            "eligible": 13,
+            "none": 6
+          },
+          {
+            "playerId": "76561198074762801",
+            "eligible": 13,
+            "none": 7
+          },
+          {
+            "playerId": "76561198113666193",
+            "eligible": 11,
+            "none": 8
+          },
+          {
+            "playerId": "76561199032006224",
+            "eligible": 14,
+            "none": 10
+          }
+        ]
+      },
+      "noFollow": {
+        "oldAlivePlayer": {
+          "eligible": 323,
+          "none": 286,
+          "rate": 0.8854489164086687,
+          "playersTriggered": 10
+        },
+        "sameEngagementParticipant": {
+          "eligible": 55,
+          "none": 23,
+          "rate": 0.41818181818181815,
+          "playersTriggered": 4
+        },
+        "finalKind": "context",
+        "semanticLimit": "Membership is over the whole Engagement, not proof of direct contact before death, LOS, supportability or P3 Trade opportunity"
+      },
+      "loneContact": {
+        "eligible": 130,
+        "none": 66,
+        "rate": 0.5076923076923077,
+        "playersTriggered": 6,
+        "occurrences": 66,
+        "finalKind": "context"
+      },
+      "teamflash": {
+        "observedFlashEffects": 166,
+        "linkageCounts": {
+          "exact": 164,
+          "ambiguous": 0,
+          "unavailable": 2
+        },
+        "requiredCoverageExcluded": 2,
+        "exactEffects": 164,
+        "teammateHitEffects": 0,
+        "teammateEffectRows": 0,
+        "rawDuration": {
+          "count": 0,
+          "min": null,
+          "p25": null,
+          "median": null,
+          "p75": null,
+          "p90": null,
+          "p95": null,
+          "max": null,
+          "bins": {
+            "[0,0.1)": 0,
+            "[0.1,0.5)": 0,
+            "[0.5,1)": 0,
+            "[1,2)": 0,
+            "[2,3)": 0,
+            "[3,Infinity)": 0
+          }
+        },
+        "perEffectMaxRawDuration": {
+          "count": 0,
+          "min": null,
+          "p25": null,
+          "median": null,
+          "p75": null,
+          "p90": null,
+          "p95": null,
+          "max": null,
+          "bins": {
+            "[0,0.1)": 0,
+            "[0.1,0.5)": 0,
+            "[0.5,1)": 0,
+            "[1,2)": 0,
+            "[2,3)": 0,
+            "[3,Infinity)": 0
+          }
+        },
+        "perEffectTotalRawDuration": {
+          "count": 0,
+          "min": null,
+          "p25": null,
+          "median": null,
+          "p75": null,
+          "p90": null,
+          "p95": null,
+          "max": null,
+          "bins": {
+            "[0,0.1)": 0,
+            "[0.1,0.5)": 0,
+            "[0.5,1)": 0,
+            "[1,2)": 0,
+            "[2,3)": 0,
+            "[3,Infinity)": 0
+          }
+        },
+        "players": [
+          {
+            "playerId": "76561197973140692",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561197978835160",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561197989430253",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561197989744167",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561197991272318",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561197996678278",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561198041683378",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561198074762801",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561198113666193",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561199032006224",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          }
+        ],
+        "triggerPlayers": 0,
+        "finalKind": "context",
+        "finalRuleSemantics": "Repeated exact teammate-hit effects; raw duration is not continuous blind duration or flash quality score",
+        "severitySensitivity": [
+          {
+            "seconds": 0.1,
+            "effects": 0,
+            "rows": 0
+          },
+          {
+            "seconds": 0.5,
+            "effects": 0,
+            "rows": 0
+          },
+          {
+            "seconds": 1,
+            "effects": 0,
+            "rows": 0
+          },
+          {
+            "seconds": 2,
+            "effects": 0,
+            "rows": 0
+          },
+          {
+            "seconds": 3,
+            "effects": 0,
+            "rows": 0
+          }
+        ]
+      },
+      "verification": {
+        "contradictions": 0,
+        "inputIssues": 0,
+        "exactOccurrenceRefs": true,
+        "relatedRoundsOnlyOccurrences": true,
+        "deterministic": true,
+        "immutable": true
+      },
+      "emitted": [
+        {
+          "playerId": "76561197973140692",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": [
+            "deep.teamplay.no-followup-pattern"
+          ]
+        },
+        {
+          "playerId": "76561197978835160",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.sole-survivor-sequence",
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": []
+        },
+        {
+          "playerId": "76561197989430253",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [],
+          "contexts": [
+            "deep.teamplay.lone-contact-death-pattern"
+          ]
+        },
+        {
+          "playerId": "76561197989744167",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": [
+            "deep.teamplay.lone-contact-death-pattern"
+          ]
+        },
+        {
+          "playerId": "76561197991272318",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": []
+        },
+        {
+          "playerId": "76561197996678278",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": [
+            "deep.teamplay.lone-contact-death-pattern"
+          ]
+        },
+        {
+          "playerId": "76561198041683378",
+          "reviews": [],
+          "highlights": [
+            "deep.impact.sole-survivor-sequence",
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": [
+            "deep.teamplay.lone-contact-death-pattern"
+          ]
+        },
+        {
+          "playerId": "76561198074762801",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.sole-survivor-sequence",
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": [
+            "deep.teamplay.lone-contact-death-pattern"
+          ]
+        },
+        {
+          "playerId": "76561198113666193",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": [
+            "deep.teamplay.no-followup-pattern"
+          ]
+        },
+        {
+          "playerId": "76561199032006224",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": [
+            "deep.teamplay.lone-contact-death-pattern"
+          ]
+        }
+      ]
+    },
+    {
+      "fixture": {
+        "filename": "dust2.dem",
+        "sha256": "db90fe85aab023a1d2c8a5996182e6120d98ef494f02a070b17982b235e4958c",
+        "headerMap": "de_dust2",
+        "fileSize": 557650967,
+        "tickRate": 64,
+        "roundCount": 24,
+        "playerCount": 10,
+        "role": "mandatory core"
+      },
+      "execution": {
+        "receivedFirstWithTwoSidedContact": 29,
+        "receivedOnly": 80,
+        "eligibleAfterFix": 109,
+        "returnKill": 10,
+        "returnDamage": 19,
+        "noneObserved": 80,
+        "negativeTriggerPlayers": 9,
+        "positiveTriggerPlayers": 0,
+        "players": [
+          {
+            "playerId": "76561197989430253",
+            "eligible": 14,
+            "none": 12
+          },
+          {
+            "playerId": "76561197991272318",
+            "eligible": 11,
+            "none": 7
+          },
+          {
+            "playerId": "76561197997351207",
+            "eligible": 14,
+            "none": 9
+          },
+          {
+            "playerId": "76561198045898864",
+            "eligible": 7,
+            "none": 5
+          },
+          {
+            "playerId": "76561198068422762",
+            "eligible": 9,
+            "none": 8
+          },
+          {
+            "playerId": "76561198081484775",
+            "eligible": 2,
+            "none": 2
+          },
+          {
+            "playerId": "76561198201620490",
+            "eligible": 16,
+            "none": 12
+          },
+          {
+            "playerId": "76561198386265483",
+            "eligible": 13,
+            "none": 7
+          },
+          {
+            "playerId": "76561198995880877",
+            "eligible": 10,
+            "none": 8
+          },
+          {
+            "playerId": "76561199063238565",
+            "eligible": 13,
+            "none": 10
+          }
+        ]
+      },
+      "noFollow": {
+        "oldAlivePlayer": {
+          "eligible": 285,
+          "none": 239,
+          "rate": 0.8385964912280702,
+          "playersTriggered": 10
+        },
+        "sameEngagementParticipant": {
+          "eligible": 79,
+          "none": 37,
+          "rate": 0.46835443037974683,
+          "playersTriggered": 5
+        },
+        "finalKind": "context",
+        "semanticLimit": "Membership is over the whole Engagement, not proof of direct contact before death, LOS, supportability or P3 Trade opportunity"
+      },
+      "loneContact": {
+        "eligible": 121,
+        "none": 53,
+        "rate": 0.4380165289256198,
+        "playersTriggered": 2,
+        "occurrences": 53,
+        "finalKind": "context"
+      },
+      "teamflash": {
+        "observedFlashEffects": 229,
+        "linkageCounts": {
+          "exact": 229,
+          "ambiguous": 0,
+          "unavailable": 0
+        },
+        "requiredCoverageExcluded": 0,
+        "exactEffects": 229,
+        "teammateHitEffects": 123,
+        "teammateEffectRows": 188,
+        "rawDuration": {
+          "count": 188,
+          "min": 0.09498586505651474,
+          "p25": 0.669189453125,
+          "median": 0.9648749828338623,
+          "p75": 1.8459632396697998,
+          "p90": 3.177739381790161,
+          "p95": 3.6110453605651855,
+          "max": 4.605339527130127,
+          "bins": {
+            "[0,0.1)": 1,
+            "[0.1,0.5)": 33,
+            "[0.5,1)": 63,
+            "[1,2)": 50,
+            "[2,3)": 17,
+            "[3,Infinity)": 24
+          }
+        },
+        "perEffectMaxRawDuration": {
+          "count": 123,
+          "min": 0.13450883328914642,
+          "p25": 0.8592008948326111,
+          "median": 1.4578686952590942,
+          "p75": 2.405029296875,
+          "p90": 3.30184268951416,
+          "p95": 3.968017578125,
+          "max": 4.605339527130127,
+          "bins": {
+            "[0,0.1)": 0,
+            "[0.1,0.5)": 15,
+            "[0.5,1)": 32,
+            "[1,2)": 39,
+            "[2,3)": 14,
+            "[3,Infinity)": 23
+          }
+        },
+        "perEffectTotalRawDuration": {
+          "count": 123,
+          "min": 0.13450883328914642,
+          "p25": 0.9251554012298584,
+          "median": 1.738443374633789,
+          "p75": 3.054443359375,
+          "p90": 4.58408260345459,
+          "p95": 5.018790602684021,
+          "max": 7.15834641456604,
+          "bins": {
+            "[0,0.1)": 0,
+            "[0.1,0.5)": 14,
+            "[0.5,1)": 25,
+            "[1,2)": 28,
+            "[2,3)": 23,
+            "[3,Infinity)": 33
+          }
+        },
+        "players": [
+          {
+            "playerId": "76561197989430253",
+            "totalRawTeammateDuration": 36.0418491885066,
+            "uniqueTeammateVictims": 4
+          },
+          {
+            "playerId": "76561197991272318",
+            "totalRawTeammateDuration": 3.945672959089279,
+            "uniqueTeammateVictims": 4
+          },
+          {
+            "playerId": "76561197997351207",
+            "totalRawTeammateDuration": 15.05049155652523,
+            "uniqueTeammateVictims": 3
+          },
+          {
+            "playerId": "76561198045898864",
+            "totalRawTeammateDuration": 27.946338966488838,
+            "uniqueTeammateVictims": 4
+          },
+          {
+            "playerId": "76561198068422762",
+            "totalRawTeammateDuration": 14.155352726578712,
+            "uniqueTeammateVictims": 3
+          },
+          {
+            "playerId": "76561198081484775",
+            "totalRawTeammateDuration": 44.94542321562767,
+            "uniqueTeammateVictims": 4
+          },
+          {
+            "playerId": "76561198201620490",
+            "totalRawTeammateDuration": 65.83688314259052,
+            "uniqueTeammateVictims": 4
+          },
+          {
+            "playerId": "76561198386265483",
+            "totalRawTeammateDuration": 12.429740265011787,
+            "uniqueTeammateVictims": 4
+          },
+          {
+            "playerId": "76561198995880877",
+            "totalRawTeammateDuration": 8.416046380996704,
+            "uniqueTeammateVictims": 4
+          },
+          {
+            "playerId": "76561199063238565",
+            "totalRawTeammateDuration": 38.48796993494034,
+            "uniqueTeammateVictims": 4
+          }
+        ],
+        "triggerPlayers": 10,
+        "finalKind": "context",
+        "finalRuleSemantics": "Repeated exact teammate-hit effects; raw duration is not continuous blind duration or flash quality score",
+        "severitySensitivity": [
+          {
+            "seconds": 0.1,
+            "effects": 123,
+            "rows": 187
+          },
+          {
+            "seconds": 0.5,
+            "effects": 108,
+            "rows": 154
+          },
+          {
+            "seconds": 1,
+            "effects": 76,
+            "rows": 91
+          },
+          {
+            "seconds": 2,
+            "effects": 37,
+            "rows": 41
+          },
+          {
+            "seconds": 3,
+            "effects": 23,
+            "rows": 24
+          }
+        ]
+      },
+      "verification": {
+        "contradictions": 0,
+        "inputIssues": 0,
+        "exactOccurrenceRefs": true,
+        "relatedRoundsOnlyOccurrences": true,
+        "deterministic": true,
+        "immutable": true
+      },
+      "emitted": [
+        {
+          "playerId": "76561197989430253",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": [
+            "deep.utility.teamflash-repeated"
+          ]
+        },
+        {
+          "playerId": "76561197991272318",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.sole-survivor-sequence"
+          ],
+          "contexts": [
+            "deep.utility.teamflash-repeated"
+          ]
+        },
+        {
+          "playerId": "76561197997351207",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.sole-survivor-sequence"
+          ],
+          "contexts": [
+            "deep.utility.teamflash-repeated"
+          ]
+        },
+        {
+          "playerId": "76561198045898864",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": [
+            "deep.teamplay.lone-contact-death-pattern"
+          ]
+        },
+        {
+          "playerId": "76561198068422762",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.sole-survivor-sequence",
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": [
+            "deep.utility.teamflash-repeated"
+          ]
+        },
+        {
+          "playerId": "76561198081484775",
+          "reviews": [],
+          "highlights": [
+            "deep.impact.sole-survivor-sequence"
+          ],
+          "contexts": [
+            "deep.teamplay.lone-contact-death-pattern"
+          ]
+        },
+        {
+          "playerId": "76561198201620490",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.sole-survivor-sequence"
+          ],
+          "contexts": [
+            "deep.utility.teamflash-repeated"
+          ]
+        },
+        {
+          "playerId": "76561198386265483",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": [
+            "deep.utility.teamflash-repeated"
+          ]
+        },
+        {
+          "playerId": "76561198995880877",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.sole-survivor-sequence",
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": [
+            "deep.utility.teamflash-repeated"
+          ]
+        },
+        {
+          "playerId": "76561199063238565",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.sole-survivor-sequence",
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": [
+            "deep.utility.teamflash-repeated"
+          ]
+        }
+      ]
+    },
+    {
+      "fixture": {
+        "filename": "mirage.dem",
+        "sha256": "62cb3af35c3893a91c7dd8c9007fdb1105950ec8963a46eca6006dac96655acb",
+        "headerMap": "de_mirage",
+        "fileSize": 296074918,
+        "tickRate": 64,
+        "roundCount": 17,
+        "playerCount": 10,
+        "role": "mandatory core"
+      },
+      "execution": {
+        "receivedFirstWithTwoSidedContact": 32,
+        "receivedOnly": 78,
+        "eligibleAfterFix": 110,
+        "returnKill": 15,
+        "returnDamage": 17,
+        "noneObserved": 78,
+        "negativeTriggerPlayers": 10,
+        "positiveTriggerPlayers": 0,
+        "players": [
+          {
+            "playerId": "76561198044118796",
+            "eligible": 14,
+            "none": 8
+          },
+          {
+            "playerId": "76561198057282432",
+            "eligible": 7,
+            "none": 4
+          },
+          {
+            "playerId": "76561198059614402",
+            "eligible": 15,
+            "none": 11
+          },
+          {
+            "playerId": "76561198083485506",
+            "eligible": 11,
+            "none": 8
+          },
+          {
+            "playerId": "76561198146207066",
+            "eligible": 13,
+            "none": 12
+          },
+          {
+            "playerId": "76561198167785069",
+            "eligible": 15,
+            "none": 11
+          },
+          {
+            "playerId": "76561198372023214",
+            "eligible": 12,
+            "none": 7
+          },
+          {
+            "playerId": "76561198812513923",
+            "eligible": 10,
+            "none": 8
+          },
+          {
+            "playerId": "76561198855375325",
+            "eligible": 6,
+            "none": 4
+          },
+          {
+            "playerId": "76561198859428279",
+            "eligible": 7,
+            "none": 5
+          }
+        ]
+      },
+      "noFollow": {
+        "oldAlivePlayer": {
+          "eligible": 283,
+          "none": 238,
+          "rate": 0.8409893992932862,
+          "playersTriggered": 10
+        },
+        "sameEngagementParticipant": {
+          "eligible": 56,
+          "none": 18,
+          "rate": 0.32142857142857145,
+          "playersTriggered": 1
+        },
+        "finalKind": "context",
+        "semanticLimit": "Membership is over the whole Engagement, not proof of direct contact before death, LOS, supportability or P3 Trade opportunity"
+      },
+      "loneContact": {
+        "eligible": 115,
+        "none": 55,
+        "rate": 0.4782608695652174,
+        "playersTriggered": 7,
+        "occurrences": 55,
+        "finalKind": "context"
+      },
+      "teamflash": {
+        "observedFlashEffects": 90,
+        "linkageCounts": {
+          "exact": 84,
+          "ambiguous": 0,
+          "unavailable": 6
+        },
+        "requiredCoverageExcluded": 6,
+        "exactEffects": 84,
+        "teammateHitEffects": 0,
+        "teammateEffectRows": 0,
+        "rawDuration": {
+          "count": 0,
+          "min": null,
+          "p25": null,
+          "median": null,
+          "p75": null,
+          "p90": null,
+          "p95": null,
+          "max": null,
+          "bins": {
+            "[0,0.1)": 0,
+            "[0.1,0.5)": 0,
+            "[0.5,1)": 0,
+            "[1,2)": 0,
+            "[2,3)": 0,
+            "[3,Infinity)": 0
+          }
+        },
+        "perEffectMaxRawDuration": {
+          "count": 0,
+          "min": null,
+          "p25": null,
+          "median": null,
+          "p75": null,
+          "p90": null,
+          "p95": null,
+          "max": null,
+          "bins": {
+            "[0,0.1)": 0,
+            "[0.1,0.5)": 0,
+            "[0.5,1)": 0,
+            "[1,2)": 0,
+            "[2,3)": 0,
+            "[3,Infinity)": 0
+          }
+        },
+        "perEffectTotalRawDuration": {
+          "count": 0,
+          "min": null,
+          "p25": null,
+          "median": null,
+          "p75": null,
+          "p90": null,
+          "p95": null,
+          "max": null,
+          "bins": {
+            "[0,0.1)": 0,
+            "[0.1,0.5)": 0,
+            "[0.5,1)": 0,
+            "[1,2)": 0,
+            "[2,3)": 0,
+            "[3,Infinity)": 0
+          }
+        },
+        "players": [
+          {
+            "playerId": "76561198044118796",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561198057282432",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561198059614402",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561198083485506",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561198146207066",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561198167785069",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561198372023214",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561198812513923",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561198855375325",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561198859428279",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          }
+        ],
+        "triggerPlayers": 0,
+        "finalKind": "context",
+        "finalRuleSemantics": "Repeated exact teammate-hit effects; raw duration is not continuous blind duration or flash quality score",
+        "severitySensitivity": [
+          {
+            "seconds": 0.1,
+            "effects": 0,
+            "rows": 0
+          },
+          {
+            "seconds": 0.5,
+            "effects": 0,
+            "rows": 0
+          },
+          {
+            "seconds": 1,
+            "effects": 0,
+            "rows": 0
+          },
+          {
+            "seconds": 2,
+            "effects": 0,
+            "rows": 0
+          },
+          {
+            "seconds": 3,
+            "effects": 0,
+            "rows": 0
+          }
+        ]
+      },
+      "verification": {
+        "contradictions": 0,
+        "inputIssues": 0,
+        "exactOccurrenceRefs": true,
+        "relatedRoundsOnlyOccurrences": true,
+        "deterministic": true,
+        "immutable": true
+      },
+      "emitted": [
+        {
+          "playerId": "76561198044118796",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": [
+            "deep.teamplay.lone-contact-death-pattern"
+          ]
+        },
+        {
+          "playerId": "76561198057282432",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": []
+        },
+        {
+          "playerId": "76561198059614402",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": [
+            "deep.teamplay.lone-contact-death-pattern"
+          ]
+        },
+        {
+          "playerId": "76561198083485506",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.sole-survivor-sequence",
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": [
+            "deep.teamplay.lone-contact-death-pattern"
+          ]
+        },
+        {
+          "playerId": "76561198146207066",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": [
+            "deep.teamplay.lone-contact-death-pattern"
+          ]
+        },
+        {
+          "playerId": "76561198167785069",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": []
+        },
+        {
+          "playerId": "76561198372023214",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.sole-survivor-sequence"
+          ],
+          "contexts": [
+            "deep.teamplay.lone-contact-death-pattern"
+          ]
+        },
+        {
+          "playerId": "76561198812513923",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.sole-survivor-sequence",
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": [
+            "deep.teamplay.lone-contact-death-pattern"
+          ]
+        },
+        {
+          "playerId": "76561198855375325",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.sole-survivor-sequence",
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": []
+        },
+        {
+          "playerId": "76561198859428279",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [],
+          "contexts": [
+            "deep.teamplay.lone-contact-death-pattern"
+          ]
+        }
+      ]
+    },
+    {
+      "fixture": {
+        "filename": "ancient.dem",
+        "sha256": "ca7b6b7cefdde927d654ac101ea1bee4fd996efc9b86ac89dac33874a0115f4e",
+        "headerMap": "de_ancient",
+        "fileSize": 403039766,
+        "tickRate": 64,
+        "roundCount": 19,
+        "playerCount": 10,
+        "role": "extended calibration observation"
+      },
+      "execution": {
+        "receivedFirstWithTwoSidedContact": 48,
+        "receivedOnly": 72,
+        "eligibleAfterFix": 120,
+        "returnKill": 26,
+        "returnDamage": 22,
+        "noneObserved": 72,
+        "negativeTriggerPlayers": 9,
+        "positiveTriggerPlayers": 1,
+        "players": [
+          {
+            "playerId": "76561197989430253",
+            "eligible": 8,
+            "none": 6
+          },
+          {
+            "playerId": "76561197991272318",
+            "eligible": 16,
+            "none": 11
+          },
+          {
+            "playerId": "76561197997351207",
+            "eligible": 7,
+            "none": 4
+          },
+          {
+            "playerId": "76561198045898864",
+            "eligible": 11,
+            "none": 6
+          },
+          {
+            "playerId": "76561198068422762",
+            "eligible": 11,
+            "none": 4
+          },
+          {
+            "playerId": "76561198081484775",
+            "eligible": 13,
+            "none": 8
+          },
+          {
+            "playerId": "76561198201620490",
+            "eligible": 10,
+            "none": 6
+          },
+          {
+            "playerId": "76561198386265483",
+            "eligible": 13,
+            "none": 7
+          },
+          {
+            "playerId": "76561198995880877",
+            "eligible": 18,
+            "none": 13
+          },
+          {
+            "playerId": "76561199063238565",
+            "eligible": 13,
+            "none": 7
+          }
+        ]
+      },
+      "noFollow": {
+        "oldAlivePlayer": {
+          "eligible": 261,
+          "none": 212,
+          "rate": 0.8122605363984674,
+          "playersTriggered": 10
+        },
+        "sameEngagementParticipant": {
+          "eligible": 76,
+          "none": 35,
+          "rate": 0.4605263157894737,
+          "playersTriggered": 6
+        },
+        "finalKind": "context",
+        "semanticLimit": "Membership is over the whole Engagement, not proof of direct contact before death, LOS, supportability or P3 Trade opportunity"
+      },
+      "loneContact": {
+        "eligible": 111,
+        "none": 49,
+        "rate": 0.44144144144144143,
+        "playersTriggered": 2,
+        "occurrences": 49,
+        "finalKind": "context"
+      },
+      "teamflash": {
+        "observedFlashEffects": 132,
+        "linkageCounts": {
+          "exact": 131,
+          "ambiguous": 0,
+          "unavailable": 1
+        },
+        "requiredCoverageExcluded": 1,
+        "exactEffects": 131,
+        "teammateHitEffects": 76,
+        "teammateEffectRows": 118,
+        "rawDuration": {
+          "count": 118,
+          "min": 0.14567311108112335,
+          "p25": 0.8477921485900879,
+          "median": 1.4783961772918701,
+          "p75": 2.542724609375,
+          "p90": 3.905272960662842,
+          "p95": 4.102662563323975,
+          "max": 5.120744228363037,
+          "bins": {
+            "[0,0.1)": 0,
+            "[0.1,0.5)": 12,
+            "[0.5,1)": 37,
+            "[1,2)": 30,
+            "[2,3)": 12,
+            "[3,Infinity)": 27
+          }
+        },
+        "perEffectMaxRawDuration": {
+          "count": 76,
+          "min": 0.1465543657541275,
+          "p25": 0.9041714072227478,
+          "median": 1.6850907802581787,
+          "p75": 3.1554465293884277,
+          "p90": 4.006057262420654,
+          "p95": 4.504174709320068,
+          "max": 5.120744228363037,
+          "bins": {
+            "[0,0.1)": 0,
+            "[0.1,0.5)": 5,
+            "[0.5,1)": 20,
+            "[1,2)": 21,
+            "[2,3)": 8,
+            "[3,Infinity)": 22
+          }
+        },
+        "perEffectTotalRawDuration": {
+          "count": 76,
+          "min": 0.1465543657541275,
+          "p25": 0.9316070079803467,
+          "median": 1.9831571578979492,
+          "p75": 3.7856085300445557,
+          "p90": 5.652573823928833,
+          "p95": 7.807306408882141,
+          "max": 10.177405536174774,
+          "bins": {
+            "[0,0.1)": 0,
+            "[0.1,0.5)": 4,
+            "[0.5,1)": 18,
+            "[1,2)": 16,
+            "[2,3)": 9,
+            "[3,Infinity)": 29
+          }
+        },
+        "players": [
+          {
+            "playerId": "76561197989430253",
+            "totalRawTeammateDuration": 24.45130705833435,
+            "uniqueTeammateVictims": 4
+          },
+          {
+            "playerId": "76561197991272318",
+            "totalRawTeammateDuration": 16.1294566988945,
+            "uniqueTeammateVictims": 4
+          },
+          {
+            "playerId": "76561197997351207",
+            "totalRawTeammateDuration": 2.167186349630356,
+            "uniqueTeammateVictims": 3
+          },
+          {
+            "playerId": "76561198045898864",
+            "totalRawTeammateDuration": 39.41641017794609,
+            "uniqueTeammateVictims": 4
+          },
+          {
+            "playerId": "76561198068422762",
+            "totalRawTeammateDuration": 10.126401543617249,
+            "uniqueTeammateVictims": 3
+          },
+          {
+            "playerId": "76561198081484775",
+            "totalRawTeammateDuration": 51.34456405043602,
+            "uniqueTeammateVictims": 4
+          },
+          {
+            "playerId": "76561198201620490",
+            "totalRawTeammateDuration": 37.619294956326485,
+            "uniqueTeammateVictims": 4
+          },
+          {
+            "playerId": "76561198386265483",
+            "totalRawTeammateDuration": 9.878984659910202,
+            "uniqueTeammateVictims": 4
+          },
+          {
+            "playerId": "76561198995880877",
+            "totalRawTeammateDuration": 16.497644305229187,
+            "uniqueTeammateVictims": 4
+          },
+          {
+            "playerId": "76561199063238565",
+            "totalRawTeammateDuration": 4.129001319408417,
+            "uniqueTeammateVictims": 1
+          }
+        ],
+        "triggerPlayers": 8,
+        "finalKind": "context",
+        "finalRuleSemantics": "Repeated exact teammate-hit effects; raw duration is not continuous blind duration or flash quality score",
+        "severitySensitivity": [
+          {
+            "seconds": 0.1,
+            "effects": 76,
+            "rows": 118
+          },
+          {
+            "seconds": 0.5,
+            "effects": 71,
+            "rows": 106
+          },
+          {
+            "seconds": 1,
+            "effects": 51,
+            "rows": 69
+          },
+          {
+            "seconds": 2,
+            "effects": 30,
+            "rows": 39
+          },
+          {
+            "seconds": 3,
+            "effects": 22,
+            "rows": 27
+          }
+        ]
+      },
+      "verification": {
+        "contradictions": 0,
+        "inputIssues": 0,
+        "exactOccurrenceRefs": true,
+        "relatedRoundsOnlyOccurrences": true,
+        "deterministic": true,
+        "immutable": true
+      },
+      "emitted": [
+        {
+          "playerId": "76561197989430253",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": [
+            "deep.utility.teamflash-repeated"
+          ]
+        },
+        {
+          "playerId": "76561197991272318",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.sole-survivor-sequence"
+          ],
+          "contexts": [
+            "deep.utility.teamflash-repeated"
+          ]
+        },
+        {
+          "playerId": "76561197997351207",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": [
+            "deep.teamplay.lone-contact-death-pattern"
+          ]
+        },
+        {
+          "playerId": "76561198045898864",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.sole-survivor-sequence",
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": [
+            "deep.teamplay.lone-contact-death-pattern"
+          ]
+        },
+        {
+          "playerId": "76561198068422762",
+          "reviews": [],
+          "highlights": [
+            "deep.impact.multikill-swing",
+            "deep.execution.return-contact-consistent"
+          ],
+          "contexts": [
+            "deep.utility.teamflash-repeated"
+          ]
+        },
+        {
+          "playerId": "76561198081484775",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [],
+          "contexts": [
+            "deep.utility.teamflash-repeated"
+          ]
+        },
+        {
+          "playerId": "76561198201620490",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": [
+            "deep.utility.teamflash-repeated"
+          ]
+        },
+        {
+          "playerId": "76561198386265483",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.sole-survivor-sequence"
+          ],
+          "contexts": [
+            "deep.utility.teamflash-repeated"
+          ]
+        },
+        {
+          "playerId": "76561198995880877",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [],
+          "contexts": [
+            "deep.utility.teamflash-repeated"
+          ]
+        },
+        {
+          "playerId": "76561199063238565",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.sole-survivor-sequence",
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": [
+            "deep.impact.multikill-unconverted"
+          ]
+        }
+      ]
+    },
+    {
+      "fixture": {
+        "filename": "anubis.dem",
+        "sha256": "5ee94d7f475a7723f214636e438bf33acccd8c30a85bdb192dfd1a26772b966d",
+        "headerMap": "de_anubis",
+        "fileSize": 404813477,
+        "tickRate": 64,
+        "roundCount": 17,
+        "playerCount": 10,
+        "role": "extended calibration observation"
+      },
+      "execution": {
+        "receivedFirstWithTwoSidedContact": 32,
+        "receivedOnly": 69,
+        "eligibleAfterFix": 101,
+        "returnKill": 14,
+        "returnDamage": 18,
+        "noneObserved": 69,
+        "negativeTriggerPlayers": 7,
+        "positiveTriggerPlayers": 2,
+        "players": [
+          {
+            "playerId": "76561197973140692",
+            "eligible": 11,
+            "none": 4
+          },
+          {
+            "playerId": "76561197978835160",
+            "eligible": 11,
+            "none": 5
+          },
+          {
+            "playerId": "76561197989744167",
+            "eligible": 5,
+            "none": 1
+          },
+          {
+            "playerId": "76561197991272318",
+            "eligible": 9,
+            "none": 8
+          },
+          {
+            "playerId": "76561197996678278",
+            "eligible": 10,
+            "none": 9
+          },
+          {
+            "playerId": "76561198041683378",
+            "eligible": 10,
+            "none": 8
+          },
+          {
+            "playerId": "76561198057282432",
+            "eligible": 15,
+            "none": 12
+          },
+          {
+            "playerId": "76561198074762801",
+            "eligible": 12,
+            "none": 9
+          },
+          {
+            "playerId": "76561198113666193",
+            "eligible": 5,
+            "none": 5
+          },
+          {
+            "playerId": "76561199091825101",
+            "eligible": 13,
+            "none": 8
+          }
+        ]
+      },
+      "noFollow": {
+        "oldAlivePlayer": {
+          "eligible": 226,
+          "none": 180,
+          "rate": 0.7964601769911505,
+          "playersTriggered": 10
+        },
+        "sameEngagementParticipant": {
+          "eligible": 57,
+          "none": 18,
+          "rate": 0.3157894736842105,
+          "playersTriggered": 1
+        },
+        "finalKind": "context",
+        "semanticLimit": "Membership is over the whole Engagement, not proof of direct contact before death, LOS, supportability or P3 Trade opportunity"
+      },
+      "loneContact": {
+        "eligible": 96,
+        "none": 38,
+        "rate": 0.3958333333333333,
+        "playersTriggered": 2,
+        "occurrences": 38,
+        "finalKind": "context"
+      },
+      "teamflash": {
+        "observedFlashEffects": 101,
+        "linkageCounts": {
+          "exact": 101,
+          "ambiguous": 0,
+          "unavailable": 0
+        },
+        "requiredCoverageExcluded": 0,
+        "exactEffects": 101,
+        "teammateHitEffects": 0,
+        "teammateEffectRows": 0,
+        "rawDuration": {
+          "count": 0,
+          "min": null,
+          "p25": null,
+          "median": null,
+          "p75": null,
+          "p90": null,
+          "p95": null,
+          "max": null,
+          "bins": {
+            "[0,0.1)": 0,
+            "[0.1,0.5)": 0,
+            "[0.5,1)": 0,
+            "[1,2)": 0,
+            "[2,3)": 0,
+            "[3,Infinity)": 0
+          }
+        },
+        "perEffectMaxRawDuration": {
+          "count": 0,
+          "min": null,
+          "p25": null,
+          "median": null,
+          "p75": null,
+          "p90": null,
+          "p95": null,
+          "max": null,
+          "bins": {
+            "[0,0.1)": 0,
+            "[0.1,0.5)": 0,
+            "[0.5,1)": 0,
+            "[1,2)": 0,
+            "[2,3)": 0,
+            "[3,Infinity)": 0
+          }
+        },
+        "perEffectTotalRawDuration": {
+          "count": 0,
+          "min": null,
+          "p25": null,
+          "median": null,
+          "p75": null,
+          "p90": null,
+          "p95": null,
+          "max": null,
+          "bins": {
+            "[0,0.1)": 0,
+            "[0.1,0.5)": 0,
+            "[0.5,1)": 0,
+            "[1,2)": 0,
+            "[2,3)": 0,
+            "[3,Infinity)": 0
+          }
+        },
+        "players": [
+          {
+            "playerId": "76561197973140692",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561197978835160",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561197989744167",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561197991272318",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561197996678278",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561198041683378",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561198057282432",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561198074762801",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561198113666193",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561199091825101",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          }
+        ],
+        "triggerPlayers": 0,
+        "finalKind": "context",
+        "finalRuleSemantics": "Repeated exact teammate-hit effects; raw duration is not continuous blind duration or flash quality score",
+        "severitySensitivity": [
+          {
+            "seconds": 0.1,
+            "effects": 0,
+            "rows": 0
+          },
+          {
+            "seconds": 0.5,
+            "effects": 0,
+            "rows": 0
+          },
+          {
+            "seconds": 1,
+            "effects": 0,
+            "rows": 0
+          },
+          {
+            "seconds": 2,
+            "effects": 0,
+            "rows": 0
+          },
+          {
+            "seconds": 3,
+            "effects": 0,
+            "rows": 0
+          }
+        ]
+      },
+      "verification": {
+        "contradictions": 0,
+        "inputIssues": 0,
+        "exactOccurrenceRefs": true,
+        "relatedRoundsOnlyOccurrences": true,
+        "deterministic": true,
+        "immutable": true
+      },
+      "emitted": [
+        {
+          "playerId": "76561197973140692",
+          "reviews": [],
+          "highlights": [
+            "deep.impact.sole-survivor-sequence",
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": []
+        },
+        {
+          "playerId": "76561197978835160",
+          "reviews": [],
+          "highlights": [
+            "deep.impact.sole-survivor-sequence",
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": []
+        },
+        {
+          "playerId": "76561197989744167",
+          "reviews": [],
+          "highlights": [
+            "deep.impact.multikill-swing",
+            "deep.execution.return-contact-consistent"
+          ],
+          "contexts": [
+            "deep.teamplay.lone-contact-death-pattern"
+          ]
+        },
+        {
+          "playerId": "76561197991272318",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": []
+        },
+        {
+          "playerId": "76561197996678278",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.sole-survivor-sequence"
+          ],
+          "contexts": []
+        },
+        {
+          "playerId": "76561198041683378",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": [
+            "deep.teamplay.no-followup-pattern"
+          ]
+        },
+        {
+          "playerId": "76561198057282432",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": []
+        },
+        {
+          "playerId": "76561198074762801",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.sole-survivor-sequence"
+          ],
+          "contexts": []
+        },
+        {
+          "playerId": "76561198113666193",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": [
+            "deep.teamplay.lone-contact-death-pattern"
+          ]
+        },
+        {
+          "playerId": "76561199091825101",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": []
+        }
+      ]
+    },
+    {
+      "fixture": {
+        "filename": "overpass.dem",
+        "sha256": "7b43fa4215d99ce767d17f9d1f36e8997b7aeeb6227fa8b2738b9d377b48f28e",
+        "headerMap": "de_overpass",
+        "fileSize": 452014141,
+        "tickRate": 64,
+        "roundCount": 19,
+        "playerCount": 10,
+        "role": "extended calibration observation"
+      },
+      "execution": {
+        "receivedFirstWithTwoSidedContact": 32,
+        "receivedOnly": 60,
+        "eligibleAfterFix": 92,
+        "returnKill": 18,
+        "returnDamage": 14,
+        "noneObserved": 60,
+        "negativeTriggerPlayers": 10,
+        "positiveTriggerPlayers": 0,
+        "players": [
+          {
+            "playerId": "76561197973140692",
+            "eligible": 6,
+            "none": 4
+          },
+          {
+            "playerId": "76561197978835160",
+            "eligible": 8,
+            "none": 5
+          },
+          {
+            "playerId": "76561197989744167",
+            "eligible": 7,
+            "none": 4
+          },
+          {
+            "playerId": "76561197991272318",
+            "eligible": 9,
+            "none": 6
+          },
+          {
+            "playerId": "76561198012872053",
+            "eligible": 13,
+            "none": 10
+          },
+          {
+            "playerId": "76561198068002993",
+            "eligible": 10,
+            "none": 6
+          },
+          {
+            "playerId": "76561198080703143",
+            "eligible": 6,
+            "none": 5
+          },
+          {
+            "playerId": "76561198113666193",
+            "eligible": 9,
+            "none": 5
+          },
+          {
+            "playerId": "76561198309839541",
+            "eligible": 7,
+            "none": 6
+          },
+          {
+            "playerId": "76561199046478501",
+            "eligible": 17,
+            "none": 9
+          }
+        ]
+      },
+      "noFollow": {
+        "oldAlivePlayer": {
+          "eligible": 239,
+          "none": 193,
+          "rate": 0.8075313807531381,
+          "playersTriggered": 10
+        },
+        "sameEngagementParticipant": {
+          "eligible": 65,
+          "none": 26,
+          "rate": 0.4,
+          "playersTriggered": 3
+        },
+        "finalKind": "context",
+        "semanticLimit": "Membership is over the whole Engagement, not proof of direct contact before death, LOS, supportability or P3 Trade opportunity"
+      },
+      "loneContact": {
+        "eligible": 99,
+        "none": 45,
+        "rate": 0.45454545454545453,
+        "playersTriggered": 4,
+        "occurrences": 45,
+        "finalKind": "context"
+      },
+      "teamflash": {
+        "observedFlashEffects": 125,
+        "linkageCounts": {
+          "exact": 125,
+          "ambiguous": 0,
+          "unavailable": 0
+        },
+        "requiredCoverageExcluded": 0,
+        "exactEffects": 125,
+        "teammateHitEffects": 0,
+        "teammateEffectRows": 0,
+        "rawDuration": {
+          "count": 0,
+          "min": null,
+          "p25": null,
+          "median": null,
+          "p75": null,
+          "p90": null,
+          "p95": null,
+          "max": null,
+          "bins": {
+            "[0,0.1)": 0,
+            "[0.1,0.5)": 0,
+            "[0.5,1)": 0,
+            "[1,2)": 0,
+            "[2,3)": 0,
+            "[3,Infinity)": 0
+          }
+        },
+        "perEffectMaxRawDuration": {
+          "count": 0,
+          "min": null,
+          "p25": null,
+          "median": null,
+          "p75": null,
+          "p90": null,
+          "p95": null,
+          "max": null,
+          "bins": {
+            "[0,0.1)": 0,
+            "[0.1,0.5)": 0,
+            "[0.5,1)": 0,
+            "[1,2)": 0,
+            "[2,3)": 0,
+            "[3,Infinity)": 0
+          }
+        },
+        "perEffectTotalRawDuration": {
+          "count": 0,
+          "min": null,
+          "p25": null,
+          "median": null,
+          "p75": null,
+          "p90": null,
+          "p95": null,
+          "max": null,
+          "bins": {
+            "[0,0.1)": 0,
+            "[0.1,0.5)": 0,
+            "[0.5,1)": 0,
+            "[1,2)": 0,
+            "[2,3)": 0,
+            "[3,Infinity)": 0
+          }
+        },
+        "players": [
+          {
+            "playerId": "76561197973140692",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561197978835160",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561197989744167",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561197991272318",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561198012872053",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561198068002993",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561198080703143",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561198113666193",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561198309839541",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          },
+          {
+            "playerId": "76561199046478501",
+            "totalRawTeammateDuration": 0,
+            "uniqueTeammateVictims": 0
+          }
+        ],
+        "triggerPlayers": 0,
+        "finalKind": "context",
+        "finalRuleSemantics": "Repeated exact teammate-hit effects; raw duration is not continuous blind duration or flash quality score",
+        "severitySensitivity": [
+          {
+            "seconds": 0.1,
+            "effects": 0,
+            "rows": 0
+          },
+          {
+            "seconds": 0.5,
+            "effects": 0,
+            "rows": 0
+          },
+          {
+            "seconds": 1,
+            "effects": 0,
+            "rows": 0
+          },
+          {
+            "seconds": 2,
+            "effects": 0,
+            "rows": 0
+          },
+          {
+            "seconds": 3,
+            "effects": 0,
+            "rows": 0
+          }
+        ]
+      },
+      "verification": {
+        "contradictions": 0,
+        "inputIssues": 0,
+        "exactOccurrenceRefs": true,
+        "relatedRoundsOnlyOccurrences": true,
+        "deterministic": true,
+        "immutable": true
+      },
+      "emitted": [
+        {
+          "playerId": "76561197973140692",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.sole-survivor-sequence"
+          ],
+          "contexts": [
+            "deep.teamplay.no-followup-pattern"
+          ]
+        },
+        {
+          "playerId": "76561197978835160",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.sole-survivor-sequence",
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": [
+            "deep.teamplay.no-followup-pattern"
+          ]
+        },
+        {
+          "playerId": "76561197989744167",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": [
+            "deep.teamplay.lone-contact-death-pattern"
+          ]
+        },
+        {
+          "playerId": "76561197991272318",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.sole-survivor-sequence",
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": []
+        },
+        {
+          "playerId": "76561198012872053",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": [
+            "deep.teamplay.lone-contact-death-pattern"
+          ]
+        },
+        {
+          "playerId": "76561198068002993",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": []
+        },
+        {
+          "playerId": "76561198080703143",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": [
+            "deep.teamplay.lone-contact-death-pattern"
+          ]
+        },
+        {
+          "playerId": "76561198113666193",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": []
+        },
+        {
+          "playerId": "76561198309839541",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": [
+            "deep.teamplay.lone-contact-death-pattern"
+          ]
+        },
+        {
+          "playerId": "76561199046478501",
+          "reviews": [
+            "deep.execution.no-confirmed-return-pattern"
+          ],
+          "highlights": [
+            "deep.impact.multikill-swing"
+          ],
+          "contexts": []
+        }
+      ]
+    }
+  ],
+  "extendedMissing": [],
+  "ruleOverbreadthSummary": {
+    "execution": "Exact received-first refs include received-only; upstream role unchanged. High negative prevalence is a sanity signal, not proof of poor play or causal diagnosis",
+    "noFollow": "Confirmed same-Engagement membership does not prove LOS or trade opportunity; context",
+    "lone": "Direct-contact membership does not prove spatial isolation or wrong positioning; context",
+    "teamflash": "Exact raw effects do not prove negative flash quality; context; no severity heuristic introduced",
+    "dedup": "No teamplay window overlap merge; deterministic context priority and cap select distinct facts"
+  }
+}

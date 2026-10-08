@@ -1,6 +1,6 @@
 import type { Match } from "@cs2-analyst/match-model";
 import type { PlayerRoundMultiKillImpact } from "./impact-contracts.js";
-import type { DeepReviewEvidenceRef, DeepReviewFinding, DeepReviewFindingsAnalysis, DeepReviewRuleId, DeepReviewSuppressionReason } from "./findings-contracts.js";
+import type { DeepReviewFinding, DeepReviewFindingsAnalysis, DeepReviewRuleId, DeepReviewSuppressionReason } from "./findings-contracts.js";
 import { FINDINGS_POLICY, FINDINGS_RULES } from "./findings-policy.js";
 import type { FindingsPolicy } from "./findings-policy.js";
 import { findingSourceIndex, refKey, canonical } from "./findings-validation.js";
@@ -15,7 +15,7 @@ const partialCaveats = <T extends { [K in keyof T]: Layer }>(coverage: T, requir
 const quality = (caveats: string[]): "complete" | "partial" => caveats.some(c => c.startsWith("未用于此规则")) ? "partial" : "complete";
 const executionCaveat = "该 evidence 不等于人类反应时间或枪法评分。";
 const teamCaveat = "这不证明空间孤立、错误站位或队友具备支援条件。";
-const followCaveat = "这不是 P3 Trade 定义，也不证明存在可补枪条件。";
+const followCaveat = "这不是 P3 Trade 定义，不证明存在 LOS 或正式补枪机会；确认参与者属于整个 Engagement，不证明阵亡前已参与。";
 
 /** Public production entry: fixed policy, pure JS aggregation of validated inputs. */
 export function analyzeDeepReviewFindings(match: Match, playerId: string, inputs: FindingsInputs): DeepReviewFindingsAnalysis {
@@ -103,11 +103,11 @@ export function evaluateDeepReviewFindings(match: Match, playerId: string, input
 
   const pairs=source.executionValid ? inputs.execution.playerEngagementExecutions.filter(c=>c.playerId===playerId).flatMap(c=>c.opponentExchanges) : [];
   const executionRequired=["engagementLinkage","contactEvidence","returnContact"];
-  const eligiblePairs=pairs.filter(p=>p.firstContactRole==="received-first" && ["kill","damage","none-observed"].includes(p.returnOutcome)
+  // Findings eligibility uses exact refs; frozen Execution role remains unknown for one-sided contact.
+  const eligiblePairs=pairs.filter(p=>p.firstReceivedRef!==null && (p.firstDealtRef===null || p.firstReceivedRef.tick<p.firstDealtRef.tick) && ["kill","damage","none-observed"].includes(p.returnOutcome)
     && executionRequired.every(key=>complete(p.coverage[key as keyof typeof p.coverage])));
   const none=eligiblePairs.filter(p=>p.returnOutcome==="none-observed").length, success=eligiblePairs.length-none;
   const executionExcluded=pairs.length-eligiblePairs.length; result.coverage.excludedOccurrences+=executionExcluded;
-  const executionRefs: DeepReviewEvidenceRef[]=eligiblePairs.map(p=>({kind:"opponent-exchange",playerId,opponentId:p.opponentId,engagementId:p.engagementId}));
   const executionCaveats=eligiblePairs.flatMap(p=>partialCaveats(p.coverage,executionRequired));
   const negative=pattern("deep.execution.no-confirmed-return-pattern",source.executionValid,eligiblePairs.length,none,policy.pattern,executionExcluded);
   const positive=pattern("deep.execution.return-contact-consistent",source.executionValid,eligiblePairs.length,success,policy.positive,executionExcluded);
@@ -115,12 +115,14 @@ export function evaluateDeepReviewFindings(match: Match, playerId: string, input
     for(const rule of ["deep.execution.no-confirmed-return-pattern","deep.execution.return-contact-consistent"] as const) suppress(rule,"contradiction");
     result.diagnostics.contradictions.push("execution:opposing-patterns-on-same-denominator");
   } else if(negative || positive) {
+    const occurrences=eligiblePairs.filter(p=>negative?p.returnOutcome==="none-observed":["kill","damage"].includes(p.returnOutcome));
     add(negative?"deep.execution.no-confirmed-return-pattern":"deep.execution.return-contact-consistent",{
       category:"execution",kind:negative?"review":"highlight",title:negative?"先受接触后的反向接触回看":"确认反向接触记录",
       summary:negative?`在 ${eligiblePairs.length} 次有完整所需证据、你先受到确认接触的交火中，${none} 次未观察到你对同一对手形成确认反向接触。`
         :`在 ${eligiblePairs.length} 次先受到确认接触的可判定交火中，${success} 次随后对同一对手形成确认伤害或击杀。`,
-      occurrences:negative?none:success,eligibleOccurrences:eligiblePairs.length,relatedRounds:eligiblePairs.map(p=>p.round),evidenceRefs:executionRefs,
-      facts:{noneObserved:none,confirmedReturns:success,denominator:"directional-opponent-exchanges"},caveats:[executionCaveat,...executionCaveats] });
+      occurrences:negative?none:success,eligibleOccurrences:eligiblePairs.length,relatedRounds:occurrences.map(p=>p.round),
+      evidenceRefs:occurrences.map(p=>({kind:"opponent-exchange",playerId,opponentId:p.opponentId,engagementId:p.engagementId})),
+      facts:{noneObserved:none,confirmedReturns:success,receivedOnly:eligiblePairs.filter(p=>p.firstDealtRef===null).length,denominator:"exact-received-first-opponent-exchanges"},caveats:[executionCaveat,...executionCaveats] });
   }
   const deaths=source.teamplayValid ? inputs.teamplay.playerDeathContexts.filter(c=>c.playerId===playerId) : [];
   const loneRequired=["engagementParticipation","aliveState","followUpTiming"];
@@ -130,41 +132,30 @@ export function evaluateDeepReviewFindings(match: Match, playerId: string, input
   const lone=eligibleDeaths.filter(c=>c.onlyConfirmedSideParticipant===true && c.teamResponse.outcome==="none-observed");
   const loneExcluded=deaths.length-eligibleDeaths.length; result.coverage.excludedOccurrences+=loneExcluded;
   if(pattern("deep.teamplay.lone-contact-death-pattern",source.teamplayValid,eligibleDeaths.length,lone.length,policy.pattern,loneExcluded)) {
-    add("deep.teamplay.lone-contact-death-pattern",{category:"teamplay",kind:"review",title:"仅本人确认接触的死亡回看",
+    add("deep.teamplay.lone-contact-death-pattern",{category:"teamplay",kind:"context",title:"仅本人确认接触的死亡记录",
       summary:`在 ${eligibleDeaths.length} 次所需证据完整的死亡场景中，${lone.length} 次该 Engagement 中本方只有你产生确认 direct contact，随后也没有观察到队友对同一击杀者形成确认接触。`,
-      occurrences:lone.length,eligibleOccurrences:eligibleDeaths.length,relatedRounds:eligibleDeaths.map(c=>c.deathRef.round),
-      evidenceRefs:eligibleDeaths.map(c=>({kind:"player-death-response",playerId,deathRef:{...c.deathRef}})),
+      occurrences:lone.length,eligibleOccurrences:eligibleDeaths.length,relatedRounds:lone.map(c=>c.deathRef.round),
+      evidenceRefs:lone.map(c=>({kind:"player-death-response",playerId,deathRef:{...c.deathRef}})),
       facts:{loneContactDeaths:lone.length,followUpWindowSeconds:inputs.teamplay.config.followUpWindowSeconds},
       caveats:[teamCaveat,...eligibleDeaths.flatMap(c=>partialCaveats(c.coverage,loneRequired))] });
   }
   const responses=source.teamplayValid ? inputs.teamplay.teammateDeathResponses.filter(c=>c.playerId===playerId) : [];
-  const followRequired=["aliveState","followUpTiming"];
+  const followRequired=["engagementParticipation","aliveState","followUpTiming"];
   const eligibleResponses=responses.filter(c=>c.playerAliveAtDeath===true && c.killerState==="alive-after-death" && ["kill","damage","none-observed"].includes(c.outcome)
+    && c.sideParticipantCount!==null
     && followRequired.every(key=>complete(c.coverage[key as keyof typeof c.coverage])));
   const noFollow=eligibleResponses.filter(c=>c.outcome==="none-observed");
   const followExcluded=responses.length-eligibleResponses.length; result.coverage.excludedOccurrences+=followExcluded;
   if(pattern("deep.teamplay.no-followup-pattern",source.teamplayValid,eligibleResponses.length,noFollow.length,policy.pattern,followExcluded)) {
     const window=inputs.teamplay.config.followUpWindowSeconds;
-    add("deep.teamplay.no-followup-pattern",{category:"teamplay",kind:"review",title:"队友阵亡后的确认接触回看",
-      summary:`在 ${eligibleResponses.length} 次你存活且击杀者仍存活的队友阵亡场景中，${noFollow.length} 次在 ${window} 秒 evidence window 内没有观察到你对同一击杀者产生确认 direct contact。`,
-      occurrences:noFollow.length,eligibleOccurrences:eligibleResponses.length,relatedRounds:eligibleResponses.map(c=>c.deathRef.round),
-      evidenceRefs:eligibleResponses.map(c=>({kind:"teammate-death-response",playerId,teammateId:c.teammateId,deathRef:{...c.deathRef}})),
-      facts:{noneObserved:noFollow.length,followUpWindowSeconds:window},caveats:[followCaveat,...eligibleResponses.flatMap(c=>partialCaveats(c.coverage,followRequired))] });
+    add("deep.teamplay.no-followup-pattern",{category:"teamplay",kind:"context",title:"同 Engagement 队友阵亡后的接触记录",
+      summary:`在对应 Engagement 中有你的确认参与记录、且你与击杀者仍存活的 ${eligibleResponses.length} 次队友阵亡场景中，${noFollow.length} 次在 ${window} 秒 evidence window 内没有观察到你对同一击杀者产生确认 direct contact。确认参与仅指整个 Engagement 内存在 direct contact，不证明阵亡前已参与。`,
+      occurrences:noFollow.length,eligibleOccurrences:eligibleResponses.length,relatedRounds:noFollow.map(c=>c.deathRef.round),
+      evidenceRefs:noFollow.map(c=>({kind:"teammate-death-response",playerId,teammateId:c.teammateId,deathRef:{...c.deathRef}})),
+      facts:{noneObserved:noFollow.length,followUpWindowSeconds:window,denominator:"same-engagement-confirmed-participants"},caveats:[followCaveat,...eligibleResponses.flatMap(c=>partialCaveats(c.coverage,followRequired))] });
   }
-  // Distinct deaths cannot share a deathRef. Merge only shared scenes or overlapping
-  // absence windows against the exact same killer, never mere round coincidence.
-  const loneFinding=candidates.find(f=>f.ruleId==="deep.teamplay.lone-contact-death-pattern");
-  const followFinding=candidates.find(f=>f.ruleId==="deep.teamplay.no-followup-pattern");
-  const loneScenes=new Set(lone.flatMap(c=>c.engagementId?[c.engagementId]:[]));
-  const overlap=noFollow.filter(c=>c.engagementId!==null && loneScenes.has(c.engagementId) || lone.some(d=>d.deathRef.round===c.deathRef.round
-    && d.killerId!==null && d.killerId===c.killerId && d.deathRef.tick>c.deathRef.tick
-    && (d.deathRef.tick-c.deathRef.tick)/match.tickRate!<=inputs.teamplay.config.followUpWindowSeconds)).length;
-  if(loneFinding && followFinding && noFollow.length>0 && overlap/noFollow.length>=policy.dedup.minimumOverlapRate) {
-    loneFinding.facts.noFollowupOccurrences=noFollow.length; loneFinding.facts.noFollowupEligible=eligibleResponses.length; loneFinding.facts.overlappingSceneOccurrences=overlap;
-    loneFinding.evidenceRefs.push(...followFinding.evidenceRefs); loneFinding.relatedRounds=sortedUnique([...loneFinding.relatedRounds,...followFinding.relatedRounds]);
-    loneFinding.caveats=[...new Set([...loneFinding.caveats,...followFinding.caveats])].sort(); loneFinding.evidenceQuality=quality(loneFinding.caveats);
-    candidates.splice(candidates.indexOf(followFinding),1); suppress(followFinding.ruleId,"deduplicated");
-  }
+  // Lone deaths and teammate deaths have distinct occurrence identities. No
+  // window/round overlap merge: the context cap uses deterministic priority.
   const effects=source.utilityValid ? inputs.utility.effects.filter(c=>c.throwerId===playerId && c.directOutcome.kind==="flash") : [];
   const utilityRequired=["actorAttribution","directOutcome"];
   const exact=effects.filter(c=>c.directOutcome.kind==="flash" && c.directOutcome.linkage==="exact"
@@ -176,7 +167,7 @@ export function evaluateDeepReviewFindings(match: Match, playerId: string, input
   record(flashRule,exact.length,teamFlashes.length,flashTriggered);
   result.coverage.excludedOccurrences+=effects.length-exact.length;
   if(!flashTriggered) suppress(flashRule,!source.utilityValid || !exact.length && effects.length>0 ? "coverage-insufficient":"insufficient-occurrences");
-  else add(flashRule,{category:"utility",kind:"review",title:"重复队友受闪记录",summary:`有 ${teamFlashes.length} 颗可精确关联的闪光影响了队友，共记录 ${teammateEffects} 条队友受闪效果。`,
+  else add(flashRule,{category:"utility",kind:"context",title:"重复队友受闪记录",summary:`有 ${teamFlashes.length} 颗可精确关联的闪光影响了队友，共记录 ${teammateEffects} 条队友受闪效果；这些事实不判断闪光质量。`,
     occurrences:teamFlashes.length,eligibleOccurrences:exact.length,relatedRounds:teamFlashes.map(c=>c.effectRef.round),
     evidenceRefs:teamFlashes.map(c=>({kind:"utility-effect",effectRef:{...c.effectRef}})),facts:{exactFlashEffects:exact.length,teamFlashEffects:teamFlashes.length,teammateEffects},
     caveats:["rawBlindDuration 不等于 continuous blind duration；受闪效果次数不代表闪光质量评分。",...teamFlashes.flatMap(c=>partialCaveats(c.coverage,utilityRequired))] });

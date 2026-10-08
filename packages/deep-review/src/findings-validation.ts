@@ -280,6 +280,16 @@ export function findingSourceIndex(match: Match, inputs: FindingsInputs) {
     for (const c of t.teammateDeathResponses) {
       const r=raw(c.deathRef);
       if (!r || r.type!=="kill" || r.victim!==c.teammateId || (validId(r.killer)?r.killer:null)!==c.killerId) {teamplayValid=false; continue;}
+      if (complete(c.coverage.engagementParticipation)) {
+        const g=e.engagements.find(g=>g.id===c.engagementId && g.contacts.some(z=>refKey(z.eventRef)===refKey(c.deathRef)));
+        const peers=g ? g.participantIds.filter(id=>g.contacts.some(z=>{
+          const event=raw(z.eventRef); if(!event || (event.type!=="kill"&&event.type!=="damage")) return false;
+          return z.attackerId===id && (event.type==="kill"?event.killerSide:event.attackerSide)===r.victimSide
+            || z.victimId===id && event.victimSide===r.victimSide;
+        })) : [];
+        if(!g || !feedComplete(c.deathRef.round,false) || !peers.includes(c.playerId) || c.sideParticipantCount!==peers.length
+          || c.onlyConfirmedSideParticipant!==(peers.length===1 && peers[0]===c.playerId)) teamplayValid=false;
+      }
       if (complete(c.coverage.aliveState) && complete(c.coverage.followUpTiming) && ["kill","damage","none-observed"].includes(c.outcome)) {
         const player=k.rounds.find(s=>s.round===c.deathRef.round)?.players.find(p=>p.playerId===c.playerId);
         if (c.playerAliveAtDeath!==true || c.killerState!=="alive-after-death" || !player || player.side!==r.victimSide

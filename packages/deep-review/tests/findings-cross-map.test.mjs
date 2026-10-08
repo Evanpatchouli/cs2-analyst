@@ -54,8 +54,11 @@ function ruleReport(outputs,policy=FINDINGS_POLICY) {
     const triggered=outputs.filter(a=>a.diagnostics.rules.find(d=>d.ruleId===ruleId).triggered);
     const emitted=outputs.filter(a=>findings(a).some(f=>f.ruleId===ruleId));
     const triggerRate=eligible.length?triggered.length/eligible.length:null;
-    return {ruleId,playersEligible:eligible.length,playersTriggered:triggered.length,playersEmitted:emitted.length,triggerRate,
-      warning:patternRules.includes(ruleId)||ruleId.endsWith('teamflash-repeated')?triggerRate!==null && triggerRate>policy.overbreadthRate?'overbreadth-review-required':null:null};
+    const finalKind=ruleId==='deep.execution.no-confirmed-return-pattern'?'review'
+      : ruleId.startsWith('deep.teamplay.') || ruleId.endsWith('teamflash-repeated') || ruleId.endsWith('multikill-unconverted')?'context':'highlight';
+    return {ruleId,finalKind,playersEligible:eligible.length,playersTriggered:triggered.length,playersEmitted:emitted.length,triggerRate,
+      warning:patternRules.includes(ruleId)||ruleId.endsWith('teamflash-repeated')?triggerRate!==null && triggerRate>policy.overbreadthRate
+        ?finalKind==='review'?'overbreadth-review-required':'high-trigger-rate-context-observation':null:null};
   });
 }
 const report={schemaVersion:1,purpose:'Development diagnostics, not production golden or skill comparisons',personalDemCompatibility:'UNVERIFIED',train:'REMOVED / NOT REQUIRED',policy:FINDINGS_POLICY,maps:[],aggregateRules:[],thresholdSensitivity:[],manualEvidenceInspection:[]};
@@ -79,16 +82,18 @@ test('four professional fixtures: one parse each, same production rules, exact r
       const rows=findings(player);assert.equal(new Set(rows.map(f=>f.ruleId)).size,rows.length);
       for(const f of rows) for(const ref of f.evidenceRefs) assert.equal(sourceFor(ref,a).length,1);
       for(const f of rows) {
+        const occurrenceRounds=f.evidenceRefs.flatMap(ref=>sourceFor(ref,a).map(s=>s.round??s.eventRef?.round??s.deathRef?.round??s.effectRef?.round));
+        assert.deepEqual(f.relatedRounds,[...new Set(occurrenceRounds)].sort((a,b)=>a-b));
         if(f.ruleId==='deep.execution.no-confirmed-return-pattern' || f.ruleId==='deep.execution.return-contact-consistent') {
-          const sources=f.evidenceRefs.map(ref=>sourceFor(ref,a)[0]);assert.equal(sources.length,f.eligibleOccurrences);
+          const sources=f.evidenceRefs.map(ref=>sourceFor(ref,a)[0]);assert.equal(sources.length,f.occurrences);
           assert.equal(sources.filter(p=>f.kind==='review'?p.returnOutcome==='none-observed':['kill','damage'].includes(p.returnOutcome)).length,f.occurrences);
         }
         if(f.ruleId==='deep.teamplay.lone-contact-death-pattern') {
-          const sources=f.evidenceRefs.filter(ref=>ref.kind==='player-death-response').map(ref=>sourceFor(ref,a)[0]);assert.equal(sources.length,f.eligibleOccurrences);
+          const sources=f.evidenceRefs.filter(ref=>ref.kind==='player-death-response').map(ref=>sourceFor(ref,a)[0]);assert.equal(sources.length,f.occurrences);
           assert.equal(sources.filter(c=>c.onlyConfirmedSideParticipant===true&&c.teamResponse.outcome==='none-observed').length,f.occurrences);
         }
         if(f.ruleId==='deep.teamplay.no-followup-pattern') {
-          const sources=f.evidenceRefs.map(ref=>sourceFor(ref,a)[0]);assert.equal(sources.length,f.eligibleOccurrences);
+          const sources=f.evidenceRefs.map(ref=>sourceFor(ref,a)[0]);assert.equal(sources.length,f.occurrences);
           assert.equal(sources.filter(c=>c.outcome==='none-observed').length,f.occurrences);
         }
         if(f.ruleId==='deep.utility.teamflash-repeated') {

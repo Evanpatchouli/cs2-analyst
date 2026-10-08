@@ -7,6 +7,60 @@ import { findingSourceIndex, jsonSafe } from '../dist/findings-validation.js';
 import {match,inputs,run,all,rule,suppression,damage,kill,swing,noReturn,returns,lone,noFollow,flashes,flash} from './findings-fixture.mjs';
 const repeat=(n,f)=>Array.from({length:n},()=>f());
 const evaluate=(m,a)=>analyzeDeepReviewFindings(m,'1',a);
+
+const receivedOnly=()=>[damage(100,'6','1')];
+const confirmedFollow=()=>[damage(90,'1','6'),...noFollow()];
+const successfulFollow=()=>[...confirmedFollow(),damage(200,'1','6')];
+const exchangeFor=(ref,a)=>a.execution.playerEngagementExecutions.flatMap(c=>c.opponentExchanges).find(p=>p.playerId===ref.playerId&&p.opponentId===ref.opponentId&&p.engagementId===ref.engagementId);
+const roundsFromRefs=(f,a)=>[...new Set(f.evidenceRefs.map(ref=>ref.deathRef?.round??ref.effectRef?.round??exchangeFor(ref,a)?.round))].sort((a,b)=>a-b);
+
+test('received-only unknown role is a legitimate negative occurrence; denominator-only rounds are absent',()=>{
+  const m=match([...repeat(3,receivedOnly),...repeat(2,returns)]),a=inputs(m),r=evaluate(m,a),f=rule(r,'no-confirmed-return-pattern');
+  assert.ok(f);assert.equal(f.eligibleOccurrences,5);assert.equal(f.occurrences,3);
+  for(const ref of f.evidenceRefs) {const p=exchangeFor(ref,a);assert.ok(p.firstReceivedRef);assert.equal(p.firstDealtRef,null);assert.equal(p.firstContactRole,'unknown');assert.equal(p.returnOutcome,'none-observed');}
+  assert.deepEqual(f.relatedRounds,[1,2,3]);assert.deepEqual(f.relatedRounds,roundsFromRefs(f,a));
+  const only=run(match(repeat(5,receivedOnly)));assert.equal(rule(only,'no-confirmed-return-pattern').occurrences,5);
+});
+
+test('positive refs include only later damage/kill successes; received-only and same tick are excluded from refs',()=>{
+  const m=match([...repeat(2,returns),...repeat(2,()=>[damage(100,'6','1'),kill(110,'1','6')]),receivedOnly(),[damage(100,'6','1'),damage(100,'1','6')]]),a=inputs(m),f=rule(evaluate(m,a),'return-contact-consistent');
+  assert.ok(f);assert.equal(f.eligibleOccurrences,5);assert.equal(f.occurrences,4);
+  assert.deepEqual(f.relatedRounds,[1,2,3,4]);assert.deepEqual(f.relatedRounds,roundsFromRefs(f,a));
+  f.evidenceRefs.forEach(ref=>assert.ok(['kill','damage'].includes(exchangeFor(ref,a).returnOutcome)));
+});
+
+test('lone context refs include only lone occurrences, never denominator-only deaths',()=>{
+  const m=match([...repeat(3,lone),...repeat(2,()=>[damage(90,'2','6'),...lone(),damage(160,'2','6')])]),a=inputs(m),f=rule(evaluate(m,a),'lone-contact-death-pattern');
+  assert.ok(f);assert.equal(f.kind,'context');assert.equal(f.eligibleOccurrences,5);assert.equal(f.evidenceRefs.length,3);
+  assert.deepEqual(f.relatedRounds,[1,2,3]);assert.deepEqual(f.relatedRounds,roundsFromRefs(f,a));
+  f.evidenceRefs.forEach(ref=>{const c=a.teamplay.playerDeathContexts.find(c=>c.playerId===ref.playerId&&c.deathRef.round===ref.deathRef.round);assert.equal(c.onlyConfirmedSideParticipant,true);assert.equal(c.teamResponse.outcome,'none-observed');});
+});
+
+test('no-follow context refs contain only actual none occurrences in confirmed Engagements',()=>{
+  const m=match([...repeat(3,confirmedFollow),...repeat(2,successfulFollow),noFollow()]),a=inputs(m),f=rule(evaluate(m,a),'no-followup-pattern');
+  assert.ok(f);assert.equal(f.kind,'context');assert.equal(f.eligibleOccurrences,5);assert.equal(f.evidenceRefs.length,3);
+  assert.deepEqual(f.relatedRounds,[1,2,3]);assert.deepEqual(f.relatedRounds,roundsFromRefs(f,a));
+  f.evidenceRefs.forEach(ref=>{const c=a.teamplay.teammateDeathResponses.find(c=>c.playerId===ref.playerId&&c.deathRef.round===ref.deathRef.round);assert.equal(c.outcome,'none-observed');assert.notEqual(c.sideParticipantCount,null);});
+});
+
+test('context competition uses fixed priority without combining distinct occurrences',()=>{
+  const m=match([...repeat(5,lone),...repeat(5,confirmedFollow),flashes()]),a=run(m);
+  assert.equal(a.contexts.length,1);assert.equal(a.contexts[0].ruleId,'deep.teamplay.lone-contact-death-pattern');
+  assert.ok(a.contexts[0].evidenceRefs.every(r=>r.kind==='player-death-response'));
+  assert.equal(suppression(a,'no-followup-pattern'),'max-count-reached');assert.equal(suppression(a,'teamflash-repeated'),'max-count-reached');
+});
+
+test('forged same-Engagement membership/count/identity cannot manufacture no-follow context',()=>{
+  for(const [events,mutate] of [
+    [noFollow,c=>{c.sideParticipantCount=1;c.coverage.engagementParticipation={status:'complete',reasons:[]};}],
+    [confirmedFollow,c=>{c.sideParticipantCount++;}],
+    [confirmedFollow,c=>{c.engagementId='unlinked';}],
+  ]) {
+    const m=match(repeat(5,events)),a=inputs(m);
+    a.teamplay.teammateDeathResponses.filter(c=>c.playerId==='1').forEach(mutate);
+    const r=evaluate(m,a);assert.equal(rule(r,'no-followup-pattern'),undefined);assert.ok(r.diagnostics.inputIssues.includes('teamplay:stale-or-conflicting-source'));
+  }
+});
 test('Scenario A: winning 3K with equalizer and advantage gain yields highlight without clutch',()=>{
   const m=match([swing()]),a=run(m),f=rule(a,'multikill-swing');
   assert.ok(f,JSON.stringify(a));assert.equal(f.facts.equalizer,true);assert.equal(f.facts.advantageGain,true);
@@ -46,33 +100,37 @@ test('contradiction guard suppresses both patterns and records diagnostic',()=>{
   assert.equal(suppression(r,'no-confirmed-return-pattern'),'contradiction');assert.equal(suppression(r,'return-contact-consistent'),'contradiction');
   assert.equal(r.diagnostics.contradictions.length,1);assert.equal(r.reviews.length,0);
 });
-test('same-tick and unavailable exchanges are excluded; one-sided role stays unknown',()=>{
+test('same-tick and unavailable exchanges are excluded; received-only role stays unknown but is eligible',()=>{
   const m=match([...repeat(4,returns),[damage(100,'6','1'),damage(100,'1','6')],[damage(100,'6','1')]]),a=inputs(m),r=evaluate(m,a);
-  assert.equal(r.diagnostics.rules.find(d=>d.ruleId.endsWith('return-contact-consistent')).eligibleOccurrences,4);
-  assert.equal(rule(r,'return-contact-consistent'),undefined);
+  assert.equal(r.diagnostics.rules.find(d=>d.ruleId.endsWith('return-contact-consistent')).eligibleOccurrences,5);
+  assert.ok(rule(r,'return-contact-consistent'));
   const row=a.execution.playerEngagementExecutions.find(c=>c.playerId==='1').opponentExchanges[0];row.returnOutcome='unavailable';row.coverage.returnContact={status:'unavailable',reasons:['return-contact-unavailable']};
-  assert.equal(evaluate(m,a).diagnostics.rules.find(d=>d.ruleId.endsWith('return-contact-consistent')).eligibleOccurrences,3);
+  assert.equal(evaluate(m,a).diagnostics.rules.find(d=>d.ruleId.endsWith('return-contact-consistent')).eligibleOccurrences,4);
 });
 test('Scenario C: lone-contact death pattern with normal return evidence stays teamplay',()=>{
   const a=run(match(repeat(5,lone)));assert.ok(rule(a,'lone-contact-death-pattern'),JSON.stringify(a));
   assert.ok(rule(a,'return-contact-consistent'));assert.equal(rule(a,'no-confirmed-return-pattern'),undefined);
   assert.ok(rule(a,'lone-contact-death-pattern').caveats.some(c=>c.includes('不证明空间孤立')));
 });
-test('no-followup uses alive player/killer and product window, not formal Trade',()=>{
-  const a=run(match(repeat(5,noFollow))),f=rule(a,'no-followup-pattern');assert.ok(f,JSON.stringify(a));
+test('no-followup requires confirmed same-Engagement membership and remains context',()=>{
+  assert.equal(rule(run(match(repeat(5,noFollow))),'no-followup-pattern'),undefined);
+  const a=run(match(repeat(5,()=>[damage(90,'1','6'),...noFollow()]))),f=rule(a,'no-followup-pattern');assert.ok(f,JSON.stringify(a));
+  assert.equal(f.kind,'context');
   assert.equal(f.facts.followUpWindowSeconds,5);assert.ok(f.caveats.some(c=>c.includes('不是 P3 Trade')));
 });
-test('teamplay dedup merges overlapping same-killer absence windows',()=>{
+test('distinct teamplay occurrences do not merge through overlapping windows or rounds',()=>{
   const rows=()=>[kill(100,'6','2'),kill(350,'6','1')];
   const m=match(repeat(5,rows)),a=inputs(m);
   const r=evaluate(m,a);assert.ok(rule(r,'lone-contact-death-pattern'),JSON.stringify(r));assert.equal(rule(r,'no-followup-pattern'),undefined);
-  assert.equal(suppression(r,'no-followup-pattern'),'deduplicated');
-  assert.equal(rule(r,'lone-contact-death-pattern').facts.noFollowupOccurrences,5);
+  assert.equal(suppression(r,'no-followup-pattern'),'coverage-insufficient');
+  assert.equal(rule(r,'lone-contact-death-pattern').kind,'context');
+  assert.equal(rule(r,'lone-contact-death-pattern').facts.noFollowupOccurrences,undefined);
   const separate=run(match(repeat(5,()=>[kill(100,'6','2'),kill(350,'7','1')])));
-  assert.ok(rule(separate,'lone-contact-death-pattern'));assert.ok(rule(separate,'no-followup-pattern'));
+  assert.ok(rule(separate,'lone-contact-death-pattern'));assert.equal(rule(separate,'no-followup-pattern'),undefined);
 });
 test('exact repeated teamflash: three effects and six teammate rows; ambiguous excluded',()=>{
   const m=match([flashes()]),a=run(m),f=rule(a,'teamflash-repeated');assert.ok(f,JSON.stringify(a));
+  assert.equal(f.kind,'context');assert.equal(a.reviews.length,0);
   assert.equal(f.occurrences,3);assert.equal(f.facts.teammateEffects,6);assert.ok(f.caveats.some(c=>c.includes('continuous blind duration')));
   const ambiguous=run(match([[...flashes(),...flash(1,400)]]));assert.equal(rule(ambiguous,'teamflash-repeated'),undefined);
   assert.equal(rule(run(match([[...flash(1,100,['2']),...flash(2,200,['2']),...flash(3,300,['2'])]])),'teamflash-repeated'),undefined);

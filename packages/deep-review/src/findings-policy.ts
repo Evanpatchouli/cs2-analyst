@@ -7,14 +7,13 @@ export const FINDINGS_POLICY = {
   positive: { minimumEligible: 5, minimumOccurrences: 4, minimumRate: 0.6 },
   impact: { minimumKills: 2, unconvertedMinimumKills: 3 },
   teamflash: { minimumEffects: 3, minimumTeammateEffects: 5 },
-  dedup: { minimumOverlapRate: 0.5 },
   caps: { review: 3, highlight: 2, context: 1 },
   overbreadthRate: 0.5,
   priority: {
     "deep.execution.no-confirmed-return-pattern": 0,
     "deep.teamplay.lone-contact-death-pattern": 1,
-    "deep.teamplay.no-followup-pattern": 2,
-    "deep.utility.teamflash-repeated": 3,
+    "deep.teamplay.no-followup-pattern": 3,
+    "deep.utility.teamflash-repeated": 2,
     "deep.impact.sole-survivor-sequence": 0,
     "deep.impact.multikill-swing": 1,
     "deep.execution.return-contact-consistent": 2,
@@ -27,7 +26,6 @@ export type FindingsPolicy = {
   positive: { minimumEligible: number; minimumOccurrences: number; minimumRate: number };
   impact: { minimumKills: number; unconvertedMinimumKills: number };
   teamflash: { minimumEffects: number; minimumTeammateEffects: number };
-  dedup: { minimumOverlapRate: number };
   caps: { review: number; highlight: number; context: number };
   overbreadthRate: number;
   priority: Record<DeepReviewRuleId, number>;

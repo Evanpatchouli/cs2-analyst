@@ -20,6 +20,7 @@ export interface DeepReviewFinding {
   kind: "highlight" | "review" | "context";
   title: string; summary: string;
   occurrences: number; eligibleOccurrences: number | null;
+  /** Only triggering occurrences, never denominator-only rows. Every round has occurrence evidence. */
   relatedRounds: number[]; evidenceRefs: DeepReviewEvidenceRef[];
   facts: Record<string, string | number | boolean | null>;
   evidenceQuality: "complete" | "partial"; caveats: string[];

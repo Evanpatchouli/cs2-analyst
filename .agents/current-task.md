@@ -1,5 +1,16 @@
 # Current Task
 
+## 2026-10-09 — P5.7.7.1 Calibration / Semantic Repair PASS
+
+- Baseline `bae40582e1156fe5187248719a42d536aec543d1`; **P5.7.7 PASS**. Original implementation technically valid, product calibration exposed overbroad/misaligned rules; history below retained. P5.7.8 **NOT STARTED / HOLD**. Final Acceptance PAUSED; P5.7.0 PARTIAL PASS; P5.7.1–6 PASS.
+- Findings exact received-first refs admit received-only unknown-role rows; P5.7.6 unchanged. Core eligible 101/112/109/110, negative 7/9/9/10, positive 1/0/0/0. Fixed thresholds/contradiction guard unchanged; high negative rate recorded as sanity observation, no skill diagnosis.
+- No-follow old eligible/none 235/200,323/286,285/239,283/238 → same-Engagement 52/20,55/23,79/37,56/18; triggers 10each→1/4/5/1. Whole-Engagement membership is not death-before opportunity/LOS/P3Trade; **context**, exact membership/count source gate. Lone **context** existing gate; teamflash **context**, no raw severity heuristic. No distance inference/threshold tuning.
+- Occurrence-only evidenceRefs/relatedRounds; negative none, positive success, lone/noFollow actual occurrences. Every relatedRound has emitted evidence. Old teamplay window overlap merge removed; context priority impact/lone/flash/follow, caps3/2/1.
+- Seven maps exact refs/no contradictions/deterministic/immutable PASS; core mandatory, extended ancient/anubis/overpass one-time observations with identity records; no permanent extended gate. Train REMOVED / NOT REQUIRED, never run. docs/deep-review-findings-calibration.json plus regenerated core/Nuke reports.
+- Independent final review PASS after fixing forged membership vulnerability. 33 synthetic PASS; typecheck12/12, build7/7, model contracts PASS; parser39, analytics53, V1 findings17, deep-review210, desktop17 PASS, zero FAIL/SKIP; demo1 historical goldens run. No installer/Renderer E2E.
+- Personal matchmaking / Perfect World DEM UNVERIFIED; native feed completeness/entity freshness/other modes/peak memory UNKNOWN. Still needs confirmed personal DEM before Final Acceptance. Focused commit `fix(analysis): calibrate deep review findings`; no amend/squash/push.
+
+
 ## 2026-10-09 — P5.7.7 Findings V2
 
 - Current: **P5.7.7 implementation complete / product acceptance pending**。P5.7.0 **PARTIAL PASS**，P5.7.1–P5.7.6 **PASS**；P5.7.8 **next**，本轮不实施；Final Acceptance **PAUSED**。
