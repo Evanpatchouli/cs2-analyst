@@ -2,7 +2,17 @@
 
 Status: v0.1 Final Acceptance **PAUSED — Deep Review product gap discovered**。
 
-Current: **P5.7 Deep Review / P5.7.3 Kill / Multi-kill Impact**；实现与Nuke结构验证完成，产品验收待定。
+Current: **P5.7 Deep Review / P5.7.4 Teamplay / Decision Evidence**；实现与Nuke结构验证完成，产品验收待定。
+
+## 2026-10-08 — P5.7.4
+
+- 基线 `7b8700ae45aa3196fc1f2b142dbfeb9d3f5d2abd`；正式状态P5.7.0 **PARTIAL PASS**、P5.7.1 / P5.7.2 / P5.7.3 **PASS**；P5.7.4当前任务；Final Acceptance继续 **PAUSED**。
+- 仅deep-review生产新增独立TeamplayAnalysis/contracts；依赖仍仅match-model，复用Engagement direct contacts与KillImpact deterministic alive timeline。first role/atomic tiers/加入delay只表达直接接触；无评分、coaching、AI、Aim、LOS、nav/map geometry，P3/Findings V1/Renderer/Electron/packaging不变。
+- 双向同killer后续damage/kill，strict later、同formal round、可配置默认5s，unknown tickRate不猜64；首response与window kill结果分别保留refs。dead-before/dies-same-tick killer无none-observed；同tick存活未知从alive spatial/responder候选排除；raw/stale feed incomplete不制造negative absence。
+- 空间exact eventRef+at-event requested/actual tick，alive truth优先RoundAliveState、entity alive仅diagnostic；XY/Z/XYZ facts、SteamID tie。缺Spatial事件分析稳定，distance不等于supportability，Nuke上下楼必须保留Z。
+- Nuke284contexts：162unique/0shared/51later/71unknown、160only confirmed；568teammate pairs=31kill/17damage/200none/0ambiguous/320unavailable；142player deaths=31team kill/15damage/70none/0ambiguous/26unavailable。994去重spatial contexts=423complete/571partial，571same-tick teammate alive排除occurrences，0alive conflicts；原点与participant first-contact抽样均exact。没有real shared-first/same-tick response/posthumous，null样本+synthetic-only说明；71unknown由不可识别direct候选回合级保守门控。
+- docs/teamplay-evidence.md与docs/deep-review-teamplay-nuke.json含定义、raw refs/IDs/ticks、人数、完整距离、coverage和自动结构抽样；数据人工复核不是画面回放。Personal DEM **UNVERIFIED**、事件完整性/entity freshness/其他录制模式/峰内存UNKNOWN，Deep Review FINAL前补个人样本+demo1。
+- typecheck12/12、build7/7、match-model contracts PASS；dem-parser38/1SKIP、analytics48/5、findings16/1、deep-review83/0（35synthetic+Nuke）、desktop16/1，0FAIL；8SKIP均缺demo1。独立review发现并修复source completeness/orphan membership/unavailable damage-null，最终复审PASS无遗留finding。完成后focused commit `feat(analysis): add teamplay evidence`，不push；不进入P5.7.5/Findings V2，无installer E2E。
 
 ## 2026-10-08 — P5.7.3
 

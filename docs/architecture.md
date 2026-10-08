@@ -9,7 +9,7 @@ CS2 Analyst is structured as a desktop application with a deterministic analysis
 - `dem-parser`: CS2 DEM parsing adapter layer
 - `match-model`: domain models for matches, rounds and players
 - `analytics`: deterministic metrics calculation
-- `deep-review`: deterministic Engagement segmentation and death-state Kill / Multi-kill evidence
+- `deep-review`: deterministic Engagement segmentation, death-state Kill / Multi-kill and Teamplay evidence
 - `findings`: pattern detection and coaching evidence
 - `report-contract`: JSON-only Electron/Renderer presentation DTO (types only)
 
@@ -33,7 +33,9 @@ P5.7.2 adds `deep-review`, depending only on match-model in production: `dem-par
 
 P5.7.3 adds independent `resolveRoundAliveState(Round)` and `analyzeKillImpact(Match, optional EngagementAnalysis)` in deep-review. Freeze-end/start fallback roster evidence and formal victim deaths drive atomic same-tick groups; invalid roster/lifecycle/death/end evidence suppresses counts. Enemy attribution and four-key Engagement linkage have separate coverage. Round multi-kills retain state transitions and final round result without scores, causality or coaching. Spatial evidence is not required. P3 Opening/Clutch/multiKills, Findings V1 and Renderer remain frozen. Contracts, tests and Nuke samples: [Kill impact analysis](./kill-impact-analysis.md).
 
-v0.1 Final Acceptance is **PAUSED — Deep Review product gap discovered**; current work is **P5.7 Deep Review / P5.7.3 Kill / Multi-kill Impact** (implemented, Nuke structural verification complete; product acceptance pending). P5.7.0 is **PARTIAL PASS — GOTV verified, personal DEM compatibility pending**. P5.7.1 and P5.7.2 are **PASS**; personal DEM compatibility remains **UNVERIFIED**, required before Deep Review FINAL Acceptance. Repository: `Evanpatchouli/cs2-analyst`.
+P5.7.4 adds `analyzeTeamplay(Match, optional EngagementAnalysis, optional KillImpactAnalysis, optional MatchSpatialEvidence, options)` returning independent TeamplayAnalysis. Direct-contact first roles/atomic participant tiers, two-way death follow-up evidence and before/after death counts remain deterministic facts. Default configurable 5s evidence window requires reliable tickRate; dead-before/same-tick killers and ambiguous player state cannot generate negative absence claims. Spatial enrichment uses exact event/sample ticks, deterministic alive-state eligibility and raw XY/Z/XYZ distances; distance never implies supportability, especially across Nuke floors. Four coverage layers preserve event response without Spatial, and incomplete feeds cannot manufacture first-role/none-observed evidence. No P3/Findings V1/desktop changes or scores/coaching. Contracts, structural tests and automatic samples: [Teamplay evidence](./teamplay-evidence.md).
+
+v0.1 Final Acceptance is **PAUSED — Deep Review product gap discovered**; current work is **P5.7 Deep Review / P5.7.4 Teamplay / Decision Evidence** (implemented, Nuke structural verification complete; product acceptance pending). P5.7.0 is **PARTIAL PASS — GOTV verified, personal DEM compatibility pending**. P5.7.1, P5.7.2 and P5.7.3 are **PASS**; personal DEM compatibility remains **UNVERIFIED**, required before Deep Review FINAL Acceptance. Repository: `Evanpatchouli/cs2-analyst`.
 
 `analytics` implements the P3 deterministic player and combat metrics and depends only on `match-model` domain types. Round windowing and roster coverage are centralized in `packages/analytics/src/coverage.ts` so individual metrics do not re-implement eligibility; the shared survival/trade timeline for KAST, Trade and Clutch lives in `packages/analytics/src/timeline.ts`. Definitions and limits: [analytics metrics](./analytics-metrics.md).
 

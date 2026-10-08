@@ -1,5 +1,16 @@
 # Agent Handoff
 
+## 2026-10-08 — P5.7.4 Teamplay / Decision Evidence
+
+- 基线 `7b8700ae45aa3196fc1f2b142dbfeb9d3f5d2abd`；P5.7.0 **PARTIAL PASS**、P5.7.1 / P5.7.2 / P5.7.3 **PASS**；P5.7.4当前任务实现/GOTV结构验证完成，产品验收待定；Final Acceptance仍 **PAUSED**。
+- 新入口analyzeTeamplay独立JSON-only TeamplayAnalysis，生产仅依赖match-model；Engagement contacts决定角色/atomic tiers，KillImpact RoundAliveState决定死亡时资格/人数。默认5s可配置finite>0，unknown时钟不猜64。无P3/Findings V1/桌面集成或评分/解释。
+- 两方向同killer contact响应，strict later/formal round/window，firstContact与kill/damage结果ref可不同，team first responder按tick/SteamID/index确定性表示而不宣称subtick顺序。same tick refs单列、不当0秒follow-up；dead-before/dies-same-tick killer unavailable、same-tick player alive=null。完整none-observed只表示没有观察到直接响应，不是failed trade。
+- 空间exact event四键与actual/requested at-event tick；只在确定存活完整位置候选中选XYZ最近，保留XY和absZ，缺位置partial，same-tick death排除+IDs，entity alive只作一致性检查。Nuke上下楼distance不能推断supportability。
+- Nuke284contexts（162unique/0shared/51later/71unknown）、160only confirmed；568teammate pairs（31kill/17damage/200none/0ambiguous/320unavailable）、142player deaths/team responses（31kill/15damage/70none/0ambiguous/26unavailable）。994spatial contexts：423complete/571partial，571same-tick alive exclusion occurrences、0entity conflicts。独立tiers/window/refs/geometry oracle、no-spatial投影、determinism/immutability全PASS。
+- 自动structural samples只按predicate选择；shared-first、same-tick response、posthumous killer实样本不存在=null，由synthetic覆盖。71unknown为无法识别direct候选的回合保守完整性门控。docs/deep-review-teamplay-nuke.json及docs/teamplay-evidence.md保留自动抽样与人工数据复核（不是画面复盘），并明确垂直地图限制。
+- 验证：typecheck12/12、build7/7、match-model contracts PASS；dem-parser38PASS/1SKIP、analytics48/5、findings16/1、deep-review83/0、desktop16/1，0FAIL。8SKIP均缺demo1，golden本轮未运行。独立review修复遗漏合法direct rows/partial feed假阴性、orphan membership误报first role、unavailable damage=0；回归及最终复审PASS无遗留finding。
+- focused commit `feat(analysis): add teamplay evidence`，不push。Personal DEM **UNVERIFIED**，feed completeness/entity freshness/峰内存/其他录制模式UNKNOWN，Deep Review FINAL前仍须个人DEM+demo1。无当前实现blocker；不运行installer E2E、不进入P5.7.5/Findings V2。
+
 ## 2026-10-08 — P5.7.3 Kill / Multi-kill Impact
 
 - 基线 `c0b559c23c98a8652dca2d401b70208521f73089`；正式P5.7.0 **PARTIAL PASS**、P5.7.1 **PASS**、P5.7.2 **PASS**；P5.7.3当前任务实现/GOTV结构验证完成，产品验收待定；Final Acceptance继续 **PAUSED**。

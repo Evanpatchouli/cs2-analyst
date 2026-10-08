@@ -1,0 +1,979 @@
+{
+  "fixtureSha256": "dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c",
+  "analysisHash": "2db275e01865dcfae120db9583fbdbe1ecdd46a294a09658ff3fa0d259e2fb7d",
+  "config": {
+    "followUpWindowSeconds": 5
+  },
+  "diagnostics": {
+    "playerEngagementContexts": 284,
+    "uniqueFirst": 162,
+    "sharedFirst": 0,
+    "later": 51,
+    "unknownFirst": 71,
+    "onlyConfirmedSideParticipant": 160,
+    "teammateDeathsObserved": 568,
+    "teammateDeathResponsesKill": 31,
+    "teammateDeathResponsesDamage": 17,
+    "teammateDeathResponsesNone": 200,
+    "teammateDeathResponsesAmbiguous": 0,
+    "teammateDeathResponsesUnavailable": 320,
+    "playerDeathsObserved": 142,
+    "teamResponsesKill": 31,
+    "teamResponsesDamage": 15,
+    "teamResponsesNone": 70,
+    "teamResponsesAmbiguous": 0,
+    "teamResponsesUnavailable": 26,
+    "spatialContextsComplete": 423,
+    "spatialContextsPartial": 571,
+    "spatialContextsUnavailable": 0,
+    "sameTickAliveAmbiguities": 571,
+    "spatialAliveConflicts": 0
+  },
+  "coverage": {
+    "engagementParticipation": {
+      "status": "partial",
+      "reasons": [
+        "engagement-evidence-incomplete",
+        "engagement-not-linked"
+      ]
+    },
+    "aliveState": {
+      "status": "partial",
+      "reasons": [
+        "player-dead-before"
+      ]
+    },
+    "followUpTiming": {
+      "status": "partial",
+      "reasons": [
+        "engagement-evidence-incomplete",
+        "player-dead-before"
+      ]
+    },
+    "spatialContext": {
+      "status": "partial",
+      "reasons": [
+        "same-tick-alive-ambiguous"
+      ]
+    }
+  },
+  "inputCoverage": {
+    "eventSegmentation": {
+      "status": "partial",
+      "reasons": [
+        "participant-unidentified"
+      ]
+    },
+    "roundState": {
+      "status": "complete",
+      "reasons": []
+    }
+  },
+  "unknownRoleRounds": [
+    1,
+    8,
+    9,
+    12,
+    17,
+    21
+  ],
+  "structuralValidation": {
+    "exactEngagementMapping": true,
+    "atomicTiers": true,
+    "firstRoleDefinitions": true,
+    "strictLaterResponses": true,
+    "sameTickNotCausal": true,
+    "deadKillerNoNoneObserved": true,
+    "exactResponseRefs": true,
+    "actualEngagementIdComparison": true,
+    "exactSpatialOracle": true,
+    "sameTickAliveExcluded": true,
+    "noSpatialEventStability": true,
+    "deterministic": true,
+    "inputImmutable": true,
+    "tierChecks": 284,
+    "responseChecks": 710,
+    "spatialChecks": 994
+  },
+  "observedCases": {
+    "sameTickAmbiguousResponses": 0,
+    "deadBeforeResponses": 0,
+    "killerDiesSameTickResponses": 0
+  },
+  "sampleSelection": {
+    "policy": "First in deterministic round/contact/playerId order by structural predicate; no name/team/round constants",
+    "available": {
+      "uniqueFirst": true,
+      "sharedFirst": false,
+      "later": true,
+      "onlyConfirmedSideParticipant": true,
+      "teammateDeathKill": true,
+      "teammateDeathDamage": true,
+      "teammateDeathNone": true,
+      "playerDeathTeamKill": true,
+      "playerDeathTeamDamage": true,
+      "playerDeathTeamNone": true,
+      "sameTickAmbiguous": false,
+      "deadBeforePosthumous": false
+    }
+  },
+  "limitations": {
+    "personalDemCompatibility": "UNVERIFIED",
+    "geometry": "Distances are raw map units. Nuke players may be on different floors; even small XYZ distance does not prove supportability.",
+    "absentCases": "Absent real cases are verified by synthetic tests only; no replay or causal coaching claims."
+  },
+  "samples": {
+    "uniqueFirst": {
+      "playerId": "76561198068422762",
+      "engagementId": "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:2:18274:57:damage:0",
+      "round": 2,
+      "side": "T",
+      "firstContactRef": {
+        "round": 2,
+        "type": "damage",
+        "tick": 18274,
+        "eventIndex": 57
+      },
+      "firstContactTick": 18274,
+      "lastContactTick": 18274,
+      "contactCount": 1,
+      "damageContactsDealt": 0,
+      "damageContactsReceived": 1,
+      "reportedDamageDealt": 0,
+      "reportedDamageReceived": 15,
+      "kills": 0,
+      "deaths": 0,
+      "sideParticipantIds": [
+        "76561198068422762"
+      ],
+      "enemyParticipantIds": [
+        "76561198995880877"
+      ],
+      "sideParticipantCount": 1,
+      "enemyParticipantCount": 1,
+      "onlyConfirmedSideParticipant": true,
+      "firstSideContactRole": "unique-first",
+      "otherSideContactObserved": false,
+      "firstOtherTeammateContactTick": null,
+      "teammateJoinDelaySeconds": null,
+      "sideContactTiers": [
+        {
+          "tick": 18274,
+          "playerIds": [
+            "76561198068422762"
+          ]
+        }
+      ],
+      "spatialContext": {
+        "eventRef": {
+          "round": 2,
+          "type": "damage",
+          "tick": 18274,
+          "eventIndex": 57
+        },
+        "nearestConfirmedAliveTeammate": {
+          "teammateId": "76561197989430253",
+          "horizontalDistance": 190.18128093027465,
+          "verticalDelta": 0,
+          "directDistance": 190.18128093027465
+        },
+        "sameTickAliveAmbiguousIds": [],
+        "incompletePositionTeammateIds": [],
+        "aliveConsistencyConflictIds": [],
+        "coverage": {
+          "status": "complete",
+          "reasons": []
+        }
+      },
+      "coverage": {
+        "engagementParticipation": {
+          "status": "complete",
+          "reasons": []
+        },
+        "aliveState": {
+          "status": "complete",
+          "reasons": []
+        },
+        "followUpTiming": {
+          "status": "complete",
+          "reasons": []
+        },
+        "spatialContext": {
+          "status": "complete",
+          "reasons": []
+        }
+      }
+    },
+    "sharedFirst": null,
+    "later": {
+      "playerId": "76561198201620490",
+      "engagementId": "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:2:18627:90:damage:2",
+      "round": 2,
+      "side": "T",
+      "firstContactRef": {
+        "round": 2,
+        "type": "damage",
+        "tick": 18635,
+        "eventIndex": 93
+      },
+      "firstContactTick": 18635,
+      "lastContactTick": 18635,
+      "contactCount": 1,
+      "damageContactsDealt": 1,
+      "damageContactsReceived": 0,
+      "reportedDamageDealt": 61,
+      "reportedDamageReceived": 0,
+      "kills": 0,
+      "deaths": 0,
+      "sideParticipantIds": [
+        "76561198068422762",
+        "76561198201620490"
+      ],
+      "enemyParticipantIds": [
+        "76561198386265483"
+      ],
+      "sideParticipantCount": 2,
+      "enemyParticipantCount": 1,
+      "onlyConfirmedSideParticipant": false,
+      "firstSideContactRole": "later",
+      "otherSideContactObserved": true,
+      "firstOtherTeammateContactTick": 18627,
+      "teammateJoinDelaySeconds": null,
+      "sideContactTiers": [
+        {
+          "tick": 18627,
+          "playerIds": [
+            "76561198068422762"
+          ]
+        },
+        {
+          "tick": 18635,
+          "playerIds": [
+            "76561198201620490"
+          ]
+        }
+      ],
+      "spatialContext": {
+        "eventRef": {
+          "round": 2,
+          "type": "damage",
+          "tick": 18635,
+          "eventIndex": 93
+        },
+        "nearestConfirmedAliveTeammate": {
+          "teammateId": "76561197991272318",
+          "horizontalDistance": 700.5868392658383,
+          "verticalDelta": 0,
+          "directDistance": 700.5868392658383
+        },
+        "sameTickAliveAmbiguousIds": [],
+        "incompletePositionTeammateIds": [],
+        "aliveConsistencyConflictIds": [],
+        "coverage": {
+          "status": "complete",
+          "reasons": []
+        }
+      },
+      "coverage": {
+        "engagementParticipation": {
+          "status": "complete",
+          "reasons": []
+        },
+        "aliveState": {
+          "status": "complete",
+          "reasons": []
+        },
+        "followUpTiming": {
+          "status": "complete",
+          "reasons": []
+        },
+        "spatialContext": {
+          "status": "complete",
+          "reasons": []
+        }
+      }
+    },
+    "onlyConfirmedSideParticipant": {
+      "playerId": "76561198068422762",
+      "engagementId": "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:1:3643:27:damage:0",
+      "round": 1,
+      "side": "T",
+      "firstContactRef": {
+        "round": 1,
+        "type": "damage",
+        "tick": 3643,
+        "eventIndex": 27
+      },
+      "firstContactTick": 3643,
+      "lastContactTick": 3643,
+      "contactCount": 1,
+      "damageContactsDealt": 1,
+      "damageContactsReceived": 0,
+      "reportedDamageDealt": 85,
+      "reportedDamageReceived": 0,
+      "kills": 0,
+      "deaths": 0,
+      "sideParticipantIds": [
+        "76561198068422762"
+      ],
+      "enemyParticipantIds": [
+        "76561198386265483"
+      ],
+      "sideParticipantCount": 1,
+      "enemyParticipantCount": 1,
+      "onlyConfirmedSideParticipant": true,
+      "firstSideContactRole": "unknown",
+      "otherSideContactObserved": false,
+      "firstOtherTeammateContactTick": null,
+      "teammateJoinDelaySeconds": null,
+      "sideContactTiers": [
+        {
+          "tick": 3643,
+          "playerIds": [
+            "76561198068422762"
+          ]
+        }
+      ],
+      "spatialContext": {
+        "eventRef": {
+          "round": 1,
+          "type": "damage",
+          "tick": 3643,
+          "eventIndex": 27
+        },
+        "nearestConfirmedAliveTeammate": {
+          "teammateId": "76561197997351207",
+          "horizontalDistance": 531.2552774358101,
+          "verticalDelta": 0,
+          "directDistance": 531.2552774358101
+        },
+        "sameTickAliveAmbiguousIds": [],
+        "incompletePositionTeammateIds": [],
+        "aliveConsistencyConflictIds": [],
+        "coverage": {
+          "status": "complete",
+          "reasons": []
+        }
+      },
+      "coverage": {
+        "engagementParticipation": {
+          "status": "partial",
+          "reasons": [
+            "engagement-evidence-incomplete"
+          ]
+        },
+        "aliveState": {
+          "status": "complete",
+          "reasons": []
+        },
+        "followUpTiming": {
+          "status": "complete",
+          "reasons": []
+        },
+        "spatialContext": {
+          "status": "complete",
+          "reasons": []
+        }
+      }
+    },
+    "teammateDeathKill": {
+      "playerId": "76561197989430253",
+      "teammateId": "76561198068422762",
+      "deathRef": {
+        "round": 3,
+        "type": "kill",
+        "tick": 24006,
+        "eventIndex": 86
+      },
+      "killerId": "76561198995880877",
+      "playerAliveAtDeath": true,
+      "killerState": "alive-after-death",
+      "engagementId": "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:3:23988:76:damage:1",
+      "firstSideContactRole": "later",
+      "sideParticipantCount": 3,
+      "otherSideContactObserved": true,
+      "onlyConfirmedSideParticipant": false,
+      "teammateJoinDelaySeconds": null,
+      "before": {
+        "teamAlive": 4,
+        "enemyAlive": 5
+      },
+      "afterAtomicGroup": {
+        "teamAlive": 3,
+        "enemyAlive": 5
+      },
+      "spatialContext": {
+        "eventRef": {
+          "round": 3,
+          "type": "kill",
+          "tick": 24006,
+          "eventIndex": 86
+        },
+        "nearestConfirmedAliveTeammate": {
+          "teammateId": "76561198201620490",
+          "horizontalDistance": 60.249895724373836,
+          "verticalDelta": 50.5625,
+          "directDistance": 78.65504650718809
+        },
+        "sameTickAliveAmbiguousIds": [
+          "76561198068422762"
+        ],
+        "incompletePositionTeammateIds": [],
+        "aliveConsistencyConflictIds": [],
+        "coverage": {
+          "status": "partial",
+          "reasons": [
+            "same-tick-alive-ambiguous"
+          ]
+        }
+      },
+      "firstFollowUpRef": {
+        "round": 3,
+        "type": "damage",
+        "tick": 24042,
+        "eventIndex": 98
+      },
+      "outcomeRef": {
+        "round": 3,
+        "type": "kill",
+        "tick": 24073,
+        "eventIndex": 117
+      },
+      "sameTickContactRefs": [],
+      "delaySeconds": 0.5625,
+      "outcome": "kill",
+      "sameEngagement": true,
+      "reportedDamage": 66,
+      "coverage": {
+        "engagementParticipation": {
+          "status": "complete",
+          "reasons": []
+        },
+        "aliveState": {
+          "status": "complete",
+          "reasons": []
+        },
+        "followUpTiming": {
+          "status": "complete",
+          "reasons": []
+        },
+        "spatialContext": {
+          "status": "partial",
+          "reasons": [
+            "same-tick-alive-ambiguous"
+          ]
+        }
+      }
+    },
+    "teammateDeathDamage": {
+      "playerId": "76561198081484775",
+      "teammateId": "76561199063238565",
+      "deathRef": {
+        "round": 1,
+        "type": "kill",
+        "tick": 5247,
+        "eventIndex": 81
+      },
+      "killerId": "76561198068422762",
+      "playerAliveAtDeath": true,
+      "killerState": "alive-after-death",
+      "engagementId": "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:1:5124:68:damage:2",
+      "firstSideContactRole": "unknown",
+      "sideParticipantCount": 3,
+      "otherSideContactObserved": true,
+      "onlyConfirmedSideParticipant": false,
+      "teammateJoinDelaySeconds": null,
+      "before": {
+        "teamAlive": 4,
+        "enemyAlive": 4
+      },
+      "afterAtomicGroup": {
+        "teamAlive": 3,
+        "enemyAlive": 4
+      },
+      "spatialContext": {
+        "eventRef": {
+          "round": 1,
+          "type": "kill",
+          "tick": 5247,
+          "eventIndex": 81
+        },
+        "nearestConfirmedAliveTeammate": {
+          "teammateId": "76561198995880877",
+          "horizontalDistance": 102.59336482792587,
+          "verticalDelta": 279.796875,
+          "directDistance": 298.01290201345563
+        },
+        "sameTickAliveAmbiguousIds": [
+          "76561199063238565"
+        ],
+        "incompletePositionTeammateIds": [],
+        "aliveConsistencyConflictIds": [],
+        "coverage": {
+          "status": "partial",
+          "reasons": [
+            "same-tick-alive-ambiguous"
+          ]
+        }
+      },
+      "firstFollowUpRef": {
+        "round": 1,
+        "type": "damage",
+        "tick": 5299,
+        "eventIndex": 85
+      },
+      "outcomeRef": {
+        "round": 1,
+        "type": "damage",
+        "tick": 5299,
+        "eventIndex": 85
+      },
+      "sameTickContactRefs": [],
+      "delaySeconds": 0.8125,
+      "outcome": "damage",
+      "sameEngagement": true,
+      "reportedDamage": 26,
+      "coverage": {
+        "engagementParticipation": {
+          "status": "partial",
+          "reasons": [
+            "engagement-evidence-incomplete"
+          ]
+        },
+        "aliveState": {
+          "status": "complete",
+          "reasons": []
+        },
+        "followUpTiming": {
+          "status": "partial",
+          "reasons": [
+            "engagement-evidence-incomplete"
+          ]
+        },
+        "spatialContext": {
+          "status": "partial",
+          "reasons": [
+            "same-tick-alive-ambiguous"
+          ]
+        }
+      }
+    },
+    "teammateDeathNone": {
+      "playerId": "76561197991272318",
+      "teammateId": "76561197989430253",
+      "deathRef": {
+        "round": 2,
+        "type": "kill",
+        "tick": 18395,
+        "eventIndex": 67
+      },
+      "killerId": "76561198386265483",
+      "playerAliveAtDeath": true,
+      "killerState": "alive-after-death",
+      "engagementId": "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:2:18395:66:damage:1",
+      "firstSideContactRole": "unknown",
+      "sideParticipantCount": null,
+      "otherSideContactObserved": null,
+      "onlyConfirmedSideParticipant": null,
+      "teammateJoinDelaySeconds": null,
+      "before": {
+        "teamAlive": 5,
+        "enemyAlive": 5
+      },
+      "afterAtomicGroup": {
+        "teamAlive": 4,
+        "enemyAlive": 5
+      },
+      "spatialContext": {
+        "eventRef": {
+          "round": 2,
+          "type": "kill",
+          "tick": 18395,
+          "eventIndex": 67
+        },
+        "nearestConfirmedAliveTeammate": {
+          "teammateId": "76561198201620490",
+          "horizontalDistance": 131.46678662096957,
+          "verticalDelta": 0,
+          "directDistance": 131.46678662096957
+        },
+        "sameTickAliveAmbiguousIds": [
+          "76561197989430253"
+        ],
+        "incompletePositionTeammateIds": [],
+        "aliveConsistencyConflictIds": [],
+        "coverage": {
+          "status": "partial",
+          "reasons": [
+            "same-tick-alive-ambiguous"
+          ]
+        }
+      },
+      "firstFollowUpRef": null,
+      "outcomeRef": null,
+      "sameTickContactRefs": [],
+      "delaySeconds": null,
+      "outcome": "none-observed",
+      "sameEngagement": null,
+      "reportedDamage": 0,
+      "coverage": {
+        "engagementParticipation": {
+          "status": "unavailable",
+          "reasons": [
+            "engagement-not-linked"
+          ]
+        },
+        "aliveState": {
+          "status": "complete",
+          "reasons": []
+        },
+        "followUpTiming": {
+          "status": "complete",
+          "reasons": []
+        },
+        "spatialContext": {
+          "status": "partial",
+          "reasons": [
+            "same-tick-alive-ambiguous"
+          ]
+        }
+      }
+    },
+    "playerDeathTeamKill": {
+      "playerId": "76561198068422762",
+      "deathRef": {
+        "round": 3,
+        "type": "kill",
+        "tick": 24006,
+        "eventIndex": 86
+      },
+      "killerId": "76561198995880877",
+      "engagementId": "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:3:23988:76:damage:1",
+      "firstSideContactRole": "unique-first",
+      "sideParticipantCount": 3,
+      "otherSideContactObserved": true,
+      "onlyConfirmedSideParticipant": false,
+      "teammateJoinDelaySeconds": 0.8125,
+      "before": {
+        "teamAlive": 4,
+        "enemyAlive": 5
+      },
+      "afterAtomicGroup": {
+        "teamAlive": 3,
+        "enemyAlive": 5
+      },
+      "spatialContext": {
+        "eventRef": {
+          "round": 3,
+          "type": "kill",
+          "tick": 24006,
+          "eventIndex": 86
+        },
+        "nearestConfirmedAliveTeammate": {
+          "teammateId": "76561197989430253",
+          "horizontalDistance": 62.41760155877547,
+          "verticalDelta": 0,
+          "directDistance": 62.41760155877547
+        },
+        "sameTickAliveAmbiguousIds": [],
+        "incompletePositionTeammateIds": [],
+        "aliveConsistencyConflictIds": [],
+        "coverage": {
+          "status": "complete",
+          "reasons": []
+        }
+      },
+      "teamResponse": {
+        "playerId": "76561198068422762",
+        "deathRef": {
+          "round": 3,
+          "type": "kill",
+          "tick": 24006,
+          "eventIndex": 86
+        },
+        "killerId": "76561198995880877",
+        "killerState": "alive-after-death",
+        "confirmedAliveTeammates": 3,
+        "sameTickAliveAmbiguousTeammateIds": [],
+        "firstResponderId": "76561197989430253",
+        "firstResponseRef": {
+          "round": 3,
+          "type": "damage",
+          "tick": 24042,
+          "eventIndex": 98
+        },
+        "outcomeRef": {
+          "round": 3,
+          "type": "kill",
+          "tick": 24073,
+          "eventIndex": 117
+        },
+        "outcomePlayerId": "76561197989430253",
+        "sameTickContactRefs": [],
+        "delaySeconds": 0.5625,
+        "outcome": "kill",
+        "sameEngagement": true,
+        "coverage": {
+          "engagementParticipation": {
+            "status": "complete",
+            "reasons": []
+          },
+          "aliveState": {
+            "status": "complete",
+            "reasons": []
+          },
+          "followUpTiming": {
+            "status": "complete",
+            "reasons": []
+          },
+          "spatialContext": {
+            "status": "complete",
+            "reasons": []
+          }
+        }
+      },
+      "coverage": {
+        "engagementParticipation": {
+          "status": "complete",
+          "reasons": []
+        },
+        "aliveState": {
+          "status": "complete",
+          "reasons": []
+        },
+        "followUpTiming": {
+          "status": "complete",
+          "reasons": []
+        },
+        "spatialContext": {
+          "status": "complete",
+          "reasons": []
+        }
+      }
+    },
+    "playerDeathTeamDamage": {
+      "playerId": "76561199063238565",
+      "deathRef": {
+        "round": 1,
+        "type": "kill",
+        "tick": 5247,
+        "eventIndex": 81
+      },
+      "killerId": "76561198068422762",
+      "engagementId": "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:1:5124:68:damage:2",
+      "firstSideContactRole": "unknown",
+      "sideParticipantCount": 3,
+      "otherSideContactObserved": true,
+      "onlyConfirmedSideParticipant": false,
+      "teammateJoinDelaySeconds": null,
+      "before": {
+        "teamAlive": 4,
+        "enemyAlive": 4
+      },
+      "afterAtomicGroup": {
+        "teamAlive": 3,
+        "enemyAlive": 4
+      },
+      "spatialContext": {
+        "eventRef": {
+          "round": 1,
+          "type": "kill",
+          "tick": 5247,
+          "eventIndex": 81
+        },
+        "nearestConfirmedAliveTeammate": {
+          "teammateId": "76561198081484775",
+          "horizontalDistance": 1107.2344331949248,
+          "verticalDelta": 288,
+          "directDistance": 1144.076959846883
+        },
+        "sameTickAliveAmbiguousIds": [],
+        "incompletePositionTeammateIds": [],
+        "aliveConsistencyConflictIds": [],
+        "coverage": {
+          "status": "complete",
+          "reasons": []
+        }
+      },
+      "teamResponse": {
+        "playerId": "76561199063238565",
+        "deathRef": {
+          "round": 1,
+          "type": "kill",
+          "tick": 5247,
+          "eventIndex": 81
+        },
+        "killerId": "76561198068422762",
+        "killerState": "alive-after-death",
+        "confirmedAliveTeammates": 3,
+        "sameTickAliveAmbiguousTeammateIds": [],
+        "firstResponderId": "76561198081484775",
+        "firstResponseRef": {
+          "round": 1,
+          "type": "damage",
+          "tick": 5299,
+          "eventIndex": 85
+        },
+        "outcomeRef": {
+          "round": 1,
+          "type": "damage",
+          "tick": 5299,
+          "eventIndex": 85
+        },
+        "outcomePlayerId": "76561198081484775",
+        "sameTickContactRefs": [],
+        "delaySeconds": 0.8125,
+        "outcome": "damage",
+        "sameEngagement": true,
+        "coverage": {
+          "engagementParticipation": {
+            "status": "partial",
+            "reasons": [
+              "engagement-evidence-incomplete"
+            ]
+          },
+          "aliveState": {
+            "status": "complete",
+            "reasons": []
+          },
+          "followUpTiming": {
+            "status": "partial",
+            "reasons": [
+              "engagement-evidence-incomplete"
+            ]
+          },
+          "spatialContext": {
+            "status": "complete",
+            "reasons": []
+          }
+        }
+      },
+      "coverage": {
+        "engagementParticipation": {
+          "status": "partial",
+          "reasons": [
+            "engagement-evidence-incomplete"
+          ]
+        },
+        "aliveState": {
+          "status": "complete",
+          "reasons": []
+        },
+        "followUpTiming": {
+          "status": "partial",
+          "reasons": [
+            "engagement-evidence-incomplete"
+          ]
+        },
+        "spatialContext": {
+          "status": "complete",
+          "reasons": []
+        }
+      }
+    },
+    "playerDeathTeamNone": {
+      "playerId": "76561197991272318",
+      "deathRef": {
+        "round": 2,
+        "type": "kill",
+        "tick": 18762,
+        "eventIndex": 109
+      },
+      "killerId": "76561198081484775",
+      "engagementId": "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:2:18741:106:damage:3",
+      "firstSideContactRole": "unique-first",
+      "sideParticipantCount": 2,
+      "otherSideContactObserved": true,
+      "onlyConfirmedSideParticipant": false,
+      "teammateJoinDelaySeconds": 3.078125,
+      "before": {
+        "teamAlive": 3,
+        "enemyAlive": 5
+      },
+      "afterAtomicGroup": {
+        "teamAlive": 2,
+        "enemyAlive": 5
+      },
+      "spatialContext": {
+        "eventRef": {
+          "round": 2,
+          "type": "kill",
+          "tick": 18762,
+          "eventIndex": 109
+        },
+        "nearestConfirmedAliveTeammate": {
+          "teammateId": "76561198201620490",
+          "horizontalDistance": 725.1717323752493,
+          "verticalDelta": 0,
+          "directDistance": 725.1717323752493
+        },
+        "sameTickAliveAmbiguousIds": [],
+        "incompletePositionTeammateIds": [],
+        "aliveConsistencyConflictIds": [],
+        "coverage": {
+          "status": "complete",
+          "reasons": []
+        }
+      },
+      "teamResponse": {
+        "playerId": "76561197991272318",
+        "deathRef": {
+          "round": 2,
+          "type": "kill",
+          "tick": 18762,
+          "eventIndex": 109
+        },
+        "killerId": "76561198081484775",
+        "killerState": "alive-after-death",
+        "confirmedAliveTeammates": 2,
+        "sameTickAliveAmbiguousTeammateIds": [],
+        "firstResponderId": null,
+        "firstResponseRef": null,
+        "outcomeRef": null,
+        "outcomePlayerId": null,
+        "sameTickContactRefs": [],
+        "delaySeconds": null,
+        "outcome": "none-observed",
+        "sameEngagement": null,
+        "coverage": {
+          "engagementParticipation": {
+            "status": "complete",
+            "reasons": []
+          },
+          "aliveState": {
+            "status": "complete",
+            "reasons": []
+          },
+          "followUpTiming": {
+            "status": "complete",
+            "reasons": []
+          },
+          "spatialContext": {
+            "status": "complete",
+            "reasons": []
+          }
+        }
+      },
+      "coverage": {
+        "engagementParticipation": {
+          "status": "complete",
+          "reasons": []
+        },
+        "aliveState": {
+          "status": "complete",
+          "reasons": []
+        },
+        "followUpTiming": {
+          "status": "complete",
+          "reasons": []
+        },
+        "spatialContext": {
+          "status": "complete",
+          "reasons": []
+        }
+      }
+    },
+    "sameTickAmbiguous": null,
+    "deadBeforePosthumous": null
+  }
+}

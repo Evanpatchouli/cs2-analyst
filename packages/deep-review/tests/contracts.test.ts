@@ -25,3 +25,13 @@ impact.kills[0].impactScore;
 // @ts-expect-error No raw event/native reference.
 impact.kills[0].event;
 void [playerId, resolveRoundAliveState(match.rounds[0])];
+import { analyzeTeamplay } from "../src/index.js";
+import type { TeamplayAnalysis, TeamplayOptions } from "../src/index.js";
+const teamplayOptions: TeamplayOptions = { followUpWindowSeconds: 5 };
+const teamplay: TeamplayAnalysis = analyzeTeamplay(match, result, impact, spatial, teamplayOptions);
+const firstRole: "unique-first" | "shared-first" | "later" | "unknown" = teamplay.playerEngagementContexts[0].firstSideContactRole;
+// @ts-expect-error No teamplay score.
+teamplay.teamplayScore;
+// @ts-expect-error No distance-based support inference.
+teamplay.playerEngagementContexts[0].spatialContext.nearestConfirmedAliveTeammate?.closeEnough;
+void [firstRole];
