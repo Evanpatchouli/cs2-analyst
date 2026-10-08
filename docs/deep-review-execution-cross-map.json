@@ -1,0 +1,364 @@
+{
+  "schemaVersion": 1,
+  "purpose": "Cross-map professional GOTV structural verification; observations are not golden counts or player comparisons",
+  "viewAlignment": "UNVERIFIED — no trusted coordinate convention established; no angle productionized",
+  "personalDemCompatibility": "UNVERIFIED",
+  "peakMemory": "UNKNOWN",
+  "maps": [
+    {
+      "fixture": "spirit-vs-faze-m1-nuke.dem",
+      "sha256": "dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c",
+      "map": "de_nuke",
+      "tickRate": 64,
+      "rounds": 21,
+      "players": 10,
+      "fileSize": 471606780,
+      "engagements": 107,
+      "eligiblePlayerEngagementExecutions": 284,
+      "opponentExchanges": 356,
+      "diagnostics": {
+        "playerEngagementContexts": 284,
+        "opponentExchanges": 356,
+        "firearmFireEventsObserved": 2690,
+        "insideEngagementFireLinked": 1068,
+        "leadInFireLinked": 164,
+        "ambiguousFire": 5,
+        "unlinkedFire": 1453,
+        "dealtFirst": 50,
+        "receivedFirst": 37,
+        "sameTickFirst": 3,
+        "unknownFirst": 194,
+        "returnKill": 29,
+        "returnDamage": 26,
+        "returnNone": 63,
+        "returnAmbiguous": 49,
+        "returnUnavailable": 189,
+        "contextsWithDistance": 284,
+        "contextsWithoutDistance": 0,
+        "unknownWeaponContacts": 0,
+        "unknownWeaponFireEvents": 0,
+        "excludedMelee": 2,
+        "excludedTaser": 0,
+        "excludedUtility": 133
+      },
+      "firstContactRoles": {
+        "dealt-first": 50,
+        "received-first": 37,
+        "same-tick": 3,
+        "unknown": 194
+      },
+      "returnOutcomes": {
+        "damage": 26,
+        "kill": 29,
+        "none-observed": 63,
+        "same-tick-ambiguous": 49,
+        "unavailable": 189
+      },
+      "spatialDistance": {
+        "direct": {
+          "count": 356,
+          "median": 580.7335622100766,
+          "p95": 1331.617675399641,
+          "max": 2094.464671151684
+        },
+        "vertical": {
+          "count": 356,
+          "median": 17.934295654296875,
+          "p95": 288,
+          "max": 380.42144775390625
+        }
+      },
+      "coverage": {
+        "engagementLinkage": {
+          "status": "complete",
+          "reasons": []
+        },
+        "fireEvidence": {
+          "status": "partial",
+          "reasons": [
+            "fire-link-ambiguous",
+            "precontact-link-ambiguous",
+            "round-window-unavailable",
+            "same-tick-fire-contact-ambiguous"
+          ]
+        },
+        "contactEvidence": {
+          "status": "partial",
+          "reasons": [
+            "contact-feed-incomplete",
+            "contact-weapon-unknown"
+          ]
+        },
+        "returnContact": {
+          "status": "partial",
+          "reasons": [
+            "contact-feed-incomplete",
+            "contact-weapon-unknown",
+            "return-contact-unavailable",
+            "same-tick-contact-ambiguous",
+            "same-tick-death-ambiguous"
+          ]
+        },
+        "spatialContext": {
+          "status": "complete",
+          "reasons": []
+        }
+      },
+      "determinismHash": "15758396d791dbfaff91f84188bc6b49bf02313f04304bde506d5df9fe9d7524",
+      "executionHash": "1d778768d4ed2a6b27fa2bc7bbe336d5c11b2f6332d47f667b03817a187e95aa",
+      "timingsMilliseconds": {
+        "parseWithSpatial": 8062.9891,
+        "deepReviewPipeline": 865.4849000000004,
+        "combatExecution": 181.70490000000063
+      },
+      "verification": {
+        "coreTicks": 3757,
+        "eligibleUniqueContacts": 620,
+        "fireChecks": 2690,
+        "pairChecks": 356,
+        "distanceChecks": 356,
+        "deterministic": true,
+        "immutable": true,
+        "jsonOnly": true,
+        "allPipelineRefsTraceable": true,
+        "sameTickUnordered": true,
+        "ambiguousFireUnassigned": true
+      }
+    },
+    {
+      "fixture": "falcons-vs-vitality-m2-inferno.dem",
+      "sha256": "b61c040074f84f1f2c1b683642923243dbe123c2a0c70ed3c0670b0e4cd7a265",
+      "map": "de_inferno",
+      "tickRate": 64,
+      "rounds": 24,
+      "players": 10,
+      "fileSize": 592871000,
+      "engagements": 126,
+      "eligiblePlayerEngagementExecutions": 310,
+      "opponentExchanges": 372,
+      "diagnostics": {
+        "playerEngagementContexts": 310,
+        "opponentExchanges": 372,
+        "firearmFireEventsObserved": 2881,
+        "insideEngagementFireLinked": 938,
+        "leadInFireLinked": 234,
+        "ambiguousFire": 0,
+        "unlinkedFire": 1709,
+        "dealtFirst": 55,
+        "receivedFirst": 33,
+        "sameTickFirst": 0,
+        "unknownFirst": 222,
+        "returnKill": 23,
+        "returnDamage": 25,
+        "returnNone": 70,
+        "returnAmbiguous": 56,
+        "returnUnavailable": 198,
+        "contextsWithDistance": 310,
+        "contextsWithoutDistance": 0,
+        "unknownWeaponContacts": 0,
+        "unknownWeaponFireEvents": 0,
+        "excludedMelee": 0,
+        "excludedTaser": 0,
+        "excludedUtility": 199
+      },
+      "firstContactRoles": {
+        "dealt-first": 55,
+        "received-first": 33,
+        "unknown": 222
+      },
+      "returnOutcomes": {
+        "damage": 25,
+        "kill": 23,
+        "none-observed": 70,
+        "same-tick-ambiguous": 56,
+        "unavailable": 198
+      },
+      "spatialDistance": {
+        "direct": {
+          "count": 372,
+          "median": 604.964839706109,
+          "p95": 1369.4905869786044,
+          "max": 1565.4967863963257
+        },
+        "vertical": {
+          "count": 372,
+          "median": 25.35919952392578,
+          "p95": 132.00003051757812,
+          "max": 174.7250213623047
+        }
+      },
+      "coverage": {
+        "engagementLinkage": {
+          "status": "complete",
+          "reasons": []
+        },
+        "fireEvidence": {
+          "status": "partial",
+          "reasons": [
+            "round-window-unavailable",
+            "same-tick-fire-contact-ambiguous"
+          ]
+        },
+        "contactEvidence": {
+          "status": "partial",
+          "reasons": [
+            "contact-feed-incomplete",
+            "contact-weapon-unknown"
+          ]
+        },
+        "returnContact": {
+          "status": "partial",
+          "reasons": [
+            "contact-feed-incomplete",
+            "contact-weapon-unknown",
+            "return-contact-unavailable",
+            "same-tick-contact-ambiguous",
+            "same-tick-death-ambiguous"
+          ]
+        },
+        "spatialContext": {
+          "status": "complete",
+          "reasons": []
+        }
+      },
+      "determinismHash": "99276770226a205989e28be6fd7d77d8727062e5dad6e910b20a35ef0600b09b",
+      "executionHash": "1482e1d830126e539899d5c64cb88c3c3f5db28aa2ff8d07358f4aef7571c9eb",
+      "timingsMilliseconds": {
+        "parseWithSpatial": 5520.871299999999,
+        "deepReviewPipeline": 753.7824,
+        "combatExecution": 158.16560000000027
+      },
+      "verification": {
+        "coreTicks": 4605,
+        "eligibleUniqueContacts": 590,
+        "fireChecks": 2881,
+        "pairChecks": 372,
+        "distanceChecks": 372,
+        "deterministic": true,
+        "immutable": true,
+        "jsonOnly": true,
+        "allPipelineRefsTraceable": true,
+        "sameTickUnordered": true,
+        "ambiguousFireUnassigned": true
+      }
+    },
+    {
+      "fixture": "spirit-vs-faze-m3-dust2.dem",
+      "sha256": "db90fe85aab023a1d2c8a5996182e6120d98ef494f02a070b17982b235e4958c",
+      "map": "de_dust2",
+      "tickRate": 64,
+      "rounds": 24,
+      "players": 10,
+      "fileSize": 557650967,
+      "engagements": 112,
+      "eligiblePlayerEngagementExecutions": 317,
+      "opponentExchanges": 424,
+      "diagnostics": {
+        "playerEngagementContexts": 317,
+        "opponentExchanges": 424,
+        "firearmFireEventsObserved": 3119,
+        "insideEngagementFireLinked": 1352,
+        "leadInFireLinked": 236,
+        "ambiguousFire": 1,
+        "unlinkedFire": 1530,
+        "dealtFirst": 54,
+        "receivedFirst": 27,
+        "sameTickFirst": 0,
+        "unknownFirst": 236,
+        "returnKill": 13,
+        "returnDamage": 26,
+        "returnNone": 80,
+        "returnAmbiguous": 69,
+        "returnUnavailable": 236,
+        "contextsWithDistance": 317,
+        "contextsWithoutDistance": 0,
+        "unknownWeaponContacts": 0,
+        "unknownWeaponFireEvents": 0,
+        "excludedMelee": 0,
+        "excludedTaser": 0,
+        "excludedUtility": 105
+      },
+      "firstContactRoles": {
+        "dealt-first": 54,
+        "received-first": 27,
+        "unknown": 236
+      },
+      "returnOutcomes": {
+        "damage": 26,
+        "kill": 13,
+        "none-observed": 80,
+        "same-tick-ambiguous": 69,
+        "unavailable": 236
+      },
+      "spatialDistance": {
+        "direct": {
+          "count": 424,
+          "median": 759.883824606557,
+          "p95": 1538.9608390554033,
+          "max": 2991.7368910760742
+        },
+        "vertical": {
+          "count": 424,
+          "median": 26.108095169067383,
+          "p95": 142.92020416259766,
+          "max": 252.2916259765625
+        }
+      },
+      "coverage": {
+        "engagementLinkage": {
+          "status": "complete",
+          "reasons": []
+        },
+        "fireEvidence": {
+          "status": "partial",
+          "reasons": [
+            "fire-link-ambiguous",
+            "round-window-unavailable",
+            "same-tick-fire-contact-ambiguous"
+          ]
+        },
+        "contactEvidence": {
+          "status": "partial",
+          "reasons": [
+            "contact-feed-incomplete",
+            "contact-weapon-unknown"
+          ]
+        },
+        "returnContact": {
+          "status": "partial",
+          "reasons": [
+            "contact-feed-incomplete",
+            "contact-weapon-unknown",
+            "return-contact-unavailable",
+            "same-tick-contact-ambiguous",
+            "same-tick-death-ambiguous"
+          ]
+        },
+        "spatialContext": {
+          "status": "complete",
+          "reasons": []
+        }
+      },
+      "determinismHash": "1f0b417af7a4fc9da2e21269314ab3779d12dcb080f2a806f136555308de78e9",
+      "executionHash": "0576ac85df5e5c9e41366f3f26bc048152397f7f74ad5b8a7b05fb3ee428e90a",
+      "timingsMilliseconds": {
+        "parseWithSpatial": 4688.6623,
+        "deepReviewPipeline": 730.7824999999975,
+        "combatExecution": 106.00530000000072
+      },
+      "verification": {
+        "coreTicks": 4702,
+        "eligibleUniqueContacts": 668,
+        "fireChecks": 3119,
+        "pairChecks": 424,
+        "distanceChecks": 424,
+        "deterministic": true,
+        "immutable": true,
+        "jsonOnly": true,
+        "allPipelineRefsTraceable": true,
+        "sameTickUnordered": true,
+        "ambiguousFireUnassigned": true
+      }
+    }
+  ]
+}

@@ -47,3 +47,20 @@ utility.effects[0].utilityScore;
 // @ts-expect-error Distance does not prove effective range.
 utility.effects[0].nearestEnemy?.inRange;
 void [effectIndex];
+import { analyzeCombatExecution } from "../src/index.js";
+import type { CombatExecutionAnalysis, WeaponFireRef } from "../src/index.js";
+const execution: CombatExecutionAnalysis = analyzeCombatExecution(match, result, impact, spatial);
+const fireRef: WeaponFireRef = execution.weaponFireEvidence[0].eventRef;
+// @ts-expect-error A fire event has no inferred opponent.
+execution.weaponFireEvidence[0].opponentId;
+// @ts-expect-error No aim/execution score.
+execution.playerSummaries[0].executionScore;
+// @ts-expect-error Observed fire count is not missed shots.
+execution.playerEngagementExecutions[0].missedShots;
+// @ts-expect-error Return event interval is not reaction time.
+execution.playerEngagementExecutions[0].opponentExchanges[0].reactionTime;
+// @ts-expect-error View convention remains unverified.
+execution.playerEngagementExecutions[0].opponentExchanges[0].angularSeparationDegrees;
+// @ts-expect-error No raw source event.
+execution.contacts[0].event;
+void [fireRef];

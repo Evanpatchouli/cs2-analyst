@@ -2,7 +2,19 @@
 
 Status: v0.1 Final Acceptance **PAUSED — Deep Review product gap discovered**。
 
-Current: **P5.7 Deep Review / P5.7.5 Utility Context**；实现与Nuke结构验证完成，产品验收待定。
+Current: **P5.7 Deep Review / P5.7.6 Combat Execution Evidence**。
+
+## 2026-10-08 — P5.7.6
+
+- 基线 `1632e5e835e9bd75f1678d08a96b0854a73a45a4`；P5.7.0 **PARTIAL PASS**、P5.7.1–P5.7.5 **PASS**；P5.7.6 当前任务，Final Acceptance继续 **PAUSED**。
+- 生产仅deep-review新增独立Execution contracts与analyzeCombatExecution；weapon_fire只有shooter、原round.events索引，inside与默认1s lead-in全部候选共同做唯一性检查，ambiguous不归属。firearm主计数，unknown保留降级，不混utility/melee/taser。
+- firstContactRole严格tick比较，单侧unknown；同opponent confirmed damage/kill return、全round本人死亡边界、严格none-observed门控、reported damage、fire/contact原始counts与exact event XY/absZ/XYZ facts。五层coverage；无target/miss/accuracy/reaction/score/AI/velocity/usercmd/shots_fired。
+- 三地图一次parseWithSpatial后同生产管线Engagement→KillImpact→Teamplay→Utility→CombatExecution；SHA/header map/tickRate/rounds/players/file size锁身份，只验structural invariants，不锁比赛计数。Nuke详细11类自动抽样与cross-map当前run报告已保存。
+- View Alignment **UNVERIFIED**，可选angle probe未执行、无angle production contract；Personal matchmaking DEM **UNVERIFIED**，三图仅证明cross-map professional GOTV。源feed绝对完整性/entity freshness/其他录制模式/Peak memory UNKNOWN；Final Acceptance前仍补个人DEM+demo1。
+- 独立review发现非法fire tick JSON、unlinked unknown fire摘要coverage、missing Engagement丢unknown raw contacts问题，已修复并补回归；唯一linked firearm shooter即使仅有melee contact也有shooter-only context，不推断opponent。
+- 最终验证与统计见docs/combat-execution-evidence.md；本轮focused commit `feat(analysis): add combat execution evidence`，不push，不进入P5.7.7/桌面UX，不运行installer/Renderer E2E。
+- 最终Nuke/Inferno/Dust2分别107/126/112 Engagement、284/310/317contexts、356/372/424pairs；core3757/4605/4702、distance356/372/424均完整。typecheck12/12、build7/7、model contracts PASS；parser38/1SKIP、analytics48/5、findings16/1、deep-review167/0（44新synthetic+三图）、desktop16/1，0FAIL；8SKIP均demo1缺失。独立最终复审PASS，无遗留阻断。
+- 后续 **P5.7.7 Findings V2 → P5.7.8 Deep Review Desktop UX**。
 
 ## 2026-10-08 — P5.7.5
 

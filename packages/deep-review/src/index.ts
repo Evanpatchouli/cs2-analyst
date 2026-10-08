@@ -3,6 +3,8 @@ export { classifyContactWeapon } from "./weapons.js";
 export { analyzeKillImpact } from "./kill-impact.js";
 export { analyzeTeamplay } from "./teamplay.js";
 export { analyzeUtilityContext } from "./utility-context.js";
+export { analyzeCombatExecution } from "./execution.js";
+export type * from "./execution-contracts.js";
 export type * from "./utility-contracts.js";
 export type * from "./teamplay-contracts.js";
 export { resolveRoundAliveState } from "./alive-state.js";

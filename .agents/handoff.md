@@ -1,5 +1,16 @@
 # Agent Handoff
 
+## 2026-10-08 — P5.7.6 Combat Execution Evidence
+
+- 基线 `1632e5e835e9bd75f1678d08a96b0854a73a45a4`；P5.7.0 **PARTIAL PASS**、P5.7.1–P5.7.5 **PASS**，P5.7.6当前任务；v0.1 Final Acceptance **PAUSED**。
+- 独立JSON-only execution contracts/analysis，仅deep-review生产变更；分析入口接Match、optional Engagement/KillImpact/Spatial、preContactFireWindowSeconds默认1。shooter-only fire原ref保留，inside与lead-in联合唯一候选、不择nearest/inside、不猜target；unknown raw contact/fire即使unlinked也保留/降级。
+- firearm direct first role、分opponent方向exchange、严格later confirmed return、本人全round死亡边界、none-observed完整性门控，returnContactRef和returnOutcomeRef分别保留；reported damage不重算effective HP，same tick不输出0s，XY/absZ/XYZ仅geometry。五层coverage与玩家counts，没有评分/accuracy/missed shots/reaction/angle/AI/velocity/usercmd/LOS。
+- 三图指定本地fixtures走一次共享parseWithSpatial+同一完整生产管线；source refs/core ticks/unique memberships/alive counts/fire linkage/pair隔离/same-tick/finite JSON/determinism/immutability均检查。docs/deep-review-execution-nuke.json详细11类自动samples、docs/deep-review-execution-cross-map.json当前run观察，不是比赛count golden；定义/身份/回归记录在docs/combat-execution-evidence.md。
+- 独立review已修复fire非finite tick、unknown/unidentified unlinked fire摘要coverage和缺Engagement raw unknown丢失，补synthetic；唯一linked shooter即使非枪械contact也有无opponent猜测的execution context。最终验证见该证据文档。
+- View Alignment **UNVERIFIED**（optional probe未做、无production angle）；Personal DEM **UNVERIFIED**、demo1历史golden仍缺失SKIP。GOTV三图不替代个人Perfect World/matchmaking验证；源feed completeness/entity freshness/其他录制模式/Peak memory UNKNOWN。
+- focused commit `feat(analysis): add combat execution evidence`，不push。后续P5.7.7 Findings V2→P5.7.8 Deep Review Desktop UX；不自行进入后续，无installer/Renderer E2E。
+- 最终typecheck12/12、build7/7、model contracts PASS；parser38/1SKIP、analytics48/5、findings16/1、deep-review167/0、desktop16/1，0FAIL；8SKIP均缺demo1。44新execution synthetic+三图全部通过，独立最终复审PASS。Nuke/Inferno/Dust2：107/126/112Engagement、284/310/317contexts、356/372/424pairs；parse8.063/5.521/4.689s、pipeline0.865/0.754/0.731s、execution0.182/0.158/0.106s；Peak memory UNKNOWN。
+
 ## 2026-10-08 — P5.7.5 Utility Context
 
 - 基线 `caa08865ae23ef4f2563aff8e4ed4cc0faefc86f`；P5.7.0 **PARTIAL PASS**、P5.7.1–P5.7.4 **PASS**；P5.7.5当前任务实现/GOTV结构验证完成，产品验收待定；Final Acceptance仍 **PAUSED**。
