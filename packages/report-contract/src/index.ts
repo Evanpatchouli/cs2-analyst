@@ -163,7 +163,9 @@ export interface DesktopDeepReviewFinding {
   occurrences: number;
   eligibleOccurrences: number | null;
   relatedRounds: number[];
-  evidenceQuality: 'complete' | 'partial';
+  /** Plain-language occurrence line assembled by the desktop copy adapter; null when not applicable. */
+  occurrenceLabel: string | null;
+  /** User-facing limitations, already translated out of domain reason codes. */
   caveats: string[];
 }
 export interface DesktopDeepReviewPlayer {

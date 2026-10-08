@@ -1,4 +1,5 @@
 import { displayPlayerName } from './player-name.ts';
+import { adaptDeepReviewFinding } from './deep-review-copy.ts';
 import { basename } from 'node:path';
 import { analyzeMatch } from '@cs2-analyst/analytics';
 import type { PlayerMetrics } from '@cs2-analyst/analytics';
@@ -277,9 +278,12 @@ function buildAnalysisViews(
 
 /** Only product fields cross IPC; diagnostics and technical refs stay in the worker. */
 function presentDeepFinding(f: DeepReviewFinding): DesktopDeepReviewFinding {
-  return { id: f.id, ruleId: f.ruleId, category: f.category, kind: f.kind, title: f.title, summary: f.summary,
+  // Domain title/summary/caveats are raw facts with reason codes; only the
+  // adapted user copy crosses IPC.
+  const copy = adaptDeepReviewFinding(f);
+  return { id: f.id, ruleId: f.ruleId, category: f.category, kind: f.kind, title: copy.title, summary: copy.summary,
     occurrences: f.occurrences, eligibleOccurrences: f.eligibleOccurrences, relatedRounds: [...f.relatedRounds],
-    evidenceQuality: f.evidenceQuality, caveats: [...f.caveats] };
+    occurrenceLabel: copy.occurrenceLabel, caveats: [...copy.caveats] };
 }
 
 export function buildDesktopReport(match: Match, filePath: string, spatial?: MatchSpatialEvidence,

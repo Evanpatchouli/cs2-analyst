@@ -1,7 +1,9 @@
 # P5.7.8 Deep Review Desktop UX
 
-Status (2026-10-09): **implementation complete / visual product acceptance pending**.
-Baseline: `a11f6af1f6f7b3efa2ee31acb223ac2299ae5ec0`.
+Status (2026-10-09): **implementation complete / copy revised / visual product acceptance pending**.
+Baseline for this copy revision: `ccb6402e9b264bab3cab0b538d35e8b028c1fd04`
+(P5.7.8 implementation was `a11f6af`). P5.7.8.1 plain-language copy polish changes presentation copy only;
+no P5.7.1–7 judgement, threshold, ranking or evidence semantics changed.
 P5.7.0 PARTIAL PASS; P5.7.1–7 PASS. v0.1 Final Acceptance **PAUSED**.
 Personal matchmaking / Perfect World DEM compatibility **UNVERIFIED**.
 Train **REMOVED / NOT REQUIRED**.
@@ -39,11 +41,12 @@ complete/partial/unavailable coverage. Availability means some player has usable
 it does not require a finding to trigger. Empty findings are legitimate.
 
 `DesktopDeepReviewFinding` is owned by report-contract and whitelists id/ruleId/category/kind,
-title/summary, occurrences/eligibleOccurrences, occurrence-only relatedRounds,
-evidenceQuality and caveats. The optional technical refs/facts are intentionally omitted from
-the production DTO. Diagnostics, suppressed rules, denominator strings, SteamID evidence refs,
-ticks/eventIndex/engagementId, Match, SpatialEvidence, Maps and class instances are absent.
-The Renderer imports only report-contract types; it never imports deep-review or derives evidence.
+plain-language title/summary, occurrences/eligibleOccurrences, occurrence-only relatedRounds,
+an optional occurrenceLabel and user-facing caveats. The optional technical refs/facts and the
+internal evidenceQuality field are intentionally omitted from the production DTO. Diagnostics,
+suppressed rules, denominator strings, SteamID evidence refs, ticks/eventIndex/engagementId,
+Match, SpatialEvidence, Maps and class instances are absent. The Renderer imports only
+report-contract types; it never imports deep-review or derives evidence.
 
 Unavailable evidence is expressed through analyzer coverage, retaining the basic report.
 Invariant/programming errors still enter the existing import error handler; no catch fabricates
@@ -58,12 +61,17 @@ reading order. No chat, scores, radar/HUD, AI coach or new analysis is introduce
 
 - 优先复盘: “复盘重点” uses Fluent warning/amber; no red or severity ranking.
 - 亮点: Fluent success; no carry/MVP/impact score.
-- 上下文: Fluent informative (neutral foreground/background/stroke), including lone contact,
-  same-Engagement no-follow and teamflash. No warning/problem label or inferred advice.
-- Finding title/summary/caveats are copied verbatim from Findings V2. Partial findings get a
-  small neutral “部分证据” badge; no confidence percentage.
-- Eligible counts show “出现 M / N 次可判定场景” without a Renderer-computed rate.
-- “证据边界” is a native keyboard-accessible details/summary, closed by default.
+- 补充观察: Fluent informative (neutral foreground/background/stroke), including lone contact,
+  same-fight no-follow and teamflash. No warning/problem label or inferred advice. The former
+  “上下文” heading was renamed because these findings are observations, not problem verdicts.
+- `apps/desktop/electron/deep-review-copy.ts` converts ruleId + facts + occurrence counts into
+  user-visible title/summary/occurrenceLabel/caveats inside the Electron presenter, so the
+  Renderer renders finished copy and never assembles domain sentences.
+- No evidence-quality badge is shown. A finding with caveats exposes only a neutral
+  “说明与限制” entry, so “部分证据” can never contradict a body that says all required evidence
+  was present.
+- Occurrence counts read “符合此情况：M / N 次” without a Renderer-computed rate.
+- “说明与限制” is a native keyboard-accessible details/summary, closed by default.
 - Empty sections have quiet copy; all-empty displays the legal no-conclusion state. No fallback finding.
 
 Finding buttons pass occurrence-only relatedRounds to existing `showRounds()`: switch to Timeline,
@@ -73,6 +81,38 @@ Switching players selects precomputed V2/P3/V1/Timeline/Analysis DTOs without im
 Nonblank nicknames are preserved exactly, even numeric/SteamID-like/long/equal to ID; only blank
 or null names fall back to 未知玩家. Evidence IDs never become visible player labels.
 Loading analysis copy is “正在生成指标与深度复盘…”, without invented progress percentages.
+
+## Product Copy Principles
+
+These rules are the long-term UI copy standard for CS2 Analyst, not a one-off edit.
+
+- **信 — never go beyond the evidence.** Copy states only what the DEM records: “没有记录到后续伤害或
+  击杀”, never 反应慢 / 枪法差; “只有你留下了交火记录”, never 站位孤立 / 太莽; “没有记录到队友跟进”,
+  never 补枪失败; “闪光弹影响了队友”, never 闪光扔得差.
+- **达 — understandable on the first read.** A normal CS2 player needs no technical document and no
+  knowledge of the internal data model.
+- **雅 — natural, concise, professional Chinese.** It should read like a post-match review tool, not a
+  database report, machine translation, thesis or development log.
+
+User-visible copy must never leak domain implementation vocabulary or reason codes. Forbidden in the
+Desktop UI: Engagement, direct contact, evidence, fireEvidence, received-first, return contact,
+partial, same-tick-fire-contact-ambiguous, eventIndex, coverage, linkage, denominator and every
+other internal reason code. They may exist only in domain packages, tests, developer diagnostics and
+engineering doc sections.
+
+Common CS terms stay in English where players already know them — ADR, KAST, Trade, Opening, Clutch,
+2K / 3K / 4K / 5K — and their existing Chinese explanations are kept. Do not force “纯中文” at the
+cost of readability.
+
+Translation happens in `apps/desktop/electron/deep-review-copy.ts` (ruleId + facts + occurrence
+counts → title / summary / occurrenceLabel / caveats). The domain contract keeps raw ruleId / facts /
+refs / coverage. The Renderer consumes only the adapted `DesktopDeepReviewFinding` fields and never
+renders domain title / summary / raw caveats. Adding a language or rewording a sentence must not
+require touching an analysis rule.
+
+Coverage caveats are rewritten as complete sentences, never by regex-deleting identifiers. For
+example: “部分开枪与伤害事件发生在同一游戏刻，无法判断严格先后；这不会影响本条结论所依据的伤害
+与击杀记录。” Every emitted finding keeps a plain-language `说明与限制` note.
 
 ## Validation
 
@@ -85,8 +125,17 @@ Loading analysis copy is “正在生成指标与深度复盘…”, without inv
 - Nuke actual `analyzeDemoFile()` twice: available, 10 player entries, at least one finding,
   legal relatedRounds, strict JSON-only DTO and identical deterministic reports, P3/V1 retained.
   No player finding counts are locked as a new golden.
-- SSR Renderer checks (6/6 included in desktop): three distinct Fluent semantics, partial evidence,
-  collapsed caveats, technical-ref decoys not visible, empty/unavailable states.
+- SSR Renderer checks (including desktop): three distinct Fluent semantics, adapted copy,
+  collapsed 说明与限制, no evidence-quality badge, technical-ref decoys not visible,
+  empty/unavailable states.
+- P5.7.8.1 copy audit: `deep-review-copy.test.mjs` covers all eight rules and partial-coverage caveat
+  translation; desktop tests (27/27) and the demo1/Nuke DTO tests assert that no
+  title/summary/occurrenceLabel/caveat contains Engagement, direct contact, evidence, partial,
+  coverage, linkage, received, return contact, same-tick, eventIndex, fireEvidence or denominator.
+  Electron report smoke also scans the real and synthetic Deep Review panels for the same forbidden
+  vocabulary and for the retired “部分证据 / 证据边界 / 上下文 / 可判定场景” wording.
+- deep-review package regression 210/210 PASS; no P5.7.1–7 rule, threshold, ranking or evidence
+  semantics changed.
 - Store regression selects every player using the same report object without an import.
 - Electron CDP report smoke: real DEM, broken DEM and non-DEM rejection PASS; four mounted tabs,
   default Deep Review, switching players, existing V1 → Timeline and V2 → Timeline PASS.
@@ -127,7 +176,9 @@ Actual Electron captures under local ignored `.tmp/p578-qa/`:
 
 - `deep-review-real-default.png`: demo1/twinkle, review + highlight + context, 1280×1400
   tall viewport to include the full reading sequence.
-- `deep-review-real-caveat.png`: real partial evidence with 证据边界 expanded.
+- `deep-review-real-caveat.png`: real Execution Review card with 说明与限制 expanded.
+- `deep-review-real-highlight.png`: real highlight card focused at 1280×820.
+- `deep-review-real-context.png`: real 补充观察 card focused at 1280×820.
 - `deep-review-real-timeline.png`: real finding occurrence rounds expanded, first highlighted.
 - `deep-review-real-900.png`, `deep-review-real-800.png`, `deep-review-real-650.png`: narrow viewports.
 - `deep-review-synthetic-three-kinds.png`, `deep-review-synthetic-partial-caveat.png`,

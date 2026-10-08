@@ -112,19 +112,22 @@ test('multi-kill summary omits zeros and the whole empty group, retaining five-o
 
 const deepFinding = (kind, extra = {}) => ({
   id: kind, ruleId: 'deep.test.' + kind, category: kind === 'review' ? 'execution' : kind === 'highlight' ? 'impact' : 'teamplay',
-  kind, title: '确认事实 ' + kind, summary: '仅保留确定性规则原文', occurrences: 6, eligibleOccurrences: 10,
-  relatedRounds: [3, 7], evidenceQuality: 'complete', caveats: [], ...extra,
+  kind, title: '可以用一句话读懂的重点 ' + kind, summary: '这条结论只依据录像中能够明确记录的伤害与击杀。',
+  occurrences: 6, eligibleOccurrences: 10, relatedRounds: [3, 7], occurrenceLabel: '符合此情况：6 / 10 次', caveats: [], ...extra,
 });
-test('Deep Review renders distinct semantics, partial caveats and no technical evidence labels', () => {
+test('Deep Review renders adapted copy, plain-language limits and no internal evidence labels', () => {
   const player = { playerId: '76561198000000000', coverage: { status: 'partial' },
-    reviews: [deepFinding('review', { evidenceQuality: 'partial', caveats: ['不证明枪法评分。'],
+    reviews: [deepFinding('review', { caveats: ['这项结果只表示录像中是否记录到后续伤害或击杀，不能据此判断你的反应速度或枪法。'],
       evidenceRefs: [{ engagementId: 'raw-engagement', eventIndex: 123, tick: 99999 }] })],
     highlights: [deepFinding('highlight')], contexts: [deepFinding('context')] };
   const html = render(createElement(DeepReview, { player, onShowRounds: () => {} }));
-  for (const text of ['优先复盘', '复盘重点', '亮点', '上下文', '出现 6 / 10 次可判定场景', '部分证据', '证据边界', '不证明枪法评分。', '查看 2 个相关回合']) assert.ok(html.includes(text), text);
+  for (const text of ['优先复盘', '复盘重点', '亮点', '补充观察', '符合此情况：6 / 10 次', '说明与限制',
+    '这项结果只表示录像中是否记录到后续伤害或击杀', '查看 2 个相关回合']) assert.ok(html.includes(text), text);
   assert.ok(html.includes('<details>') && !html.includes('<details open'));
   const text = html.replace(/<[^>]*>/g, '');
-  for (const token of ['76561198000000000', 'raw-engagement', 'eventIndex', '99999', 'tick', '严重', '高危', '需要改进']) assert.ok(!text.includes(token), token);
+  for (const token of ['76561198000000000', 'raw-engagement', 'eventIndex', '99999', 'tick', '部分证据', '证据边界', '上下文',
+    'Engagement', 'direct contact', 'evidence', 'partial', 'coverage', 'linkage', 'received', 'return contact', 'same-tick', 'fireEvidence',
+    '严重', '高危', '需要改进']) assert.ok(!text.includes(token), token);
   const labels = [...html.matchAll(/data-deep-label="(.*?)"[^>]*class="([^"]+)"/g)];
   assert.equal(labels.length, 3);
   assert.equal(new Set(labels.map(m => m[2])).size, 3, 'three distinct Fluent badge styles');
@@ -132,8 +135,8 @@ test('Deep Review renders distinct semantics, partial caveats and no technical e
 test('Deep Review permits empty and unavailable evidence without fallback cards', () => {
   for (const status of ['complete', 'unavailable']) {
     const html = render(createElement(DeepReview, { player: { playerId: '1', coverage: { status }, reviews: [], highlights: [], contexts: [] }, onShowRounds: () => {} }));
-    assert.ok(html.includes('本场没有达到 Deep Review 规则阈值且证据充分的结论。'));
-    assert.ok(html.includes('没有达到规则阈值且证据充分的问题型结论。'));
+    assert.ok(html.includes('本场没有生成深度复盘结论。'));
+    assert.ok(html.includes('本场没有需要优先复盘的问题。'));
     assert.ok(!html.includes('data-deep-kind='));
     assert.equal(html.includes('基础比赛报告仍可查看'), status === 'unavailable');
   }

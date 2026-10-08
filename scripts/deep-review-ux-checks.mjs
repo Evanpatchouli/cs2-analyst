@@ -3,6 +3,10 @@ import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 
+/** Internal domain vocabulary that must never reach Deep Review user copy. */
+const INTERNAL_TERMS = ['Engagement', 'direct contact', 'evidence', 'partial', 'coverage', 'linkage',
+  'received', 'return contact', 'same-tick', 'eventIndex', 'fireEvidence', 'denominator'];
+
 /** Runtime-only fixtures through React's existing report props; no shipped test seam. */
 export async function checkDeepReviewUx(evaluate, send, qaDir) {
   const settle = () => delay(150);
@@ -40,6 +44,19 @@ export async function checkDeepReviewUx(evaluate, send, qaDir) {
   await evaluate(`document.querySelector('[data-app-content]').scrollTo(0, 0)`);
   await screenshot('deep-review-real-default');
   if (real) assert.deepEqual(await evaluate(`[...document.querySelectorAll('#deep-review-panel [data-deep-kind]')].map(c => c.dataset.deepKind).filter((kind, index, all) => all.indexOf(kind) === index)`), ['review', 'highlight', 'context']);
+  const realText = await evaluate(`document.getElementById('deep-review-panel').textContent`);
+  for (const token of INTERNAL_TERMS) assert.ok(!realText.includes(token), '真实复盘文案泄漏内部术语：' + token);
+  for (const stale of ['部分证据', '证据边界', '上下文', '可判定场景']) assert.ok(!realText.includes(stale), '旧文案仍出现：' + stale);
+  // QA-only spacer so the last sections can scroll to the top for a focused capture.
+  await evaluate(`(() => { const spacer = document.createElement('div'); spacer.id = 'qa-deep-spacer'; spacer.style.height = '700px'; document.getElementById('deep-review-panel').appendChild(spacer); })()`);
+  await send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 620, deviceScaleFactor: 1, mobile: false });
+  for (const [kind, name] of [['highlight', 'deep-review-real-highlight'], ['context', 'deep-review-real-context']]) {
+    const found = await evaluate(`(() => { const card = document.querySelector('#deep-review-panel [data-deep-kind="${kind}"]'); if (!card) return false; card.scrollIntoView({ block: 'start' }); return true; })()`);
+    if (found) await screenshot(name);
+  }
+  await evaluate(`document.getElementById('qa-deep-spacer')?.remove()`);
+  await send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 1400, deviceScaleFactor: 1, mobile: false });
+  await evaluate(`document.querySelector('[data-app-content]').scrollTo(0, 0)`);
   const partial = await evaluate(`Boolean(document.querySelector('#deep-review-panel [data-deep-kind] details'))`);
   if (partial) {
     await evaluate(`const d = document.querySelector('#deep-review-panel [data-deep-kind] details'); d.open = true; d.scrollIntoView({ block: 'center' })`);
@@ -55,9 +72,9 @@ export async function checkDeepReviewUx(evaluate, send, qaDir) {
   // Synthetic A+B+D, with technical decoys to catch accidental visible ref rendering.
   await evaluate(`(() => {
     const f = kind => ({ id: kind, ruleId: 'deep.synthetic.' + kind, category: kind === 'review' ? 'execution' : kind === 'highlight' ? 'impact' : 'teamplay', kind,
-      title: ({ review: '未观察到确认反向接触', highlight: '多杀人数变化', context: '同一交火中的团队接触上下文' })[kind],
+      title: ({ review: '先被对手打到后的反击情况', highlight: 'R24 的 4K 改变了人数局面', context: '队友阵亡后，同一交火中的后续跟进' })[kind],
       summary: '合成 UX 场景：仅验证展示与回合定位，不构成真实比赛结论。', occurrences: 6, eligibleOccurrences: 10,
-      relatedRounds: [7, 24], evidenceQuality: kind === 'review' ? 'partial' : 'complete', caveats: ['这不证明枪法评分、错误站位或正式补枪机会。'],
+      relatedRounds: [7, 24], occurrenceLabel: '符合此情况：6 / 10 次', caveats: ['这不代表你的站位一定孤立，也不能说明队友当时看得到、来得及或具备支援条件。'],
       evidenceRefs: [{ engagementId: 'SECRET-ENGAGEMENT', eventIndex: 987654, tick: 876543, playerId: '76561198099999999' }] });
     window.__qaReport.deepReview = { available: true, players: window.__qaDeepOriginal.players.map(p => p.playerId === ${JSON.stringify(id)}
       ? { playerId: p.playerId, coverage: { status: 'partial' }, reviews: [f('review')], highlights: [f('highlight')], contexts: [f('context')] } : p) };
@@ -65,8 +82,10 @@ export async function checkDeepReviewUx(evaluate, send, qaDir) {
   await refresh();
   await evaluate(`document.querySelector('[data-app-content]').scrollTo(0, 0)`);
   const text = await evaluate(`document.getElementById('deep-review-panel').textContent`);
-  for (const expected of ['复盘重点', '亮点', '上下文', '部分证据', '证据边界', '6 / 10']) assert.ok(text.includes(expected), expected);
+  for (const expected of ['复盘重点', '亮点', '补充观察', '说明与限制', '符合此情况：6 / 10 次']) assert.ok(text.includes(expected), expected);
   for (const raw of ['SECRET-ENGAGEMENT', '987654', '876543', '76561198099999999', 'eventIndex']) assert.ok(!text.includes(raw), raw);
+  for (const token of INTERNAL_TERMS) assert.ok(!text.includes(token), '合成复盘文案泄漏内部术语：' + token);
+  for (const stale of ['部分证据', '证据边界', '上下文', '可判定场景']) assert.ok(!text.includes(stale), '旧文案仍出现：' + stale);
   const colors = await evaluate(`[...document.querySelectorAll('[data-deep-label]')].map(b => ({ kind: b.dataset.deepLabel, color: getComputedStyle(b).color }))`);
   assert.equal(new Set(colors.map(b => b.color)).size, 3);
   assert.equal(colors.find(b => b.kind === 'context').color, 'rgb(143, 157, 176)', 'context uses neutral foreground');
@@ -95,7 +114,7 @@ export async function checkDeepReviewUx(evaluate, send, qaDir) {
   await select('twinkle');
   await evaluate(`(() => { const p = window.__qaReport.deepReview.players.find(p => p.playerId === ${JSON.stringify(id)}); p.reviews = []; p.highlights = []; p.contexts = []; p.coverage.status = 'complete'; })()`);
   await refresh();
-  assert.ok(await evaluate(`document.getElementById('deep-review-panel').textContent.includes('本场没有达到 Deep Review 规则阈值且证据充分的结论。')`));
+  assert.ok(await evaluate(`document.getElementById('deep-review-panel').textContent.includes('本场没有生成深度复盘结论。')`));
   assert.equal(await evaluate(`document.querySelectorAll('#deep-review-panel [data-deep-kind]').length`), 0);
   // Restore real data and collapsed rounds for the historical checks following this test.
   await evaluate(`window.__qaReport.deepReview = window.__qaDeepOriginal; delete window.__qaDeepOriginal; delete window.__qaReport`);
