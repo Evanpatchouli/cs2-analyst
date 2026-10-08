@@ -7,7 +7,9 @@ pnpm install --frozen-lockfile
 pnpm dev
 ```
 
-`pnpm dev` 使用 electron-vite 构建主进程和 preload，启动渲染页面开发服务器，并打开 Electron 桌面窗口。关闭窗口后退出应用，停止开发命令使用 Ctrl+C。
+`pnpm dev` 先通过 Turbo 构建桌面应用依赖的核心包，再使用 electron-vite 构建主进程和 preload，启动渲染页面开发服务器，并打开 Electron 桌面窗口。开发模式的分析子进程直接加载核心包的 `dist` 入口，因此干净检出或清理构建产物后也必须先完成依赖构建；Turbo 的 `dev.dependsOn = ["^build"]` 自动保证这一顺序。关闭窗口后退出应用，停止开发命令使用 Ctrl+C。
+
+2026-10-08 修复验证：缺少核心包 `dist` 时，真实 Electron Utility Process 因 `ERR_MODULE_NOT_FOUND`（`analytics/dist/index.js`）以退出码 1 结束，界面显示“分析进程意外退出”。补齐依赖构建后，当前 `.demo` 中 Spirit 对 FaZe 的 Nuke / Ancient / Dust2，以及 Spirit 对 M80 的 Dust2 / Cache p1 / Cache p2 六份 DEM 均通过真实 Utility Process 的 parser → analytics → findings → report DTO 链路，每份报告包含 10 名玩家。Turbo dry-run 确认桌面 `dev` 等待全部五个核心依赖包构建。
 
 根目录脚本通过本地 Turbo `^2.11.6` 调度工作区任务，无需全局安装 Turbo。`dev` 和 `start` 是持续运行且不缓存的任务，`test:smoke` 每次实际执行；构建缓存包含 `dist/**`，共享的 `tsconfig.base.json` 变化会使缓存失效。配置方式参考 [Turborepo 任务文档](https://turborepo.dev/docs/crafting-your-repository/configuring-tasks)。
 

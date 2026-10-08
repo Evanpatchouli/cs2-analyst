@@ -3,6 +3,7 @@
   "globalDependencies": ["tsconfig.base.json"],
   "tasks": {
     "dev": {
+      "dependsOn": ["^build"],
       "cache": false,
       "persistent": true,
       "passThroughEnv": ["ELECTRON_*", "electron_*", "npm_config_*"]
