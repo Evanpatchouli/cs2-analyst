@@ -8,7 +8,7 @@ import test from "node:test";
 import { Demoparser2Provider } from "../../dem-parser/dist/index.js";
 import { analyzeEngagements } from "../dist/index.js";
 
-const demo = fileURLToPath(new URL("../../../.demo/spirit-vs-faze-m1-nuke.dem", import.meta.url));
+const demo = fileURLToPath(new URL("../../../.demo/nuke.dem", import.meta.url));
 const fingerprint = value => createHash("sha256").update(JSON.stringify(value)).digest("hex");
 const refKey = ref => JSON.stringify([ref.round, ref.type, ref.tick, ref.eventIndex]);
 const utility = new Set(["hegrenade", "inferno", "molotov", "incgrenade", "flashbang", "smokegrenade", "decoy", "planted_c4", "c4", "bomb", "bomb_explosion"]);

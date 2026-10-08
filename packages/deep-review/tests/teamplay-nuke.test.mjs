@@ -7,7 +7,7 @@ import test from "node:test";
 import { Demoparser2Provider } from "../../dem-parser/dist/index.js";
 import { analyzeEngagements, analyzeKillImpact, analyzeTeamplay } from "../dist/index.js";
 
-const demo = fileURLToPath(new URL("../../../.demo/spirit-vs-faze-m1-nuke.dem", import.meta.url));
+const demo = fileURLToPath(new URL("../../../.demo/nuke.dem", import.meta.url));
 const hash = v => createHash("sha256").update(JSON.stringify(v)).digest("hex");
 const key = r => JSON.stringify([r.round, r.type, r.tick, r.eventIndex]);
 const cmp = (a, b) => a < b ? -1 : a > b ? 1 : 0;

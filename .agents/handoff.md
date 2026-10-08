@@ -1,5 +1,9 @@
 # Agent Handoff
 
+## 2026-10-08 — Demo Fixture Rename Migration
+
+Map-only names replace historical fixture paths throughout tests/docs/reports. Nuke / Inferno / Dust2 SHA identities verified unchanged. See [fixture matrix](../docs/demo-fixtures.md): Train **REMOVED / NOT REQUIRED**, retained locally only; neither P5.7 nor Final Acceptance gate. Mirage joins Findings sanity; ancient/anubis/overpass remain optional. No DEM moved/copied/downloaded/staged. Findings V2 follows the separate migration commit.
+
 ## 2026-10-08 — P5.7.6 Combat Execution Evidence
 
 - 基线 `1632e5e835e9bd75f1678d08a96b0854a73a45a4`；P5.7.0 **PARTIAL PASS**、P5.7.1–P5.7.5 **PASS**，P5.7.6当前任务；v0.1 Final Acceptance **PAUSED**。

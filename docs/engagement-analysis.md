@@ -58,7 +58,7 @@ Spatial unavailable/partial 不抑制事件分组。无距离优劣、补枪机�
 
 ## Nuke structural report
 
-固定本地 fixture `.demo/spirit-vs-faze-m1-nuke.dem`，SHA-256 `dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c`。测试只锁 SHA 与结构 invariants，不硬编码队伍、选手、比分、赢家或战术故事。[可复算结构报告](./deep-review-engagement-nuke.json)。
+固定本地 fixture `.demo/nuke.dem`，SHA-256 `dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c`。测试只锁 SHA 与结构 invariants，不硬编码队伍、选手、比分、赢家或战术故事。[可复算结构报告](./deep-review-engagement-nuke.json)。
 
 | 项目 | 本轮结果 |
 | --- | --- |

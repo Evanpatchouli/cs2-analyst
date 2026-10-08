@@ -67,7 +67,7 @@ diagnostics 只用于 Deep Review 自检。teammateDeathsObserved 是 teammate-d
 
 ## Nuke structural validation / automatic review
 
-fixture `.demo/spirit-vs-faze-m1-nuke.dem`，SHA-256 `dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c`。测试不硬编码队伍、选手、比分、比赛故事或回合号。报告：[deep-review-teamplay-nuke.json](./deep-review-teamplay-nuke.json)。
+fixture `.demo/nuke.dem`，SHA-256 `dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c`。测试不硬编码队伍、选手、比分、比赛故事或回合号。报告：[deep-review-teamplay-nuke.json](./deep-review-teamplay-nuke.json)。
 
 | 本轮实测 | 结果 |
 | --- | --- |

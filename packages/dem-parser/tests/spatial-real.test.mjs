@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 import test from "node:test";
 import { Demoparser2Provider } from "../dist/index.js";
 
-const demo = fileURLToPath(new URL("../../../.demo/spirit-vs-faze-m1-nuke.dem", import.meta.url));
+const demo = fileURLToPath(new URL("../../../.demo/nuke.dem", import.meta.url));
 const fingerprint = value => createHash("sha256").update(JSON.stringify(value)).digest("hex");
 
 test("real Nuke: exact event references, actor/target relations, alive weapons, core preservation and determinism", {

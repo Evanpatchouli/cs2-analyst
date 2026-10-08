@@ -11,9 +11,9 @@ import { analyzeEngagements, analyzeKillImpact, analyzeTeamplay, analyzeUtilityC
 const hash = v => createHash("sha256").update(JSON.stringify(v)).digest("hex");
 const key = r => JSON.stringify([r.round, r.type, r.tick, r.eventIndex]);
 const fixtures = [
-  ["Nuke", "spirit-vs-faze-m1-nuke.dem", "de_nuke", "dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c"],
-  ["Inferno", "falcons-vs-vitality-m2-inferno.dem", "de_inferno", "b61c040074f84f1f2c1b683642923243dbe123c2a0c70ed3c0670b0e4cd7a265"],
-  ["Dust2", "spirit-vs-faze-m3-dust2.dem", "de_dust2", "db90fe85aab023a1d2c8a5996182e6120d98ef494f02a070b17982b235e4958c"],
+  ["Nuke", "nuke.dem", "de_nuke", "dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c"],
+  ["Inferno", "inferno.dem", "de_inferno", "b61c040074f84f1f2c1b683642923243dbe123c2a0c70ed3c0670b0e4cd7a265"],
+  ["Dust2", "dust2.dem", "de_dust2", "db90fe85aab023a1d2c8a5996182e6120d98ef494f02a070b17982b235e4958c"],
 ];
 const distributions = (rows, field) => Object.fromEntries([...new Set(rows.map(r => r[field]))].sort().map(value => [value, rows.filter(r => r[field] === value).length]));
 const stats = values => { const sorted = [...values].sort((a, b) => a - b), n = sorted.length;

@@ -6,7 +6,7 @@
   "peakMemory": "UNKNOWN",
   "maps": [
     {
-      "fixture": "spirit-vs-faze-m1-nuke.dem",
+      "fixture": "nuke.dem",
       "sha256": "dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c",
       "map": "de_nuke",
       "tickRate": 64,
@@ -107,9 +107,9 @@
       "determinismHash": "15758396d791dbfaff91f84188bc6b49bf02313f04304bde506d5df9fe9d7524",
       "executionHash": "1d778768d4ed2a6b27fa2bc7bbe336d5c11b2f6332d47f667b03817a187e95aa",
       "timingsMilliseconds": {
-        "parseWithSpatial": 8062.9891,
-        "deepReviewPipeline": 865.4849000000004,
-        "combatExecution": 181.70490000000063
+        "parseWithSpatial": 11418.332400000001,
+        "deepReviewPipeline": 3295.327299999999,
+        "combatExecution": 629.9201999999987
       },
       "verification": {
         "coreTicks": 3757,
@@ -126,7 +126,7 @@
       }
     },
     {
-      "fixture": "falcons-vs-vitality-m2-inferno.dem",
+      "fixture": "inferno.dem",
       "sha256": "b61c040074f84f1f2c1b683642923243dbe123c2a0c70ed3c0670b0e4cd7a265",
       "map": "de_inferno",
       "tickRate": 64,
@@ -224,9 +224,9 @@
       "determinismHash": "99276770226a205989e28be6fd7d77d8727062e5dad6e910b20a35ef0600b09b",
       "executionHash": "1482e1d830126e539899d5c64cb88c3c3f5db28aa2ff8d07358f4aef7571c9eb",
       "timingsMilliseconds": {
-        "parseWithSpatial": 5520.871299999999,
-        "deepReviewPipeline": 753.7824,
-        "combatExecution": 158.16560000000027
+        "parseWithSpatial": 24409.957200000004,
+        "deepReviewPipeline": 1133.4810999999972,
+        "combatExecution": 225.43099999999686
       },
       "verification": {
         "coreTicks": 4605,
@@ -243,7 +243,7 @@
       }
     },
     {
-      "fixture": "spirit-vs-faze-m3-dust2.dem",
+      "fixture": "dust2.dem",
       "sha256": "db90fe85aab023a1d2c8a5996182e6120d98ef494f02a070b17982b235e4958c",
       "map": "de_dust2",
       "tickRate": 64,
@@ -342,9 +342,9 @@
       "determinismHash": "1f0b417af7a4fc9da2e21269314ab3779d12dcb080f2a806f136555308de78e9",
       "executionHash": "0576ac85df5e5c9e41366f3f26bc048152397f7f74ad5b8a7b05fb3ee428e90a",
       "timingsMilliseconds": {
-        "parseWithSpatial": 4688.6623,
-        "deepReviewPipeline": 730.7824999999975,
-        "combatExecution": 106.00530000000072
+        "parseWithSpatial": 16892.941099999996,
+        "deepReviewPipeline": 934.7433000000019,
+        "combatExecution": 230.11089999999967
       },
       "verification": {
         "coreTicks": 4702,

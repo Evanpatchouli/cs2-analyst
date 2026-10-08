@@ -76,6 +76,8 @@ P5.6.5 Branding & App Icon — **FINAL PASS**。正式产品名冻结为 CS2 Ana
 
 Current: **P5.7 Deep Review**。
 
+正式 [fixture matrix](./demo-fixtures.md)：Nuke + Inferno + Dust2 + Mirage 为核心 gate；Ancient / Anubis / Overpass 为 extended optional。Train **REMOVED / NOT REQUIRED**，不属于 P5.7 / Final Acceptance gate，不是 debt / blocker；仅本地保留，不运行。
+
 - P5.7.0 Evidence Feasibility Spike：**PARTIAL PASS — GOTV verified, personal DEM compatibility pending**。
 - P5.7.1 Spatial Evidence Foundation：**PASS**，正式领域contract、事件引用、core优先稀疏采样、coverage与共享输入实现，GOTV验证完成；见 [Deep Review](./deep-review-evidence.md) / [Spatial contract](./spatial-evidence.md)。
 - P5.7.2 Engagement Engine：**PASS**；独立deep-review包、敌对direct contacts、共享participant/time-gap连通分组、空间exact join与分离coverage，默认3s与2/3/4/5s sensitivity；见 [Engagement analysis](./engagement-analysis.md)。

@@ -7,7 +7,7 @@ import test from "node:test";
 import { Demoparser2Provider } from "../../dem-parser/dist/index.js";
 import { analyzeEngagements, analyzeKillImpact } from "../dist/index.js";
 
-const demo = fileURLToPath(new URL("../../../.demo/spirit-vs-faze-m1-nuke.dem", import.meta.url));
+const demo = fileURLToPath(new URL("../../../.demo/nuke.dem", import.meta.url));
 const sha = value => createHash("sha256").update(JSON.stringify(value)).digest("hex");
 const key = ref => JSON.stringify([ref.round, ref.type, ref.tick, ref.eventIndex]);
 const projection = multi => ({ round: multi.round, playerId: multi.playerId, killCount: multi.killCount,

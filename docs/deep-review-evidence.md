@@ -45,7 +45,7 @@ v0.1 Final Acceptance: **PAUSED — Deep Review product gap discovered**。Curre
 
 | 项 | 职业 Nuke（本轮实测） | demo1（本轮） |
 | --- | --- | --- |
-| 文件 | .demo/spirit-vs-faze-m1-nuke.dem | .demo/demo1.dem 缺失 |
+| 文件 | .demo/nuke.dem | .demo/demo1.dem 缺失 |
 | bytes | 471606780（449.76 MiB） | UNKNOWN |
 | SHA-256 | dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c | UNKNOWN；历史golden hash见 analytics-metrics.md |
 | map | de_nuke | UNKNOWN（历史 de_dust2） |
@@ -384,7 +384,7 @@ UNKNOWN：demo1所有新字段和性能、个人与GOTV差异、真实golden回�
 ```powershell
 pnpm --filter @cs2-analyst/dem-parser build
 node --test packages/dem-parser/dev/evidence-probe.test.mjs
-node --expose-gc packages/dem-parser/dev/evidence-probe.mjs .demo/spirit-vs-faze-m1-nuke.dem .tmp/nuke-evidence.json
+node --expose-gc packages/dem-parser/dev/evidence-probe.mjs .demo/nuke.dem .tmp/nuke-evidence.json
 # 补回原始demo1后（必须是现有golden内容，不能把Nuke改名）
 node --expose-gc packages/dem-parser/dev/evidence-probe.mjs .demo/demo1.dem .tmp/demo1-evidence.json
 pnpm typecheck

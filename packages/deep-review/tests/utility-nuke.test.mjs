@@ -7,7 +7,7 @@ import test from "node:test";
 import { Demoparser2Provider } from "../../dem-parser/dist/index.js";
 import { analyzeUtilityContext, analyzeKillImpact } from "../dist/index.js";
 import { researchUtility } from "./utility-research.mjs";
-const demo = fileURLToPath(new URL("../../../.demo/spirit-vs-faze-m1-nuke.dem", import.meta.url));
+const demo = fileURLToPath(new URL("../../../.demo/nuke.dem", import.meta.url));
 const hash = v => createHash("sha256").update(JSON.stringify(v)).digest("hex");
 const key = r => JSON.stringify([r.round, r.type, r.tick, r.eventIndex]);
 test("Nuke utility linkage research, independent spatial/alive oracle and structural samples", { skip: !existsSync(demo) ? "Local Nuke missing; no downloads" : false }, async t => {

@@ -89,7 +89,7 @@ diagnostics 只作 Deep Review 自检：rounds/eligible/ineligible、正式窗�
 
 ## Nuke structural validation
 
-固定本地 fixture `.demo/spirit-vs-faze-m1-nuke.dem`，SHA-256 `dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c`。测试只断言 SHA 与结构，绝不锁定队伍、选手、比分、赢家或回合故事。报告：[deep-review-impact-nuke.json](./deep-review-impact-nuke.json)。
+固定本地 fixture `.demo/nuke.dem`，SHA-256 `dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c`。测试只断言 SHA 与结构，绝不锁定队伍、选手、比分、赢家或回合故事。报告：[deep-review-impact-nuke.json](./deep-review-impact-nuke.json)。
 
 | 结果 | 本轮实测 |
 | --- | --- |

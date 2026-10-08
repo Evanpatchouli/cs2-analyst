@@ -66,9 +66,9 @@ View Alignment = **UNVERIFIED**。本轮没有建立可信 Source2/demoparser2 y
 
 | Role | Fixture | SHA-256 | header map | ticks/s | rounds / players | bytes |
 | --- | --- | --- | --- | --- | --- | --- |
-| Primary | spirit-vs-faze-m1-nuke.dem | dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c | de_nuke | 64 | 21 / 10 | 471606780 |
-| Cross-map A | falcons-vs-vitality-m2-inferno.dem | b61c040074f84f1f2c1b683642923243dbe123c2a0c70ed3c0670b0e4cd7a265 | de_inferno | 64 | 24 / 10 | 592871000 |
-| Cross-map B | spirit-vs-faze-m3-dust2.dem | db90fe85aab023a1d2c8a5996182e6120d98ef494f02a070b17982b235e4958c | de_dust2 | 64 | 24 / 10 | 557650967 |
+| Primary | nuke.dem | dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c | de_nuke | 64 | 21 / 10 | 471606780 |
+| Cross-map A | inferno.dem | b61c040074f84f1f2c1b683642923243dbe123c2a0c70ed3c0670b0e4cd7a265 | de_inferno | 64 | 24 / 10 | 592871000 |
+| Cross-map B | dust2.dem | db90fe85aab023a1d2c8a5996182e6120d98ef494f02a070b17982b235e4958c | de_dust2 | 64 | 24 / 10 | 557650967 |
 
 只使用仓库.demo指定同名文件，不下载/替换；缺失明确SKIP。SHA锁fixture身份，计数不是比赛golden；不锁队伍/姓名/比分/赢家。目标是检验单图假设、overlap/dense/sparse边界、空间coverage和linkage robustness，不比较职业选手水平或推出地图玩法结论。
 

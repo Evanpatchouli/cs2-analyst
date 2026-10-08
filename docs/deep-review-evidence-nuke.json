@@ -1,6 +1,6 @@
 {
   "schema": "P5.7.0-dev-probe-v1",
-  "file": ".demo/spirit-vs-faze-m1-nuke.dem",
+  "file": ".demo/nuke.dem",
   "bytes": 471606780,
   "sha256": "dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c",
   "header": {
@@ -73,12 +73,12 @@
     }
   ],
   "environment": {
-    "node": "v24.21.0",
+    "node": "v26.3.0",
     "platform": "win32",
     "arch": "x64",
-    "cpu": "AMD Ryzen 7 5700G with Radeon Graphics         ",
+    "cpu": "13th Gen Intel(R) Core(TM) i7-13620H",
     "logicalCpus": 16,
-    "ramBytes": 33684189184,
+    "ramBytes": 34141691904,
     "nativeVersion": "0.42.0"
   },
   "eventCounts": {
@@ -114,11 +114,11 @@
     "kill": 145
   },
   "baselineMs": [
-    1606.6387000000002,
-    1578.2461,
-    1548.0631999999996
+    1849.3953000000001,
+    6783.7776,
+    10549.3368
   ],
-  "parseEventsMs": 422.8710999999994,
+  "parseEventsMs": 1947.0493999999999,
   "queries": {
     "sparse": {
       "plan": {
@@ -165,9 +165,9 @@
         "requestedTicks": 9487
       },
       "ms": [
-        1547.3501000000006,
-        1527.0029999999997,
-        1527.0508999999984
+        11106.1259,
+        4211.921799999996,
+        5748.727000000006
       ],
       "returnedRows": 94580,
       "returnedTicks": 9458,
@@ -1978,9 +1978,9 @@
         "requestedTicks": 21418
       },
       "ms": [
-        3076.1745999999985,
-        3366.9116000000013,
-        3439.8446000000004
+        7455.25,
+        6202.6175,
+        5852.328100000006
       ],
       "returnedRows": 213260,
       "returnedTicks": 21326,
@@ -3904,43 +3904,43 @@
   },
   "timing": {
     "sparse": {
-      "baselineMedianMs": 1578.2461,
-      "sparseMedianMs": 1527.0508999999984,
-      "projectedParserPlusQueryMs": 3105.2969999999987,
-      "addedQueryFraction": 0.49175679492170926,
-      "overheadVsBaseline": 0.9675619664132218
+      "baselineMedianMs": 6783.7776,
+      "sparseMedianMs": 5748.727000000006,
+      "projectedParserPlusQueryMs": 12532.504600000007,
+      "addedQueryFraction": 0.45870535726753314,
+      "overheadVsBaseline": 0.8474226808378869
     },
     "history": {
-      "baselineMedianMs": 1578.2461,
-      "sparseMedianMs": 3366.9116000000013,
-      "projectedParserPlusQueryMs": 4945.157700000002,
-      "addedQueryFraction": 0.68085019816456,
-      "overheadVsBaseline": 2.133324834447556
+      "baselineMedianMs": 6783.7776,
+      "sparseMedianMs": 6202.6175,
+      "projectedParserPlusQueryMs": 12986.395100000002,
+      "addedQueryFraction": 0.4776242715732559,
+      "overheadVsBaseline": 0.914330903182911
     }
   },
   "integrated": {
     "sparse": {
-      "parserMs": 1957.1152000000002,
-      "extraReadMs": 518.0227999999988,
-      "queryMs": 1865.6160000000018,
-      "totalMs": 4340.754000000001,
-      "queryFraction": 0.4297907690691528,
+      "parserMs": 4546.669300000009,
+      "extraReadMs": 682.582699999999,
+      "queryMs": 3111.756299999979,
+      "totalMs": 8341.008299999987,
+      "queryFraction": 0.37306716263547945,
       "returnedRows": 94580,
       "note": "One measured sequential provider parse + extra file read + sparse query; excludes probe statistics/optional queries; not a production adapter modification"
     },
     "history": {
-      "parserMs": 1938.5944999999992,
-      "extraReadMs": 486.44800000000396,
-      "queryMs": 3556.133099999999,
-      "totalMs": 5981.175600000002,
-      "queryFraction": 0.5945542043607611,
+      "parserMs": 4707.3227999999945,
+      "extraReadMs": 606.5555999999924,
+      "queryMs": 6041.705500000011,
+      "totalMs": 11355.583899999998,
+      "queryFraction": 0.5320471015145256,
       "returnedRows": 213260,
       "note": "One measured sequential provider parse + extra file read + sparse query; excludes probe statistics/optional queries; not a production adapter modification"
     }
   },
   "optionalMs": {
-    "shots_fired": 2758.9802999999993,
-    "usercmd_viewangle_x": 8191.891700000004
+    "shots_fired": 12453.9528,
+    "usercmd_viewangle_x": 30297.2687
   },
   "optionalCoverage": {
     "shots_fired": {

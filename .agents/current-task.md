@@ -1,5 +1,9 @@
 # Current Task
 
+## 2026-10-08 — Demo Fixture Rename Migration
+
+Baseline `065f0f316f9b2366864b0b5a66be796bbad659fa`. Map-only fixture filenames; Nuke / Inferno / Dust2 SHA identities unchanged. Fixture roles and Train **REMOVED / NOT REQUIRED** status: [matrix](../docs/demo-fixtures.md). Core gate: Nuke + Inferno + Dust2 + Mirage; extended maps optional. Personal DEM compatibility **UNVERIFIED**. Complete this focused migration commit before P5.7.7.
+
 Status: v0.1 Final Acceptance **PAUSED — Deep Review product gap discovered**。
 
 Current: **P5.7 Deep Review / P5.7.6 Combat Execution Evidence**。

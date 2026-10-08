@@ -54,7 +54,7 @@ diagnostics 是开发自检，不是产品评分。`heExactDamageLinked` 计 exa
 
 ## Nuke research / automatic cases
 
-本地 `.demo/spirit-vs-faze-m1-nuke.dem` SHA-256：`dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c`。生产/自动选择没有硬编码队伍、玩家姓名、比分或故事。研究覆盖全部 Match round.events；候选 tick delta 分布是所有同 actor/round 的 **damage-effect pairs**，不是配对结果。
+本地 `.demo/nuke.dem` SHA-256：`dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c`。生产/自动选择没有硬编码队伍、玩家姓名、比分或故事。研究覆盖全部 Match round.events；候选 tick delta 分布是所有同 actor/round 的 **damage-effect pairs**，不是配对结果。
 
 | 研究 | 实测 |
 | --- | --- |

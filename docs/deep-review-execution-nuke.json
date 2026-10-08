@@ -1,5 +1,5 @@
 {
-  "fixture": "spirit-vs-faze-m1-nuke.dem",
+  "fixture": "nuke.dem",
   "sha256": "dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c",
   "map": "de_nuke",
   "tickRate": 64,
@@ -100,9 +100,9 @@
   "determinismHash": "15758396d791dbfaff91f84188bc6b49bf02313f04304bde506d5df9fe9d7524",
   "executionHash": "1d778768d4ed2a6b27fa2bc7bbe336d5c11b2f6332d47f667b03817a187e95aa",
   "timingsMilliseconds": {
-    "parseWithSpatial": 8062.9891,
-    "deepReviewPipeline": 865.4849000000004,
-    "combatExecution": 181.70490000000063
+    "parseWithSpatial": 11418.332400000001,
+    "deepReviewPipeline": 3295.327299999999,
+    "combatExecution": 629.9201999999987
   },
   "verification": {
     "coreTicks": 3757,
