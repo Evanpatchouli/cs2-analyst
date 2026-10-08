@@ -13,22 +13,22 @@ export async function checkReportUx(evaluate, send, qaDir) {
   await send('Emulation.setFocusEmulationEnabled', { enabled: true });
   await evaluate(`document.getElementById('report-tab').click()`);
   await settle();
-  assert.deepEqual(await evaluate(`[...document.querySelectorAll('[role="tab"]')].map(t => t.querySelector('.fui-Tab__content').textContent)`), ['比赛报告', '回合时间线', '分析']);
-  assert.equal(await evaluate(`document.querySelectorAll('[role="tabpanel"]').length`), 3);
+  assert.deepEqual(await evaluate(`[...document.querySelectorAll('[role="tab"]')].map(t => t.querySelector('.fui-Tab__content').textContent)`), ['深度复盘', '比赛报告', '回合时间线', '分析']);
+  assert.equal(await evaluate(`document.querySelectorAll('[role="tabpanel"]').length`), 4);
   assert.equal(await evaluate(`document.getElementById('report-panel').hidden`), false);
   // Native summary retains keyboard activation and clear focus feedback.
-  const summary = await evaluate(`(() => { const s = document.querySelector('summary'); s.focus(); return { cursor: getComputedStyle(s).cursor, focused: document.activeElement === s }; })()`);
+  const summary = await evaluate(`(() => { const s = document.querySelector('#report-panel summary'); s.focus(); return { cursor: getComputedStyle(s).cursor, focused: document.activeElement === s }; })()`);
   assert.equal(summary.cursor, 'pointer');
   assert.equal(summary.focused, true);
   await send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', text: '\r', windowsVirtualKeyCode: 13 });
   await send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
-  assert.equal(await evaluate(`document.querySelector('details').open`), true);
-  assert.equal(await evaluate(`document.querySelector('summary').matches(':focus-visible')`), true);
-  assert.ok(await evaluate(`parseFloat(getComputedStyle(document.querySelector('summary')).outlineWidth) >= 2`));
-  await evaluate(`document.querySelector('details').open = false; document.activeElement.blur()`);
-  const hover = await evaluate(`(() => { const s = document.querySelector('summary'); s.scrollIntoView({ block: 'center' }); const r = s.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`);
+  assert.equal(await evaluate(`document.querySelector('#report-panel details').open`), true);
+  assert.equal(await evaluate(`document.querySelector('#report-panel summary').matches(':focus-visible')`), true);
+  assert.ok(await evaluate(`parseFloat(getComputedStyle(document.querySelector('#report-panel summary')).outlineWidth) >= 2`));
+  await evaluate(`document.querySelector('#report-panel details').open = false; document.activeElement.blur()`);
+  const hover = await evaluate(`(() => { const s = document.querySelector('#report-panel summary'); s.scrollIntoView({ block: 'center' }); const r = s.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 }; })()`);
   await send('Input.dispatchMouseEvent', { type: 'mouseMoved', ...hover });
-  assert.equal(await evaluate(`getComputedStyle(document.querySelector('summary')).backgroundColor`), 'rgb(34, 43, 54)');
+  assert.equal(await evaluate(`getComputedStyle(document.querySelector('#report-panel summary')).backgroundColor`), 'rgb(34, 43, 54)');
   await send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 0, y: 0 });
   // Observe scrolling itself: the destination must be visible and expanded at call time.
   await evaluate(`(() => { const original = Element.prototype.scrollIntoView; window.__roundScroll = null;
@@ -37,7 +37,7 @@ export async function checkReportUx(evaluate, send, qaDir) {
       if (this.id === 'round-r24') window.__roundScroll = { visible: !document.getElementById('timeline-panel').hidden, expanded: this.querySelector('button').getAttribute('aria-expanded') };
       return original.call(this, options);
     };
-    [...document.querySelectorAll('button')].find(b => b.textContent.trim() === '查看 R24').click();
+    [...document.querySelectorAll('#report-panel button')].find(b => b.textContent.trim() === '查看 R24').click();
   })()`);
   await settle();
   assert.deepEqual(await evaluate('window.__roundScroll'), { visible: true, expanded: 'true' });
@@ -113,7 +113,7 @@ export async function checkReportUx(evaluate, send, qaDir) {
     await evaluate(`document.getElementById('report-tab').click(); document.querySelector('[data-app-content]').scrollTo(0, 0)`);
     await settle();
     await screenshot(`report-tabs-${width}`);
-    await evaluate(`document.querySelector('summary').scrollIntoView({ block: 'center' }); document.querySelector('summary').focus()`);
+    await evaluate(`document.querySelector('#report-panel summary').scrollIntoView({ block: 'center' }); document.querySelector('#report-panel summary').focus()`);
     await screenshot(`finding-evidence-${width}`);
     await evaluate(`document.getElementById('analysis-tab').click()`);
     await settle();

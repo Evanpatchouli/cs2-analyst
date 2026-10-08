@@ -141,7 +141,7 @@ export interface DesktopAnalysisViews {
 }
 
 export interface DesktopMatchReport {
-  schemaVersion: 1;
+  schemaVersion: 2;
   match: { id: string; fileName: string; map: string; rounds: number; score: { initialCT: number; initialT: number } | null };
   selectedPlayer: string;
   players: { id: string; nickname: string }[];
@@ -150,6 +150,28 @@ export interface DesktopMatchReport {
   /** Full per-player round timelines; the Renderer picks the entry matching the selected player. */
   timeline: DesktopPlayerTimeline[];
   analysis: DesktopAnalysisViews;
+  deepReview: { available: boolean; players: DesktopDeepReviewPlayer[] };
+}
+/** Presentation contract owned here; Renderer has no dependency on analysis packages. */
+export interface DesktopDeepReviewFinding {
+  id: string;
+  ruleId: string;
+  category: 'impact' | 'execution' | 'teamplay' | 'utility';
+  kind: 'review' | 'highlight' | 'context';
+  title: string;
+  summary: string;
+  occurrences: number;
+  eligibleOccurrences: number | null;
+  relatedRounds: number[];
+  evidenceQuality: 'complete' | 'partial';
+  caveats: string[];
+}
+export interface DesktopDeepReviewPlayer {
+  playerId: string;
+  reviews: DesktopDeepReviewFinding[];
+  highlights: DesktopDeepReviewFinding[];
+  contexts: DesktopDeepReviewFinding[];
+  coverage: { status: 'complete' | 'partial' | 'unavailable' };
 }
 export type ImportPhase = 'selecting' | 'parsing' | 'analyzing';
 export type ImportResult = { kind: 'success'; report: DesktopMatchReport } | { kind: 'cancelled' } | { kind: 'error'; message: string };

@@ -7,6 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { analyzeMatch } from '@cs2-analyst/analytics';
 import { Demoparser2Provider } from '@cs2-analyst/dem-parser';
 import { comparisonMetrics, comparisonValue, comparisonIncomplete, sortedComparison } from '../renderer/src/analysis-metrics.ts';
+import { useReport } from '../renderer/src/store.ts';
 import { displayPlayerName } from '../electron/player-name.ts';
 import { analyzeDemoFile, buildDesktopReport } from '../electron/report.ts';
 
@@ -14,12 +15,25 @@ const demo = process.env.DEM_TEST_FILE ?? fileURLToPath(new URL('../../../.demo/
 const hasDemo = existsSync(demo);
 
 test('real demo flows through parser -> analytics -> findings into a serializable DTO', { skip: hasDemo ? false : 'demo1.dem not present' }, async () => {
-  const result = await analyzeDemoFile(demo);
+  let timings;
+  let parseCalls = 0;
+  const spatialParse = Demoparser2Provider.prototype.parseWithSpatial;
+  const oldParse = Demoparser2Provider.prototype.parse;
+  Demoparser2Provider.prototype.parse = () => { throw new Error('Desktop must use only parseWithSpatial'); };
+  Demoparser2Provider.prototype.parseWithSpatial = function(...args) { parseCalls++; return spatialParse.apply(this, args); };
+  let result;
+  try { result = await analyzeDemoFile(demo, undefined, t => { timings = t; }); }
+  finally { Demoparser2Provider.prototype.parseWithSpatial = spatialParse; Demoparser2Provider.prototype.parse = oldParse; }
+  assert.equal(parseCalls, 1);
+  console.log('demo1 Desktop performance', JSON.stringify(timings));
   assert.equal(result.kind, 'success');
   const report = result.report;
 
+  assert.equal(report.schemaVersion, 2);
+  assert.deepEqual(report.deepReview.players.map(p => p.playerId), report.players.map(p => p.id));
+  assertDeepDto(report);
   // Renderer-facing shape: JSON only, no domain events or native objects.
-  assert.deepEqual(Object.keys(report), ['schemaVersion', 'match', 'selectedPlayer', 'players', 'analytics', 'findings', 'timeline', 'analysis']);
+  assert.deepEqual(Object.keys(report), ['schemaVersion', 'match', 'selectedPlayer', 'players', 'analytics', 'findings', 'timeline', 'analysis', 'deepReview']);
   assert.deepEqual(JSON.parse(JSON.stringify(report)), report);
 
   assert.equal(report.match.map, 'de_dust2');
@@ -220,7 +234,7 @@ function syntheticMatch() {
 test('timeline filters to high-value events, maps nicknames and computes round time', () => {
   const match = syntheticMatch();
   const report = buildDesktopReport(match, 'synthetic.dem');
-  assert.deepEqual(Object.keys(report), ['schemaVersion', 'match', 'selectedPlayer', 'players', 'analytics', 'findings', 'timeline', 'analysis']);
+  assert.deepEqual(Object.keys(report), ['schemaVersion', 'match', 'selectedPlayer', 'players', 'analytics', 'findings', 'timeline', 'analysis', 'deepReview']);
   assert.deepEqual(report.match.score, { initialCT: 1, initialT: 0 });
 
   const alice = report.timeline.find(t => t.playerId === '1').rounds[0];
@@ -409,5 +423,85 @@ test('kill/death DTO copies optional kill flags without inventing absent evidenc
         assert.equal(key in projected, key in flags);
       }
     }
+  }
+});
+
+function assertDeepDto(report) {
+  assert.deepEqual(JSON.parse(JSON.stringify(report)), report);
+  const inspect = value => {
+    if (value === null || typeof value !== 'object') return;
+    assert.ok(Array.isArray(value) || Object.getPrototypeOf(value) === Object.prototype);
+    for (const [key, child] of Object.entries(value)) {
+      assert.ok(!['suppressedRules', 'diagnostics', 'eventIndex', 'engagementId', 'tick', 'spatial', 'events'].includes(key), key);
+      inspect(child);
+    }
+  };
+  inspect(report.deepReview);
+  for (const p of report.deepReview.players) {
+    for (const f of [...p.reviews, ...p.highlights, ...p.contexts]) {
+      assert.ok(f.relatedRounds.every(r => report.timeline.find(t => t.playerId === p.playerId).rounds.some(round => round.round === r)));
+    }
+  }
+}
+
+test('Nuke Desktop integrates shared spatial pipeline, JSON DTO and deterministic per-player results', async () => {
+  const file = fileURLToPath(new URL('../../../.demo/nuke.dem', import.meta.url));
+  assert.ok(existsSync(file), 'Nuke integration fixture required');
+  let timings;
+  const result = await analyzeDemoFile(file, undefined, t => { timings = t; });
+  assert.equal(result.kind, 'success');
+  console.log('Nuke Desktop performance', JSON.stringify(timings));
+  const report = result.report;
+  assert.equal(report.schemaVersion, 2);
+  assert.equal(report.deepReview.available, true);
+  assert.equal(report.deepReview.players.length, 10);
+  assert.deepEqual(report.deepReview.players.map(p => p.playerId), report.players.map(p => p.id));
+  assert.ok(report.deepReview.players.some(p => p.reviews.length + p.highlights.length + p.contexts.length > 0));
+  assert.equal(report.analytics.length, 10);
+  assert.ok(report.findings.length > 0);
+  assertDeepDto(report);
+  const again = await analyzeDemoFile(file);
+  assert.equal(again.kind, 'success');
+  assert.deepEqual(again.report, report);
+});
+
+test('unavailable V2 identity coverage preserves the basic report without fallback findings', () => {
+  const match = syntheticMatch();
+  // P3 can report an identity which Findings V2 explicitly cannot identify.
+  const rename = value => {
+    if (!value || typeof value !== 'object') return;
+    for (const key of Object.keys(value)) {
+      if (value[key] === '1') value[key] = 'unidentified';
+      else rename(value[key]);
+    }
+  };
+  rename(match);
+  const report = buildDesktopReport(match, 'synthetic.dem');
+  const player = report.deepReview.players.find(p => p.playerId === 'unidentified');
+  assert.equal(player.coverage.status, 'unavailable');
+  assert.deepEqual([player.reviews, player.highlights, player.contexts], [[], [], []]);
+  assert.ok(report.analytics.find(p => p.playerId === 'unidentified'));
+  assertDeepDto(report);
+});
+
+test('switching every target player selects existing DTOs without importing or reanalyzing', () => {
+  const report = buildDesktopReport(syntheticMatch(), 'synthetic.dem');
+  let imports = 0;
+  globalThis.window = { cs2Analyst: { importDemo: () => { imports++; throw new Error('Unexpected import'); } } };
+  try {
+    useReport.setState({ report, playerId: report.selectedPlayer, status: 'success' });
+    for (const player of report.players) {
+      useReport.getState().selectPlayer(player.id);
+      const state = useReport.getState();
+      assert.equal(state.playerId, player.id);
+      assert.equal(state.report, report);
+      assert.equal(state.report.deepReview.players.find(p => p.playerId === state.playerId), report.deepReview.players.find(p => p.playerId === player.id));
+    }
+    useReport.getState().selectPlayer('not-a-player');
+    assert.equal(useReport.getState().playerId, report.players.at(-1).id);
+    assert.equal(imports, 0);
+  } finally {
+    delete globalThis.window;
+    useReport.setState({ report: null, playerId: '', status: 'idle' });
   }
 });

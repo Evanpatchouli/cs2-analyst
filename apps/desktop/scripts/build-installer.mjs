@@ -59,7 +59,7 @@ const workerBundle = readFileSync(join(desktopDir, 'dist/electron/report-worker.
 
 // The worker must be self-contained JavaScript: workspace packages bundled in,
 // native parser external so prepare-pack.mjs can provide it at runtime.
-for (const pkg of ['dem-parser', 'match-model', 'analytics', 'findings', 'report-contract']) {
+for (const pkg of ['dem-parser', 'match-model', 'analytics', 'findings', 'deep-review', 'report-contract']) {
   if (workerBundle.includes(`"@cs2-analyst/${pkg}"`)) {
     throw new Error(`report-worker.js still imports @cs2-analyst/${pkg}; workspace packages must be bundled`);
   }

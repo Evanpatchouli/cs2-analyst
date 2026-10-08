@@ -17,6 +17,9 @@ importers:
       '@cs2-analyst/analytics':
         specifier: workspace:^
         version: link:../../packages/analytics
+      '@cs2-analyst/deep-review':
+        specifier: workspace:^
+        version: link:../../packages/deep-review
       '@cs2-analyst/dem-parser':
         specifier: workspace:^
         version: link:../../packages/dem-parser

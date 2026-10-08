@@ -1,4 +1,5 @@
 import { checkReportUx } from './report-ux-checks.mjs';
+import { checkDeepReviewUx } from './deep-review-ux-checks.mjs';
 import { checkWindowShell } from './window-shell-checks.mjs';
 import { checkWindowsInstallBranding } from './windows-branding-checks.mjs';
 import assert from 'node:assert/strict';
@@ -382,6 +383,8 @@ async function testSeamScenario() {
     }
     const findingCount = await session.evaluate("document.querySelectorAll('[data-rule]').length");
     assert.equal(findingCount, 5, 'twinkle 应显示 5 条 Findings');
+    assert.equal(await session.evaluate(`document.getElementById('deep-review-tab').getAttribute('aria-selected')`), 'true');
+    await checkDeepReviewUx(session.evaluate, session.send);
     await session.evaluate(`[...document.querySelectorAll('button')].find(b => b.textContent.trim() === '查看 R24').click()`);
     await waitFor(async () => session.evaluate(`!document.getElementById('timeline-panel').hidden`), 10_000, '安装版 Finding 切换 Timeline');
     await waitFor(async () => session.evaluate(`document.querySelector('[data-round-detail="24"]')?.textContent.includes('8888888888888888888888')`), 10_000, '安装版 Timeline 长数字昵称');

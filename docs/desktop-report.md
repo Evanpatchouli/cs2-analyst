@@ -1,3 +1,16 @@
+# Current Desktop contract — P5.7.8
+
+**implementation complete / visual product acceptance pending**. Deep Review is the default of
+four mounted tabs. The Utility Process invokes one shared-input `parseWithSpatial()` and the
+existing five evidence analyzers once, then Findings V2 for every valid player. P3/V1/Timeline/
+Analysis remain available on the same Match; V1 is titled 基础规则提示. Report schema is **v2**,
+with JSON-only `deepReview` player DTOs; Renderer has no deep-review dependency. Evidence caveats
+remain collapsed, context is neutral, and occurrence buttons reuse the existing Timeline linkage.
+Implementation, tests, performance, screenshots and personal DEM debt: [Deep Review Desktop](./deep-review-desktop.md).
+Final Acceptance **PAUSED**; Personal matchmaking / Perfect World **UNVERIFIED**.
+
+---
+
 # P5.1 桌面比赛报告 MVP
 
 P5.1 打通了第一条可实际使用的桌面链路：
@@ -70,15 +83,16 @@ Renderer（仅渲染 DTO，不访问 Node/fs/demoparser2）
 
 ```ts
 interface DesktopMatchReport {
-  schemaVersion: 1;
+  schemaVersion: 2;
   match: { id: string; fileName: string; map: string; rounds: number;
            score: { initialCT: number; initialT: number } | null };
   selectedPlayer: string;                       // 默认 twinkle，否则第一名有效玩家
   players: { id: string; nickname: string }[];
   analytics: DesktopPlayerAnalytics[];
-  findings: Finding[];
+  findings: DesktopFinding[];
   timeline: DesktopPlayerTimeline[];            // 每名有效玩家一份回合时间线（只读投影）
   analysis: DesktopAnalysisViews;              // 冻结指标投影 + Timeline 回合事实
+  deepReview: { available: boolean; players: DesktopDeepReviewPlayer[] };
 }
 
 type ImportPhase = 'selecting' | 'parsing' | 'analyzing';

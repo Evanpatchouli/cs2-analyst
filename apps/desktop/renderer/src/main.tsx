@@ -10,6 +10,7 @@ import type {
 } from '@cs2-analyst/report-contract';
 import { KillFeedEvent } from './killfeed-event';
 import { AnalysisViews } from './analysis-views';
+import { DeepReview } from './deep-review';
 import { useReport } from './store';
 import { QuestionCircleIcon } from './icons';
 import { UtilityIcon } from './utility-icons';
@@ -178,9 +179,9 @@ function Findings({ report, playerId, onShowRounds }: {
 }) {
   const s = useStyles();
   const rows = report.findings.filter(f => f.playerId === playerId);
-  return <section className={s.section} aria-label="本场复盘重点">
-    <Title2>本场复盘重点</Title2>
-    <Caption1 className={s.muted}>最多 3 个问题、2 个亮点 · 结论来自确定性规则与本场证据</Caption1>
+  return <section className={s.section} aria-label="基础规则提示">
+    <Title2>基础规则提示</Title2>
+    <Caption1 className={s.muted}>来自基础指标规则 · 深度交火与团队证据请查看「深度复盘」</Caption1>
     {rows.length ? rows.map(f => <Card key={f.id} className={s.finding} data-rule={f.ruleId}>
       <div className={s.header}><Subtitle1>{f.title}</Subtitle1><Badge appearance="tint" color={f.severity === 'positive' ? 'success' : f.severity === 'high' ? 'danger' : 'warning'}>{severityText[f.severity] ?? f.severity}</Badge></div>
       <Body1>{f.summary}</Body1>
@@ -288,7 +289,7 @@ function Report({ report, playerId }: { report: DesktopMatchReport; playerId: st
   const player = report.players.find(p => p.id === playerId)!;
   const p = report.analytics.find(a => a.playerId === playerId)!;
   const timeline = report.timeline.find(t => t.playerId === playerId)?.rounds ?? [];
-  const [activeTab, setActiveTab] = useState('report');
+  const [activeTab, setActiveTab] = useState('deep-review');
   const [expanded, setExpanded] = useState<number[]>([]);
   const [highlighted, setHighlighted] = useState<number | null>(null);
   const [scrollRound, setScrollRound] = useState<number | null>(null);
@@ -324,10 +325,14 @@ function Report({ report, playerId }: { report: DesktopMatchReport; playerId: st
       </Dropdown></Tooltip></div>
     </div>
     <TabList aria-label="报告页面" selectedValue={activeTab} onTabSelect={(_, data) => setActiveTab(String(data.value))}>
+      <Tab id="deep-review-tab" value="deep-review" aria-controls="deep-review-panel">深度复盘</Tab>
       <Tab id="report-tab" value="report" aria-controls="report-panel">比赛报告</Tab>
       <Tab id="timeline-tab" value="timeline" aria-controls="timeline-panel">回合时间线</Tab>
       <Tab id="analysis-tab" value="analysis" aria-controls="analysis-panel">分析</Tab>
     </TabList>
+    <div id="deep-review-panel" role="tabpanel" aria-labelledby="deep-review-tab" hidden={activeTab !== 'deep-review'}>
+      <DeepReview key={playerId} player={report.deepReview.players.find(p => p.playerId === playerId)!} onShowRounds={showRounds} />
+    </div>
     <div id="report-panel" role="tabpanel" aria-labelledby="report-tab" hidden={activeTab !== 'report'}>
       <div className={s.section}>
       {p.coverage.notes.length ? <MessageBar intent="warning"><MessageBarBody>{p.coverage.notes.join(' ')}</MessageBarBody></MessageBar> : null}
@@ -387,12 +392,12 @@ function App() {
   const { status, report, playerId, error, importDemo, setPhase } = useReport();
   useEffect(() => window.cs2Analyst.onProgress(setPhase), [setPhase]);
   const busy = status === 'selecting' || status === 'parsing' || status === 'analyzing';
-  const phase = status === 'selecting' ? '正在选择 DEM…' : status === 'parsing' ? '正在后台解析 DEM…' : '正在生成指标与复盘结论…';
+  const phase = status === 'selecting' ? '正在选择 DEM…' : status === 'parsing' ? '正在后台解析 DEM…' : '正在生成指标与深度复盘…';
   return <main className={s.content} data-status={status}>
     <header className={s.header}><div className={s.column}><Subtitle1>CS2 Analyst</Subtitle1><Caption1 className={s.muted}>本地赛后报告</Caption1></div><Button appearance="primary" disabled={busy} onClick={() => void importDemo()}>{report || status === 'error' ? '重新选择 DEM' : '选择 DEM'}</Button></header>
     {busy ? <div role="status"><Spinner label={phase} /><Caption1 className={s.muted}>大型录像可能需要数十秒，请保持应用打开。</Caption1></div> : null}
     {error ? <MessageBar intent="error"><MessageBarBody>{error}</MessageBarBody></MessageBar> : null}
-    {report ? <>{status === 'error' || busy ? <Caption1>下方为上一次成功导入的报告。</Caption1> : null}<Report report={report} playerId={playerId} /></> : !busy ? <Card className={s.empty}><Title1>从一场比赛开始</Title1><Body1>选择 CS2 .dem 录像，查看玩家表现与有证据的复盘重点。</Body1><Caption1 className={s.muted}>文件只在本机处理。</Caption1></Card> : null}
+    {report ? <>{status === 'error' || busy ? <Caption1>下方为上一次成功导入的报告。</Caption1> : null}<Report key={report.match.id} report={report} playerId={playerId} /></> : !busy ? <Card className={s.empty}><Title1>从一场比赛开始</Title1><Body1>选择 CS2 .dem 录像，查看玩家表现与有证据的复盘重点。</Body1><Caption1 className={s.muted}>文件只在本机处理。</Caption1></Card> : null}
   </main>;
 }
 

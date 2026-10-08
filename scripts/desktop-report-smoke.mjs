@@ -1,3 +1,4 @@
+import { checkDeepReviewUx } from './deep-review-ux-checks.mjs';
 import { checkReportUx } from './report-ux-checks.mjs';
 import { checkWindowShell } from './window-shell-checks.mjs';
 import assert from 'node:assert/strict';
@@ -164,7 +165,11 @@ await scenario({
     assert.ok(!/tick \d+/.test(text), '证据行不应默认显示原始 tick');
   },
   assertDom: async (evaluate, send) => {
-    assert.equal(await evaluate(`document.getElementById('report-panel').hidden`), false);
+    assert.equal(await evaluate(`document.getElementById('deep-review-panel').hidden`), false);
+    assert.equal(await evaluate(`document.getElementById('deep-review-tab').getAttribute('aria-selected')`), 'true');
+    await checkDeepReviewUx(evaluate, send, process.env.CS2_ANALYST_QA_DIR);
+    await evaluate(`document.getElementById('report-tab').click()`);
+    await delay(100);
     const helps = await evaluate('document.querySelectorAll(\'button[aria-label$="说明"]\').length');
     assert.ok(helps >= 9, `核心指标与道具面板的 Tooltip 入口不足：${helps}`);
 

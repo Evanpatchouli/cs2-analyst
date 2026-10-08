@@ -4,11 +4,15 @@ import { analyzeMatch } from '@cs2-analyst/analytics';
 import type { PlayerMetrics } from '@cs2-analyst/analytics';
 import { Demoparser2Provider } from '@cs2-analyst/dem-parser';
 import { generateFindings } from '@cs2-analyst/findings';
+import { analyzeEngagements, analyzeKillImpact, analyzeTeamplay, analyzeUtilityContext,
+  analyzeCombatExecution, analyzeDeepReviewFindings } from '@cs2-analyst/deep-review';
+import type { DeepReviewFinding } from '@cs2-analyst/deep-review';
+import { performance } from 'node:perf_hooks';
 import type { Finding, FindingEvidence } from '@cs2-analyst/findings';
-import type { BombAction, Match, Round } from '@cs2-analyst/match-model';
+import type { BombAction, Match, MatchSpatialEvidence, Round } from '@cs2-analyst/match-model';
 import type {
   DesktopFinding, DesktopMatchReport, DesktopPlayerTimeline, DesktopRoundTimeline,
-  DesktopTimelineEvent, DesktopAnalysisViews, DesktopSideAnalysis, ImportResult,
+  DesktopTimelineEvent, DesktopAnalysisViews, DesktopSideAnalysis, ImportResult, DesktopDeepReviewFinding,
 } from '@cs2-analyst/report-contract';
 
 /** Stable initial-team membership from the first observed freeze-end roster, or null. */
@@ -271,7 +275,15 @@ function buildAnalysisViews(
   };
 }
 
-export function buildDesktopReport(match: Match, filePath: string): DesktopMatchReport {
+/** Only product fields cross IPC; diagnostics and technical refs stay in the worker. */
+function presentDeepFinding(f: DeepReviewFinding): DesktopDeepReviewFinding {
+  return { id: f.id, ruleId: f.ruleId, category: f.category, kind: f.kind, title: f.title, summary: f.summary,
+    occurrences: f.occurrences, eligibleOccurrences: f.eligibleOccurrences, relatedRounds: [...f.relatedRounds],
+    evidenceQuality: f.evidenceQuality, caveats: [...f.caveats] };
+}
+
+export function buildDesktopReport(match: Match, filePath: string, spatial?: MatchSpatialEvidence,
+  onDeepReview?: (elapsedMs: number) => void): DesktopMatchReport {
   const a = analyzeMatch(match);
   const valid = a.players.filter(p => p.steamId && p.roundsPlayed > 0);
   if (!valid.length) throw new Error('DEM 没有可报告的有效玩家或完整回合。');
@@ -281,8 +293,20 @@ export function buildDesktopReport(match: Match, filePath: string): DesktopMatch
   const scores = roundScoreLookup(match);
   const lastRound = [...match.rounds].sort((x, y) => x.number - y.number).at(-1);
   const timeline = buildTimeline(match, valid, scores);
+  const started = performance.now();
+  const engagements = analyzeEngagements(match, spatial);
+  const impact = analyzeKillImpact(match, engagements);
+  const teamplay = analyzeTeamplay(match, engagements, impact, spatial);
+  const utility = analyzeUtilityContext(match, spatial, impact);
+  const execution = analyzeCombatExecution(match, engagements, impact, spatial);
+  const deepPlayers = valid.map(p => {
+    const f = analyzeDeepReviewFindings(match, p.steamId, { engagements, impact, teamplay, utility, execution });
+    return { playerId: p.steamId, reviews: f.reviews.map(presentDeepFinding), highlights: f.highlights.map(presentDeepFinding),
+      contexts: f.contexts.map(presentDeepFinding), coverage: { status: f.coverage.status } };
+  });
+  onDeepReview?.(performance.now() - started);
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     match: { id: match.id, fileName: basename(filePath), map: match.map, rounds: match.rounds.length,
       score: lastRound ? scores.get(lastRound.number) ?? null : null },
     selectedPlayer: selected.steamId,
@@ -311,6 +335,7 @@ export function buildDesktopReport(match: Match, filePath: string): DesktopMatch
     findings: valid.flatMap(p => generateFindings(a, p.steamId).map(finding => withRoundTime(finding, roundTime))),
     timeline,
     analysis: buildAnalysisViews(match, valid, timeline),
+    deepReview: { available: deepPlayers.some(p => p.coverage.status !== 'unavailable'), players: deepPlayers },
   };
 }
 
@@ -319,11 +344,22 @@ export function buildDesktopReport(match: Match, filePath: string): DesktopMatch
  * report-worker.ts) so a 200MB+ DEM never blocks the Main or Renderer thread.
  * onParsed fires after the native parser returns and before analysis begins.
  */
-export async function analyzeDemoFile(filePath: string, onParsed?: () => void): Promise<ImportResult> {
+export interface DesktopReportPerformance {
+  parseWithSpatialMs: number; deepReviewMs: number; reportProjectionMs: number; totalMs: number; peakMemory: 'UNKNOWN';
+}
+export async function analyzeDemoFile(filePath: string, onParsed?: () => void,
+  onPerformance?: (timings: DesktopReportPerformance) => void): Promise<ImportResult> {
   try {
-    const match = await new Demoparser2Provider().parse(filePath);
+    const started = performance.now();
+    const { match, spatial } = await new Demoparser2Provider().parseWithSpatial(filePath);
+    const parsed = performance.now();
     onParsed?.();
-    return { kind: 'success', report: buildDesktopReport(match, filePath) };
+    let deepReviewMs = 0;
+    const report = buildDesktopReport(match, filePath, spatial, ms => { deepReviewMs = ms; });
+    const finished = performance.now();
+    onPerformance?.({ parseWithSpatialMs: parsed - started, deepReviewMs,
+      reportProjectionMs: finished - parsed - deepReviewMs, totalMs: finished - started, peakMemory: 'UNKNOWN' });
+    return { kind: 'success', report };
   } catch (error) {
     console.error('DEM report failed', error);
     return { kind: 'error', message: '无法分析此 DEM。请确认它是完整的 CS2 录像，然后重新选择。' };

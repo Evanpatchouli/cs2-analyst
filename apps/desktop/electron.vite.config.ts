@@ -14,6 +14,7 @@ const WORKSPACE_PACKAGES = [
   '@cs2-analyst/match-model',
   '@cs2-analyst/analytics',
   '@cs2-analyst/findings',
+  '@cs2-analyst/deep-review',
   '@cs2-analyst/report-contract',
 ];
 

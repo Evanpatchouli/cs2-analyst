@@ -1,5 +1,17 @@
 # Current Task
 
+## 2026-10-09 — P5.7.8 Deep Review Desktop UX
+
+- Baseline `a11f6af1f6f7b3efa2ee31acb223ac2299ae5ec0`; implementation complete / visual product acceptance pending. P5.7.0 PARTIAL PASS; P5.7.1–7 PASS. Final Acceptance PAUSED; Personal matchmaking / Perfect World DEM UNVERIFIED; Train REMOVED / NOT REQUIRED.
+- Utility Process: one shared-input parseWithSpatial → unchanged P3/V1/Timeline/Analysis + shared Engagement/Impact/Teamplay/Utility/Execution → per-valid-player Findings V2. No algorithms/rules/thresholds changed; no repeated parse or player/tab reanalysis.
+- report-contract schema2: field-whitelisted JSON-only per-player Deep Review arrays/coverage; no raw refs/facts/diagnostics/spatial/native objects. Renderer only consumes DTO; new workspace dependency bundled into worker.
+- Four mounted tabs; 深度复盘 default; V1 titled 基础规则提示. Reviews amber, highlights success, contexts neutral; partial badge, collapsed native evidence caveats, legitimate empty states. Occurrence buttons reuse showRounds (all occurrences expanded, first scrolled/highlighted); Timeline filter and nickname policy unchanged.
+- PASS: typecheck13/13, build7/7; model contracts; parser39, analytics53, V1 findings17, deep-review210, desktop22, zero FAIL/SKIP. demo1 all historical goldens retained; actual Nuke Desktop runs deterministic/10 players/JSON-only/V1+P3 present. SSR6 tests + real Electron synthetic A–D and V1/V2 linkage + player switch passed. dev/preview/report smoke PASS.
+- Observational Desktop: demo1 parse3016.54ms/deep1102.81ms/other-report55.82ms/total4175.17ms; Nuke2917.39/730.84/15.60/3663.83ms. Peak memory UNKNOWN; no SLA/parser optimization.
+- Actual real default/partial-caveat/Timeline and synthetic QA screenshots in ignored `.tmp/p578-qa/`; tall1280×1400 plus900/800/650 viewports inspected. Product Owner visual acceptance pending; no Product FINAL PASS. Full details: docs/deep-review-desktop.md.
+- Independent final reviewer PASS (code/docs/three real screenshots; no actionable findings). pack:win / pack:win:test / test:installed PASS; both109.9MiB, ASAR3.43MiB/82entries, new deep-review dependency bundled; production injection guard, installed real/synthetic Deep Review UX, assets, damaged DEM, mid-analysis close/no worker and both uninstalls PASS. Focused commit `feat(desktop): integrate deep review experience`. No amend/squash/push.
+
+
 ## 2026-10-09 — P5.7.7.1 Calibration / Semantic Repair PASS
 
 - Baseline `bae40582e1156fe5187248719a42d536aec543d1`; **P5.7.7 PASS**. Original implementation technically valid, product calibration exposed overbroad/misaligned rules; history below retained. P5.7.8 **NOT STARTED / HOLD**. Final Acceptance PAUSED; P5.7.0 PARTIAL PASS; P5.7.1–6 PASS.
