@@ -71,8 +71,9 @@ The Utility Process shares a single parseWithSpatial result across P3/V1 and the
 Engagement → KillImpact → Teamplay → UtilityContext → CombatExecution pipeline. Findings V2 runs
 for each valid player with those same inputs. The presenter whitelists product fields into
 report-contract schema v2; raw analysis/spatial evidence and debug diagnostics do not cross IPC.
-Renderer only selects per-player DTOs. Four mounted tabs start at 深度复盘; warning reviews,
-success highlights and neutral contexts preserve Findings V2 copy and collapsible caveats.
+Renderer only selects per-player DTOs. Four mounted tabs start at 比赛报告, with 深度复盘 as an
+independent advanced review entry; warning reviews, success highlights and neutral contexts
+preserve Findings V2 copy and collapsible caveats.
 Occurrence-only rounds use existing Timeline expansion/scroll/highlight. The workspace dependency
 is bundled into the installed worker; native loader/staging/IPC/installer security layout is unchanged.
 [Deep Review Desktop](./deep-review-desktop.md) records validation and remaining visual acceptance.

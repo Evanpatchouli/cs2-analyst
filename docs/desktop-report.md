@@ -1,6 +1,6 @@
 # Current Desktop contract — P5.7.8
 
-**implementation complete / visual product acceptance pending**. Deep Review is the default of
+**implementation complete / visual product acceptance pending**. 比赛报告 is the default of
 four mounted tabs. The Utility Process invokes one shared-input `parseWithSpatial()` and the
 existing five evidence analyzers once, then Findings V2 for every valid player. P3/V1/Timeline/
 Analysis remain available on the same Match; V1 is titled 基础规则提示. Report schema is **v2**,

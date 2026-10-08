@@ -289,7 +289,7 @@ function Report({ report, playerId }: { report: DesktopMatchReport; playerId: st
   const player = report.players.find(p => p.id === playerId)!;
   const p = report.analytics.find(a => a.playerId === playerId)!;
   const timeline = report.timeline.find(t => t.playerId === playerId)?.rounds ?? [];
-  const [activeTab, setActiveTab] = useState('deep-review');
+  const [activeTab, setActiveTab] = useState('report');
   const [expanded, setExpanded] = useState<number[]>([]);
   const [highlighted, setHighlighted] = useState<number | null>(null);
   const [scrollRound, setScrollRound] = useState<number | null>(null);
@@ -325,8 +325,8 @@ function Report({ report, playerId }: { report: DesktopMatchReport; playerId: st
       </Dropdown></Tooltip></div>
     </div>
     <TabList aria-label="报告页面" selectedValue={activeTab} onTabSelect={(_, data) => setActiveTab(String(data.value))}>
-      <Tab id="deep-review-tab" value="deep-review" aria-controls="deep-review-panel">深度复盘</Tab>
       <Tab id="report-tab" value="report" aria-controls="report-panel">比赛报告</Tab>
+      <Tab id="deep-review-tab" value="deep-review" aria-controls="deep-review-panel">深度复盘</Tab>
       <Tab id="timeline-tab" value="timeline" aria-controls="timeline-panel">回合时间线</Tab>
       <Tab id="analysis-tab" value="analysis" aria-controls="analysis-panel">分析</Tab>
     </TabList>

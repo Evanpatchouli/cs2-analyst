@@ -13,7 +13,7 @@ export async function checkReportUx(evaluate, send, qaDir) {
   await send('Emulation.setFocusEmulationEnabled', { enabled: true });
   await evaluate(`document.getElementById('report-tab').click()`);
   await settle();
-  assert.deepEqual(await evaluate(`[...document.querySelectorAll('[role="tab"]')].map(t => t.querySelector('.fui-Tab__content').textContent)`), ['深度复盘', '比赛报告', '回合时间线', '分析']);
+  assert.deepEqual(await evaluate(`[...document.querySelectorAll('[role="tab"]')].map(t => t.querySelector('.fui-Tab__content').textContent)`), ['比赛报告', '深度复盘', '回合时间线', '分析']);
   assert.equal(await evaluate(`document.querySelectorAll('[role="tabpanel"]').length`), 4);
   assert.equal(await evaluate(`document.getElementById('report-panel').hidden`), false);
   // Native summary retains keyboard activation and clear focus feedback.

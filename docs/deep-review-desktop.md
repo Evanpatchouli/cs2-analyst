@@ -5,6 +5,10 @@ Baseline for this copy revision: `ccb6402e9b264bab3cab0b538d35e8b028c1fd04`
 (P5.7.8 implementation was `a11f6af`). P5.7.8.1–2 plain-language copy polish changes presentation copy only;
 no P5.7.1–7 judgement, threshold, ranking or evidence semantics changed.
 P5.7.0 PARTIAL PASS; P5.7.1–7 PASS. v0.1 Final Acceptance **PAUSED**.
+Default-view revision `cde8e7ff48e334ba9fe432453abd7a32ed4c467f` restores **比赛报告 as the default
+entry** and orders the tabs 比赛报告 / 深度复盘 / 回合时间线 / 分析. It changes only the initial tab and
+tab order; Deep Review UI/copy, Findings V1/V2, P3 Analytics, Timeline, report-contract and every
+analysis algorithm, threshold and rule stay frozen.
 Personal matchmaking / Perfect World DEM compatibility **UNVERIFIED**.
 Train **REMOVED / NOT REQUIRED**.
 
@@ -54,7 +58,9 @@ Invariant/programming errors still enter the existing import error handler; no c
 
 ## Experience
 
-Four panels remain mounted in order: 深度复盘 (default), 比赛报告, 回合时间线, 分析.
+Product decision (final): **比赛报告 is the default entry**; **深度复盘 is an independent advanced
+review entry** reached through its own tab. The four panels remain mounted in order:
+比赛报告 (default), 深度复盘, 回合时间线, 分析.
 A newly imported match resets the Report component by match identity. Quiet Studio keeps
 maxWidth 1120, the current dark blue-grey tokens, Fluent UI v9, flat card surfaces and single-column
 reading order. No chat, scores, radar/HUD, AI coach or new analysis is introduced.
@@ -144,7 +150,8 @@ utility → 闪光弹与受闪记录; an unknown future rule gets the data-type-
   semantics changed.
 - Store regression selects every player using the same report object without an import.
 - Electron CDP report smoke: real DEM, broken DEM and non-DEM rejection PASS; four mounted tabs,
-  default Deep Review, switching players, existing V1 → Timeline and V2 → Timeline PASS.
+  比赛报告 as the default entry, explicit Deep Review entry, switching players, existing
+  V1 → Timeline and V2 → Timeline PASS.
   Synthetic scenarios A–D run in the QA process through existing React report props, with data
   restored afterward. They add no production bridge or fixture injection capability.
   Scroll instrumentation confirms Timeline visible and all [R7,R24] occurrences expanded before
@@ -158,6 +165,10 @@ utility → 闪光弹与受闪记录; an unknown future rule gets the data-type-
   Timeline linkage, asset decoding, broken DEM, mid-analysis close/no residual worker and both
   uninstall paths PASS. Windows branding/shortcuts/registration checks also passed.
 - Independent reviewer: PASS, no actionable findings; independent SSR6/6 and diff whitespace checks PASS.
+- Default-view revision PASS: `pnpm typecheck` 13/13, `pnpm build` 7/7; desktop Node tests
+  **29/29** PASS; Electron CDP report smoke real/broken/non-DEM all PASS with 比赛报告 default,
+  four mounted tabs, explicit Deep Review entry, player switch unchanged and V1/V2 → Timeline
+  linkage re-verified. No Deep Review multi-map recalibration was rerun.
 
 Full seven-map recalibration is unnecessary: algorithm packages were not changed.
 

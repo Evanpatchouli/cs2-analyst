@@ -383,7 +383,9 @@ async function testSeamScenario() {
     }
     const findingCount = await session.evaluate("document.querySelectorAll('[data-rule]').length");
     assert.equal(findingCount, 5, 'twinkle 应显示 5 条 Findings');
-    assert.equal(await session.evaluate(`document.getElementById('deep-review-tab').getAttribute('aria-selected')`), 'true');
+    assert.equal(await session.evaluate(`document.getElementById('report-tab').getAttribute('aria-selected')`), 'true');
+    assert.equal(await session.evaluate(`document.getElementById('report-panel').hidden`), false);
+    assert.equal(await session.evaluate(`document.querySelectorAll('[role="tab"]').length`), 4);
     await checkDeepReviewUx(session.evaluate, session.send);
     await session.evaluate(`[...document.querySelectorAll('button')].find(b => b.textContent.trim() === '查看 R24').click()`);
     await waitFor(async () => session.evaluate(`!document.getElementById('timeline-panel').hidden`), 10_000, '安装版 Finding 切换 Timeline');
