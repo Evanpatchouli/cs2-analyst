@@ -86,6 +86,16 @@ importers:
         specifier: ^7.0.2
         version: 7.0.2
 
+  packages/deep-review:
+    dependencies:
+      '@cs2-analyst/match-model':
+        specifier: workspace:^
+        version: link:../match-model
+    devDependencies:
+      typescript:
+        specifier: ^7.0.2
+        version: 7.0.2
+
   packages/dem-parser:
     dependencies:
       '@cs2-analyst/match-model':

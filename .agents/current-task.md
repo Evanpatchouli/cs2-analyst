@@ -2,7 +2,17 @@
 
 Status: v0.1 Final Acceptance **PAUSED — Deep Review product gap discovered**。
 
-Current: **P5.7 Deep Review**；本轮 **P5.7.1 Spatial Evidence Foundation** 已实现、GOTV验证完成。
+Current: **P5.7 Deep Review / P5.7.2 Engagement Engine**；实现与Nuke结构验证完成，产品验收待定。
+
+## 2026-10-08 — P5.7.2
+
+- 基线 `f37db2e42bcf9e42d489d03c5e52ae625d7e0d4a`；P5.7.0 **PARTIAL PASS**，P5.7.1 **PASS**；v0.1 Final Acceptance继续 **PAUSED**。
+- 新deep-review生产仅依赖match-model：正式round window的敌对damage/kill contacts，3s product heuristic/shared participant连通分组；unknown weapon保留，utility仅计排除诊断，weapon_fire不猜opponent；无评分/coaching或Renderer改动。
+- 四键spatial exact join；event segmentation和spatial enrichment独立coverage；缺tickRate保留directContacts、分组unavailable。P3/Findings V1/parser/model/desktop public contracts不变。
+- Nuke SHA固定：776候选、620 included（478damage/142kill）→107 Engagement；排除post9/unidentified11/self2/team12/utility122；exact join620/620，at完整620、before完整618；301同tick行保留index。
+- 2/3/4/5s：116/107/99/96组；完整图oracle全部一致、每contact唯一归属、不跨round、重复deterministic；无结构算法异常，未调整默认3s。
+- 文档和实测：docs/engagement-analysis.md、docs/deep-review-engagement-nuke.json。Personal DEM compatibility **UNVERIFIED**，demo1缺失golden仍SKIP；峰内存/entity freshness/其他录制模式UNKNOWN。
+- 最终验证：typecheck12/12、build7/7、match-model contract PASS；dem-parser38 PASS/1 SKIP、analytics48/5、findings16/1、deep-review20/0、desktop16/1，0 FAIL；全部8个SKIP因demo1缺失。独立review发现1项极小tickRate时长溢出，修复/补回归/复审PASS，无未解决发现；修复后重跑typecheck/build/deep-review，Nuke report hash不变。按指定focused commit，不push。未进入P5.7.3或后续模块。
 
 ## 2026-10-08 — P5.7.1
 

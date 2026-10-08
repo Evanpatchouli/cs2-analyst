@@ -1,5 +1,15 @@
 # Agent Handoff
 
+## 2026-10-08 — P5.7.2 Engagement Engine
+
+- 基线 `f37db2e42bcf9e42d489d03c5e52ae625d7e0d4a`；P5.7.0 **PARTIAL PASS**、P5.7.1 **PASS**；P5.7.2当前任务实现/GOTV结构验证完成，产品验收待定；v0.1 Final Acceptance继续 **PAUSED**。
+- 新packages/deep-review生产依赖只有match-model；analyzeEngagements输出独立JSON contract，正式round内敌对damage/kill、完整refs/原reported damage/kill flags；默认3s共享participant连通分组。tickRate不可靠保留contacts但不分组；未知weapon保留并降级，utility不当anchor/桥接，weapon_fire完全不参与。
+- exact spatial matchId+round/type/tick/eventIndex join，conflict不猜测；actor/target at/before coverage复制，segmentation与spatial独立门控，无位置推断/评分/coaching。未修改P3、Findings V1、parser/model public contracts、Renderer/Electron/packaging。
+- Nuke SHA固定；776候选→620contacts（478damage/142kill）→107groups；post9/unidentified11/self2/team12/utility122；spatial exact620、at完整620、before完整618；同tick301行保留eventIndex。2/3/4/5s=116/107/99/96groups；独立两两完整图oracle全通过，无漏/重复/跨round，重复输出deterministic。
+- docs/engagement-analysis.md、docs/deep-review-engagement-nuke.json可复算。Personal DEM Engagement/spatial compatibility **UNVERIFIED**；缺个人样本非本轮blocker，Deep Review FINAL前必补；demo1缺失golden仍SKIP，不用Nuke替代。
+- 最终验证：pnpm typecheck12/12、build7/7、match-model contract PASS；dem-parser38 PASS/1 SKIP、analytics48/5、findings16/1、deep-review20/0、desktop16/1，均0 FAIL；8个SKIP全部因demo1缺失。独立review发现极小tickRate时长Infinity边界，按不可靠时钟降级保留contacts，补测试并独立复审PASS，无剩余发现；最终重跑typecheck/build/deep-review，Nuke analysis hash不变。
+- 新package使用原锁定版本，离线frozen install成功；生产import边界/UTF-8无BOM/whitespace检查通过。无需installer/report E2E；不进入P5.7.3或后续。指定commit `feat(analysis): add engagement segmentation`，不push。
+
 ## 2026-10-08 — P5.7.1 Spatial Evidence Foundation
 
 - v0.1 Final Acceptance：**PAUSED — Deep Review product gap discovered**；Current：**P5.7 Deep Review**。

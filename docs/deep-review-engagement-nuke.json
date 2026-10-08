@@ -1,0 +1,106 @@
+{
+  "schema": "P5.7.2-engagement-validation-v1",
+  "fixtureSha256": "dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c",
+  "analysisHash": "9c0d389865aeb8d610f945fb58cbcf4c27a81070fbc7963c362e81509ec1a353",
+  "rounds": 21,
+  "tickRate": 64,
+  "config": {
+    "contactGapSeconds": 3,
+    "contactGapTicks": 192
+  },
+  "diagnostics": {
+    "candidateContacts": 776,
+    "includedContacts": 620,
+    "excludedRoundWindow": 0,
+    "excludedInvalidTick": 0,
+    "excludedPreRound": 0,
+    "excludedPostRound": 9,
+    "excludedUnidentified": 11,
+    "excludedSelf": 2,
+    "excludedTeam": 12,
+    "excludedUnknownSide": 0,
+    "excludedUtility": 122,
+    "unknownWeaponKind": 0,
+    "roundsWithUnavailableWindow": 0,
+    "repeatedEventRows": 0,
+    "sameTickContacts": 301
+  },
+  "coverage": {
+    "eventSegmentation": {
+      "status": "partial",
+      "reasons": [
+        "participant-unidentified"
+      ]
+    },
+    "spatialEnrichment": {
+      "status": "partial",
+      "contacts": 620,
+      "exactJoinedContacts": 620,
+      "completeAtEventContacts": 620,
+      "completeBeforeEventContacts": 618
+    }
+  },
+  "groupedContacts": 620,
+  "killContacts": 142,
+  "damageContacts": 478,
+  "invariants": {
+    "everyEligibleContactExactlyOnce": true,
+    "noCrossRound": true,
+    "noDuplicateMembership": true,
+    "formalWindowOnly": true,
+    "utilityNotAnchor": true,
+    "unknownWeaponRetained": true,
+    "sameTickIndicesPreserved": true,
+    "exactSpatialJoin": true,
+    "deterministic": true,
+    "independentGraphOracleAllGaps": true,
+    "segmentationIndependentOfSpatial": true
+  },
+  "sensitivity": [
+    {
+      "contactGapSeconds": 2,
+      "engagements": 116,
+      "singletons": 13,
+      "multiContact": 103,
+      "medianDurationSeconds": 0.234375,
+      "p95DurationSeconds": 2.78125,
+      "maxDurationSeconds": 8.09375,
+      "maxParticipants": 8,
+      "maxContacts": 23
+    },
+    {
+      "contactGapSeconds": 3,
+      "engagements": 107,
+      "singletons": 10,
+      "multiContact": 97,
+      "medianDurationSeconds": 0.359375,
+      "p95DurationSeconds": 3.1875,
+      "maxDurationSeconds": 11.078125,
+      "maxParticipants": 9,
+      "maxContacts": 29
+    },
+    {
+      "contactGapSeconds": 4,
+      "engagements": 99,
+      "singletons": 8,
+      "multiContact": 91,
+      "medianDurationSeconds": 0.5,
+      "p95DurationSeconds": 4.46875,
+      "maxDurationSeconds": 11.078125,
+      "maxParticipants": 10,
+      "maxContacts": 35
+    },
+    {
+      "contactGapSeconds": 5,
+      "engagements": 96,
+      "singletons": 8,
+      "multiContact": 88,
+      "medianDurationSeconds": 0.4765625,
+      "p95DurationSeconds": 5.1875,
+      "maxDurationSeconds": 13.65625,
+      "maxParticipants": 10,
+      "maxContacts": 35
+    }
+  ],
+  "personalDemoCompatibility": "UNVERIFIED"
+}

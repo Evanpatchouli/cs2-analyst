@@ -77,9 +77,10 @@ P5.6.5 Branding & App Icon — **FINAL PASS**。正式产品名冻结为 CS2 Ana
 Current: **P5.7 Deep Review**。
 
 - P5.7.0 Evidence Feasibility Spike：**PARTIAL PASS — GOTV verified, personal DEM compatibility pending**。
-- P5.7.1 Spatial Evidence Foundation（当前任务）：正式领域contract、事件引用、core优先稀疏采样、coverage与共享输入实现，GOTV验证完成；见 [Deep Review](./deep-review-evidence.md) / [Spatial contract](./spatial-evidence.md)。
+- P5.7.1 Spatial Evidence Foundation：**PASS**，正式领域contract、事件引用、core优先稀疏采样、coverage与共享输入实现，GOTV验证完成；见 [Deep Review](./deep-review-evidence.md) / [Spatial contract](./spatial-evidence.md)。
+- P5.7.2 Engagement Engine（当前任务）：实现与Nuke结构验证完成，产品验收待定；独立deep-review包、敌对direct contacts、共享participant/time-gap连通分组、空间exact join与分离coverage，默认3s与2/3/4/5s sensitivity；见 [Engagement analysis](./engagement-analysis.md)。
 - Personal DEM spatial compatibility = **UNVERIFIED**；不阻塞本轮foundation，但正式Deep Review FINAL Acceptance前至少用一份真实个人DEM补验。峰内存UNKNOWN。
-- 未进入P5.7.2 Engagement；不新增Findings/coaching conclusion或Renderer，P3 public contracts继续冻结。
+- 未进入P5.7.3 Kill/Multi-kill Impact、P5.7.4 Teamplay/Decision、P5.7.5 Utility Context、P5.7.6 Findings V2；不新增Findings/coaching conclusion或Renderer，P3 public contracts继续冻结。
 - GitHub repository：`Evanpatchouli/cs2-analyst`（已正式改名）。
 
 - P5 Desktop MVP 已封板；当前仅推进已明确授权的P5.7 Deep Review evidence工作，不追加其他功能或polish。
