@@ -72,9 +72,17 @@ P5.6.5 Branding & App Icon — **FINAL PASS**。正式产品名冻结为 CS2 Ana
 
 ## v0.1 Final Acceptance
 
-**Status: ACTIVE — waiting for additional real DEM samples.**
+**Status: PAUSED — Deep Review product gap discovered.**
 
-- P5 Desktop MVP 已封板；除已确认 bug 外，不再追加 P5.x 功能或 polish。
+Current: **P5.7 Deep Review**。
+
+- P5.7.0 Evidence Feasibility Spike：**PARTIAL PASS — GOTV verified, personal DEM compatibility pending**。
+- P5.7.1 Spatial Evidence Foundation（当前任务）：正式领域contract、事件引用、core优先稀疏采样、coverage与共享输入实现，GOTV验证完成；见 [Deep Review](./deep-review-evidence.md) / [Spatial contract](./spatial-evidence.md)。
+- Personal DEM spatial compatibility = **UNVERIFIED**；不阻塞本轮foundation，但正式Deep Review FINAL Acceptance前至少用一份真实个人DEM补验。峰内存UNKNOWN。
+- 未进入P5.7.2 Engagement；不新增Findings/coaching conclusion或Renderer，P3 public contracts继续冻结。
+- GitHub repository：`Evanpatchouli/cs2-analyst`（已正式改名）。
+
+- P5 Desktop MVP 已封板；当前仅推进已明确授权的P5.7 Deep Review evidence工作，不追加其他功能或polish。
 - `demo1` 继续作为 deterministic golden，现有 K/D/A、ADR、KAST、Trade、CT/T、Multi-kill、R24 clutch、R22 posthumous HE 与 Findings ruleId 顺序不得回归。
 - Final Acceptance 的核心目标从“继续开发功能”切换为“验证不同真实比赛上的泛化可靠性”。
 - 目标样本约 3～5 场真实玩家 DEM，尽量覆盖不同地图、比分、发挥水平与特殊情况；拿到第 2 份 DEM 即可开始逐场验收，不必等待全部样本收齐。

@@ -1,0 +1,105 @@
+{
+  "schema": "P5.7.1-spatial-validation-v1",
+  "fixtureSha256": "dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c",
+  "map": "de_nuke",
+  "rounds": 21,
+  "players": 10,
+  "evidenceHash": "a6b17927aa4cc534e1b9db48b87816e9b348404cb19c66c319dc44b5a7c874c0",
+  "deterministic": true,
+  "matchUnchanged": true,
+  "coreBudgetZeroPreserved": true,
+  "eventReferences": 4799,
+  "killReferences": 145,
+  "boundaryReferences": 63,
+  "identifiedKillActors": 142,
+  "unidentifiedKillActors": 3,
+  "killCoverage": {
+    "atActor": 142,
+    "atTarget": 145,
+    "beforeActor": 141,
+    "beforeTarget": 141,
+    "afterActor": 125,
+    "afterTarget": 125
+  },
+  "coreTickCount": 3757,
+  "optionalTickCount": 5574,
+  "requestedTickCount": 9331,
+  "returnedTickCount": 9303,
+  "rowCount": 93030,
+  "omittedOptionalTickCount": 0,
+  "missingTicks": [
+    84720,
+    84839,
+    85130,
+    85334,
+    85375,
+    86942,
+    87848,
+    87964,
+    87977,
+    88022,
+    89321,
+    89565,
+    89592,
+    89595,
+    89617,
+    89621,
+    89640,
+    89643,
+    89748,
+    89780,
+    89793,
+    89824,
+    89837,
+    89843,
+    90577,
+    90646,
+    90699,
+    90706
+  ],
+  "requiredCompleteSamples": 93030,
+  "expectedPlayerSamples": 93310,
+  "aliveWeapon": {
+    "available": 74843,
+    "aliveRows": 74843
+  },
+  "coverage": {
+    "status": "partial",
+    "reasons": [
+      "participant-unidentified",
+      "weapon-unavailable",
+      "context-outside-round",
+      "position-missing",
+      "view-missing",
+      "state-missing",
+      "requested-tick-missing"
+    ]
+  },
+  "performance": {
+    "standaloneParserMs": 1880.3038999999999,
+    "sharedInputRuns": [
+      {
+        "parserMs": 1629.4328,
+        "spatialMs": 1692.1536,
+        "totalMs": 3321.5864,
+        "peakMemory": "UNKNOWN"
+      },
+      {
+        "parserMs": 1610.7712999999994,
+        "spatialMs": 1594.6623000000009,
+        "totalMs": 3205.4336000000003,
+        "peakMemory": "UNKNOWN"
+      }
+    ],
+    "coreOnly": {
+      "parserMs": 1891.6353999999992,
+      "spatialMs": 1172.6326000000008,
+      "totalMs": 3064.268,
+      "peakMemory": "UNKNOWN"
+    },
+    "inputReadsPerSpatialParse": 1,
+    "spatialNativeQueriesPerParse": 1,
+    "peakMemory": "UNKNOWN"
+  },
+  "personalDemoCompatibility": "UNVERIFIED"
+}

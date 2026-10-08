@@ -1,19 +1,56 @@
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
+import { performance } from "node:perf_hooks";
 
 import type { ParserAdapter } from "../adapter.js";
+import type { SpatialParseResult, SpatialSamplingOptions } from "../spatial.js";
+import { convertToMatch } from "./converters.js";
+import { buildSpatialEvidence, planSpatialSampling, spatialFields } from "./spatial-evidence.js";
 
 // Keep all native APIs and their untyped results behind this adapter.
 export class Demoparser2Adapter implements ParserAdapter {
   readonly name = "demoparser2";
 
   async parse(filePath: string): Promise<unknown> {
+    const { bytes, native } = await this.readInput(filePath);
+    return this.parseInput(bytes, native);
+  }
+
+  async parseWithSpatial(filePath: string, options: SpatialSamplingOptions = {}): Promise<SpatialParseResult> {
+    const started = performance.now();
+    const { bytes, native } = await this.readInput(filePath);
+    const match = convertToMatch(this.parseInput(bytes, native));
+    const parsed = performance.now();
+    const plan = planSpatialSampling(match, options);
+    const ticks = [...plan.coreTicks, ...plan.optionalTicks].sort((a, b) => a - b);
+    let rawRows: unknown = [];
+    let failed = false;
+    if (ticks.length) {
+      try {
+        // Reuse the input bytes. One new native query, never an empty full-tick query.
+        rawRows = native.parseTicks(bytes, spatialFields, ticks) as unknown;
+      } catch {
+        failed = true;
+      }
+    }
+    const spatial = buildSpatialEvidence(match, plan, rawRows, failed);
+    const finished = performance.now();
+    return { match, spatial, performance: {
+      parserMs: parsed - started, spatialMs: finished - parsed, totalMs: finished - started, peakMemory: "UNKNOWN",
+    } };
+  }
+
+  private async readInput(filePath: string) {
     const bytes = await readFile(filePath);
     if (bytes.length < 16 || !bytes.subarray(0, 8).equals(Buffer.from("PBDEMS2\0"))) {
       throw new Error("文件不是有效的 CS2 DEM（PBDEMS2）");
     }
 
     const native = await import("@laihoe/demoparser2");
+    return { bytes, native };
+  }
+
+  private parseInput(bytes: Buffer, native: typeof import("@laihoe/demoparser2")): unknown {
     const events = native.parseEvents(
       bytes,
       [

@@ -8,3 +8,7 @@ export type {
   RoundPlayerLifecycleEvent,
 } from "./round.js";
 export type { Match } from "./match.js";
+export type {
+  SpatialRelation, SpatialCoverageStatus, SpatialCoverageReason, SpatialCoverage,
+  SpatialSample, SpatialEventRef, SpatialEvidence, MatchSpatialEvidence,
+} from "./spatial.js";

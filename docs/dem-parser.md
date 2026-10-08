@@ -13,6 +13,8 @@ const match = await parser.parse("E:/demos/match.dem");
 
 公开入口提供 `DemoParser` 接口和 `Demoparser2Provider`。上游函数、原始结果及 converter 均不从包入口导出。
 
+P5.7.1 可通过 `provider.parseWithSpatial(filePath, { tickBudget: 24000, contextSeconds: 0.125 })` 显式请求空间证据，返回 `{ match, spatial, performance }`；原 `DemoParser.parse()`、桌面调用和旧Match结果不变。adapter只读取DEM一次，在同一bytes上完成原解析和新增一次空间parseTicks；不公开Buffer/native API。`spatial` 是match-model正式领域数据，timing不参与确定性比较。空间查询失败显式降级为unavailable，不丢Match；原parser错误仍拒绝Promise。core永远保留、仅裁optional，完整策略、coverage和真实性能见 [Spatial Evidence Foundation](./spatial-evidence.md)。
+
 转换路径：`Demoparser2Provider → Demoparser2Adapter → convertToMatch → Match`。只有 adapter 调用原生库；converter 验证原始结果并完成所有领域映射。无数据库、UI 或分析规则依赖。
 
 原生 API 同步执行解析；`parse()` 的 Promise 接口不代表解析已移至后台线程。当前一次读取整个文件到内存，对同一份字节快照查询 header、玩家和事件，并生成 SHA-256 内容 ID；相同 DEM 的路径或文件名变化不改变 ID。大型文件的内存占用和主进程调度需要在后续导入集成阶段评估。
@@ -32,7 +34,7 @@ const match = await parser.parse("E:/demos/match.dem");
 
 `MatchEvent` 现在是具体事件的可辨识联合类型。模型与完整原始字段映射见 [领域模型](./domain-model.md) 和 [P2.1 Combat Event Model 证据与限制](./combat-event-evidence.md)。安装包 `index.d.ts` 的事件结果为 `any`，因此转换契约以锁定版本真实 DEM 输出及捕获样本为证据，不使用上游原始类型定义领域模型。
 
-仅在正式回合 start / freeze end / end 精确 tick 采集 team_num/is_alive 快照，不采集玩家位置轨迹或全量 tick 数据。无边界时不执行 parseTicks。没有唯一 SteamID 的机器人不能表示为独立 Player；无法识别受害者的击杀、伤害、闪光和无法识别 shooter 的开火不输出。新模型无法识别的 attacker/thrower/bomb player 使用 null。数值型 SteamID64 报错，避免精度损失。必要伤害数值或闪光时长缺失/非法时报错，不生成假零值。每回合状态、参与名单与已验证生命周期见 [P2.2 证据与限制](./round-state-evidence.md)。有效伤害策略、投掷物归一化与 trade 窗口仍需后续工作，本轮未实现 Analytics。
+原 `parse()` 路径仅在正式回合 start / freeze end / end 精确 tick 采集 team_num/is_alive 快照，不采集玩家位置轨迹或全量 tick 数据。无边界时不执行 parseTicks。没有唯一 SteamID 的机器人不能表示为独立 Player；无法识别受害者的击杀、伤害、闪光和无法识别 shooter 的开火不输出。新模型无法识别的 attacker/thrower/bomb player 使用 null。数值型 SteamID64 报错，避免精度损失。必要伤害数值或闪光时长缺失/非法时报错，不生成假零值。每回合状态、参与名单与已验证生命周期见 [P2.2 证据与限制](./round-state-evidence.md)。此段保留 P2.2 映射口径；既有 P3 Analytics 语义不因 P5.7.1 空间入口改变。
 
 文件不存在、非 CS2 文件或原生解析失败时，Promise 拒绝，错误包含文件路径及原始 `cause`。原生模块加载发生在文件魔数检查之后。
 

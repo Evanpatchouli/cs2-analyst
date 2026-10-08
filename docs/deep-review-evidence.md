@@ -1,4 +1,27 @@
-# P5.7.0 Deep Review Evidence Feasibility Spike
+# P5.7 Deep Review Evidence
+
+v0.1 Final Acceptance: **PAUSED — Deep Review product gap discovered**。Current: **P5.7 Deep Review**。
+
+- P5.7.0: **PARTIAL PASS — GOTV verified, personal DEM compatibility pending**。
+- P5.7.1（当前任务）: Spatial Evidence Foundation 已实现并完成职业 GOTV 验证。正式 contract、采样策略、coverage、共享输入性能与个人兼容债务见 [P5.7.1 Spatial Evidence](./spatial-evidence.md)，测量见 [Nuke摘要](./deep-review-spatial-nuke.json)。未进入 P5.7.2。
+- Personal DEM spatial compatibility = **UNVERIFIED**，不是本轮 blocker，但正式 Deep Review FINAL Acceptance 前至少用一份真实个人 DEM 补验。峰内存仍 UNKNOWN。
+
+### P5.7.1 本轮执行结果
+
+| 验证 | 结果 |
+| --- | --- |
+| pnpm typecheck | 11/11 tasks 成功 |
+| pnpm build | 6/6 tasks 成功 |
+| match-model tests | TypeScript contract tests PASS（新增独立test入口） |
+| dem-parser tests | 38 PASS / 1 SKIP / 0 FAIL；含10个新合成测试与真实Nuke测试 |
+| analytics tests | 48 PASS / 5 SKIP / 0 FAIL |
+| findings tests | 16 PASS / 1 SKIP / 0 FAIL |
+| desktop tests | 16 PASS / 1 SKIP / 0 FAIL |
+| 独立review | 无actionable发现；核验public/native边界、旧parse与共享读取 |
+
+所有8项SKIP因demo1.dem不存在，历史golden定义/fixture未修改，但未声称真实golden本轮PASS。Nuke同输入空间证据hash `a6b17927aa4cc534e1b9db48b87816e9b348404cb19c66c319dc44b5a7c874c0` 重复一致；完整包测试额外重跑亦一致（共享路径总3.652/3.593秒，性能波动不参与determinism）。报告E2E与installer/installed regression本轮未运行，无相关产品修改。以下历史表格仍只描述P5.7.0。
+
+## P5.7.0 Evidence Feasibility Spike（以下为历史验证记录）
 
 验证日期：2026-10-08。锁定本机 @laihoe/demoparser2 0.42.0，Windows x64，Node v24.21.0；AMD Ryzen 7 5700G with Radeon Graphics，16 logical CPUs，RAM 31.37 GiB。基线提交 d073aca5128cfdfd151654489c9ce73acdea8402。
 
@@ -335,7 +358,7 @@ aliveCounts来源明确区分freeze_end+death按tick整体推进与entity采样�
 
 完整邻点抽查和每玩家计数见 [结构化测量附件](./deep-review-evidence-nuke.json)。没有coaching conclusion。
 
-## P5.7.1建议（未实施）
+## P5.7.0 时的 P5.7.1 建议（已由正式 contract 取代）
 
 独立evidence contract，不能反向扩展冻结P3 Analytics或把原生属性直接传renderer。最小建议：
 
@@ -348,7 +371,7 @@ aliveCounts来源明确区分freeze_end+death按tick整体推进与entity采样�
 - lifecycle与snapshot冲突应作为availability门控；不把所有metadata玩家自动当每回合参与者，不把team0/1当CT/T。
 - optional observations：shots/scoped/walking/airborne/aim punch/flash duration/buttons/usercmd独立coverage及时钟/语义验证状态，不作为required条件。
 
-这个候选在Nuke有基础证据，跨个人/GOTV稳定合同批准仍等待demo1和资源验证。不是P5.7.1实现批准。
+这是 P5.7.0 时的候选建议；本轮用户已批准实现 P5.7.1 foundation，正式 contract 以上方链接为准。个人/GOTV兼容与资源验收仍未验证。
 
 ## 明确禁止的推断与UNKNOWN
 
@@ -386,4 +409,4 @@ pnpm --filter @cs2-analyst/desktop test
 
 独立review发现并已修复FIRE trueCount被另一optional组覆盖为0的开发报告bug；重跑probe后以本附件为准。review另指出velocity有限值不等于准确、cap降级、death-only计数与性能估计边界，均已显式记录。
 
-本轮完成的是可复算的开发调查与UNKNOWN清单，不满足双DEM完整PASS条件。后续恢复原始demo1并跑同probe/golden，再补外部峰内存测量，才有依据决定P5.7.1 required contract与桌面资源门槛。
+P5.7.0 完成的是可复算的开发调查与UNKNOWN清单，状态为 PARTIAL PASS。P5.7.1 已正式建立最小可降级contract；个人DEM兼容和桌面资源门槛不由职业GOTV结果自动证明，仍需真实个人样本与外部峰内存测量。

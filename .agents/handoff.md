@@ -1,13 +1,26 @@
 # Agent Handoff
 
-## 2026-10-08 — v0.1 Final Acceptance — ACTIVE / waiting for real DEM samples
+## 2026-10-08 — P5.7.1 Spatial Evidence Foundation
+
+- v0.1 Final Acceptance：**PAUSED — Deep Review product gap discovered**；Current：**P5.7 Deep Review**。
+- P5.7.0：**PARTIAL PASS — GOTV verified, personal DEM compatibility pending**。本轮P5.7.1实现/GOTV验证完成，不进入P5.7.2。
+- 新match-model独立JSON领域contract，dem-parser显式parseWithSpatial；原parse兼容、一次readFile共享bytes、一次新增空间query。core永不裁掉，optional按预算且不跨round；coverage显式缺失tick/player/字段、未知actor与截断，nullable武器独立门控。
+- Nuke固定hash：145 kill refs（142 identified actor、3 world/planted_c4未知actor）、63边界；3757 core全覆盖，9331请求/9303返回/93030行；28可选tick缺失，存活weapon74843/74843。budget=0仍全保留core；重复输出deterministic且Match与旧入口相同。
+- 独立parse1.880秒；共享路径parser1.629/1.611、spatial1.692/1.595、总3.322/3.205秒；另完整包测试重跑总3.652/3.593秒，同一evidence hash。峰内存UNKNOWN。
+- Personal DEM spatial compatibility=**UNVERIFIED**，开发机无真实个人matchmaking DEM；非foundation blocker，Deep Review FINAL Acceptance前至少补一份真实个人样本（required fields、event ticks、weapon、performance、recording modes）。不寻找/下载/伪造样本。
+- P3 contracts/semantics、Findings V1、Timeline、Renderer/desktop report、report schema、kill-feed、branding、packaging全保持。无新Findings/结论、LOS、补枪、意图、停枪、反应/移动射击、Engagement。
+- 独立review未发现actionable问题。正式设计/结果在docs/spatial-evidence.md、docs/deep-review-spatial-nuke.json；demo1缺失的真实golden保持SKIP，不将历史PASS当本轮结果。
+- GitHub repository已正式改名：`Evanpatchouli/cs2-analyst`，origin一致。
+- 本轮执行：pnpm typecheck11/11、pnpm build6/6、match-model TypeScript contract tests PASS；dem-parser38 PASS/1 SKIP、analytics48/5、findings16/1、desktop16/1，均0 FAIL。8个SKIP均因demo1缺失；report E2E/installer未运行。本work unit完成后按用户指定focused commit，不push。
+
+## 2026-10-08 — v0.1 Final Acceptance（原计划，现PAUSED）
 
 - P5 Desktop MVP 已正式封板；后续仅接受确认 bug 修复，不继续追加 P5.x feature/polish。
 - P5.6.5 Branding & App Icon 由 Product Owner 明确批准 FINAL PASS；对应实现提交 `dbdd710529a7cb2ed021dd2a4d09325ed196abf9`。
 - Final Acceptance 从第 2 份真实 DEM 即可开始，最终目标约 3～5 场，覆盖不同地图、比分、发挥水平及可遇到的异常/特殊事件。
 - 验收方式：保持 demo1 deterministic golden，同时对新 DEM 做自洽检查与少量人工事实抽样（比分、K/D/A、ADR、KAST、CT/T、Multi-kill、Opening/Trade、Clutch、随机 Timeline、Findings evidence）。
 - Feature freeze：不新增 AI / Login / History / apps/api / heatmap / 3D replay / auto DEM discovery / 新 Analytics 指标。
-- GitHub repository slug 暂仍为 `Evanpatchouli/cs2-coach`；用户稍后自行在 GitHub 改为 cs2-analyst，本阶段不操作 repository rename。
+- GitHub repository已正式改名为 `Evanpatchouli/cs2-analyst`。
 
 ## 2026-10-08 — P5.6.5 Branding & App Icon — FINAL PASS
 

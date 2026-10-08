@@ -1,6 +1,7 @@
 import type { Match } from "@cs2-analyst/match-model";
 
 import type { DemoParser } from "../parser.js";
+import type { SpatialParseResult, SpatialSamplingOptions } from "../spatial.js";
 import { convertToMatch } from "./converters.js";
 import { Demoparser2Adapter } from "./demoparser2-adapter.js";
 
@@ -18,6 +19,15 @@ export class Demoparser2Provider implements DemoParser {
       return convertToMatch(await this.adapter.parse(filePath));
     } catch (cause) {
       throw new Error(`无法解析 DEM 文件：${filePath}`, { cause });
+    }
+  }
+
+  /** Explicit opt-in; the existing desktop parse/report path remains unchanged. */
+  async parseWithSpatial(filePath: string, options?: SpatialSamplingOptions): Promise<SpatialParseResult> {
+    try {
+      return await this.adapter.parseWithSpatial(filePath, options);
+    } catch (cause) {
+      throw new Error(`无法解析 DEM 空间证据：${filePath}`, { cause });
     }
   }
 }

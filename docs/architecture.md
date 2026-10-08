@@ -26,6 +26,10 @@ For Windows distribution the Main and Utility Process bundles inline every works
 
 The DEM implementation routes native demoparser2 results through an internal adapter and converter before returning `Match`. Native APIs are not exported by the package. The Electron main build keeps the native parser external and bundles the workspace packages. See [DEM parsing](./dem-parser.md) for the current mappings and limitations.
 
+P5.7.1 adds explicit `Demoparser2Provider.parseWithSpatial()` returning Match plus a separate `MatchSpatialEvidence` domain contract from match-model. Its internal adapter reads the DEM once and shares bytes between the existing parser and one sparse spatial query. Core event/boundary ticks survive any budget; optional combat context alone can be trimmed. Event references, exact requested/actual ticks, relations and field coverage preserve missing evidence. Native types/Buffer remain internal; Analytics does not call demoparser2 and the existing desktop/Renderer path still uses `parse()`. No new Findings or Engagement engine. Contract and evidence: [Spatial foundation](./spatial-evidence.md).
+
+v0.1 Final Acceptance is **PAUSED — Deep Review product gap discovered**; current work is **P5.7 Deep Review**. P5.7.0 is **PARTIAL PASS — GOTV verified, personal DEM compatibility pending**. P5.7.1 foundation is implemented and GOTV-verified; personal spatial compatibility remains **UNVERIFIED**, required before Deep Review FINAL Acceptance. Repository: `Evanpatchouli/cs2-analyst`.
+
 `analytics` implements the P3 deterministic player and combat metrics and depends only on `match-model` domain types. Round windowing and roster coverage are centralized in `packages/analytics/src/coverage.ts` so individual metrics do not re-implement eligibility; the shared survival/trade timeline for KAST, Trade and Clutch lives in `packages/analytics/src/timeline.ts`. Definitions and limits: [analytics metrics](./analytics-metrics.md).
 
 ## Principles

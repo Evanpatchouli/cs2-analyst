@@ -49,6 +49,12 @@ Round 另可包含 `stateSnapshots` 与 `playerLifecycle`。快照在已记录�
 
 See [combat event evidence](./combat-event-evidence.md) for native mappings, captured examples, unavailable data and P3 prerequisites.
 
+## Spatial Evidence（P5.7.1）
+
+`MatchSpatialEvidence / SpatialEvidence / SpatialEventRef / SpatialSample` 是 match-model 的独立 JSON-only contract，不改变 Match 或 MatchEvent，不进入冻结 Analytics/report schema。事件引用用回合、type、tick与稳定本地eventIndex；边界单独引用start/freeze_end/end。participants保留可识别SteamID string与未知身份null，samples明示actor/target/relevant及before/at/after/boundary。
+
+requestedTick与nullable actualTick分开；无精确行时actualTick=null，不最近邻替代。位置、视角、health、alive与activeWeapon允许缺失，TeamSide可Unknown。sample/event/match coverage区分complete/partial/unavailable，weapon独立门控，不因nullable weapon废掉位置证据。详见 [正式空间契约、预算与限制](./spatial-evidence.md)。
+
 ## Dependency Direction
 
 DEM parser -> match-model -> analytics -> findings -> report
