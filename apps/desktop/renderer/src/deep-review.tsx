@@ -15,7 +15,7 @@ const useStyles = makeStyles({
   caveats: { display: 'flex', flexDirection: 'column', gap: '8px', paddingTop: '8px' },
 });
 const groups = [
-  { key: 'reviews', title: '优先复盘', label: '复盘重点', color: 'warning', empty: '本场没有需要优先复盘的问题。' },
+  { key: 'reviews', title: '优先复盘', label: '复盘重点', color: 'warning', empty: '本场没有生成优先复盘结论。' },
   { key: 'highlights', title: '亮点', label: '亮点', color: 'success', empty: '本场没有值得单独标注的亮点。' },
   { key: 'contexts', title: '补充观察', label: '补充观察', color: 'informative', empty: '本场没有额外的补充观察。' },
 ] as const;

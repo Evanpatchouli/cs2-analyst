@@ -194,7 +194,7 @@ function Findings({ report, playerId, onShowRounds }: {
         {f.evidence.map((e, i) => {
           const when = [e.round === undefined ? null : `R${e.round}`, e.roundTimeSeconds === undefined ? null : `回合开始后 ${seconds(e.roundTimeSeconds)}`].filter(Boolean).join(' · ');
           return <div key={i} className={s.evidence}>
-            <Caption1 className={s.muted} title={e.tick === undefined ? undefined : `原始记录 tick ${e.tick}`}>{metricLabel(e.metric)}{when ? ` · ${when}` : ''}</Caption1>
+            <Caption1 className={s.muted}>{metricLabel(e.metric)}{when ? ` · ${when}` : ''}</Caption1>
             <Caption1>{evidenceText(e.value, e.unit)}</Caption1>
           </div>;
         })}

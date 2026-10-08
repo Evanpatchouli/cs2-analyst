@@ -133,10 +133,11 @@ test('Deep Review renders adapted copy, plain-language limits and no internal ev
   assert.equal(new Set(labels.map(m => m[2])).size, 3, 'three distinct Fluent badge styles');
 });
 test('Deep Review permits empty and unavailable evidence without fallback cards', () => {
-  for (const status of ['complete', 'unavailable']) {
+  for (const status of ['complete', 'partial', 'unavailable']) {
     const html = render(createElement(DeepReview, { player: { playerId: '1', coverage: { status }, reviews: [], highlights: [], contexts: [] }, onShowRounds: () => {} }));
     assert.ok(html.includes('本场没有生成深度复盘结论。'));
-    assert.ok(html.includes('本场没有需要优先复盘的问题。'));
+    assert.ok(html.includes('本场没有生成优先复盘结论。'));
+    assert.ok(!html.includes('本场没有需要优先复盘的问题。'));
     assert.ok(!html.includes('data-deep-kind='));
     assert.equal(html.includes('基础比赛报告仍可查看'), status === 'unavailable');
   }
