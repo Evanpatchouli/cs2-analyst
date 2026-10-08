@@ -445,6 +445,7 @@ function assertDeepDto(report) {
     for (const f of [...p.reviews, ...p.highlights, ...p.contexts]) {
       assert.ok(f.relatedRounds.every(r => report.timeline.find(t => t.playerId === p.playerId).rounds.some(round => round.round === r)));
       assert.ok(!('evidenceQuality' in f), 'Desktop DTO must not expose the internal evidence quality field');
+      if (f.ruleId.startsWith('deep.impact.')) assert.equal(f.occurrenceLabel, null, `impact finding ${f.ruleId} must not expose the candidate count`);
       const copy = [f.title, f.summary, f.occurrenceLabel ?? '', ...f.caveats].join('\n');
       for (const token of INTERNAL_COPY_TERMS) assert.ok(!copy.includes(token), `${token} leaked into user copy of ${f.ruleId}: ${copy}`);
     }

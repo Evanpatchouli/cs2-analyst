@@ -2,7 +2,7 @@
 
 Status (2026-10-09): **implementation complete / copy revised / visual product acceptance pending**.
 Baseline for this copy revision: `ccb6402e9b264bab3cab0b538d35e8b028c1fd04`
-(P5.7.8 implementation was `a11f6af`). P5.7.8.1 plain-language copy polish changes presentation copy only;
+(P5.7.8 implementation was `a11f6af`). P5.7.8.1–2 plain-language copy polish changes presentation copy only;
 no P5.7.1–7 judgement, threshold, ranking or evidence semantics changed.
 P5.7.0 PARTIAL PASS; P5.7.1–7 PASS. v0.1 Final Acceptance **PAUSED**.
 Personal matchmaking / Perfect World DEM compatibility **UNVERIFIED**.
@@ -70,7 +70,9 @@ reading order. No chat, scores, radar/HUD, AI coach or new analysis is introduce
 - No evidence-quality badge is shown. A finding with caveats exposes only a neutral
   “说明与限制” entry, so “部分证据” can never contradict a body that says all required evidence
   was present.
-- Occurrence counts read “符合此情况：M / N 次” without a Renderer-computed rate.
+- Occurrence counts read “符合此情况：M / N 次” for execution / teamplay / utility patterns,
+  without a Renderer-computed rate. `deep.impact.*` findings describe one selected round, so they
+  never show the internal qualified-candidate count (`occurrenceLabel: null`).
 - “说明与限制” is a native keyboard-accessible details/summary, closed by default.
 - Empty sections have quiet copy; all-empty displays the legal no-conclusion state. No fallback finding.
 
@@ -112,7 +114,10 @@ require touching an analysis rule.
 
 Coverage caveats are rewritten as complete sentences, never by regex-deleting identifiers. For
 example: “部分开枪与伤害事件发生在同一游戏刻，无法判断严格先后；这不会影响本条结论所依据的伤害
-与击杀记录。” Every emitted finding keeps a plain-language `说明与限制` note.
+与击杀记录。” The closing sentence follows the finding family so it matches the evidence type:
+execution → 伤害与击杀记录, impact → 击杀和人数变化记录, teamplay → 交火与阵亡记录,
+utility → 闪光弹与受闪记录; an unknown future rule gets the data-type-free “这不会影响本条结论所使用的
+其他明确记录。” Every emitted finding keeps a plain-language `说明与限制` note.
 
 ## Validation
 
@@ -128,10 +133,11 @@ example: “部分开枪与伤害事件发生在同一游戏刻，无法判断�
 - SSR Renderer checks (including desktop): three distinct Fluent semantics, adapted copy,
   collapsed 说明与限制, no evidence-quality badge, technical-ref decoys not visible,
   empty/unavailable states.
-- P5.7.8.1 copy audit: `deep-review-copy.test.mjs` covers all eight rules and partial-coverage caveat
-  translation; desktop tests (27/27) and the demo1/Nuke DTO tests assert that no
-  title/summary/occurrenceLabel/caveat contains Engagement, direct contact, evidence, partial,
-  coverage, linkage, received, return contact, same-tick, eventIndex, fireEvidence or denominator.
+- P5.7.8.1–2 copy audit: `deep-review-copy.test.mjs` covers all eight rules, the `deep.impact.*`
+  no-occurrenceLabel rule and per-family partial-coverage caveat translation; desktop tests (29/29)
+  and the demo1/Nuke DTO tests assert that no title/summary/occurrenceLabel/caveat contains
+  Engagement, direct contact, evidence, partial, coverage, linkage, received, return contact,
+  same-tick, eventIndex, fireEvidence or denominator.
   Electron report smoke also scans the real and synthetic Deep Review panels for the same forbidden
   vocabulary and for the retired “部分证据 / 证据边界 / 上下文 / 可判定场景” wording.
 - deep-review package regression 210/210 PASS; no P5.7.1–7 rule, threshold, ranking or evidence

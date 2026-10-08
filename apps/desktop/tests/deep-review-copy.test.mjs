@@ -39,7 +39,8 @@ test('every Deep Review rule has plain-language product copy without internal vo
     audit(copy);
     assert.ok(copy.title.length > 4, ruleId);
     assert.ok(copy.summary.endsWith('。'), ruleId);
-    assert.match(copy.occurrenceLabel, /^符合此情况：\d+ \/ \d+ 次$/, ruleId);
+    if (ruleId.startsWith('deep.impact.')) assert.equal(copy.occurrenceLabel, null, `${ruleId} must not expose the candidate count`);
+    else assert.match(copy.occurrenceLabel, /^符合此情况：\d+ \/ \d+ 次$/, ruleId);
     assert.ok(copy.caveats.length > 0, `${ruleId} must keep its limitation note`);
   }
 });
@@ -59,6 +60,24 @@ test('impact copy states the round, kills and real transitions as natural senten
     { sequenceRound: 7, killCount: 2, roundResult: 'loss' }));
   assert.equal(sole.title, 'R7：队伍只剩你一人时继续拿到击杀');
   assert.equal(sole.summary, '你在 R7 共完成 2 次击杀，并在队伍只剩你一人存活后继续拿到击杀；该回合最终失利。');
+  for (const copy of [swing, lost, sole]) assert.equal(copy.occurrenceLabel, null);
+});
+
+test('impact findings never show the qualified-candidate occurrence label', () => {
+  const rules = ['deep.impact.multikill-swing', 'deep.impact.sole-survivor-sequence', 'deep.impact.multikill-unconverted'];
+  for (const ruleId of rules) {
+    const copy = adaptDeepReviewFinding(finding(ruleId,
+      { sequenceRound: 24, killCount: 4, roundResult: 'win', equalizer: true }, { occurrences: 1, eligibleOccurrences: 2 }));
+    assert.equal(copy.occurrenceLabel, null, ruleId);
+    assert.ok(!JSON.stringify(copy).includes('符合此情况'), ruleId);
+  }
+});
+
+test('a merged sole-survivor sentence stays natural without a stiff connective', () => {
+  const merged = adaptDeepReviewFinding(finding('deep.impact.sole-survivor-sequence',
+    { sequenceRound: 24, killCount: 4, roundResult: 'win', equalizer: true, advantageGain: true, enemyEliminated: true, soleSurvivor: true }));
+  assert.equal(merged.summary, '你在 R24 共完成 4 次击杀，期间你曾扳平人数、帮助队伍取得人数优势，并最终清空对手；随后在队伍只剩你一人存活时继续拿到击杀，该回合最终获胜。');
+  assert.ok(!merged.summary.includes('；并且'));
 });
 
 test('pattern copy keeps the required negative/positive framing and the follow-up window', () => {
@@ -84,16 +103,24 @@ test('pattern copy keeps the required negative/positive framing and the follow-u
   assert.equal(flash.summary, '有 3 颗可以明确归属到你的闪光弹影响了队友，共记录到 6 次队友受闪。');
 });
 
-test('domain coverage caveats become complete user sentences, never codes', () => {
-  const execution = adaptDeepReviewFinding(finding('deep.execution.return-contact-consistent', {}, {
-    caveats: ['未用于此规则的 fireEvidence 证据为 partial（same-tick-fire-contact-ambiguous）；不影响本规则使用的确认事实。'] }));
+test('coverage caveat closing text matches the finding family and never leaks codes', () => {
+  const partial = '未用于此规则的 fireEvidence 证据为 partial（same-tick-fire-contact-ambiguous）；不影响本规则使用的确认事实。';
+  const execution = adaptDeepReviewFinding(finding('deep.execution.return-contact-consistent', {}, { caveats: [partial] }));
   assert.ok(execution.caveats.includes('部分开枪与伤害事件发生在同一游戏刻，无法判断严格先后；这不会影响本条结论所依据的伤害与击杀记录。'), JSON.stringify(execution.caveats));
   audit(execution);
 
-  const spatial = adaptDeepReviewFinding(finding('deep.teamplay.lone-contact-death-pattern', {}, {
+  const impact = adaptDeepReviewFinding(finding('deep.impact.multikill-swing',
+    { sequenceRound: 24, killCount: 4, roundResult: 'win' }, { caveats: [partial] }));
+  assert.ok(impact.caveats.some(c => c.endsWith('这不会影响本条结论所依据的击杀和人数变化记录。')), JSON.stringify(impact.caveats));
+
+  const teamplay = adaptDeepReviewFinding(finding('deep.teamplay.lone-contact-death-pattern', {}, {
     caveats: ['未用于此规则的 spatialContext 证据为 incomplete（position-missing）；不影响本规则使用的确认事实。'] }));
-  assert.ok(spatial.caveats.some(c => c.includes('这不会影响本条结论所依据的伤害与击杀记录')), JSON.stringify(spatial.caveats));
-  audit(spatial);
+  assert.ok(teamplay.caveats.some(c => c.endsWith('这不会影响本条结论所依据的交火与阵亡记录。')), JSON.stringify(teamplay.caveats));
+  audit(teamplay);
+
+  const utility = adaptDeepReviewFinding(finding('deep.utility.teamflash-repeated',
+    { teamFlashEffects: 3, teammateEffects: 6 }, { caveats: [partial] }));
+  assert.ok(utility.caveats.some(c => c.endsWith('这不会影响本条结论所依据的闪光弹与受闪记录。')), JSON.stringify(utility.caveats));
 
   const noReason = adaptDeepReviewFinding(finding('deep.execution.no-confirmed-return-pattern', {}, {
     caveats: ['未用于此规则的 spatialContext 证据为 partial；不影响本规则使用的确认事实。'] }));
@@ -101,9 +128,11 @@ test('domain coverage caveats become complete user sentences, never codes', () =
   audit(noReason);
 });
 
-test('an unknown rule id still yields safe product copy instead of domain text', () => {
-  const copy = adaptDeepReviewFinding(finding('deep.future.unknown-rule', { anything: 1 }));
+test('an unknown rule id keeps a generic caveat closing without naming a data type', () => {
+  const copy = adaptDeepReviewFinding(finding('deep.future.unknown-rule', { anything: 1 }, {
+    caveats: ['未用于此规则的 fireEvidence 证据为 partial（same-tick-fire-contact-ambiguous）；不影响本规则使用的确认事实。'] }));
   audit(copy);
   assert.equal(copy.title, '深度复盘结论');
   assert.ok(!copy.summary.includes('domain raw'));
+  assert.ok(copy.caveats.some(c => c.endsWith('这不会影响本条结论所使用的其他明确记录。')), JSON.stringify(copy.caveats));
 });

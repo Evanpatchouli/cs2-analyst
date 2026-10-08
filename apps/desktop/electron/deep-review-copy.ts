@@ -1,4 +1,4 @@
-import type { DeepReviewFinding } from '@cs2-analyst/deep-review';
+import type { DeepReviewFinding, DeepReviewRuleId } from '@cs2-analyst/deep-review';
 
 /**
  * Product copy for Deep Review. This module is the single translation boundary
@@ -53,11 +53,26 @@ const REASON_HINTS: { test: RegExp; text: string }[] = [
   { test: /unavailable/, text: '部分记录不可用' },
 ];
 
+/** Closing sentence follows the finding family, so the note matches what the rule used. */
+const CAVEAT_TAIL: Record<DeepReviewFinding['category'], string> = {
+  execution: '这不会影响本条结论所依据的伤害与击杀记录。',
+  impact: '这不会影响本条结论所依据的击杀和人数变化记录。',
+  teamplay: '这不会影响本条结论所依据的交火与阵亡记录。',
+  utility: '这不会影响本条结论所依据的闪光弹与受闪记录。',
+};
+const KNOWN_RULES: ReadonlySet<string> = new Set<DeepReviewRuleId>([
+  'deep.impact.multikill-swing', 'deep.impact.sole-survivor-sequence', 'deep.impact.multikill-unconverted',
+  'deep.execution.no-confirmed-return-pattern', 'deep.execution.return-contact-consistent',
+  'deep.teamplay.lone-contact-death-pattern', 'deep.teamplay.no-followup-pattern', 'deep.utility.teamflash-repeated',
+]);
+const UNKNOWN_CAVEAT_TAIL = '这不会影响本条结论所使用的其他明确记录。';
+const caveatTail = (f: DeepReviewFinding): string => KNOWN_RULES.has(f.ruleId) ? CAVEAT_TAIL[f.category] : UNKNOWN_CAVEAT_TAIL;
+
 /**
  * Domain coverage caveats name layers and reason codes. Translate them into a
  * complete user sentence instead of deleting identifiers from the raw string.
  */
-function translatePartialCaveat(caveat: string): string | null {
+function translatePartialCaveat(caveat: string, tail: string): string | null {
   if (!caveat.startsWith('未用于此规则')) return null;
   const layerMatch = caveat.match(/^未用于此规则的\s*(.+?)\s*证据为/);
   const layer = (layerMatch && LAYER_LABELS[layerMatch[1]]) ?? '部分记录';
@@ -65,7 +80,7 @@ function translatePartialCaveat(caveat: string): string | null {
   const reasons = reasonBlock ? reasonBlock[1].split('、').filter(Boolean) : [];
   const hint = reasons.map(r => REASON_HINTS.find(h => h.test.test(r))?.text).find(Boolean);
   const body = hint ?? `部分${layer}无法完整判断`;
-  return `${body}；这不会影响本条结论所依据的伤害与击杀记录。`;
+  return `${body}；${tail}`;
 }
 
 const RESULT_NOTE: Record<string, string> = {
@@ -108,7 +123,7 @@ function impactCopy(f: DeepReviewFinding): DeepReviewCopy {
   if (f.ruleId === 'deep.impact.sole-survivor-sequence') {
     const outcome = facts.roundResult === 'win' ? '获胜' : facts.roundResult === 'loss' ? '失利' : '结束';
     const tail = swingClause
-      ? `；并且在队伍只剩你一人存活后继续拿到击杀，该回合最终${outcome}。`
+      ? `；随后在队伍只剩你一人存活时继续拿到击杀，该回合最终${outcome}。`
       : `，并在队伍只剩你一人存活后继续拿到击杀；该回合最终${outcome}。`;
     return { title: `R${round}：队伍只剩你一人时继续拿到击杀`,
       summary: `你在 R${round} 共完成 ${kills} 次击杀${swingClause}${tail}`, occurrenceLabel: null, caveats: [] };
@@ -122,8 +137,9 @@ export function adaptDeepReviewFinding(f: DeepReviewFinding): DeepReviewCopy {
   const eligible = f.eligibleOccurrences;
   const occurrenceLabel = eligible === null ? null : `符合此情况：${f.occurrences} / ${eligible} 次`;
   const caveats = [RESULT_NOTE[f.ruleId]];
+  const tail = caveatTail(f);
   for (const raw of f.caveats) {
-    const translated = translatePartialCaveat(raw);
+    const translated = translatePartialCaveat(raw, tail);
     if (translated) caveats.push(translated);
   }
   const copy: DeepReviewCopy = { title: '', summary: '', occurrenceLabel, caveats: [...new Set(caveats.filter(Boolean))] };
@@ -131,7 +147,8 @@ export function adaptDeepReviewFinding(f: DeepReviewFinding): DeepReviewCopy {
     case 'deep.impact.multikill-swing':
     case 'deep.impact.sole-survivor-sequence':
     case 'deep.impact.multikill-unconverted':
-      return { ...impactCopy(f), occurrenceLabel: copy.occurrenceLabel, caveats: copy.caveats };
+      // Impact cards describe one selected round; the qualified-candidate count stays internal.
+      return { ...impactCopy(f), caveats: copy.caveats };
     case 'deep.execution.no-confirmed-return-pattern':
       return { ...copy, title: '先被对手打到后的反击情况',
         summary: `在 ${eligible ?? 0} 次你先被对手打到、且可以完整判断的交火中，有 ${f.occurrences} 次之后没有记录到你对同一对手造成伤害或击杀。` };

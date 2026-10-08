@@ -30,7 +30,7 @@ export function DeepReview({ player, onShowRounds }: {
     <Title2>深度复盘</Title2>
     <Body1 className={s.muted}>根据 DEM 中能够明确记录的交火、人数变化、队友跟进和道具效果生成。</Body1>
     {player.coverage.status === 'unavailable' ? <Body1>本场录像无法用于深度复盘，基础比赛报告仍可查看。</Body1>
-      : player.coverage.status === 'partial' ? <Caption1 className={s.muted}>这场录像中有少量记录无法完整判断，具体限制可在每张卡片的「说明与限制」中查看。</Caption1> : null}
+      : player.coverage.status === 'partial' ? <Caption1 className={s.muted}>这场录像中有部分记录无法完整判断，具体限制可在每张卡片的「说明与限制」中查看。</Caption1> : null}
     {empty ? <Body1>本场没有生成深度复盘结论。</Body1> : null}
     {groups.map(group => <section key={group.key} className={s.group} aria-label={group.title}>
       <Subtitle1>{group.title}</Subtitle1>
