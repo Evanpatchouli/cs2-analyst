@@ -1,5 +1,14 @@
 # Agent Handoff
 
+## 2026-10-08 — P5.7.3 Kill / Multi-kill Impact
+
+- 基线 `c0b559c23c98a8652dca2d401b70208521f73089`；正式P5.7.0 **PARTIAL PASS**、P5.7.1 **PASS**、P5.7.2 **PASS**；P5.7.3当前任务实现/GOTV结构验证完成，产品验收待定；Final Acceptance继续 **PAUSED**。
+- 生产仅deep-review新增JSON-only contracts、独立round alive-state resolver、Kill/MultiKill analyzer，依赖仍仅match-model。freeze_end优先/start fallback partial；正式victim death包含world/self/team/utility，atomic same-tick不虚构顺序，异常整回合抑制人数但保留refs。明确敌对event attribution独立；duplicate victim不credit伪多杀。
+- 每杀facts/tags/posthumous/before/afterAtomicGroup、三层coverage；round>=2kills聚合、snapshot side+winner得最终result、exact四键Engagement linkage；utility允许无link。缺killerSide不污染可靠victim timeline；已知killer缺participant roster说明名单缺口、整回合counts不可用。P3 Opening/Clutch/multiKills、Findings V1、Renderer/desktop、parser/model契约均不变，无评分/coaching/AI。
+- Nuke固定SHA，21round全eligible、142death/atomic groups/credited/linked，29multi（19×2K、9×3K、1×4K），23win/6loss，10single/19multi Engagement；12sole survivor kills。coverage全部complete；0same tick多death/posthumous/utility enemy kill，特殊absence仅synthetic覆盖。独立set oracle/refs/linkage/result/immutability/determinism PASS。
+- docs/kill-impact-analysis.md + docs/deep-review-impact-nuke.json：自动3个2K/3个3K+/首lost/sole sequence，same tick不存在=null；人工读取数据复核，不称画面回放。Personal DEM **UNVERIFIED**，事件feed completeness/其他录制模式/峰内存UNKNOWN；Deep Review FINAL前补个人样本与demo1。
+- typecheck12/12、build7/7；match-model contract PASS；dem-parser38 PASS/1SKIP、analytics48/5、findings16/1、deep-review47/0、desktop16/1，0FAIL；8SKIP均缺demo1，未执行历史golden。独立review发现并修复killer attribution side传播与missing known killer名单覆盖两项边界并补回归，最终复审PASS无遗留finding。focused commit `feat(analysis): add kill impact analysis`，不push；不进入P5.7.4/Findings V2，不执行installer/Renderer E2E。
+
 ## 2026-10-08 — P5.7.2 Engagement Engine
 
 - 基线 `f37db2e42bcf9e42d489d03c5e52ae625d7e0d4a`；P5.7.0 **PARTIAL PASS**、P5.7.1 **PASS**；P5.7.2当前任务实现/GOTV结构验证完成，产品验收待定；v0.1 Final Acceptance继续 **PAUSED**。

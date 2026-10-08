@@ -2,7 +2,16 @@
 
 Status: v0.1 Final Acceptance **PAUSED — Deep Review product gap discovered**。
 
-Current: **P5.7 Deep Review / P5.7.2 Engagement Engine**；实现与Nuke结构验证完成，产品验收待定。
+Current: **P5.7 Deep Review / P5.7.3 Kill / Multi-kill Impact**；实现与Nuke结构验证完成，产品验收待定。
+
+## 2026-10-08 — P5.7.3
+
+- 基线 `c0b559c23c98a8652dca2d401b70208521f73089`；P5.7.0 **PARTIAL PASS**、P5.7.1 **PASS**、P5.7.2 **PASS**；Final Acceptance仍 **PAUSED**。
+- deep-review独立freeze_end/start fallback alive-state resolver；victim death（含world/self/team）与enemy attribution分离，same-tick atomic推进，未知名单/生命周期/重复death/end冲突拒绝人数。事件only attribution与三层coverage分离；无Spatial依赖、评分/AI/coaching/P3/Findings V1/Renderer修改。
+- KillImpact事实tags、多标签共存、可靠更早death确定posthumous；round MultiKill只>=2，保留snapshot side/winner/result与single/multi Engagement，四键exact join不猜utility归属；opening/sole survivor不替代P3 Opening/Clutch。
+- Nuke21round/142death/142credited/142linked，29multi=19×2K+9×3K+1×4K；23win/6loss，10single/19multi Engagement，12sole survivor kills；三层complete。0same-tick多death/posthumous/utility enemy kill，特殊行为仅synthetic验证，不宣称真实发生。
+- 自动3个2K/3个3K+/首lost/sole sequence抽样：docs/deep-review-impact-nuke.json；定义/人工数据复核/compatibility debt：docs/kill-impact-analysis.md。Personal DEM **UNVERIFIED**、峰内存/其他录制模式UNKNOWN。
+- typecheck12/12、build7/7；match-model contract PASS；dem-parser38/1SKIP、analytics48/5、findings16/1、deep-review47/0、desktop16/1，0FAIL。8SKIP均缺demo1，历史golden未执行。独立review问题修复并补回归，最终复审PASS无遗留finding；提交使用focused commit `feat(analysis): add kill impact analysis`，不push；无installer/Renderer E2E，不进入P5.7.4。
 
 ## 2026-10-08 — P5.7.2
 

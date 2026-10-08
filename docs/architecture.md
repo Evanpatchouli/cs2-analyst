@@ -9,7 +9,7 @@ CS2 Analyst is structured as a desktop application with a deterministic analysis
 - `dem-parser`: CS2 DEM parsing adapter layer
 - `match-model`: domain models for matches, rounds and players
 - `analytics`: deterministic metrics calculation
-- `deep-review`: deterministic direct-contact Engagement segmentation (product heuristic)
+- `deep-review`: deterministic Engagement segmentation and death-state Kill / Multi-kill evidence
 - `findings`: pattern detection and coaching evidence
 - `report-contract`: JSON-only Electron/Renderer presentation DTO (types only)
 
@@ -31,7 +31,9 @@ P5.7.1 adds explicit `Demoparser2Provider.parseWithSpatial()` returning Match pl
 
 P5.7.2 adds `deep-review`, depending only on match-model in production: `dem-parser → match-model → { analytics, deep-review }`. `analyzeEngagements(Match, optional MatchSpatialEvidence, options)` groups explicit hostile damage/kill contacts within formal round windows through shared-participant/time-gap connected components. The default 3-second gap is a product heuristic; no reliable tickRate means contacts remain but time grouping is unavailable. Spatial joins use exact round/type/tick/eventIndex with separate enrichment coverage. Utility and weapon_fire do not create anchors; unknown contact weapons are retained. No cycles, changes to frozen P3/Findings V1, desktop integration, AI or coaching conclusions. Future Findings V2 can consume both independent outputs. Definition, contracts, Nuke invariants and sensitivity: [Engagement analysis](./engagement-analysis.md).
 
-v0.1 Final Acceptance is **PAUSED — Deep Review product gap discovered**; current work is **P5.7 Deep Review / P5.7.2 Engagement Engine** (implemented, Nuke structural verification complete; product acceptance pending). P5.7.0 is **PARTIAL PASS — GOTV verified, personal DEM compatibility pending**. P5.7.1 is **PASS**; personal spatial/Engagement compatibility remains **UNVERIFIED**, required before Deep Review FINAL Acceptance. Repository: `Evanpatchouli/cs2-analyst`.
+P5.7.3 adds independent `resolveRoundAliveState(Round)` and `analyzeKillImpact(Match, optional EngagementAnalysis)` in deep-review. Freeze-end/start fallback roster evidence and formal victim deaths drive atomic same-tick groups; invalid roster/lifecycle/death/end evidence suppresses counts. Enemy attribution and four-key Engagement linkage have separate coverage. Round multi-kills retain state transitions and final round result without scores, causality or coaching. Spatial evidence is not required. P3 Opening/Clutch/multiKills, Findings V1 and Renderer remain frozen. Contracts, tests and Nuke samples: [Kill impact analysis](./kill-impact-analysis.md).
+
+v0.1 Final Acceptance is **PAUSED — Deep Review product gap discovered**; current work is **P5.7 Deep Review / P5.7.3 Kill / Multi-kill Impact** (implemented, Nuke structural verification complete; product acceptance pending). P5.7.0 is **PARTIAL PASS — GOTV verified, personal DEM compatibility pending**. P5.7.1 and P5.7.2 are **PASS**; personal DEM compatibility remains **UNVERIFIED**, required before Deep Review FINAL Acceptance. Repository: `Evanpatchouli/cs2-analyst`.
 
 `analytics` implements the P3 deterministic player and combat metrics and depends only on `match-model` domain types. Round windowing and roster coverage are centralized in `packages/analytics/src/coverage.ts` so individual metrics do not re-implement eligibility; the shared survival/trade timeline for KAST, Trade and Clutch lives in `packages/analytics/src/timeline.ts`. Definitions and limits: [analytics metrics](./analytics-metrics.md).
 

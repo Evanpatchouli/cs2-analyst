@@ -1,0 +1,1460 @@
+{
+  "fixtureSha256": "dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c",
+  "analysisHash": "51e8b3bc77f2e25c72783db396dc4d74dfc1da741878741e7cdf7e1b5dce19d5",
+  "diagnostics": {
+    "rounds": 21,
+    "eligibleRounds": 21,
+    "ineligibleRounds": 0,
+    "deathEvents": 142,
+    "atomicDeathGroups": 142,
+    "creditedEnemyKills": 142,
+    "unattributedKills": 0,
+    "teamKills": 0,
+    "selfKills": 0,
+    "worldKills": 0,
+    "sameTickDeathGroups": 0,
+    "posthumousKills": 0,
+    "multiKillRounds": 29,
+    "doubleKills": 19,
+    "tripleKills": 9,
+    "quadKills": 1,
+    "fivePlusKills": 0,
+    "engagementLinkedKills": 142,
+    "unlinkedKills": 0
+  },
+  "coverage": {
+    "roundState": {
+      "status": "complete",
+      "reasons": []
+    },
+    "attribution": {
+      "status": "complete",
+      "reasons": []
+    },
+    "engagementLinkage": {
+      "status": "complete",
+      "reasons": []
+    }
+  },
+  "multiKillStructure": {
+    "roundWon": 23,
+    "roundLost": 6,
+    "roundUnknown": 0,
+    "singleEngagement": 10,
+    "multiEngagement": 19,
+    "tagCounts": {
+      "contains-advantage-extension": 18,
+      "contains-advantage-gain": 21,
+      "contains-deficit-reduction": 2,
+      "contains-enemy-elimination": 9,
+      "contains-equalizer": 12,
+      "contains-opening": 8,
+      "contains-sole-survivor-kill": 4,
+      "multi-engagement": 19,
+      "round-lost": 6,
+      "round-won": 23,
+      "single-engagement": 10
+    }
+  },
+  "structuralValidation": {
+    "deterministic": true,
+    "inputImmutable": true,
+    "uniqueDeathAdvancement": true,
+    "nonnegativeCounts": true,
+    "atomicSameTick": true,
+    "exactKillRefs": true,
+    "exactEngagementLinkage": true,
+    "utilityMayBeUnlinked": true,
+    "noPosthumousResurrection": true,
+    "uniqueMultiKillRefs": true,
+    "snapshotRoundConversion": true,
+    "eligibleRounds": 21,
+    "appliedDeaths": 142
+  },
+  "observedCases": {
+    "sameTickDeathGroups": 0,
+    "posthumousKills": 0,
+    "utilityEnemyKills": 0,
+    "absentCasesValidatedBySyntheticOnly": [
+      "same-tick atomic deaths",
+      "posthumous grenade kill",
+      "utility kill without Engagement"
+    ]
+  },
+  "roundCoverage": [
+    {
+      "round": 1,
+      "baseline": {
+        "boundary": "freeze_end",
+        "tick": 2712
+      },
+      "coverage": {
+        "status": "complete",
+        "reasons": []
+      }
+    },
+    {
+      "round": 2,
+      "baseline": {
+        "boundary": "freeze_end",
+        "tick": 15494
+      },
+      "coverage": {
+        "status": "complete",
+        "reasons": []
+      }
+    },
+    {
+      "round": 3,
+      "baseline": {
+        "boundary": "freeze_end",
+        "tick": 21683
+      },
+      "coverage": {
+        "status": "complete",
+        "reasons": []
+      }
+    },
+    {
+      "round": 4,
+      "baseline": {
+        "boundary": "freeze_end",
+        "tick": 29863
+      },
+      "coverage": {
+        "status": "complete",
+        "reasons": []
+      }
+    },
+    {
+      "round": 5,
+      "baseline": {
+        "boundary": "freeze_end",
+        "tick": 33665
+      },
+      "coverage": {
+        "status": "complete",
+        "reasons": []
+      }
+    },
+    {
+      "round": 6,
+      "baseline": {
+        "boundary": "freeze_end",
+        "tick": 43236
+      },
+      "coverage": {
+        "status": "complete",
+        "reasons": []
+      }
+    },
+    {
+      "round": 7,
+      "baseline": {
+        "boundary": "freeze_end",
+        "tick": 55198
+      },
+      "coverage": {
+        "status": "complete",
+        "reasons": []
+      }
+    },
+    {
+      "round": 8,
+      "baseline": {
+        "boundary": "freeze_end",
+        "tick": 62556
+      },
+      "coverage": {
+        "status": "complete",
+        "reasons": []
+      }
+    },
+    {
+      "round": 9,
+      "baseline": {
+        "boundary": "freeze_end",
+        "tick": 75852
+      },
+      "coverage": {
+        "status": "complete",
+        "reasons": []
+      }
+    },
+    {
+      "round": 10,
+      "baseline": {
+        "boundary": "freeze_end",
+        "tick": 84163
+      },
+      "coverage": {
+        "status": "complete",
+        "reasons": []
+      }
+    },
+    {
+      "round": 11,
+      "baseline": {
+        "boundary": "freeze_end",
+        "tick": 92450
+      },
+      "coverage": {
+        "status": "complete",
+        "reasons": []
+      }
+    },
+    {
+      "round": 12,
+      "baseline": {
+        "boundary": "freeze_end",
+        "tick": 98890
+      },
+      "coverage": {
+        "status": "complete",
+        "reasons": []
+      }
+    },
+    {
+      "round": 13,
+      "baseline": {
+        "boundary": "freeze_end",
+        "tick": 106689
+      },
+      "coverage": {
+        "status": "complete",
+        "reasons": []
+      }
+    },
+    {
+      "round": 14,
+      "baseline": {
+        "boundary": "freeze_end",
+        "tick": 113316
+      },
+      "coverage": {
+        "status": "complete",
+        "reasons": []
+      }
+    },
+    {
+      "round": 15,
+      "baseline": {
+        "boundary": "freeze_end",
+        "tick": 120441
+      },
+      "coverage": {
+        "status": "complete",
+        "reasons": []
+      }
+    },
+    {
+      "round": 16,
+      "baseline": {
+        "boundary": "freeze_end",
+        "tick": 128951
+      },
+      "coverage": {
+        "status": "complete",
+        "reasons": []
+      }
+    },
+    {
+      "round": 17,
+      "baseline": {
+        "boundary": "freeze_end",
+        "tick": 139060
+      },
+      "coverage": {
+        "status": "complete",
+        "reasons": []
+      }
+    },
+    {
+      "round": 18,
+      "baseline": {
+        "boundary": "freeze_end",
+        "tick": 150004
+      },
+      "coverage": {
+        "status": "complete",
+        "reasons": []
+      }
+    },
+    {
+      "round": 19,
+      "baseline": {
+        "boundary": "freeze_end",
+        "tick": 159092
+      },
+      "coverage": {
+        "status": "complete",
+        "reasons": []
+      }
+    },
+    {
+      "round": 20,
+      "baseline": {
+        "boundary": "freeze_end",
+        "tick": 164568
+      },
+      "coverage": {
+        "status": "complete",
+        "reasons": []
+      }
+    },
+    {
+      "round": 21,
+      "baseline": {
+        "boundary": "freeze_end",
+        "tick": 175127
+      },
+      "coverage": {
+        "status": "complete",
+        "reasons": []
+      }
+    }
+  ],
+  "sampleSelection": {
+    "policy": "First by round/playerId; no player name, team, winner or round constants",
+    "availableDoubleKills": 19,
+    "availableTriplePlusKills": 10,
+    "availableLostMultiKills": 6,
+    "availableSoleSurvivorKills": 12,
+    "availableAtomicGroups": 0
+  },
+  "samples": {
+    "doubleKills": [
+      {
+        "round": 1,
+        "playerId": "76561198201620490",
+        "killCount": 2,
+        "kills": [
+          {
+            "eventRef": {
+              "round": 1,
+              "type": "kill",
+              "tick": 5350,
+              "eventIndex": 104
+            },
+            "before": {
+              "teamAlive": 4,
+              "enemyAlive": 3
+            },
+            "afterAtomicGroup": {
+              "teamAlive": 4,
+              "enemyAlive": 2
+            },
+            "tags": [
+              "advantage-extension"
+            ],
+            "posthumous": false,
+            "atomicGroup": {
+              "deathCount": 1,
+              "attributedKillCount": 1,
+              "ordered": true
+            },
+            "engagementId": "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:1:5124:68:damage:2",
+            "coverage": {
+              "roundState": {
+                "status": "complete",
+                "reasons": []
+              },
+              "attribution": {
+                "status": "complete",
+                "reasons": []
+              },
+              "engagementLinkage": {
+                "status": "complete",
+                "reasons": []
+              }
+            }
+          },
+          {
+            "eventRef": {
+              "round": 1,
+              "type": "kill",
+              "tick": 6597,
+              "eventIndex": 130
+            },
+            "before": {
+              "teamAlive": 4,
+              "enemyAlive": 2
+            },
+            "afterAtomicGroup": {
+              "teamAlive": 4,
+              "enemyAlive": 1
+            },
+            "tags": [
+              "advantage-extension"
+            ],
+            "posthumous": false,
+            "atomicGroup": {
+              "deathCount": 1,
+              "attributedKillCount": 1,
+              "ordered": true
+            },
+            "engagementId": "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:1:6597:129:damage:3",
+            "coverage": {
+              "roundState": {
+                "status": "complete",
+                "reasons": []
+              },
+              "attribution": {
+                "status": "complete",
+                "reasons": []
+              },
+              "engagementLinkage": {
+                "status": "complete",
+                "reasons": []
+              }
+            }
+          }
+        ],
+        "engagementIds": [
+          "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:1:5124:68:damage:2",
+          "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:1:6597:129:damage:3"
+        ],
+        "roundSide": "T",
+        "roundWinner": "T",
+        "roundResult": "win",
+        "tags": [
+          "contains-advantage-extension",
+          "multi-engagement",
+          "round-won"
+        ],
+        "coverage": {
+          "roundState": {
+            "status": "complete",
+            "reasons": []
+          },
+          "attribution": {
+            "status": "complete",
+            "reasons": []
+          },
+          "engagementLinkage": {
+            "status": "complete",
+            "reasons": []
+          }
+        }
+      },
+      {
+        "round": 6,
+        "playerId": "76561198045898864",
+        "killCount": 2,
+        "kills": [
+          {
+            "eventRef": {
+              "round": 6,
+              "type": "kill",
+              "tick": 47442,
+              "eventIndex": 149
+            },
+            "before": {
+              "teamAlive": 4,
+              "enemyAlive": 4
+            },
+            "afterAtomicGroup": {
+              "teamAlive": 4,
+              "enemyAlive": 3
+            },
+            "tags": [
+              "advantage-gain"
+            ],
+            "posthumous": false,
+            "atomicGroup": {
+              "deathCount": 1,
+              "attributedKillCount": 1,
+              "ordered": true
+            },
+            "engagementId": "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:6:47431:144:damage:2",
+            "coverage": {
+              "roundState": {
+                "status": "complete",
+                "reasons": []
+              },
+              "attribution": {
+                "status": "complete",
+                "reasons": []
+              },
+              "engagementLinkage": {
+                "status": "complete",
+                "reasons": []
+              }
+            }
+          },
+          {
+            "eventRef": {
+              "round": 6,
+              "type": "kill",
+              "tick": 50078,
+              "eventIndex": 206
+            },
+            "before": {
+              "teamAlive": 2,
+              "enemyAlive": 2
+            },
+            "afterAtomicGroup": {
+              "teamAlive": 2,
+              "enemyAlive": 1
+            },
+            "tags": [
+              "advantage-gain"
+            ],
+            "posthumous": false,
+            "atomicGroup": {
+              "deathCount": 1,
+              "attributedKillCount": 1,
+              "ordered": true
+            },
+            "engagementId": "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:6:50078:205:damage:6",
+            "coverage": {
+              "roundState": {
+                "status": "complete",
+                "reasons": []
+              },
+              "attribution": {
+                "status": "complete",
+                "reasons": []
+              },
+              "engagementLinkage": {
+                "status": "complete",
+                "reasons": []
+              }
+            }
+          }
+        ],
+        "engagementIds": [
+          "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:6:47431:144:damage:2",
+          "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:6:50078:205:damage:6"
+        ],
+        "roundSide": "CT",
+        "roundWinner": "T",
+        "roundResult": "loss",
+        "tags": [
+          "contains-advantage-gain",
+          "multi-engagement",
+          "round-lost"
+        ],
+        "coverage": {
+          "roundState": {
+            "status": "complete",
+            "reasons": []
+          },
+          "attribution": {
+            "status": "complete",
+            "reasons": []
+          },
+          "engagementLinkage": {
+            "status": "complete",
+            "reasons": []
+          }
+        }
+      },
+      {
+        "round": 7,
+        "playerId": "76561198045898864",
+        "killCount": 2,
+        "kills": [
+          {
+            "eventRef": {
+              "round": 7,
+              "type": "kill",
+              "tick": 58218,
+              "eventIndex": 185
+            },
+            "before": {
+              "teamAlive": 4,
+              "enemyAlive": 5
+            },
+            "afterAtomicGroup": {
+              "teamAlive": 4,
+              "enemyAlive": 4
+            },
+            "tags": [
+              "equalizer"
+            ],
+            "posthumous": false,
+            "atomicGroup": {
+              "deathCount": 1,
+              "attributedKillCount": 1,
+              "ordered": true
+            },
+            "engagementId": "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:7:58190:174:damage:1",
+            "coverage": {
+              "roundState": {
+                "status": "complete",
+                "reasons": []
+              },
+              "attribution": {
+                "status": "complete",
+                "reasons": []
+              },
+              "engagementLinkage": {
+                "status": "complete",
+                "reasons": []
+              }
+            }
+          },
+          {
+            "eventRef": {
+              "round": 7,
+              "type": "kill",
+              "tick": 58363,
+              "eventIndex": 205
+            },
+            "before": {
+              "teamAlive": 4,
+              "enemyAlive": 4
+            },
+            "afterAtomicGroup": {
+              "teamAlive": 4,
+              "enemyAlive": 3
+            },
+            "tags": [
+              "advantage-gain"
+            ],
+            "posthumous": false,
+            "atomicGroup": {
+              "deathCount": 1,
+              "attributedKillCount": 1,
+              "ordered": true
+            },
+            "engagementId": "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:7:58190:174:damage:1",
+            "coverage": {
+              "roundState": {
+                "status": "complete",
+                "reasons": []
+              },
+              "attribution": {
+                "status": "complete",
+                "reasons": []
+              },
+              "engagementLinkage": {
+                "status": "complete",
+                "reasons": []
+              }
+            }
+          }
+        ],
+        "engagementIds": [
+          "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:7:58190:174:damage:1"
+        ],
+        "roundSide": "CT",
+        "roundWinner": "T",
+        "roundResult": "loss",
+        "tags": [
+          "contains-equalizer",
+          "contains-advantage-gain",
+          "single-engagement",
+          "round-lost"
+        ],
+        "coverage": {
+          "roundState": {
+            "status": "complete",
+            "reasons": []
+          },
+          "attribution": {
+            "status": "complete",
+            "reasons": []
+          },
+          "engagementLinkage": {
+            "status": "complete",
+            "reasons": []
+          }
+        }
+      }
+    ],
+    "triplePlusKills": [
+      {
+        "round": 2,
+        "playerId": "76561198386265483",
+        "killCount": 3,
+        "kills": [
+          {
+            "eventRef": {
+              "round": 2,
+              "type": "kill",
+              "tick": 18395,
+              "eventIndex": 67
+            },
+            "before": {
+              "teamAlive": 5,
+              "enemyAlive": 5
+            },
+            "afterAtomicGroup": {
+              "teamAlive": 5,
+              "enemyAlive": 4
+            },
+            "tags": [
+              "opening",
+              "advantage-gain"
+            ],
+            "posthumous": false,
+            "atomicGroup": {
+              "deathCount": 1,
+              "attributedKillCount": 1,
+              "ordered": true
+            },
+            "engagementId": "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:2:18395:66:damage:1",
+            "coverage": {
+              "roundState": {
+                "status": "complete",
+                "reasons": []
+              },
+              "attribution": {
+                "status": "complete",
+                "reasons": []
+              },
+              "engagementLinkage": {
+                "status": "complete",
+                "reasons": []
+              }
+            }
+          },
+          {
+            "eventRef": {
+              "round": 2,
+              "type": "kill",
+              "tick": 18627,
+              "eventIndex": 91
+            },
+            "before": {
+              "teamAlive": 5,
+              "enemyAlive": 4
+            },
+            "afterAtomicGroup": {
+              "teamAlive": 5,
+              "enemyAlive": 3
+            },
+            "tags": [
+              "advantage-extension"
+            ],
+            "posthumous": false,
+            "atomicGroup": {
+              "deathCount": 1,
+              "attributedKillCount": 1,
+              "ordered": true
+            },
+            "engagementId": "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:2:18627:90:damage:2",
+            "coverage": {
+              "roundState": {
+                "status": "complete",
+                "reasons": []
+              },
+              "attribution": {
+                "status": "complete",
+                "reasons": []
+              },
+              "engagementLinkage": {
+                "status": "complete",
+                "reasons": []
+              }
+            }
+          },
+          {
+            "eventRef": {
+              "round": 2,
+              "type": "kill",
+              "tick": 19955,
+              "eventIndex": 176
+            },
+            "before": {
+              "teamAlive": 5,
+              "enemyAlive": 1
+            },
+            "afterAtomicGroup": {
+              "teamAlive": 5,
+              "enemyAlive": 0
+            },
+            "tags": [
+              "advantage-extension",
+              "enemy-eliminated"
+            ],
+            "posthumous": false,
+            "atomicGroup": {
+              "deathCount": 1,
+              "attributedKillCount": 1,
+              "ordered": true
+            },
+            "engagementId": "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:2:19955:175:damage:6",
+            "coverage": {
+              "roundState": {
+                "status": "complete",
+                "reasons": []
+              },
+              "attribution": {
+                "status": "complete",
+                "reasons": []
+              },
+              "engagementLinkage": {
+                "status": "complete",
+                "reasons": []
+              }
+            }
+          }
+        ],
+        "engagementIds": [
+          "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:2:18395:66:damage:1",
+          "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:2:18627:90:damage:2",
+          "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:2:19955:175:damage:6"
+        ],
+        "roundSide": "CT",
+        "roundWinner": "CT",
+        "roundResult": "win",
+        "tags": [
+          "contains-opening",
+          "contains-advantage-gain",
+          "contains-advantage-extension",
+          "contains-enemy-elimination",
+          "multi-engagement",
+          "round-won"
+        ],
+        "coverage": {
+          "roundState": {
+            "status": "complete",
+            "reasons": []
+          },
+          "attribution": {
+            "status": "complete",
+            "reasons": []
+          },
+          "engagementLinkage": {
+            "status": "complete",
+            "reasons": []
+          }
+        }
+      },
+      {
+        "round": 3,
+        "playerId": "76561199063238565",
+        "killCount": 3,
+        "kills": [
+          {
+            "eventRef": {
+              "round": 3,
+              "type": "kill",
+              "tick": 23180,
+              "eventIndex": 54
+            },
+            "before": {
+              "teamAlive": 5,
+              "enemyAlive": 5
+            },
+            "afterAtomicGroup": {
+              "teamAlive": 5,
+              "enemyAlive": 4
+            },
+            "tags": [
+              "opening",
+              "advantage-gain"
+            ],
+            "posthumous": false,
+            "atomicGroup": {
+              "deathCount": 1,
+              "attributedKillCount": 1,
+              "ordered": true
+            },
+            "engagementId": "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:3:23142:38:damage:0",
+            "coverage": {
+              "roundState": {
+                "status": "complete",
+                "reasons": []
+              },
+              "attribution": {
+                "status": "complete",
+                "reasons": []
+              },
+              "engagementLinkage": {
+                "status": "complete",
+                "reasons": []
+              }
+            }
+          },
+          {
+            "eventRef": {
+              "round": 3,
+              "type": "kill",
+              "tick": 24537,
+              "eventIndex": 138
+            },
+            "before": {
+              "teamAlive": 4,
+              "enemyAlive": 3
+            },
+            "afterAtomicGroup": {
+              "teamAlive": 4,
+              "enemyAlive": 2
+            },
+            "tags": [
+              "advantage-extension"
+            ],
+            "posthumous": false,
+            "atomicGroup": {
+              "deathCount": 1,
+              "attributedKillCount": 1,
+              "ordered": true
+            },
+            "engagementId": "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:3:24505:129:damage:2",
+            "coverage": {
+              "roundState": {
+                "status": "complete",
+                "reasons": []
+              },
+              "attribution": {
+                "status": "complete",
+                "reasons": []
+              },
+              "engagementLinkage": {
+                "status": "complete",
+                "reasons": []
+              }
+            }
+          },
+          {
+            "eventRef": {
+              "round": 3,
+              "type": "kill",
+              "tick": 28018,
+              "eventIndex": 171
+            },
+            "before": {
+              "teamAlive": 4,
+              "enemyAlive": 2
+            },
+            "afterAtomicGroup": {
+              "teamAlive": 4,
+              "enemyAlive": 1
+            },
+            "tags": [
+              "advantage-extension"
+            ],
+            "posthumous": false,
+            "atomicGroup": {
+              "deathCount": 1,
+              "attributedKillCount": 1,
+              "ordered": true
+            },
+            "engagementId": "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:3:27939:158:damage:3",
+            "coverage": {
+              "roundState": {
+                "status": "complete",
+                "reasons": []
+              },
+              "attribution": {
+                "status": "complete",
+                "reasons": []
+              },
+              "engagementLinkage": {
+                "status": "complete",
+                "reasons": []
+              }
+            }
+          }
+        ],
+        "engagementIds": [
+          "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:3:23142:38:damage:0",
+          "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:3:24505:129:damage:2",
+          "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:3:27939:158:damage:3"
+        ],
+        "roundSide": "CT",
+        "roundWinner": "CT",
+        "roundResult": "win",
+        "tags": [
+          "contains-opening",
+          "contains-advantage-gain",
+          "contains-advantage-extension",
+          "multi-engagement",
+          "round-won"
+        ],
+        "coverage": {
+          "roundState": {
+            "status": "complete",
+            "reasons": []
+          },
+          "attribution": {
+            "status": "complete",
+            "reasons": []
+          },
+          "engagementLinkage": {
+            "status": "complete",
+            "reasons": []
+          }
+        }
+      },
+      {
+        "round": 4,
+        "playerId": "76561199063238565",
+        "killCount": 3,
+        "kills": [
+          {
+            "eventRef": {
+              "round": 4,
+              "type": "kill",
+              "tick": 31289,
+              "eventIndex": 73
+            },
+            "before": {
+              "teamAlive": 5,
+              "enemyAlive": 5
+            },
+            "afterAtomicGroup": {
+              "teamAlive": 5,
+              "enemyAlive": 4
+            },
+            "tags": [
+              "opening",
+              "advantage-gain"
+            ],
+            "posthumous": false,
+            "atomicGroup": {
+              "deathCount": 1,
+              "attributedKillCount": 1,
+              "ordered": true
+            },
+            "engagementId": "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:4:31269:55:damage:1",
+            "coverage": {
+              "roundState": {
+                "status": "complete",
+                "reasons": []
+              },
+              "attribution": {
+                "status": "complete",
+                "reasons": []
+              },
+              "engagementLinkage": {
+                "status": "complete",
+                "reasons": []
+              }
+            }
+          },
+          {
+            "eventRef": {
+              "round": 4,
+              "type": "kill",
+              "tick": 31321,
+              "eventIndex": 100
+            },
+            "before": {
+              "teamAlive": 5,
+              "enemyAlive": 3
+            },
+            "afterAtomicGroup": {
+              "teamAlive": 5,
+              "enemyAlive": 2
+            },
+            "tags": [
+              "advantage-extension"
+            ],
+            "posthumous": false,
+            "atomicGroup": {
+              "deathCount": 1,
+              "attributedKillCount": 1,
+              "ordered": true
+            },
+            "engagementId": "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:4:31269:55:damage:1",
+            "coverage": {
+              "roundState": {
+                "status": "complete",
+                "reasons": []
+              },
+              "attribution": {
+                "status": "complete",
+                "reasons": []
+              },
+              "engagementLinkage": {
+                "status": "complete",
+                "reasons": []
+              }
+            }
+          },
+          {
+            "eventRef": {
+              "round": 4,
+              "type": "kill",
+              "tick": 31937,
+              "eventIndex": 212
+            },
+            "before": {
+              "teamAlive": 5,
+              "enemyAlive": 1
+            },
+            "afterAtomicGroup": {
+              "teamAlive": 5,
+              "enemyAlive": 0
+            },
+            "tags": [
+              "advantage-extension",
+              "enemy-eliminated"
+            ],
+            "posthumous": false,
+            "atomicGroup": {
+              "deathCount": 1,
+              "attributedKillCount": 1,
+              "ordered": true
+            },
+            "engagementId": "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:4:31872:194:damage:2",
+            "coverage": {
+              "roundState": {
+                "status": "complete",
+                "reasons": []
+              },
+              "attribution": {
+                "status": "complete",
+                "reasons": []
+              },
+              "engagementLinkage": {
+                "status": "complete",
+                "reasons": []
+              }
+            }
+          }
+        ],
+        "engagementIds": [
+          "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:4:31269:55:damage:1",
+          "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:4:31872:194:damage:2"
+        ],
+        "roundSide": "CT",
+        "roundWinner": "CT",
+        "roundResult": "win",
+        "tags": [
+          "contains-opening",
+          "contains-advantage-gain",
+          "contains-advantage-extension",
+          "contains-enemy-elimination",
+          "multi-engagement",
+          "round-won"
+        ],
+        "coverage": {
+          "roundState": {
+            "status": "complete",
+            "reasons": []
+          },
+          "attribution": {
+            "status": "complete",
+            "reasons": []
+          },
+          "engagementLinkage": {
+            "status": "complete",
+            "reasons": []
+          }
+        }
+      }
+    ],
+    "roundLostMultiKill": {
+      "round": 6,
+      "playerId": "76561198045898864",
+      "killCount": 2,
+      "kills": [
+        {
+          "eventRef": {
+            "round": 6,
+            "type": "kill",
+            "tick": 47442,
+            "eventIndex": 149
+          },
+          "before": {
+            "teamAlive": 4,
+            "enemyAlive": 4
+          },
+          "afterAtomicGroup": {
+            "teamAlive": 4,
+            "enemyAlive": 3
+          },
+          "tags": [
+            "advantage-gain"
+          ],
+          "posthumous": false,
+          "atomicGroup": {
+            "deathCount": 1,
+            "attributedKillCount": 1,
+            "ordered": true
+          },
+          "engagementId": "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:6:47431:144:damage:2",
+          "coverage": {
+            "roundState": {
+              "status": "complete",
+              "reasons": []
+            },
+            "attribution": {
+              "status": "complete",
+              "reasons": []
+            },
+            "engagementLinkage": {
+              "status": "complete",
+              "reasons": []
+            }
+          }
+        },
+        {
+          "eventRef": {
+            "round": 6,
+            "type": "kill",
+            "tick": 50078,
+            "eventIndex": 206
+          },
+          "before": {
+            "teamAlive": 2,
+            "enemyAlive": 2
+          },
+          "afterAtomicGroup": {
+            "teamAlive": 2,
+            "enemyAlive": 1
+          },
+          "tags": [
+            "advantage-gain"
+          ],
+          "posthumous": false,
+          "atomicGroup": {
+            "deathCount": 1,
+            "attributedKillCount": 1,
+            "ordered": true
+          },
+          "engagementId": "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:6:50078:205:damage:6",
+          "coverage": {
+            "roundState": {
+              "status": "complete",
+              "reasons": []
+            },
+            "attribution": {
+              "status": "complete",
+              "reasons": []
+            },
+            "engagementLinkage": {
+              "status": "complete",
+              "reasons": []
+            }
+          }
+        }
+      ],
+      "engagementIds": [
+        "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:6:47431:144:damage:2",
+        "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:6:50078:205:damage:6"
+      ],
+      "roundSide": "CT",
+      "roundWinner": "T",
+      "roundResult": "loss",
+      "tags": [
+        "contains-advantage-gain",
+        "multi-engagement",
+        "round-lost"
+      ],
+      "coverage": {
+        "roundState": {
+          "status": "complete",
+          "reasons": []
+        },
+        "attribution": {
+          "status": "complete",
+          "reasons": []
+        },
+        "engagementLinkage": {
+          "status": "complete",
+          "reasons": []
+        }
+      }
+    },
+    "soleSurvivorSequence": {
+      "round": 6,
+      "playerId": "76561198201620490",
+      "killCount": 4,
+      "kills": [
+        {
+          "eventRef": {
+            "round": 6,
+            "type": "kill",
+            "tick": 46095,
+            "eventIndex": 136
+          },
+          "before": {
+            "teamAlive": 4,
+            "enemyAlive": 5
+          },
+          "afterAtomicGroup": {
+            "teamAlive": 4,
+            "enemyAlive": 4
+          },
+          "tags": [
+            "equalizer"
+          ],
+          "posthumous": false,
+          "atomicGroup": {
+            "deathCount": 1,
+            "attributedKillCount": 1,
+            "ordered": true
+          },
+          "engagementId": "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:6:46006:102:damage:1",
+          "coverage": {
+            "roundState": {
+              "status": "complete",
+              "reasons": []
+            },
+            "attribution": {
+              "status": "complete",
+              "reasons": []
+            },
+            "engagementLinkage": {
+              "status": "complete",
+              "reasons": []
+            }
+          }
+        },
+        {
+          "eventRef": {
+            "round": 6,
+            "type": "kill",
+            "tick": 48120,
+            "eventIndex": 193
+          },
+          "before": {
+            "teamAlive": 2,
+            "enemyAlive": 4
+          },
+          "afterAtomicGroup": {
+            "teamAlive": 2,
+            "enemyAlive": 3
+          },
+          "tags": [
+            "deficit-reduction"
+          ],
+          "posthumous": false,
+          "atomicGroup": {
+            "deathCount": 1,
+            "attributedKillCount": 1,
+            "ordered": true
+          },
+          "engagementId": "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:6:48120:192:damage:5",
+          "coverage": {
+            "roundState": {
+              "status": "complete",
+              "reasons": []
+            },
+            "attribution": {
+              "status": "complete",
+              "reasons": []
+            },
+            "engagementLinkage": {
+              "status": "complete",
+              "reasons": []
+            }
+          }
+        },
+        {
+          "eventRef": {
+            "round": 6,
+            "type": "kill",
+            "tick": 50116,
+            "eventIndex": 222
+          },
+          "before": {
+            "teamAlive": 1,
+            "enemyAlive": 2
+          },
+          "afterAtomicGroup": {
+            "teamAlive": 1,
+            "enemyAlive": 1
+          },
+          "tags": [
+            "equalizer",
+            "sole-survivor-kill"
+          ],
+          "posthumous": false,
+          "atomicGroup": {
+            "deathCount": 1,
+            "attributedKillCount": 1,
+            "ordered": true
+          },
+          "engagementId": "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:6:50097:211:damage:7",
+          "coverage": {
+            "roundState": {
+              "status": "complete",
+              "reasons": []
+            },
+            "attribution": {
+              "status": "complete",
+              "reasons": []
+            },
+            "engagementLinkage": {
+              "status": "complete",
+              "reasons": []
+            }
+          }
+        },
+        {
+          "eventRef": {
+            "round": 6,
+            "type": "kill",
+            "tick": 50844,
+            "eventIndex": 269
+          },
+          "before": {
+            "teamAlive": 1,
+            "enemyAlive": 1
+          },
+          "afterAtomicGroup": {
+            "teamAlive": 1,
+            "enemyAlive": 0
+          },
+          "tags": [
+            "advantage-gain",
+            "enemy-eliminated",
+            "sole-survivor-kill"
+          ],
+          "posthumous": false,
+          "atomicGroup": {
+            "deathCount": 1,
+            "attributedKillCount": 1,
+            "ordered": true
+          },
+          "engagementId": "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:6:50819:258:damage:9",
+          "coverage": {
+            "roundState": {
+              "status": "complete",
+              "reasons": []
+            },
+            "attribution": {
+              "status": "complete",
+              "reasons": []
+            },
+            "engagementLinkage": {
+              "status": "complete",
+              "reasons": []
+            }
+          }
+        }
+      ],
+      "engagementIds": [
+        "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:6:46006:102:damage:1",
+        "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:6:48120:192:damage:5",
+        "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:6:50097:211:damage:7",
+        "engagement:dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c:6:50819:258:damage:9"
+      ],
+      "roundSide": "T",
+      "roundWinner": "T",
+      "roundResult": "win",
+      "tags": [
+        "contains-equalizer",
+        "contains-deficit-reduction",
+        "contains-sole-survivor-kill",
+        "contains-advantage-gain",
+        "contains-enemy-elimination",
+        "multi-engagement",
+        "round-won"
+      ],
+      "coverage": {
+        "roundState": {
+          "status": "complete",
+          "reasons": []
+        },
+        "attribution": {
+          "status": "complete",
+          "reasons": []
+        },
+        "engagementLinkage": {
+          "status": "complete",
+          "reasons": []
+        }
+      }
+    },
+    "sameTickAtomicCase": null
+  }
+}
