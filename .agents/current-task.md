@@ -1,12 +1,24 @@
 # Current Task
 
+## 2026-10-09 — P5.7.7 Findings V2
+
+- Current: **P5.7.7 implementation complete / product acceptance pending**。P5.7.0 **PARTIAL PASS**，P5.7.1–P5.7.6 **PASS**；P5.7.8 **next**，本轮不实施；Final Acceptance **PAUSED**。
+- Fixture migration focused commit `c8b0100`：全仓旧fixture filename 0；Nuke/Inferno/Dust2 SHA一致；三个含filename报告由generator重新生成并核对全部既有非环境/非耗时测量数据一致。无DEM rename/copy/download/add。Train **REMOVED / NOT REQUIRED**，不运行，不属于gate/debt/blocker；extended地图optional未跑。
+- 仅deep-review生产新增JSON-only contracts、固定policy、source validation与analyzeDeepReviewFindings；8rules：3impact、2execution、2teamplay、1exact teamflash。负向pattern5/3/0.5；positive5/4/0.6；flash3effects/5rows；caps3/2/1；exact refs、priority、dedup、contradiction；P3/P4/parser/model/desktop/renderer/report-contract冻结。
+- 四图各一次parseWithSpatial后完整同生产管线，所有40名可识别玩家结构/ref/count/JSON/immutability/determinism通过；Mirage SHA `62cb3af35c3893a91c7dd8c9007fdb1105950ec8963a46eca6006dac96655acb`，de_mirage，296074918bytes，64tick，17round/10players；仅filename/SHA/map锁身份。
+- Nuke/Inferno/Dust2/Mirage lone6/6/2/7、no-followup10/10/10/10、teamflash3/0/10/0、execution positive候选2/4/2/2；negative0。lone21/40=52.5%、no-followup40/40=100%标记overbreadth；真实source抽查确认literal facts但不证明支援机会/战术问题，产品验收pending，阈值未为了职业样本调参。literal received-first排除上游received-only unknown，为明确coverage限制。
+- 9组合sensitivity minimumEligible4/5/6、rate0.4/0.5/0.6、minimumOccurrences3；lone总触发30/21/11，no-followup40、executionnegative0；不暴露production配置。Nuke详细自动结构抽样，missing negative/zero-player为null；报告/规则/性能详见docs/deep-review-findings-v2.md及两个JSON。
+- 独立复审修复缺正向行缩分母、伪造人数、stale clock、same-tick覆盖伪完整、模糊存活absence、unknown-side追加、end/lifecycle/baseline矛盾；27新Findings synthetic全PASS，最终独立review无actionable遗留。
+- 全回归：typecheck12/12、build7/7、model contracts PASS；parser39/0SKIP、analytics53/0、Findings V1 17/0、deep-review199/0、desktop17/0，0FAIL/0SKIP。demo1本地恢复，历史golden实际执行；不据文件名推断personal录制模式。无installer/Renderer E2E。
+- **Personal matchmaking / Perfect World DEM compatibility = UNVERIFIED**，Final Acceptance前仍需一份确认来源的真实个人DEM。native feed绝对完整性、其他录制模式、entity freshness、peak memory UNKNOWN。职业四图通过仅证明professional GOTV兼容。没有push。
+
 ## 2026-10-08 — Demo Fixture Rename Migration
 
-Baseline `065f0f316f9b2366864b0b5a66be796bbad659fa`. Map-only fixture filenames; Nuke / Inferno / Dust2 SHA identities unchanged. Fixture roles and Train **REMOVED / NOT REQUIRED** status: [matrix](../docs/demo-fixtures.md). Core gate: Nuke + Inferno + Dust2 + Mirage; extended maps optional. Personal DEM compatibility **UNVERIFIED**. Complete this focused migration commit before P5.7.7.
+Baseline `065f0f316f9b2366864b0b5a66be796bbad659fa`. Migration completed in `c8b0100` before P5.7.7; working tree was clean between units. Map-only fixture filenames; Nuke / Inferno / Dust2 SHA identities unchanged. Fixture roles and Train **REMOVED / NOT REQUIRED** status: [matrix](../docs/demo-fixtures.md). Core gate: Nuke + Inferno + Dust2 + Mirage; extended maps optional. Personal DEM compatibility **UNVERIFIED**.
 
 Status: v0.1 Final Acceptance **PAUSED — Deep Review product gap discovered**。
 
-Current: **P5.7 Deep Review / P5.7.6 Combat Execution Evidence**。
+Current: **P5.7 Deep Review / P5.7.7 implementation complete / product acceptance pending**。
 
 ## 2026-10-08 — P5.7.6
 

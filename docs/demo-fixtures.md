@@ -21,4 +21,6 @@ Locked SHA-256 identities, verified during the rename migration:
 - Inferno: `b61c040074f84f1f2c1b683642923243dbe123c2a0c70ed3c0670b0e4cd7a265`
 - Dust2: `db90fe85aab023a1d2c8a5996182e6120d98ef494f02a070b17982b235e4958c`
 
-Mirage identity is recorded on first Findings V2 validation. Scores, winners, player names and finding counts are not fixture identity.
+Mirage first Findings V2 identity: `62cb3af35c3893a91c7dd8c9007fdb1105950ec8963a46eca6006dac96655acb`, header/domain map `de_mirage`, 296074918 bytes, 64 tick/s, 17 rounds, 10 players. Only filename + SHA + map are locked; counts are observations. Scores, winners, player names and finding counts are not fixture identity.
+
+During P5.7.7, `demo1.dem` is present again; its existing historical goldens run. That filename alone does not verify personal matchmaking / Perfect World recording provenance.

@@ -1,5 +1,16 @@
 # Agent Handoff
 
+## 2026-10-09 — P5.7.7 Findings V2
+
+- P5.7.0 **PARTIAL PASS**；P5.7.1–P5.7.6 **PASS**；P5.7.7 **implementation complete / product acceptance pending**；P5.7.8 **next**（未实施）；Final Acceptance **PAUSED**。
+- 首个focused commit `c8b0100` normalized fixture names；Nuke/Inferno/Dust2 SHA verified，全仓旧filename0；generated报告原结构measurement一致（耗时/environment重新记录），工作树干净后进入本轮。Train **REMOVED / NOT REQUIRED**，未运行/新增测试/加入gate；扩展ancient/anubis/overpass optional未运行；DEM未复制下载移动或入Git。
+- 生产仅deep-review：analyzeDeepReviewFindings(Match, playerId, {engagements,impact,teamplay,utility,execution})；JSON-only独立contract、exact stable refs、8固定规则；pattern5/3/0.5，positive5/4/0.6，teamflash3exact effects/5teammate rows；priority集中，caps3/2/1，impact同序列合并与teamplay同killer重叠window>=50%合并，contradiction抑制留diagnostic。
+- source validator只核既有分析与原Match约束，不调用任何Evidence analyzer/native parser。独立review7类门控缺口修复并回归；27synthetic和A/B/C/D产品场景PASS；最终独立复审无actionable遗留。不存在weapon_fire→miss、delay→reaction、距离→supportability、lone→空间孤立、no-followup→P3Trade、低damage→低utility价值等推断。
+- 四图40玩家同生产规则通过，核心Nuke/Inferno/Dust2/Mirage；Mirage SHA `62cb3af35c3893a91c7dd8c9007fdb1105950ec8963a46eca6006dac96655acb` / de_mirage / 296074918bytes /64tick/17round/10players；只filename/SHA/map锁identity。两个Findings JSON报告包括Nuke自动样本、四图rule/players/suppression/quality/hash/overbreadth/9组合sensitivity/performance。
+- Overbreadth：lone21/40=52.5%、no-followup40/40=100%；Dust2 teamflash10/10。已数据source抽查，文字literal正确但复盘价值仍需产品验收，不自动FAIL、不调参压职业触发率。received-only上游role unknown按用户B10排除，negative四图0是coverage限制，非灵敏度验证。zeroFinding Nuke样本null如实记录。
+- 全回归typecheck12/12、build7/7、model contracts PASS；parser39、analytics53、FindingsV1 17、deep-review199、desktop17，全部PASS，0FAIL/0SKIP；demo1已本地恢复且旧golden执行。无installer/Renderer E2E，P3/P4/UI/report-contract/parser/model未改。
+- Personal matchmaking/Perfect World compatibility **UNVERIFIED**；至少一份确认个人来源DEM在Final Acceptance前补验。职业GOTV不能替代；不能据demo1存在假定来源。Peak memory、native feed绝对完整性、其他录制模式UNKNOWN。不push；下轮先产品验收/讨论阈值语义限制，再明确授权P5.7.8。
+
 ## 2026-10-08 — Demo Fixture Rename Migration
 
 Map-only names replace historical fixture paths throughout tests/docs/reports. Nuke / Inferno / Dust2 SHA identities verified unchanged. See [fixture matrix](../docs/demo-fixtures.md): Train **REMOVED / NOT REQUIRED**, retained locally only; neither P5.7 nor Final Acceptance gate. Mirage joins Findings sanity; ancient/anubis/overpass remain optional. No DEM moved/copied/downloaded/staged. Findings V2 follows the separate migration commit.

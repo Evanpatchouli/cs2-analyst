@@ -84,11 +84,11 @@ Current: **P5.7 Deep Review**。
 - P5.7.3 Kill / Multi-kill Impact：**PASS**；独立alive-state resolver、same-tick atomic groups、敌对KillImpact与round MultiKill、exact Engagement join、最终round result，三层coverage；21回合142death、29多杀（19×2K/9×3K/1×4K），自动抽样；见 [Kill impact analysis](./kill-impact-analysis.md)。
 - P5.7.4 Teamplay / Decision Evidence：**PASS**；独立TeamplayAnalysis、direct-contact角色/atomic tiers、双向死亡响应、posthumous/same-tick保守门控、exact-event XY/Z/XYZ facts、四层coverage；284contexts、568teammate pairs、142player deaths，结构自动抽样。无评分/coaching或距离支援推断；见 [Teamplay evidence](./teamplay-evidence.md)。
 - P5.7.5 Utility Context：**PASS**；逐UtilityEvent effect、exact at-event spatial、deterministic alive/bomb context、严格HE/flash linkage、fire attribution unavailable、六层coverage。404effects、15 HE damage refs、144 flash victim refs；见 [Utility context](./utility-context.md)。
-- P5.7.6 Combat Execution Evidence（当前任务）：独立contract/analysis、shooter-only weapon_fire唯一inside/默认1s lead-in linkage、tick-only firstContactRole、同opponent return contact、reported damage/精确XY/Z/XYZ facts、五层coverage。三地图同一生产管线、结构invariants和自动抽样；无Aim评分/target/miss/reaction推断，View Alignment UNVERIFIED；见 [Combat Execution](./combat-execution-evidence.md)。
-- P5.7.7 Findings V2：在Combat Execution Evidence后推进，不直接跳入新结论。
-- P5.7.8 Deep Review Desktop UX：在证据与Findings契约稳定后推进。
+- P5.7.6 Combat Execution Evidence：**PASS**；独立contract/analysis、shooter-only weapon_fire唯一inside/默认1s lead-in linkage、tick-only firstContactRole、同opponent return contact、reported damage/精确XY/Z/XYZ facts、五层coverage。三地图同一生产管线、结构invariants和自动抽样；无Aim评分/target/miss/reaction推断，View Alignment UNVERIFIED；见 [Combat Execution](./combat-execution-evidence.md)。
+- P5.7.7 Findings V2：**implementation complete / product acceptance pending**。独立DeepReviewFindingsAnalysis、八条规则、fixed product heuristics、exact refs/quality/stale gates、deterministic priority/caps/dedup/contradiction；四地图40名玩家同生产管线、sensitivity、结构抽样与独立复审完成。Teamplay overbreadth和literal received-first覆盖限制如实保留；见 [Findings V2](./deep-review-findings-v2.md)。P4 Findings V1完全冻结。
+- P5.7.8 Deep Review Desktop UX：**next**；本轮不实施。
 - Personal DEM spatial compatibility = **UNVERIFIED**；不阻塞本轮foundation，但正式Deep Review FINAL Acceptance前至少用一份真实个人DEM补验。峰内存UNKNOWN。
-- 本轮不进入P5.7.7–P5.7.8，不新增Findings/coaching conclusion或Renderer，P3 public contracts继续冻结。
+- 本轮完成P5.7.7，不进入P5.7.8；不修改Renderer、Electron、report-contract、Timeline或P3/P4冻结契约。Train **REMOVED / NOT REQUIRED**；Final Acceptance继续 **PAUSED**。
 - GitHub repository：`Evanpatchouli/cs2-analyst`（已正式改名）。
 
 - P5 Desktop MVP 已封板；当前仅推进已明确授权的P5.7 Deep Review evidence工作，不追加其他功能或polish。

@@ -55,6 +55,10 @@ Auto DEM discovery / directory scanning is **not planned**: the user always sele
 
 `findings` consumes only frozen `MatchAnalytics` via the Analytics public package. `generateFindings` runs pure deterministic rules and returns ranked evidence with per-player caps (3 issues, 2 highlights). It does not parse DEMs or recompute Analytics; parser is a devDependency only for real-demo golden tests. Policy and gaps: [Findings Engine](./findings-engine.md).
 
+## Deep Review Findings V2 (P5.7.7)
+
+`packages/deep-review` exposes `analyzeDeepReviewFindings(Match, playerId, { engagements, impact, teamplay, utility, execution })`. It validates and aggregates existing evidence into independent JSON-only Findings with stable exact refs, fixed heuristics, deterministic priority/caps/dedup and contradiction diagnostics. Production dependency remains match-model; no upstream analyzer/native parse is invoked here. Findings V1 (`packages/findings`), P3, report-contract and Desktop remain frozen. Status: implementation complete / product acceptance pending; P5.7.8 Desktop UX is next. See [Findings V2](./deep-review-findings-v2.md) and [fixture matrix](./demo-fixtures.md). Train **REMOVED / NOT REQUIRED**; personal DEM compatibility **UNVERIFIED**; Final Acceptance **PAUSED**.
+
 ## Desktop branding (P5.6.5)
 
 CS2 Analyst uses a 20px transparent PNG mark plus its product name in the 40px titlebar. The text lockup is retained as a canonical resource. Windows EXE/NSIS/uninstaller icons use a seven-resolution ICO (16/24/32/48/64/128/256). BrowserWindow uses the mark from extraResources in installed apps and a bundle-relative path in dev/preview; Renderer imports the PNG through Vite. No shell resource depends on the source machine's Downloads directory.

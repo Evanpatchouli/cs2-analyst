@@ -15,6 +15,21 @@ result.engagements[0].aimScore;
 // @ts-expect-error Raw MatchEvent is not part of the evidence contract.
 contact.event;
 void [id, ordinal, numericId];
+import { analyzeDeepReviewFindings } from "../src/index.js";
+import type { DeepReviewFinding, DeepReviewFindingsAnalysis, DeepReviewFindingsInputs, DeepReviewEvidenceRef } from "../src/index.js";
+declare const findingInputs: DeepReviewFindingsInputs;
+const deepFindings: DeepReviewFindingsAnalysis = analyzeDeepReviewFindings(match, id, findingInputs);
+const finding: DeepReviewFinding = deepFindings.reviews[0];
+const findingRef: DeepReviewEvidenceRef = { kind: "opponent-exchange", playerId: id, opponentId: "2", engagementId: "engagement" };
+// @ts-expect-error No numerical skill rating is part of Findings V2.
+finding.score;
+// @ts-expect-error Raw Match objects cannot be evidence references.
+const rawFindingRef: DeepReviewEvidenceRef = match;
+// @ts-expect-error SteamID is never numeric.
+analyzeDeepReviewFindings(match, 1, findingInputs);
+// @ts-expect-error Production thresholds are fixed; there is no sensitivity option.
+analyzeDeepReviewFindings(match, id, findingInputs, { minimumEligible: 4 });
+void [findingRef, rawFindingRef];
 import { analyzeKillImpact, resolveRoundAliveState } from "../src/index.js";
 import type { KillImpactAnalysis, PlayerRoundMultiKillImpact } from "../src/index.js";
 const impact: KillImpactAnalysis = analyzeKillImpact(match, result);
