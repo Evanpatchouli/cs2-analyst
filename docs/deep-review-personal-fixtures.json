@@ -1,0 +1,26 @@
+{
+  "provenance": "Product Owner confirmed actual personal matches; demo3 target explicitly confirmed 2026-10-09",
+  "fixtures": [
+    {
+      "filename": ".demo/demo1.dem",
+      "sha256": "f3c3173eae0cd100d15c81c3b734be792f9212256a9c99703b358d3434000852",
+      "fileSize": 267275583,
+      "map": "de_dust2",
+      "targetNickname": "twinkle"
+    },
+    {
+      "filename": ".demo/demo2.dem",
+      "sha256": "253e5b719ac418b092ff3cdd1b5928bb0dfc8ccbf06cb9398963ea1e9fa44a25",
+      "fileSize": 75699561,
+      "map": "de_dust2",
+      "targetNickname": " 元屠"
+    },
+    {
+      "filename": ".demo/demo3.dem",
+      "sha256": "6c9dae6e5676f7e9498297c527393264d52a8944fdb03b972b8ed075a996e5ea",
+      "fileSize": 254040069,
+      "map": "de_dust2",
+      "targetNickname": "🥔土豆🥔"
+    }
+  ]
+}

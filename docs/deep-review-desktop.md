@@ -1,15 +1,15 @@
 # P5.7.8 Deep Review Desktop UX
 
-Status (2026-10-09): **implementation complete / copy revised / visual product acceptance pending**.
+Status (2026-10-09): **PASS**.
 Baseline for this copy revision: `ccb6402e9b264bab3cab0b538d35e8b028c1fd04`
 (P5.7.8 implementation was `a11f6af`). P5.7.8.1–2 plain-language copy polish changes presentation copy only;
 no P5.7.1–7 judgement, threshold, ranking or evidence semantics changed.
 P5.7.0 PARTIAL PASS; P5.7.1–7 PASS. v0.1 Final Acceptance **PAUSED**.
-Default-view revision `cde8e7ff48e334ba9fe432453abd7a32ed4c467f` restores **比赛报告 as the default
+Default-view revision `80437834a43960196bc65d85cbd35095d9a469f8` restores **比赛报告 as the default
 entry** and orders the tabs 比赛报告 / 深度复盘 / 回合时间线 / 分析. It changes only the initial tab and
 tab order; Deep Review UI/copy, Findings V1/V2, P3 Analytics, Timeline, report-contract and every
 analysis algorithm, threshold and rule stay frozen.
-Personal matchmaking / Perfect World DEM compatibility **UNVERIFIED**.
+Personal fixture provenance is Product Owner-confirmed; the three-fixture compatibility gate is **FAIL** due to demo2 entity/state coverage. See [personal acceptance](./deep-review-personal-acceptance.md).
 Train **REMOVED / NOT REQUIRED**.
 
 ## Desktop pipeline
@@ -201,9 +201,6 @@ Actual Electron captures under local ignored `.tmp/p578-qa/`:
 - `deep-review-synthetic-three-kinds.png`, `deep-review-synthetic-partial-caveat.png`,
   `deep-review-synthetic-timeline-occurrences.png`: explicitly synthetic QA scenarios.
 
-Screenshots were inspected for readable copy, restrained distinct badges, matching flat surfaces,
-no clipping in the full-page capture and no unwanted raw evidence labels. Product Owner visual
-acceptance is **pending**; automated checks and agent inspection do not grant Product FINAL PASS.
-Personal DEM provenance remains unconfirmed: demo1 historical golden and professional GOTV/Nuke
-cannot prove Personal matchmaking / Perfect World compatibility. Native feed absolute completeness,
+P5.7.8 is formally **PASS** per the Product Owner task baseline. Screenshots were inspected for readable copy, restrained distinct badges, matching flat surfaces,
+no clipping in the full-page capture and no unwanted raw evidence labels. Personal provenance of `.demo/demo1.dem`, `.demo/demo2.dem`, and `.demo/demo3.dem` is now confirmed by the Product Owner. demo1 remains the unchanged historical golden and also serves as a personal fixture. The compatibility gate found a demo2 blocker; this does not reverse the P5.7.8 UX PASS. Native feed absolute completeness,
 entity freshness, other recording modes and peak memory remain UNKNOWN. No algorithm blocker found.

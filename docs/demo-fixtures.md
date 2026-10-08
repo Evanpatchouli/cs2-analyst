@@ -9,11 +9,11 @@ Map-only names identify local fixtures; renaming does not change DEM bytes. No D
 | Findings sanity | `.demo/mirage.dem` | P5.7.7 core gate |
 | Extended compatibility | `.demo/ancient.dem`, `.demo/anubis.dem`, `.demo/overpass.dem` | Optional; not mandatory acceptance gates |
 | Excluded / Not Required | `.demo/train.dem` | **REMOVED / NOT REQUIRED** |
-| Personal compatibility | Future real personal matchmaking / Perfect World DEM | **UNVERIFIED**; required before Final Acceptance |
+| Personal compatibility | `.demo/demo1.dem`, `.demo/demo2.dem`, `.demo/demo3.dem` | Product Owner-confirmed personal fixtures; compatibility gate **FAIL** (demo2) |
 
 Train is retained locally only. Its professional sample is stale and insufficiently compatible with current CS2; high-quality current competitive samples are difficult to obtain. Historical-version compatibility noise is not introduced for map coverage. Train is neither a P5.7 nor a v0.1 Final Acceptance gate, debt or blocker; do not run it or add tests.
 
-The professional core is Nuke + Inferno + Dust2 + Mirage. Passing it establishes current professional GOTV cross-map compatibility only. Historical `demo1.dem` deterministic golden tests still report SKIP while that exact file is missing.
+The professional core is Nuke + Inferno + Dust2 + Mirage. Passing it establishes current professional GOTV cross-map compatibility only. The exact `demo1.dem` is present; unchanged historical golden tests PASS.
 
 Locked SHA-256 identities, verified during the rename migration:
 
@@ -23,4 +23,6 @@ Locked SHA-256 identities, verified during the rename migration:
 
 Mirage first Findings V2 identity: `62cb3af35c3893a91c7dd8c9007fdb1105950ec8963a46eca6006dac96655acb`, header/domain map `de_mirage`, 296074918 bytes, 64 tick/s, 17 rounds, 10 players. Only filename + SHA + map are locked; counts are observations. Scores, winners, player names and finding counts are not fixture identity.
 
-During P5.7.7, `demo1.dem` is present again; its existing historical goldens run. That filename alone does not verify personal matchmaking / Perfect World recording provenance.
+During P5.7.7, `demo1.dem` is present again; its existing historical goldens run. The Product Owner has now explicitly confirmed all three personal fixtures. This is human provenance evidence, separate from raw header recording metadata.
+
+Identity hashes and acceptance-only target nicknames: [manifest](./deep-review-personal-fixtures.json). Personal fixtures validate target-user compatibility; professional fixtures validate cross-map/complex scenarios. Personal gate evidence: [report](./deep-review-personal-acceptance.md).

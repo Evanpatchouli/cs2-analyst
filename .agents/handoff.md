@@ -1,3 +1,13 @@
+# Personal Compatibility Gate — 2026-10-09
+
+- Baseline `80437834a43960196bc65d85cbd35095d9a469f8`; P5.7.8 formally **PASS**. Older provenance/visual-pending entries below are historical and superseded.
+- All `.demo/demo1.dem`, `.demo/demo2.dem`, `.demo/demo3.dem` are Product Owner-confirmed actual personal matches. Header `SourceTV Demo` is recording metadata, not evidence against personal provenance.
+- Gate **FAIL**: demo2 has 270 required actor/target spatial samples missing XYZ/view/state for one event participant; native direct probes reproduce the gap. All 18 KillImpact alive-state rounds unavailable, with Teamplay/Utility spatial unavailable; no rule changes or fabricated conclusions.
+- demo1 / demo3 spatial required rows pass. Target demo1 twinkle; demo2 same account recorded as 元屠; demo3 Product Owner explicitly confirmed 土豆 (actual nickname preserves emoji).
+- All three real Desktop imports, schema2, repeated deterministic report, JSON/refs/structural checks complete. See `docs/deep-review-personal-acceptance.md` and JSON for coverage, screenshots and regression evidence.
+- P5.7.0 remains **PARTIAL PASS**; P5.7 Deep Review FINAL **HOLD**; v0.1 Final Acceptance remains **PAUSED**, not READY TO RESUME. Compatibility root cause (DEM data vs native parser decode) UNKNOWN.
+- No production algorithm/threshold/semantics/player/filename branches changed. Product Owner explicitly authorized a focused diagnostic acceptance commit despite gate FAIL; committing does not grant acceptance PASS. No amend/squash/push. Next: independently scoped demo2 compatibility diagnosis, with evidence before any implementation change.
+
 # Agent Handoff
 
 ## 2026-10-09 — P5.7.8 Deep Review Desktop UX
