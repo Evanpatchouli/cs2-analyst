@@ -72,23 +72,23 @@ P5.6.5 Branding & App Icon — **FINAL PASS**。正式产品名冻结为 CS2 Ana
 
 ## v0.1 Final Acceptance
 
-**Status: PAUSED — Deep Review product gap discovered.**
+**Status: READY TO RESUME — P5.7 FINAL PASS after the fixed native parser acceptance.** 本轮未执行 v0.1 Final Acceptance Resume，尚未宣布 v0.1 FINAL PASS。
 
-Current: **P5.7 Deep Review**。
+Current: **P5.7.0.2 completed; next is v0.1 Final Acceptance Resume**。见 [14-bit handle integration](./demoparser-handle-fix.md)。
 
 正式 [fixture matrix](./demo-fixtures.md)：Nuke + Inferno + Dust2 + Mirage 为核心 gate；Ancient / Anubis / Overpass 为 extended optional。Train **REMOVED / NOT REQUIRED**，不属于 P5.7 / Final Acceptance gate，不是 debt / blocker；仅本地保留，不运行。
 
-- P5.7.0 Evidence Feasibility Spike：**PARTIAL PASS — GOTV verified, personal DEM compatibility pending**。
+- P5.7.0 Evidence Feasibility Spike：**PASS — GOTV and three confirmed Personal DEMs verified with v0.42.0 + #363 production MSVC binding**。此前 PARTIAL PASS / Gate FAIL 保留为历史记录。
 - P5.7.1 Spatial Evidence Foundation：**PASS**，正式领域contract、事件引用、core优先稀疏采样、coverage与共享输入实现，GOTV验证完成；见 [Deep Review](./deep-review-evidence.md) / [Spatial contract](./spatial-evidence.md)。
 - P5.7.2 Engagement Engine：**PASS**；独立deep-review包、敌对direct contacts、共享participant/time-gap连通分组、空间exact join与分离coverage，默认3s与2/3/4/5s sensitivity；见 [Engagement analysis](./engagement-analysis.md)。
 - P5.7.3 Kill / Multi-kill Impact：**PASS**；独立alive-state resolver、same-tick atomic groups、敌对KillImpact与round MultiKill、exact Engagement join、最终round result，三层coverage；21回合142death、29多杀（19×2K/9×3K/1×4K），自动抽样；见 [Kill impact analysis](./kill-impact-analysis.md)。
 - P5.7.4 Teamplay / Decision Evidence：**PASS**；独立TeamplayAnalysis、direct-contact角色/atomic tiers、双向死亡响应、posthumous/same-tick保守门控、exact-event XY/Z/XYZ facts、四层coverage；284contexts、568teammate pairs、142player deaths，结构自动抽样。无评分/coaching或距离支援推断；见 [Teamplay evidence](./teamplay-evidence.md)。
 - P5.7.5 Utility Context：**PASS**；逐UtilityEvent effect、exact at-event spatial、deterministic alive/bomb context、严格HE/flash linkage、fire attribution unavailable、六层coverage。404effects、15 HE damage refs、144 flash victim refs；见 [Utility context](./utility-context.md)。
 - P5.7.6 Combat Execution Evidence：**PASS**；独立contract/analysis、shooter-only weapon_fire唯一inside/默认1s lead-in linkage、tick-only firstContactRole、同opponent return contact、reported damage/精确XY/Z/XYZ facts、五层coverage。三地图同一生产管线、结构invariants和自动抽样；无Aim评分/target/miss/reaction推断，View Alignment UNVERIFIED；见 [Combat Execution](./combat-execution-evidence.md)。
-- P5.7.7 Findings V2：**PASS after P5.7.7.1 Calibration / Semantic Repair**。原实现 technically valid，product calibration exposed overbroad/misaligned rules；exact received-only denominator、occurrence-only refs/rounds、same-Engagement no-follow context、lone context、teamflash context、priority/caps/dedup/source gates 修复。七图 calibration、33 synthetic 与全回归/独立复审 PASS。个人 DEM 来源已确认；compatibility gate 因 demo2 entity/state 缺口未通过；见 [Findings V2](./deep-review-findings-v2.md) 和 [calibration](./deep-review-findings-calibration.json)。P4 Findings V1 冻结。
+- P5.7.7 Findings V2：**PASS after P5.7.7.1 Calibration / Semantic Repair**。原实现 technically valid，product calibration exposed overbroad/misaligned rules；exact received-only denominator、occurrence-only refs/rounds、same-Engagement no-follow context、lone context、teamflash context、priority/caps/dedup/source gates 修复。七图 calibration、33 synthetic 与全回归/独立复审 PASS。个人 DEM 来源已确认，当前 compatibility gate PASS；见 [Findings V2](./deep-review-findings-v2.md) 和 [calibration](./deep-review-findings-calibration.json)。P4 Findings V1 冻结。
 - P5.7.8 Deep Review Desktop UX：**PASS**。共享 parseWithSpatial、schema v2、默认比赛报告、深度复盘独立进阶入口与 V1/P3 共存、occurrence → Timeline、全玩家预计算已接入；见 [Desktop Deep Review](./deep-review-desktop.md)。
-- Personal DEM compatibility gate = **FAIL**：三份来源均由 Product Owner 确认；demo1 / demo3 空间必需字段通过，demo2 entity/state 缺口阻断。P5.7 FINAL **HOLD**；v0.1 Final Acceptance 继续 **PAUSED**，尚非 READY TO RESUME。见 [personal acceptance](./deep-review-personal-acceptance.md)。峰内存UNKNOWN。
-- P5.7.7 算法保持 PASS；P5.7.8 已完成 Renderer/Electron/report-contract 集成，P3/P4 算法与 Timeline filter 冻结。Train **REMOVED / NOT REQUIRED**；Final Acceptance继续 **PAUSED**。
+- Personal DEM compatibility gate = **PASS**：三份真实 Personal DEM 均通过固定 native binding 验收。demo2 Pawn2927 全 tick 恢复，R18 lifecycle-anomaly 与 optional weapon unavailable 保留。P5.7 FINAL **PASS**；v0.1 Final Acceptance **READY TO RESUME**。见 [personal acceptance](./deep-review-personal-acceptance.md)。峰内存UNKNOWN。
+- P5.7.7 算法保持 PASS；P5.7.8 已完成 Renderer/Electron/report-contract 集成，P3/P4 算法与 Timeline filter 冻结。Train **REMOVED / NOT REQUIRED**；Final Acceptance Resume 单独执行。
 - GitHub repository：`Evanpatchouli/cs2-analyst`（已正式改名）。
 
 - P5 Desktop MVP 已封板；当前仅推进已明确授权的P5.7 Deep Review evidence工作，不追加其他功能或polish。

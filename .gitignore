@@ -6,3 +6,5 @@ dist
 # local packaging output: release/<version>/ and test artifacts under .tmp/
 .tmp
 release
+vendor/demoparser/.build/
+packages/demoparser-native/native/

@@ -46,11 +46,11 @@ export class Demoparser2Adapter implements ParserAdapter {
       throw new Error("文件不是有效的 CS2 DEM（PBDEMS2）");
     }
 
-    const native = await import("@laihoe/demoparser2");
+    const native = await import("@cs2-analyst/demoparser-native");
     return { bytes, native };
   }
 
-  private parseInput(bytes: Buffer, native: typeof import("@laihoe/demoparser2")): unknown {
+  private parseInput(bytes: Buffer, native: typeof import("@cs2-analyst/demoparser-native")): unknown {
     const events = native.parseEvents(
       bytes,
       [

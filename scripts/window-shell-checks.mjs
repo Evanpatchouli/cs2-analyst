@@ -34,6 +34,7 @@ export async function checkWindowLayout(evaluate) {
 }
 
 export async function checkWindowShell(evaluate, send) {
+  await send('Emulation.setFocusEmulationEnabled', { enabled: true });
   await checkWindowLayout(evaluate);
   assert.equal(await evaluate(`document.querySelector('[data-window-control="maximize"]').getAttribute('aria-label')`), '最大化');
   const waitLabel = async expected => {
@@ -47,6 +48,9 @@ export async function checkWindowShell(evaluate, send) {
   await waitLabel('还原');
   assert.equal(await evaluate('window.cs2Analyst.window.isMaximized()'), true);
   await checkWindowLayout(evaluate);
+  // Windows reports maximize before the native transition animation finishes.
+  // Let that transition settle before testing the opposite native operation.
+  await delay(1000);
   await evaluate(`document.querySelector('[data-window-control="maximize"]').click()`);
   await waitLabel('最大化');
   assert.equal(await evaluate('window.cs2Analyst.window.isMaximized()'), false);

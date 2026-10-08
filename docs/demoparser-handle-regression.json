@@ -1,0 +1,2395 @@
+{
+  "schemaVersion": 1,
+  "native": {
+    "source": {
+      "repository": "https://github.com/LaihoE/demoparser.git",
+      "baseTag": "v0.42.0",
+      "baseCommit": "d3767705dc5846d73ed29db50eaeda58778dc934",
+      "upstreamPullRequest": 363,
+      "fixCommit": "451321a517ec9c0c6be7f0103dd07e7a805c3345",
+      "fixHeadCommit": "cc214aed17d23fa996929305df5413505a7dd40b",
+      "target": "x86_64-pc-windows-msvc",
+      "rustVersion": "1.90.0",
+      "patches": {
+        "entity-handle-363.patch": "f1b4e750a0fbb38136e4e5bf29c02d974b84c7eeee2aaf45353ceb8253bec8f9",
+        "backport-363.patch": "47a9b2bfcb5fd9ee0358f1362e7a5ccc61bdd0a69e526ba1717cd70b13fc2c68",
+        "build-support.patch": "94172e708cdb487ef3ae27248554260256f3dc653a5eddd107674c458772fd97"
+      },
+      "protobufSha256": "953ad3f19e1c1bd888d8d51292ff47cb1379a979353f07fb7977a4c152e4f5b5",
+      "cargoLockSha256": "316232d192147c84050bd9b069919dc66d45e3f113ffd2e7b5508852e9f0992c",
+      "generatedSourceHashes": {
+        "src/csgoproto/src/protobuf.rs": "953ad3f19e1c1bd888d8d51292ff47cb1379a979353f07fb7977a4c152e4f5b5",
+        "src/csgoproto/src/message_type.rs": "3db1c6244d8a9f8ec8701cc980c4bd13f2aad86cdde11ea69f305dd011c986f4",
+        "src/csgoproto/src/maps.rs": "82206b2cddfafc8b8cb60d78ce8cad8e9153a9177f16ac31075a63f1d4233a07"
+      }
+    },
+    "target": "x86_64-pc-windows-msvc",
+    "rust": "rustc 1.90.0 (1159e78c4 2025-09-14)",
+    "cargo": "cargo 1.90.0 (840b83a10 2025-07-30)",
+    "msvc": "14.44.35207",
+    "sdk": "10.0.26100.0\\",
+    "node": "v26.3.0",
+    "nodeApi": "10",
+    "nativeApi": "napi6",
+    "napiCli": "2.16.1",
+    "sourceGeneration": "Both generators disabled: exact tag protobuf.rs, maps.rs, message_type.rs retained; no GameTracking fetch / protoc",
+    "binary": {
+      "filename": "demoparser2.win32-x64-msvc.node",
+      "sha256": "132d664125b60542dc80dc8bc270e2c8e181a0a55433fdac5be285ef4d9b0de1"
+    },
+    "bindingPath": "E:\\cs2-analyst\\packages\\demoparser-native\\native\\demoparser2.win32-x64-msvc.node",
+    "verifiedSha256": "132d664125b60542dc80dc8bc270e2c8e181a0a55433fdac5be285ef4d9b0de1"
+  },
+  "train": "REMOVED / NOT REQUIRED",
+  "fixtures": [
+    {
+      "fixture": "demo1",
+      "sha": "f3c3173eae0cd100d15c81c3b734be792f9212256a9c99703b358d3434000852",
+      "oldHash": "d10659a78dee88cff1884a2ceda503330b43e06e3392716e84587c4aafe5f9a9",
+      "fixedHash": "d10659a78dee88cff1884a2ceda503330b43e06e3392716e84587c4aafe5f9a9",
+      "players": {
+        "old": 10,
+        "fixed": 10
+      },
+      "events": {
+        "old": 6139,
+        "fixed": 6139
+      },
+      "spatialCoverage": {
+        "old": {
+          "status": "partial",
+          "reasons": [
+            "participant-unidentified",
+            "weapon-unavailable",
+            "context-outside-round",
+            "position-missing",
+            "view-missing",
+            "state-missing"
+          ]
+        },
+        "fixed": {
+          "status": "partial",
+          "reasons": [
+            "participant-unidentified",
+            "weapon-unavailable",
+            "context-outside-round",
+            "position-missing",
+            "view-missing",
+            "state-missing"
+          ]
+        }
+      },
+      "impactCoverage": {
+        "old": {
+          "roundState": {
+            "status": "complete",
+            "reasons": []
+          },
+          "attribution": {
+            "status": "complete",
+            "reasons": []
+          },
+          "engagementLinkage": {
+            "status": "partial",
+            "reasons": [
+              "engagement-not-linked"
+            ]
+          }
+        },
+        "fixed": {
+          "roundState": {
+            "status": "complete",
+            "reasons": []
+          },
+          "attribution": {
+            "status": "complete",
+            "reasons": []
+          },
+          "engagementLinkage": {
+            "status": "partial",
+            "reasons": [
+              "engagement-not-linked"
+            ]
+          }
+        }
+      },
+      "changes": {
+        "match": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        },
+        "spatial": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        },
+        "evidence": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        },
+        "findings": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        },
+        "nativeEvents": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        }
+      },
+      "unapprovedNativeChanges": [],
+      "invariants": "PASS",
+      "classification": "UNCHANGED"
+    },
+    {
+      "fixture": "demo2",
+      "sha": "253e5b719ac418b092ff3cdd1b5928bb0dfc8ccbf06cb9398963ea1e9fa44a25",
+      "oldHash": "b6bd7d3bc29f12288379729268e13020611c251ed96ccd7876323e1686da3289",
+      "fixedHash": "957f1611d6a04a67e9cd52ece19cf1c7191ea83fee9183c368fc0722536b75e0",
+      "players": {
+        "old": 10,
+        "fixed": 10
+      },
+      "events": {
+        "old": 3757,
+        "fixed": 3757
+      },
+      "spatialCoverage": {
+        "old": {
+          "status": "partial",
+          "reasons": [
+            "participant-unidentified",
+            "position-missing",
+            "view-missing",
+            "state-missing",
+            "weapon-unavailable",
+            "context-outside-round"
+          ]
+        },
+        "fixed": {
+          "status": "partial",
+          "reasons": [
+            "participant-unidentified",
+            "weapon-unavailable",
+            "context-outside-round",
+            "position-missing",
+            "view-missing",
+            "state-missing"
+          ]
+        }
+      },
+      "impactCoverage": {
+        "old": {
+          "roundState": {
+            "status": "unavailable",
+            "reasons": [
+              "lifecycle-anomaly",
+              "participant-state-unknown",
+              "side-unknown"
+            ]
+          },
+          "attribution": {
+            "status": "partial",
+            "reasons": [
+              "side-unknown"
+            ]
+          },
+          "engagementLinkage": {
+            "status": "partial",
+            "reasons": [
+              "engagement-not-linked"
+            ]
+          }
+        },
+        "fixed": {
+          "roundState": {
+            "status": "partial",
+            "reasons": [
+              "lifecycle-anomaly"
+            ]
+          },
+          "attribution": {
+            "status": "complete",
+            "reasons": []
+          },
+          "engagementLinkage": {
+            "status": "partial",
+            "reasons": [
+              "engagement-not-linked"
+            ]
+          }
+        }
+      },
+      "changes": {
+        "match": {
+          "unchanged": false,
+          "changedValues": 529,
+          "fieldCounts": {
+            ".players.*.team": 1,
+            ".rounds.*.events.*.shooterSide": 151,
+            ".rounds.*.events.*.victimSide": 86,
+            ".rounds.*.events.*.teamkill": 25,
+            ".rounds.*.stateSnapshots.*.players.*.side": 54,
+            ".rounds.*.stateSnapshots.*.players.*.alive": 42,
+            ".rounds.*.stateSnapshots.*.players.*.participant": 54,
+            ".rounds.*.events.*.attackerSide": 46,
+            ".rounds.*.events.*.assisterSide": 6,
+            ".rounds.*.playerLifecycle.*.side": 17,
+            ".rounds.*.events.*.killerSide": 13,
+            ".rounds.*.events.*.throwerSide": 22,
+            ".rounds.*.events.*.playerSide": 12
+          },
+          "examples": [
+            {
+              "path": ".players.6.team",
+              "old": "CT",
+              "fixed": "T"
+            },
+            {
+              "path": ".rounds.0.events.47.shooterSide",
+              "old": "Unknown",
+              "fixed": "T"
+            },
+            {
+              "path": ".rounds.0.events.103.shooterSide",
+              "old": "Unknown",
+              "fixed": "T"
+            },
+            {
+              "path": ".rounds.0.events.116.shooterSide",
+              "old": "Unknown",
+              "fixed": "T"
+            },
+            {
+              "path": ".rounds.0.events.118.victimSide",
+              "old": "Unknown",
+              "fixed": "T"
+            },
+            {
+              "path": ".rounds.0.events.119.victimSide",
+              "old": "Unknown",
+              "fixed": "T"
+            },
+            {
+              "path": ".rounds.0.events.119.teamkill",
+              "old": null,
+              "fixed": false
+            },
+            {
+              "path": ".rounds.0.stateSnapshots.0.players.6.side",
+              "old": "Unknown",
+              "fixed": "T"
+            },
+            {
+              "path": ".rounds.0.stateSnapshots.0.players.6.alive",
+              "old": false,
+              "fixed": true
+            },
+            {
+              "path": ".rounds.0.stateSnapshots.0.players.6.participant",
+              "old": null,
+              "fixed": true
+            },
+            {
+              "path": ".rounds.0.stateSnapshots.1.players.6.side",
+              "old": "Unknown",
+              "fixed": "T"
+            },
+            {
+              "path": ".rounds.0.stateSnapshots.1.players.6.alive",
+              "old": false,
+              "fixed": true
+            },
+            {
+              "path": ".rounds.0.stateSnapshots.1.players.6.participant",
+              "old": null,
+              "fixed": true
+            },
+            {
+              "path": ".rounds.0.stateSnapshots.2.players.6.side",
+              "old": "Unknown",
+              "fixed": "T"
+            },
+            {
+              "path": ".rounds.0.stateSnapshots.2.players.6.participant",
+              "old": null,
+              "fixed": true
+            },
+            {
+              "path": ".rounds.1.events.2.shooterSide",
+              "old": "Unknown",
+              "fixed": "T"
+            },
+            {
+              "path": ".rounds.1.events.3.attackerSide",
+              "old": "Unknown",
+              "fixed": "T"
+            },
+            {
+              "path": ".rounds.1.events.10.shooterSide",
+              "old": "Unknown",
+              "fixed": "T"
+            },
+            {
+              "path": ".rounds.1.events.11.shooterSide",
+              "old": "Unknown",
+              "fixed": "T"
+            },
+            {
+              "path": ".rounds.1.events.12.shooterSide",
+              "old": "Unknown",
+              "fixed": "T"
+            }
+          ]
+        },
+        "spatial": {
+          "unchanged": false,
+          "changedValues": 217286,
+          "fieldCounts": {
+            ".events.*.samples.*.sample.position": 10184,
+            ".events.*.samples.*.sample.view": 10184,
+            ".events.*.samples.*.sample.health": 10184,
+            ".events.*.samples.*.sample.alive": 8166,
+            ".events.*.samples.*.sample.side": 10184,
+            ".events.*.samples.*.sample.activeWeapon": 26235,
+            ".events.*.samples.*.sample.coverage.status": 10184,
+            ".events.*.samples.*.sample.coverage.reasons.*": 58685,
+            ".events.*.samples.*.sample.fields.position": 10184,
+            ".events.*.samples.*.sample.fields.view": 10184,
+            ".events.*.samples.*.sample.fields.state": 10184,
+            ".events.*.samples.*.sample.fields.weapon": 26115,
+            ".events.*.coverage.status": 3676,
+            ".events.*.coverage.reasons.*": 12932,
+            ".coverage.reasons.*": 5
+          },
+          "examples": [
+            {
+              "path": ".events.0.samples.6.sample.position",
+              "old": null,
+              "fixed": {
+                "x": -822.3651733398438,
+                "y": -795.64208984375,
+                "z": 117.26399993896484
+              }
+            },
+            {
+              "path": ".events.0.samples.6.sample.view",
+              "old": null,
+              "fixed": {
+                "yaw": 106.99996948242188,
+                "pitch": 0
+              }
+            },
+            {
+              "path": ".events.0.samples.6.sample.health",
+              "old": null,
+              "fixed": 100
+            },
+            {
+              "path": ".events.0.samples.6.sample.alive",
+              "old": false,
+              "fixed": true
+            },
+            {
+              "path": ".events.0.samples.6.sample.side",
+              "old": "Unknown",
+              "fixed": "T"
+            },
+            {
+              "path": ".events.0.samples.6.sample.activeWeapon",
+              "old": null,
+              "fixed": "Glock-18"
+            },
+            {
+              "path": ".events.0.samples.6.sample.coverage.status",
+              "old": "partial",
+              "fixed": "complete"
+            },
+            {
+              "path": ".events.0.samples.6.sample.coverage.reasons.0",
+              "old": "position-missing",
+              "fixed": null
+            },
+            {
+              "path": ".events.0.samples.6.sample.coverage.reasons.1",
+              "old": "view-missing",
+              "fixed": null
+            },
+            {
+              "path": ".events.0.samples.6.sample.coverage.reasons.2",
+              "old": "state-missing",
+              "fixed": null
+            },
+            {
+              "path": ".events.0.samples.6.sample.coverage.reasons.3",
+              "old": "weapon-unavailable",
+              "fixed": null
+            },
+            {
+              "path": ".events.0.samples.6.sample.fields.position",
+              "old": "unavailable",
+              "fixed": "complete"
+            },
+            {
+              "path": ".events.0.samples.6.sample.fields.view",
+              "old": "unavailable",
+              "fixed": "complete"
+            },
+            {
+              "path": ".events.0.samples.6.sample.fields.state",
+              "old": "partial",
+              "fixed": "complete"
+            },
+            {
+              "path": ".events.0.samples.6.sample.fields.weapon",
+              "old": "unavailable",
+              "fixed": "complete"
+            },
+            {
+              "path": ".events.0.coverage.status",
+              "old": "partial",
+              "fixed": "complete"
+            },
+            {
+              "path": ".events.0.coverage.reasons.0",
+              "old": "position-missing",
+              "fixed": null
+            },
+            {
+              "path": ".events.0.coverage.reasons.1",
+              "old": "view-missing",
+              "fixed": null
+            },
+            {
+              "path": ".events.0.coverage.reasons.2",
+              "old": "state-missing",
+              "fixed": null
+            },
+            {
+              "path": ".events.0.coverage.reasons.3",
+              "old": "weapon-unavailable",
+              "fixed": null
+            }
+          ]
+        },
+        "evidence": {
+          "unchanged": false,
+          "changedValues": 73724,
+          "fieldCounts": {
+            ".engagements.directContacts.*.spatialCoverage.evidenceCoverage.status": 435,
+            ".engagements.directContacts.*.spatialCoverage.evidenceCoverage.reasons.*": 1480,
+            ".engagements.directContacts.*.eventRef.tick": 436,
+            ".engagements.directContacts.*.eventRef.eventIndex": 428,
+            ".engagements.directContacts.*.attackerId": 403,
+            ".engagements.directContacts.*.victimId": 400,
+            ".engagements.directContacts.*.weapon": 350,
+            ".engagements.directContacts.*.spatialCoverage.actorAtEvent.requestedTick": 436,
+            ".engagements.directContacts.*.spatialCoverage.actorAtEvent.actualTick": 436,
+            ".engagements.directContacts.*.spatialCoverage.targetAtEvent.requestedTick": 436,
+            ".engagements.directContacts.*.spatialCoverage.targetAtEvent.actualTick": 436,
+            ".engagements.directContacts.*.spatialCoverage.actorBeforeEvent.requestedTick": 436,
+            ".engagements.directContacts.*.spatialCoverage.actorBeforeEvent.actualTick": 436,
+            ".engagements.directContacts.*.spatialCoverage.targetBeforeEvent.requestedTick": 436,
+            ".engagements.directContacts.*.spatialCoverage.targetBeforeEvent.actualTick": 436,
+            ".engagements.directContacts.*.reportedHealthDamage": 404,
+            ".engagements.directContacts.*.sourceKind": 36,
+            ".engagements.directContacts.*.coverage.reasons.*": 36,
+            ".engagements.directContacts.*.spatialCoverage.targetAtEvent.coverage.reasons.*": 204,
+            ".engagements.directContacts.*.spatialCoverage.targetAtEvent.fields.weapon": 204,
+            ".engagements.directContacts.*.healthRemaining": 396,
+            ".engagements.directContacts.*.eventRef.type": 158,
+            ".engagements.directContacts.*.fatal": 158,
+            ".engagements.directContacts.*.headshot": 170,
+            ".engagements.directContacts.*.assistedFlash": 159,
+            ".engagements.directContacts.*.eventRef.round": 390,
+            ".engagements.directContacts.*.spatialCoverage.actorAtEvent.coverage.reasons.*": 116,
+            ".engagements.directContacts.*.spatialCoverage.actorAtEvent.fields.weapon": 116,
+            ".engagements.directContacts.*.spatialCoverage.actorBeforeEvent.coverage.reasons.*": 116,
+            ".engagements.directContacts.*.spatialCoverage.actorBeforeEvent.fields.weapon": 116,
+            ".engagements.directContacts.*.spatialCoverage.targetBeforeEvent.coverage.reasons.*": 106,
+            ".engagements.directContacts.*.spatialCoverage.targetBeforeEvent.fields.weapon": 106,
+            ".engagements.directContacts.*": 110,
+            ".engagements.engagements.*.contacts.*.spatialCoverage.evidenceCoverage.status": 266,
+            ".engagements.engagements.*.contacts.*.spatialCoverage.evidenceCoverage.reasons.*": 916,
+            ".engagements.engagements.*.endTick": 92,
+            ".engagements.engagements.*.durationSeconds": 85,
+            ".engagements.engagements.*.participantIds.*": 209,
+            ".engagements.engagements.*.contacts.*": 344,
+            ".engagements.engagements.*.killCount": 43,
+            ".engagements.engagements.*.damageContactCount": 78,
+            ".engagements.engagements.*.coverage.eventSegmentation.status": 30,
+            ".engagements.engagements.*.coverage.eventSegmentation.reasons.*": 30,
+            ".engagements.engagements.*.coverage.spatialEnrichment.contacts": 82,
+            ".engagements.engagements.*.coverage.spatialEnrichment.exactJoinedContacts": 82,
+            ".engagements.engagements.*.coverage.spatialEnrichment.completeAtEventContacts": 82,
+            ".engagements.engagements.*.coverage.spatialEnrichment.completeBeforeEventContacts": 82,
+            ".engagements.engagements.*.id": 91,
+            ".engagements.engagements.*.startTick": 91,
+            ".engagements.engagements.*.contacts.*.eventRef.tick": 251,
+            ".engagements.engagements.*.contacts.*.eventRef.eventIndex": 247,
+            ".engagements.engagements.*.contacts.*.attackerId": 232,
+            ".engagements.engagements.*.contacts.*.weapon": 207,
+            ".engagements.engagements.*.contacts.*.spatialCoverage.actorAtEvent.requestedTick": 251,
+            ".engagements.engagements.*.contacts.*.spatialCoverage.actorAtEvent.actualTick": 251,
+            ".engagements.engagements.*.contacts.*.spatialCoverage.targetAtEvent.requestedTick": 251,
+            ".engagements.engagements.*.contacts.*.spatialCoverage.targetAtEvent.actualTick": 251,
+            ".engagements.engagements.*.contacts.*.spatialCoverage.targetAtEvent.coverage.reasons.*": 110,
+            ".engagements.engagements.*.contacts.*.spatialCoverage.targetAtEvent.fields.weapon": 110,
+            ".engagements.engagements.*.contacts.*.spatialCoverage.actorBeforeEvent.requestedTick": 251,
+            ".engagements.engagements.*.contacts.*.spatialCoverage.actorBeforeEvent.actualTick": 251,
+            ".engagements.engagements.*.contacts.*.spatialCoverage.targetBeforeEvent.requestedTick": 251,
+            ".engagements.engagements.*.contacts.*.spatialCoverage.targetBeforeEvent.actualTick": 251,
+            ".engagements.engagements.*.contacts.*.reportedHealthDamage": 231,
+            ".engagements.engagements.*.contacts.*.healthRemaining": 220,
+            ".engagements.engagements.*.contacts.*.victimId": 227,
+            ".engagements.engagements.*.contacts.*.sourceKind": 20,
+            ".engagements.engagements.*.contacts.*.coverage.reasons.*": 20,
+            ".engagements.engagements.*.contacts.*.headshot": 67,
+            ".engagements.engagements.*.contacts.*.eventRef.type": 60,
+            ".engagements.engagements.*.contacts.*.fatal": 60,
+            ".engagements.engagements.*.contacts.*.assistedFlash": 61,
+            ".engagements.engagements.*.round": 83,
+            ".engagements.engagements.*.contacts.*.eventRef.round": 233,
+            ".engagements.engagements.*.contacts.*.spatialCoverage.actorAtEvent.coverage.reasons.*": 58,
+            ".engagements.engagements.*.contacts.*.spatialCoverage.actorAtEvent.fields.weapon": 58,
+            ".engagements.engagements.*.contacts.*.spatialCoverage.actorBeforeEvent.coverage.reasons.*": 58,
+            ".engagements.engagements.*.contacts.*.spatialCoverage.actorBeforeEvent.fields.weapon": 58,
+            ".engagements.engagements.*.contacts.*.spatialCoverage.targetBeforeEvent.coverage.reasons.*": 53,
+            ".engagements.engagements.*.contacts.*.spatialCoverage.targetBeforeEvent.fields.weapon": 53,
+            ".engagements.engagements.*": 25,
+            ".engagements.diagnostics.includedContacts": 1,
+            ".engagements.diagnostics.excludedTeam": 1,
+            ".engagements.diagnostics.excludedUnknownSide": 1,
+            ".engagements.diagnostics.excludedUtility": 1,
+            ".engagements.diagnostics.unknownWeaponKind": 1,
+            ".engagements.diagnostics.sameTickContacts": 1,
+            ".engagements.coverage.eventSegmentation.reasons.*": 2,
+            ".engagements.coverage.spatialEnrichment.contacts": 1,
+            ".engagements.coverage.spatialEnrichment.exactJoinedContacts": 1,
+            ".engagements.coverage.spatialEnrichment.completeAtEventContacts": 1,
+            ".engagements.coverage.spatialEnrichment.completeBeforeEventContacts": 1,
+            ".impact.rounds.*.players.*.playerId": 54,
+            ".impact.rounds.*.players.*.deathTick": 52,
+            ".impact.rounds.*.players.*.side": 18,
+            ".impact.rounds.*.players.*": 18,
+            ".impact.rounds.*.groups.*.appliedVictimIds.*": 124,
+            ".impact.rounds.*.groups.*.before": 124,
+            ".impact.rounds.*.groups.*.after": 124,
+            ".impact.rounds.*.groups.*.tags.T.*": 60,
+            ".impact.rounds.*.groups.*.tags.CT.*": 79,
+            ".impact.rounds.*.coverage.status": 17,
+            ".impact.rounds.*.coverage.reasons.*": 30,
+            ".impact.kills.*.posthumous": 108,
+            ".impact.kills.*.before": 108,
+            ".impact.kills.*.afterAtomicGroup": 108,
+            ".impact.kills.*.tags.*": 145,
+            ".impact.kills.*.coverage.roundState.status": 108,
+            ".impact.kills.*.coverage.roundState.reasons.*": 189,
+            ".impact.kills.*.eventRef.tick": 103,
+            ".impact.kills.*.eventRef.eventIndex": 103,
+            ".impact.kills.*.killerId": 97,
+            ".impact.kills.*.victimId": 88,
+            ".impact.kills.*.killerSide": 52,
+            ".impact.kills.*.victimSide": 52,
+            ".impact.kills.*.weapon": 88,
+            ".impact.kills.*.engagementId": 102,
+            ".impact.kills.*.headshot": 47,
+            ".impact.kills.*.eventRef.round": 87,
+            ".impact.kills.*.coverage.engagementLinkage.status": 6,
+            ".impact.kills.*.coverage.engagementLinkage.reasons.*": 6,
+            ".impact.kills.*": 25,
+            ".impact.multiKills.*.kills.*.posthumous": 56,
+            ".impact.multiKills.*.kills.*.before": 56,
+            ".impact.multiKills.*.kills.*.afterAtomicGroup": 56,
+            ".impact.multiKills.*.kills.*.tags.*": 74,
+            ".impact.multiKills.*.kills.*.coverage.roundState.status": 56,
+            ".impact.multiKills.*.kills.*.coverage.roundState.reasons.*": 104,
+            ".impact.multiKills.*.beforeFirstKill": 27,
+            ".impact.multiKills.*.afterLastKillAtomicGroup": 27,
+            ".impact.multiKills.*.tags.*": 119,
+            ".impact.multiKills.*.coverage.roundState.status": 27,
+            ".impact.multiKills.*.coverage.roundState.reasons.*": 50,
+            ".impact.multiKills.*.kills.*.engagementId": 48,
+            ".impact.multiKills.*.engagementIds.*": 53,
+            ".impact.multiKills.*.playerId": 18,
+            ".impact.multiKills.*.round": 17,
+            ".impact.multiKills.*.kills.*.eventRef.round": 35,
+            ".impact.multiKills.*.kills.*.eventRef.tick": 45,
+            ".impact.multiKills.*.kills.*.eventRef.eventIndex": 45,
+            ".impact.multiKills.*.kills.*.killerId": 37,
+            ".impact.multiKills.*.kills.*.victimId": 42,
+            ".impact.multiKills.*.kills.*.headshot": 24,
+            ".impact.multiKills.*.kills.*": 9,
+            ".impact.multiKills.*.killCount": 9,
+            ".impact.multiKills.*.firstKillTick": 22,
+            ".impact.multiKills.*.lastKillTick": 22,
+            ".impact.multiKills.*.kills.*.killerSide": 16,
+            ".impact.multiKills.*.kills.*.victimSide": 16,
+            ".impact.multiKills.*.kills.*.weapon": 39,
+            ".impact.multiKills.*.kills.*.coverage.engagementLinkage.status": 2,
+            ".impact.multiKills.*.kills.*.coverage.engagementLinkage.reasons.*": 2,
+            ".impact.multiKills.*.roundSide": 9,
+            ".impact.multiKills.*.roundResult": 9,
+            ".impact.multiKills.*.coverage.engagementLinkage.status": 2,
+            ".impact.multiKills.*.coverage.engagementLinkage.reasons.*": 2,
+            ".impact.multiKills.*.roundWinner": 6,
+            ".impact.multiKills.*": 4,
+            ".impact.unattributedKills.*": 25,
+            ".impact.diagnostics.eligibleRounds": 1,
+            ".impact.diagnostics.ineligibleRounds": 1,
+            ".impact.diagnostics.creditedEnemyKills": 1,
+            ".impact.diagnostics.unattributedKills": 1,
+            ".impact.diagnostics.multiKillRounds": 1,
+            ".impact.diagnostics.doubleKills": 1,
+            ".impact.diagnostics.tripleKills": 1,
+            ".impact.diagnostics.engagementLinkedKills": 1,
+            ".impact.coverage.roundState.status": 1,
+            ".impact.coverage.roundState.reasons.*": 2,
+            ".impact.coverage.attribution.status": 1,
+            ".impact.coverage.attribution.reasons.*": 1,
+            ".teamplay.playerEngagementContexts.*.firstSideContactRole": 211,
+            ".teamplay.playerEngagementContexts.*.spatialContext.nearestConfirmedAliveTeammate": 205,
+            ".teamplay.playerEngagementContexts.*.spatialContext.coverage.status": 227,
+            ".teamplay.playerEngagementContexts.*.spatialContext.coverage.reasons.*": 227,
+            ".teamplay.playerEngagementContexts.*.coverage.engagementParticipation.status": 211,
+            ".teamplay.playerEngagementContexts.*.coverage.engagementParticipation.reasons.*": 211,
+            ".teamplay.playerEngagementContexts.*.coverage.aliveState.status": 227,
+            ".teamplay.playerEngagementContexts.*.coverage.aliveState.reasons.*": 624,
+            ".teamplay.playerEngagementContexts.*.coverage.spatialContext.status": 227,
+            ".teamplay.playerEngagementContexts.*.coverage.spatialContext.reasons.*": 227,
+            ".teamplay.playerEngagementContexts.*.teammateJoinDelaySeconds": 25,
+            ".teamplay.playerEngagementContexts.*.lastContactTick": 213,
+            ".teamplay.playerEngagementContexts.*.contactCount": 182,
+            ".teamplay.playerEngagementContexts.*.damageContactsDealt": 167,
+            ".teamplay.playerEngagementContexts.*.reportedDamageDealt": 189,
+            ".teamplay.playerEngagementContexts.*.kills": 117,
+            ".teamplay.playerEngagementContexts.*.enemyParticipantIds.*": 269,
+            ".teamplay.playerEngagementContexts.*.enemyParticipantCount": 69,
+            ".teamplay.playerEngagementContexts.*.playerId": 203,
+            ".teamplay.playerEngagementContexts.*.firstContactRef.tick": 211,
+            ".teamplay.playerEngagementContexts.*.firstContactRef.eventIndex": 210,
+            ".teamplay.playerEngagementContexts.*.firstContactTick": 211,
+            ".teamplay.playerEngagementContexts.*.reportedDamageReceived": 199,
+            ".teamplay.playerEngagementContexts.*.deaths": 107,
+            ".teamplay.playerEngagementContexts.*.sideParticipantIds.*": 291,
+            ".teamplay.playerEngagementContexts.*.sideParticipantCount": 82,
+            ".teamplay.playerEngagementContexts.*.onlyConfirmedSideParticipant": 80,
+            ".teamplay.playerEngagementContexts.*.otherSideContactObserved": 80,
+            ".teamplay.playerEngagementContexts.*.firstOtherTeammateContactTick": 90,
+            ".teamplay.playerEngagementContexts.*.sideContactTiers.*": 86,
+            ".teamplay.playerEngagementContexts.*.spatialContext.eventRef.tick": 211,
+            ".teamplay.playerEngagementContexts.*.spatialContext.eventRef.eventIndex": 210,
+            ".teamplay.playerEngagementContexts.*.engagementId": 209,
+            ".teamplay.playerEngagementContexts.*.side": 114,
+            ".teamplay.playerEngagementContexts.*.damageContactsReceived": 170,
+            ".teamplay.playerEngagementContexts.*.sideContactTiers.*.tick": 218,
+            ".teamplay.playerEngagementContexts.*.sideContactTiers.*.playerIds.*": 206,
+            ".teamplay.playerEngagementContexts.*.round": 192,
+            ".teamplay.playerEngagementContexts.*.firstContactRef.round": 192,
+            ".teamplay.playerEngagementContexts.*.spatialContext.eventRef.round": 192,
+            ".teamplay.playerEngagementContexts.*": 59,
+            ".teamplay.teammateDeathResponses.*.playerAliveAtDeath": 436,
+            ".teamplay.teammateDeathResponses.*.killerState": 436,
+            ".teamplay.teammateDeathResponses.*.before": 436,
+            ".teamplay.teammateDeathResponses.*.afterAtomicGroup": 436,
+            ".teamplay.teammateDeathResponses.*.spatialContext.nearestConfirmedAliveTeammate": 369,
+            ".teamplay.teammateDeathResponses.*.spatialContext.sameTickAliveAmbiguousIds.*": 436,
+            ".teamplay.teammateDeathResponses.*.spatialContext.coverage.status": 436,
+            ".teamplay.teammateDeathResponses.*.spatialContext.coverage.reasons.*": 436,
+            ".teamplay.teammateDeathResponses.*.firstFollowUpRef": 29,
+            ".teamplay.teammateDeathResponses.*.outcomeRef": 29,
+            ".teamplay.teammateDeathResponses.*.delaySeconds": 29,
+            ".teamplay.teammateDeathResponses.*.outcome": 249,
+            ".teamplay.teammateDeathResponses.*.sameEngagement": 29,
+            ".teamplay.teammateDeathResponses.*.reportedDamage": 249,
+            ".teamplay.teammateDeathResponses.*.coverage.aliveState.status": 436,
+            ".teamplay.teammateDeathResponses.*.coverage.aliveState.reasons.*": 1618,
+            ".teamplay.teammateDeathResponses.*.coverage.followUpTiming.status": 249,
+            ".teamplay.teammateDeathResponses.*.coverage.followUpTiming.reasons.*": 1340,
+            ".teamplay.teammateDeathResponses.*.coverage.spatialContext.status": 436,
+            ".teamplay.teammateDeathResponses.*.coverage.spatialContext.reasons.*": 436,
+            ".teamplay.teammateDeathResponses.*.playerId": 372,
+            ".teamplay.teammateDeathResponses.*.teammateId": 377,
+            ".teamplay.teammateDeathResponses.*.deathRef.tick": 422,
+            ".teamplay.teammateDeathResponses.*.deathRef.eventIndex": 420,
+            ".teamplay.teammateDeathResponses.*.killerId": 374,
+            ".teamplay.teammateDeathResponses.*.engagementId": 420,
+            ".teamplay.teammateDeathResponses.*.sideParticipantCount": 60,
+            ".teamplay.teammateDeathResponses.*.otherSideContactObserved": 58,
+            ".teamplay.teammateDeathResponses.*.onlyConfirmedSideParticipant": 58,
+            ".teamplay.teammateDeathResponses.*.spatialContext.eventRef.tick": 422,
+            ".teamplay.teammateDeathResponses.*.spatialContext.eventRef.eventIndex": 420,
+            ".teamplay.teammateDeathResponses.*.coverage.engagementParticipation.status": 61,
+            ".teamplay.teammateDeathResponses.*.coverage.engagementParticipation.reasons.*": 61,
+            ".teamplay.teammateDeathResponses.*.firstSideContactRole": 34,
+            ".teamplay.teammateDeathResponses.*.teammateJoinDelaySeconds": 11,
+            ".teamplay.teammateDeathResponses.*.deathRef.round": 361,
+            ".teamplay.teammateDeathResponses.*.spatialContext.eventRef.round": 361,
+            ".teamplay.teammateDeathResponses.*": 96,
+            ".teamplay.playerDeathContexts.*.firstSideContactRole": 107,
+            ".teamplay.playerDeathContexts.*.before": 121,
+            ".teamplay.playerDeathContexts.*.afterAtomicGroup": 121,
+            ".teamplay.playerDeathContexts.*.spatialContext.nearestConfirmedAliveTeammate": 107,
+            ".teamplay.playerDeathContexts.*.spatialContext.coverage.status": 121,
+            ".teamplay.playerDeathContexts.*.spatialContext.coverage.reasons.*": 121,
+            ".teamplay.playerDeathContexts.*.teamResponse.killerState": 121,
+            ".teamplay.playerDeathContexts.*.teamResponse.confirmedAliveTeammates": 121,
+            ".teamplay.playerDeathContexts.*.teamResponse.firstResponderId": 31,
+            ".teamplay.playerDeathContexts.*.teamResponse.firstResponseRef": 31,
+            ".teamplay.playerDeathContexts.*.teamResponse.outcomeRef": 31,
+            ".teamplay.playerDeathContexts.*.teamResponse.outcomePlayerId": 31,
+            ".teamplay.playerDeathContexts.*.teamResponse.delaySeconds": 31,
+            ".teamplay.playerDeathContexts.*.teamResponse.outcome": 112,
+            ".teamplay.playerDeathContexts.*.teamResponse.sameEngagement": 31,
+            ".teamplay.playerDeathContexts.*.teamResponse.coverage.engagementParticipation.status": 111,
+            ".teamplay.playerDeathContexts.*.teamResponse.coverage.engagementParticipation.reasons.*": 111,
+            ".teamplay.playerDeathContexts.*.teamResponse.coverage.aliveState.status": 121,
+            ".teamplay.playerDeathContexts.*.teamResponse.coverage.aliveState.reasons.*": 329,
+            ".teamplay.playerDeathContexts.*.teamResponse.coverage.followUpTiming.status": 112,
+            ".teamplay.playerDeathContexts.*.teamResponse.coverage.followUpTiming.reasons.*": 367,
+            ".teamplay.playerDeathContexts.*.teamResponse.coverage.spatialContext.status": 121,
+            ".teamplay.playerDeathContexts.*.teamResponse.coverage.spatialContext.reasons.*": 121,
+            ".teamplay.playerDeathContexts.*.coverage.engagementParticipation.status": 111,
+            ".teamplay.playerDeathContexts.*.coverage.engagementParticipation.reasons.*": 111,
+            ".teamplay.playerDeathContexts.*.coverage.aliveState.status": 121,
+            ".teamplay.playerDeathContexts.*.coverage.aliveState.reasons.*": 329,
+            ".teamplay.playerDeathContexts.*.coverage.followUpTiming.status": 112,
+            ".teamplay.playerDeathContexts.*.coverage.followUpTiming.reasons.*": 367,
+            ".teamplay.playerDeathContexts.*.coverage.spatialContext.status": 121,
+            ".teamplay.playerDeathContexts.*.coverage.spatialContext.reasons.*": 121,
+            ".teamplay.playerDeathContexts.*.teammateJoinDelaySeconds": 23,
+            ".teamplay.playerDeathContexts.*.playerId": 104,
+            ".teamplay.playerDeathContexts.*.deathRef.tick": 116,
+            ".teamplay.playerDeathContexts.*.deathRef.eventIndex": 116,
+            ".teamplay.playerDeathContexts.*.killerId": 104,
+            ".teamplay.playerDeathContexts.*.engagementId": 115,
+            ".teamplay.playerDeathContexts.*.spatialContext.eventRef.tick": 116,
+            ".teamplay.playerDeathContexts.*.spatialContext.eventRef.eventIndex": 116,
+            ".teamplay.playerDeathContexts.*.teamResponse.playerId": 104,
+            ".teamplay.playerDeathContexts.*.teamResponse.deathRef.tick": 116,
+            ".teamplay.playerDeathContexts.*.teamResponse.deathRef.eventIndex": 116,
+            ".teamplay.playerDeathContexts.*.teamResponse.killerId": 104,
+            ".teamplay.playerDeathContexts.*.sideParticipantCount": 57,
+            ".teamplay.playerDeathContexts.*.otherSideContactObserved": 57,
+            ".teamplay.playerDeathContexts.*.onlyConfirmedSideParticipant": 57,
+            ".teamplay.playerDeathContexts.*.deathRef.round": 84,
+            ".teamplay.playerDeathContexts.*.spatialContext.eventRef.round": 84,
+            ".teamplay.playerDeathContexts.*.teamResponse.deathRef.round": 84,
+            ".teamplay.playerDeathContexts.*": 12,
+            ".teamplay.playerDeathTeamResponses.*.killerState": 121,
+            ".teamplay.playerDeathTeamResponses.*.confirmedAliveTeammates": 121,
+            ".teamplay.playerDeathTeamResponses.*.firstResponderId": 31,
+            ".teamplay.playerDeathTeamResponses.*.firstResponseRef": 31,
+            ".teamplay.playerDeathTeamResponses.*.outcomeRef": 31,
+            ".teamplay.playerDeathTeamResponses.*.outcomePlayerId": 31,
+            ".teamplay.playerDeathTeamResponses.*.delaySeconds": 31,
+            ".teamplay.playerDeathTeamResponses.*.outcome": 112,
+            ".teamplay.playerDeathTeamResponses.*.sameEngagement": 31,
+            ".teamplay.playerDeathTeamResponses.*.coverage.engagementParticipation.status": 111,
+            ".teamplay.playerDeathTeamResponses.*.coverage.engagementParticipation.reasons.*": 111,
+            ".teamplay.playerDeathTeamResponses.*.coverage.aliveState.status": 121,
+            ".teamplay.playerDeathTeamResponses.*.coverage.aliveState.reasons.*": 329,
+            ".teamplay.playerDeathTeamResponses.*.coverage.followUpTiming.status": 112,
+            ".teamplay.playerDeathTeamResponses.*.coverage.followUpTiming.reasons.*": 367,
+            ".teamplay.playerDeathTeamResponses.*.coverage.spatialContext.status": 121,
+            ".teamplay.playerDeathTeamResponses.*.coverage.spatialContext.reasons.*": 121,
+            ".teamplay.playerDeathTeamResponses.*.playerId": 104,
+            ".teamplay.playerDeathTeamResponses.*.deathRef.tick": 116,
+            ".teamplay.playerDeathTeamResponses.*.deathRef.eventIndex": 116,
+            ".teamplay.playerDeathTeamResponses.*.killerId": 104,
+            ".teamplay.playerDeathTeamResponses.*.deathRef.round": 84,
+            ".teamplay.playerDeathTeamResponses.*": 12,
+            ".teamplay.diagnostics.playerEngagementContexts": 1,
+            ".teamplay.diagnostics.uniqueFirst": 1,
+            ".teamplay.diagnostics.later": 1,
+            ".teamplay.diagnostics.unknownFirst": 1,
+            ".teamplay.diagnostics.onlyConfirmedSideParticipant": 1,
+            ".teamplay.diagnostics.teammateDeathsObserved": 1,
+            ".teamplay.diagnostics.teammateDeathResponsesKill": 1,
+            ".teamplay.diagnostics.teammateDeathResponsesDamage": 1,
+            ".teamplay.diagnostics.teammateDeathResponsesNone": 1,
+            ".teamplay.diagnostics.teammateDeathResponsesUnavailable": 1,
+            ".teamplay.diagnostics.playerDeathsObserved": 1,
+            ".teamplay.diagnostics.teamResponsesKill": 1,
+            ".teamplay.diagnostics.teamResponsesDamage": 1,
+            ".teamplay.diagnostics.teamResponsesNone": 1,
+            ".teamplay.diagnostics.teamResponsesUnavailable": 1,
+            ".teamplay.diagnostics.spatialContextsComplete": 1,
+            ".teamplay.diagnostics.spatialContextsPartial": 1,
+            ".teamplay.diagnostics.spatialContextsUnavailable": 1,
+            ".teamplay.diagnostics.sameTickAliveAmbiguities": 1,
+            ".teamplay.coverage.aliveState.status": 1,
+            ".teamplay.coverage.aliveState.reasons.*": 2,
+            ".teamplay.coverage.followUpTiming.reasons.*": 3,
+            ".teamplay.coverage.spatialContext.status": 1,
+            ".teamplay.coverage.spatialContext.reasons.*": 1,
+            ".utility.effects.*.roundContext.teamAlive": 209,
+            ".utility.effects.*.roundContext.enemyAlive": 209,
+            ".utility.effects.*.nearestEnemy": 212,
+            ".utility.effects.*.nearestTeammate": 209,
+            ".utility.effects.*.enemiesWithPosition.*": 900,
+            ".utility.effects.*.teammatesWithPosition.*": 738,
+            ".utility.effects.*.coverage.roundState.status": 212,
+            ".utility.effects.*.coverage.roundState.reasons.*": 212,
+            ".utility.effects.*.coverage.spatialContext.status": 212,
+            ".utility.effects.*.coverage.spatialContext.reasons.*": 234,
+            ".utility.effects.*.roundContext.beforeAtomicGroup": 3,
+            ".utility.effects.*.roundContext.afterAtomicGroup": 3,
+            ".utility.effects.*.sameTickAliveAmbiguousIds.*": 3,
+            ".utility.effects.*.throwerSide": 22,
+            ".utility.effects.*.directOutcome.enemyEffects.*": 10,
+            ".utility.effects.*.directOutcome.unknownEffects.*": 18,
+            ".utility.effects.*.directOutcome.linkage": 19,
+            ".utility.effects.*.coverage.actorAttribution.status": 22,
+            ".utility.effects.*.coverage.actorAttribution.reasons.*": 22,
+            ".utility.effects.*.coverage.directOutcome.status": 19,
+            ".utility.effects.*.coverage.directOutcome.reasons.*": 28,
+            ".utility.effects.*.directOutcome.teammateEffects.*": 8,
+            ".utility.effects.*.directOutcome.teammateEffects.*.eventRef.eventIndex": 2,
+            ".utility.effects.*.directOutcome.teammateEffects.*.victimId": 2,
+            ".utility.effects.*.directOutcome.teammateEffects.*.rawBlindDurationSeconds": 2,
+            ".utility.effects.*.directOutcome.damageEvents.*.sideRelation": 2,
+            ".utility.effects.*.directOutcome.reportedEnemyDamage": 2,
+            ".utility.effects.*.directOutcome.damagedEnemyIds.*": 4,
+            ".utility.effects.*.directOutcome.enemyEffects.*.eventRef.eventIndex": 1,
+            ".utility.effects.*.directOutcome.enemyEffects.*.victimId": 1,
+            ".utility.effects.*.directOutcome.enemyEffects.*.rawBlindDurationSeconds": 1,
+            ".utility.coverage.actorAttribution.status": 1,
+            ".utility.coverage.actorAttribution.reasons.*": 1,
+            ".utility.coverage.roundState.status": 1,
+            ".utility.coverage.roundState.reasons.*": 1,
+            ".utility.coverage.spatialContext.status": 1,
+            ".utility.coverage.spatialContext.reasons.*": 1,
+            ".utility.coverage.directOutcome.reasons.*": 2,
+            ".utility.diagnostics.effectsWithCompleteSpatial": 1,
+            ".utility.diagnostics.heExactDamageLinked": 1,
+            ".utility.diagnostics.heUnlinked": 1,
+            ".utility.diagnostics.flashExactLinked": 1,
+            ".utility.diagnostics.sameTickAliveAmbiguities": 1,
+            ".execution.contacts.*.eventRef.tick": 436,
+            ".execution.contacts.*.eventRef.eventIndex": 428,
+            ".execution.contacts.*.attackerId": 403,
+            ".execution.contacts.*.victimId": 400,
+            ".execution.contacts.*.weapon": 350,
+            ".execution.contacts.*.reportedHealthDamage": 404,
+            ".execution.contacts.*.sourceKind": 36,
+            ".execution.contacts.*.eventRef.type": 158,
+            ".execution.contacts.*.eventRef.round": 390,
+            ".execution.contacts.*": 110,
+            ".execution.weaponFireEvidence.*.linkage": 197,
+            ".execution.weaponFireEvidence.*.engagementId": 804,
+            ".execution.weaponFireEvidence.*.candidateEngagementIds.*": 804,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.coverage.contactEvidence.reasons.*": 384,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.coverage.returnContact.reasons.*": 553,
+            ".execution.playerEngagementExecutions.*.coverage.contactEvidence.reasons.*": 380,
+            ".execution.playerEngagementExecutions.*.coverage.returnContact.reasons.*": 549,
+            ".execution.playerEngagementExecutions.*.weaponFireRefs.*": 1009,
+            ".execution.playerEngagementExecutions.*.insideEngagementFireCount": 187,
+            ".execution.playerEngagementExecutions.*.damageContactsDealt": 167,
+            ".execution.playerEngagementExecutions.*.reportedDamageDealt": 189,
+            ".execution.playerEngagementExecutions.*.fireToContactEvidence.observedFireEvents": 193,
+            ".execution.playerEngagementExecutions.*.fireToContactEvidence.confirmedOffensiveContacts": 167,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.opponentId": 198,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.contactRefs.*.tick": 501,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.contactRefs.*.eventIndex": 500,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.firstDealtRef.tick": 91,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.firstDealtRef.eventIndex": 91,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.reportedDamageDealt": 186,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.firstContactRef.tick": 214,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.firstContactRef.eventIndex": 213,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.firstContactDistance.horizontalDistance": 214,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.firstContactDistance.verticalDelta": 214,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.firstContactDistance.directDistance": 214,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*": 49,
+            ".execution.playerEngagementExecutions.*.playerId": 203,
+            ".execution.playerEngagementExecutions.*.firstObservedFireRef": 55,
+            ".execution.playerEngagementExecutions.*.firstConfirmedDefensiveContactRef.tick": 103,
+            ".execution.playerEngagementExecutions.*.firstConfirmedDefensiveContactRef.eventIndex": 103,
+            ".execution.playerEngagementExecutions.*.reportedDamageReceived": 199,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.playerId": 204,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.firstReceivedRef.tick": 100,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.firstReceivedRef.eventIndex": 100,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.reportedDamageReceived": 197,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.returnOutcome": 111,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.coverage.returnContact.status": 96,
+            ".execution.playerEngagementExecutions.*.coverage.returnContact.status": 99,
+            ".execution.playerEngagementExecutions.*.engagementId": 209,
+            ".execution.playerEngagementExecutions.*.weaponFireRefs.*.tick": 417,
+            ".execution.playerEngagementExecutions.*.weaponFireRefs.*.eventIndex": 416,
+            ".execution.playerEngagementExecutions.*.firstObservedFireRef.tick": 153,
+            ".execution.playerEngagementExecutions.*.firstObservedFireRef.eventIndex": 153,
+            ".execution.playerEngagementExecutions.*.firstConfirmedOffensiveContactRef": 95,
+            ".execution.playerEngagementExecutions.*.firstConfirmedDefensiveContactRef": 96,
+            ".execution.playerEngagementExecutions.*.damageContactsReceived": 170,
+            ".execution.playerEngagementExecutions.*.weaponFireEventsBeforeFirstConfirmedContact": 169,
+            ".execution.playerEngagementExecutions.*.firstFireToFirstConfirmedContactSeconds": 132,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.engagementId": 210,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.firstDealtRef": 95,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.firstReceivedRef": 97,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.damageContactsDealt": 162,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.damageContactsReceived": 164,
+            ".execution.playerEngagementExecutions.*.firearmDeaths": 89,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.contactRefs.*": 456,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.deathRef": 90,
+            ".execution.playerEngagementExecutions.*.firearmKills": 97,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.coverage.fireEvidence.status": 92,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.coverage.fireEvidence.reasons.*": 92,
+            ".execution.playerEngagementExecutions.*.coverage.fireEvidence.status": 91,
+            ".execution.playerEngagementExecutions.*.coverage.fireEvidence.reasons.*": 91,
+            ".execution.playerEngagementExecutions.*.firstConfirmedOffensiveContactRef.tick": 93,
+            ".execution.playerEngagementExecutions.*.firstConfirmedOffensiveContactRef.eventIndex": 93,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.killRef": 87,
+            ".execution.playerEngagementExecutions.*.round": 192,
+            ".execution.playerEngagementExecutions.*.firstConfirmedDefensiveContactRef.round": 92,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.round": 193,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.contactRefs.*.round": 467,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.contactRefs.*.type": 103,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.firstReceivedRef.round": 90,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.returnContactRef": 58,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.returnOutcomeRef": 58,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.returnContactDelaySeconds": 66,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.firstContactRef.round": 193,
+            ".execution.playerEngagementExecutions.*.leadInFireCount": 132,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.deathRef.tick": 31,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.deathRef.eventIndex": 31,
+            ".execution.playerEngagementExecutions.*.weaponFireRefs.*.round": 389,
+            ".execution.playerEngagementExecutions.*.firstObservedFireRef.round": 138,
+            ".execution.playerEngagementExecutions.*.firstConfirmedOffensiveContactRef.round": 86,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.firstDealtRef.round": 84,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.killRef.round": 22,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.killRef.tick": 22,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.killRef.eventIndex": 22,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.deathRef.round": 29,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.returnContactRef.round": 8,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.returnContactRef.tick": 8,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.returnContactRef.eventIndex": 8,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.returnOutcomeRef.round": 8,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.returnOutcomeRef.tick": 8,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.returnOutcomeRef.eventIndex": 8,
+            ".execution.playerEngagementExecutions.*.firstContactRole": 13,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.firstContactRole": 13,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.coverage.contactEvidence.status": 40,
+            ".execution.playerEngagementExecutions.*.coverage.contactEvidence.status": 39,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.sameTickReturnRefs.*": 5,
+            ".execution.playerEngagementExecutions.*.opponentExchanges.*.returnOutcomeRef.type": 2,
+            ".execution.playerEngagementExecutions.*": 59,
+            ".execution.playerSummaries.*.eligibleEngagements": 6,
+            ".execution.playerSummaries.*.dealtFirst": 6,
+            ".execution.playerSummaries.*.unknownFirst": 8,
+            ".execution.playerSummaries.*.firearmKills": 5,
+            ".execution.playerSummaries.*.firearmDeaths": 6,
+            ".execution.playerSummaries.*.confirmedReturnDamage": 3,
+            ".execution.playerSummaries.*.noConfirmedReturn": 8,
+            ".execution.playerSummaries.*.ambiguousReturn": 4,
+            ".execution.playerSummaries.*.unavailableReturn": 7,
+            ".execution.playerSummaries.*.engagementsWithLeadInFire": 8,
+            ".execution.playerSummaries.*.totalConfirmedOffensiveContacts": 6,
+            ".execution.playerSummaries.*.opponentExchanges": 6,
+            ".execution.playerSummaries.*.receivedFirst": 4,
+            ".execution.playerSummaries.*.confirmedReturnKill": 1,
+            ".execution.playerSummaries.*.coverage.engagementLinkage.status": 1,
+            ".execution.playerSummaries.*.coverage.fireEvidence.reasons.*": 1,
+            ".execution.playerSummaries.*.coverage.contactEvidence.status": 1,
+            ".execution.playerSummaries.*.coverage.contactEvidence.reasons.*": 2,
+            ".execution.playerSummaries.*.coverage.returnContact.status": 1,
+            ".execution.playerSummaries.*.coverage.returnContact.reasons.*": 6,
+            ".execution.playerSummaries.*.coverage.spatialContext.status": 1,
+            ".execution.diagnostics.playerEngagementContexts": 1,
+            ".execution.diagnostics.opponentExchanges": 1,
+            ".execution.diagnostics.insideEngagementFireLinked": 1,
+            ".execution.diagnostics.leadInFireLinked": 1,
+            ".execution.diagnostics.unlinkedFire": 1,
+            ".execution.diagnostics.dealtFirst": 1,
+            ".execution.diagnostics.receivedFirst": 1,
+            ".execution.diagnostics.unknownFirst": 1,
+            ".execution.diagnostics.returnKill": 1,
+            ".execution.diagnostics.returnDamage": 1,
+            ".execution.diagnostics.returnNone": 1,
+            ".execution.diagnostics.returnAmbiguous": 1,
+            ".execution.diagnostics.returnUnavailable": 1,
+            ".execution.diagnostics.contextsWithDistance": 1,
+            ".execution.diagnostics.unknownWeaponContacts": 1
+          },
+          "examples": [
+            {
+              "path": ".engagements.directContacts.0.spatialCoverage.evidenceCoverage.status",
+              "old": "partial",
+              "fixed": "complete"
+            },
+            {
+              "path": ".engagements.directContacts.0.spatialCoverage.evidenceCoverage.reasons.0",
+              "old": "position-missing",
+              "fixed": null
+            },
+            {
+              "path": ".engagements.directContacts.0.spatialCoverage.evidenceCoverage.reasons.1",
+              "old": "view-missing",
+              "fixed": null
+            },
+            {
+              "path": ".engagements.directContacts.0.spatialCoverage.evidenceCoverage.reasons.2",
+              "old": "state-missing",
+              "fixed": null
+            },
+            {
+              "path": ".engagements.directContacts.0.spatialCoverage.evidenceCoverage.reasons.3",
+              "old": "weapon-unavailable",
+              "fixed": null
+            },
+            {
+              "path": ".engagements.directContacts.1.spatialCoverage.evidenceCoverage.status",
+              "old": "partial",
+              "fixed": "complete"
+            },
+            {
+              "path": ".engagements.directContacts.1.spatialCoverage.evidenceCoverage.reasons.0",
+              "old": "position-missing",
+              "fixed": null
+            },
+            {
+              "path": ".engagements.directContacts.1.spatialCoverage.evidenceCoverage.reasons.1",
+              "old": "view-missing",
+              "fixed": null
+            },
+            {
+              "path": ".engagements.directContacts.1.spatialCoverage.evidenceCoverage.reasons.2",
+              "old": "state-missing",
+              "fixed": null
+            },
+            {
+              "path": ".engagements.directContacts.1.spatialCoverage.evidenceCoverage.reasons.3",
+              "old": "weapon-unavailable",
+              "fixed": null
+            },
+            {
+              "path": ".engagements.directContacts.2.spatialCoverage.evidenceCoverage.status",
+              "old": "partial",
+              "fixed": "complete"
+            },
+            {
+              "path": ".engagements.directContacts.2.spatialCoverage.evidenceCoverage.reasons.0",
+              "old": "position-missing",
+              "fixed": null
+            },
+            {
+              "path": ".engagements.directContacts.2.spatialCoverage.evidenceCoverage.reasons.1",
+              "old": "view-missing",
+              "fixed": null
+            },
+            {
+              "path": ".engagements.directContacts.2.spatialCoverage.evidenceCoverage.reasons.2",
+              "old": "state-missing",
+              "fixed": null
+            },
+            {
+              "path": ".engagements.directContacts.2.spatialCoverage.evidenceCoverage.reasons.3",
+              "old": "weapon-unavailable",
+              "fixed": null
+            },
+            {
+              "path": ".engagements.directContacts.3.spatialCoverage.evidenceCoverage.status",
+              "old": "partial",
+              "fixed": "complete"
+            },
+            {
+              "path": ".engagements.directContacts.3.spatialCoverage.evidenceCoverage.reasons.1",
+              "old": "position-missing",
+              "fixed": null
+            },
+            {
+              "path": ".engagements.directContacts.3.spatialCoverage.evidenceCoverage.reasons.2",
+              "old": "view-missing",
+              "fixed": null
+            },
+            {
+              "path": ".engagements.directContacts.3.spatialCoverage.evidenceCoverage.reasons.3",
+              "old": "state-missing",
+              "fixed": null
+            },
+            {
+              "path": ".engagements.directContacts.4.spatialCoverage.evidenceCoverage.status",
+              "old": "partial",
+              "fixed": "complete"
+            }
+          ]
+        },
+        "findings": {
+          "unchanged": false,
+          "changedValues": 428,
+          "fieldCounts": {
+            ".*.highlights.*": 11,
+            ".*.contexts.*.category": 3,
+            ".*.contexts.*.title": 3,
+            ".*.contexts.*.summary": 3,
+            ".*.contexts.*.occurrences": 3,
+            ".*.contexts.*.eligibleOccurrences": 3,
+            ".*.contexts.*.relatedRounds.*": 23,
+            ".*.contexts.*.evidenceRefs.*.kind": 13,
+            ".*.contexts.*.evidenceRefs.*.effectRef": 13,
+            ".*.contexts.*.evidenceRefs.*.playerId": 13,
+            ".*.contexts.*.evidenceRefs.*.deathRef": 13,
+            ".*.contexts.*.evidenceRefs.*": 12,
+            ".*.contexts.*.facts.exactFlashEffects": 3,
+            ".*.contexts.*.facts.teamFlashEffects": 3,
+            ".*.contexts.*.facts.teammateEffects": 3,
+            ".*.contexts.*.facts.loneContactDeaths": 3,
+            ".*.contexts.*.facts.followUpWindowSeconds": 3,
+            ".*.contexts.*.caveats.*": 9,
+            ".*.contexts.*.id": 3,
+            ".*.contexts.*.ruleId": 3,
+            ".*.contexts.*.evidenceQuality": 3,
+            ".*.suppressedRules.*.reason": 49,
+            ".*.suppressedRules.*.ruleId": 42,
+            ".*.suppressedRules.*": 18,
+            ".*.diagnostics.rules.*.eligibleOccurrences": 56,
+            ".*.diagnostics.rules.*.occurrences": 45,
+            ".*.diagnostics.rules.*.triggered": 24,
+            ".*.diagnostics.rules.*.emitted": 24,
+            ".*.coverage.excludedOccurrences": 10,
+            ".*.coverage.caveats.*": 7,
+            ".*.reviews.*": 1,
+            ".*.contexts.*": 6
+          },
+          "examples": [
+            {
+              "path": ".0.highlights.0",
+              "old": null,
+              "fixed": {
+                "category": "impact",
+                "kind": "highlight",
+                "title": "仅剩本人存活时的击杀序列",
+                "summary": "R14 完成 2K，其中本方仅剩该玩家存活时继续完成确认击杀。",
+                "occurrences": 1,
+                "eligibleOccurrences": 1,
+                "relatedRounds": [
+                  14
+                ],
+                "evidenceRefs": [
+                  {
+                    "kind": "kill",
+                    "eventRef": {
+                      "round": 14,
+                      "type": "kill",
+                      "tick": 84627,
+                      "eventIndex": 218
+                    }
+                  },
+                  {
+                    "kind": "kill",
+                    "eventRef": {
+                      "round": 14,
+                      "type": "kill",
+                      "tick": 84722,
+                      "eventIndex": 245
+                    }
+                  },
+                  {
+                    "kind": "multi-kill",
+                    "playerId": "76561198336129296",
+                    "round": 14
+                  }
+                ],
+                "facts": {
+                  "killCount": 2,
+                  "roundResult": "loss",
+                  "sequenceRound": 14,
+                  "qualifiedSequences": 1,
+                  "equalizer": true,
+                  "advantageGain": false,
+                  "deficitReduction": true,
+                  "enemyEliminated": false,
+                  "soleSurvivor": true
+                },
+                "caveats": [
+                  "人数变化与回合结果是观察事实，不证明某次击杀导致回合获胜。"
+                ],
+                "id": "deep-finding:253e5b719ac418b092ff3cdd1b5928bb0dfc8ccbf06cb9398963ea1e9fa44a25:76561198336129296:deep.impact.sole-survivor-sequence",
+                "ruleId": "deep.impact.sole-survivor-sequence",
+                "playerId": "76561198336129296",
+                "evidenceQuality": "complete"
+              }
+            },
+            {
+              "path": ".0.highlights.1",
+              "old": null,
+              "fixed": {
+                "category": "impact",
+                "kind": "highlight",
+                "title": "多杀人数变化亮点",
+                "summary": "R1 的 2K 序列包含缩小人数劣势、完成敌方存活人数归零的确认人数变化，该回合最终获胜。",
+                "occurrences": 1,
+                "eligibleOccurrences": 5,
+                "relatedRounds": [
+                  1
+                ],
+                "evidenceRefs": [
+                  {
+                    "kind": "kill",
+                    "eventRef": {
+                      "round": 1,
+                      "type": "kill",
+                      "tick": 5851,
+                      "eventIndex": 141
+                    }
+                  },
+                  {
+                    "kind": "kill",
+                    "eventRef": {
+                      "round": 1,
+                      "type": "kill",
+                      "tick": 3832,
+                      "eventIndex": 60
+                    }
+                  },
+                  {
+                    "kind": "multi-kill",
+                    "playerId": "76561198336129296",
+                    "round": 1
+                  }
+                ],
+                "facts": {
+                  "killCount": 2,
+                  "roundResult": "win",
+                  "sequenceRound": 1,
+                  "qualifiedSequences": 5,
+                  "equalizer": false,
+                  "advantageGain": false,
+                  "deficitReduction": true,
+                  "enemyEliminated": true,
+                  "soleSurvivor": false
+                },
+                "caveats": [
+                  "人数变化与回合结果是观察事实，不证明某次击杀导致回合获胜。"
+                ],
+                "id": "deep-finding:253e5b719ac418b092ff3cdd1b5928bb0dfc8ccbf06cb9398963ea1e9fa44a25:76561198336129296:deep.impact.multikill-swing",
+                "ruleId": "deep.impact.multikill-swing",
+                "playerId": "76561198336129296",
+                "evidenceQuality": "complete"
+              }
+            },
+            {
+              "path": ".0.contexts.0.category",
+              "old": "utility",
+              "fixed": "teamplay"
+            },
+            {
+              "path": ".0.contexts.0.title",
+              "old": "重复队友受闪记录",
+              "fixed": "仅本人确认接触的死亡记录"
+            },
+            {
+              "path": ".0.contexts.0.summary",
+              "old": "有 4 颗可精确关联的闪光影响了队友，共记录 7 条队友受闪效果；这些事实不判断闪光质量。",
+              "fixed": "在 9 次所需证据完整的死亡场景中，8 次该 Engagement 中本方只有你产生确认 direct contact，随后也没有观察到队友对同一击杀者形成确认接触。"
+            },
+            {
+              "path": ".0.contexts.0.occurrences",
+              "old": 4,
+              "fixed": 8
+            },
+            {
+              "path": ".0.contexts.0.eligibleOccurrences",
+              "old": 8,
+              "fixed": 9
+            },
+            {
+              "path": ".0.contexts.0.relatedRounds.0",
+              "old": 11,
+              "fixed": 3
+            },
+            {
+              "path": ".0.contexts.0.relatedRounds.1",
+              "old": 13,
+              "fixed": 4
+            },
+            {
+              "path": ".0.contexts.0.relatedRounds.2",
+              "old": 15,
+              "fixed": 5
+            },
+            {
+              "path": ".0.contexts.0.relatedRounds.3",
+              "old": 17,
+              "fixed": 10
+            },
+            {
+              "path": ".0.contexts.0.relatedRounds.4",
+              "old": null,
+              "fixed": 12
+            },
+            {
+              "path": ".0.contexts.0.relatedRounds.5",
+              "old": null,
+              "fixed": 13
+            },
+            {
+              "path": ".0.contexts.0.relatedRounds.6",
+              "old": null,
+              "fixed": 14
+            },
+            {
+              "path": ".0.contexts.0.relatedRounds.7",
+              "old": null,
+              "fixed": 16
+            },
+            {
+              "path": ".0.contexts.0.evidenceRefs.0.kind",
+              "old": "utility-effect",
+              "fixed": "player-death-response"
+            },
+            {
+              "path": ".0.contexts.0.evidenceRefs.0.effectRef",
+              "old": {
+                "round": 11,
+                "type": "utility",
+                "tick": 63138,
+                "eventIndex": 144,
+                "utility": "flashbang",
+                "action": "detonate"
+              },
+              "fixed": null
+            },
+            {
+              "path": ".0.contexts.0.evidenceRefs.0.playerId",
+              "old": null,
+              "fixed": "76561198336129296"
+            },
+            {
+              "path": ".0.contexts.0.evidenceRefs.0.deathRef",
+              "old": null,
+              "fixed": {
+                "round": 4,
+                "type": "kill",
+                "tick": 25625,
+                "eventIndex": 108
+              }
+            },
+            {
+              "path": ".0.contexts.0.evidenceRefs.1.kind",
+              "old": "utility-effect",
+              "fixed": "player-death-response"
+            }
+          ]
+        },
+        "nativeEvents": {
+          "unchanged": false,
+          "changedValues": 3839,
+          "fieldCounts": {
+            ".*.user_active_weapon": 271,
+            ".*.user_active_weapon_name": 1178,
+            ".*.user_entity_id": 271,
+            ".*.user_inventory.*": 1402,
+            ".*.attacker_active_weapon": 59,
+            ".*.attacker_active_weapon_name": 268,
+            ".*.attacker_entity_id": 59,
+            ".*.attacker_inventory.*": 308,
+            ".*.assister_active_weapon": 6,
+            ".*.assister_active_weapon_name": 4,
+            ".*.assister_entity_id": 6,
+            ".*.assister_inventory.*": 7
+          },
+          "examples": [
+            {
+              "path": ".47.user_active_weapon",
+              "old": null,
+              "fixed": 5506043
+            },
+            {
+              "path": ".47.user_active_weapon_name",
+              "old": null,
+              "fixed": "Glock-18"
+            },
+            {
+              "path": ".47.user_entity_id",
+              "old": 879,
+              "fixed": 2927
+            },
+            {
+              "path": ".47.user_inventory.0",
+              "old": null,
+              "fixed": "Glock-18"
+            },
+            {
+              "path": ".47.user_inventory.1",
+              "old": null,
+              "fixed": "Skeleton Knife"
+            },
+            {
+              "path": ".103.user_active_weapon",
+              "old": null,
+              "fixed": 5506043
+            },
+            {
+              "path": ".103.user_active_weapon_name",
+              "old": null,
+              "fixed": "Glock-18"
+            },
+            {
+              "path": ".103.user_entity_id",
+              "old": 879,
+              "fixed": 2927
+            },
+            {
+              "path": ".103.user_inventory.0",
+              "old": null,
+              "fixed": "Glock-18"
+            },
+            {
+              "path": ".103.user_inventory.1",
+              "old": null,
+              "fixed": "Skeleton Knife"
+            },
+            {
+              "path": ".116.user_active_weapon",
+              "old": null,
+              "fixed": 5506043
+            },
+            {
+              "path": ".116.user_active_weapon_name",
+              "old": null,
+              "fixed": "Glock-18"
+            },
+            {
+              "path": ".116.user_entity_id",
+              "old": 879,
+              "fixed": 2927
+            },
+            {
+              "path": ".116.user_inventory.0",
+              "old": null,
+              "fixed": "Glock-18"
+            },
+            {
+              "path": ".116.user_inventory.1",
+              "old": null,
+              "fixed": "Skeleton Knife"
+            },
+            {
+              "path": ".118.user_active_weapon",
+              "old": null,
+              "fixed": 5506043
+            },
+            {
+              "path": ".118.user_active_weapon_name",
+              "old": null,
+              "fixed": "Glock-18"
+            },
+            {
+              "path": ".118.user_entity_id",
+              "old": 879,
+              "fixed": 2927
+            },
+            {
+              "path": ".118.user_inventory.0",
+              "old": null,
+              "fixed": "Glock-18"
+            },
+            {
+              "path": ".118.user_inventory.1",
+              "old": null,
+              "fixed": "Skeleton Knife"
+            }
+          ]
+        }
+      },
+      "unapprovedNativeChanges": [],
+      "invariants": "PASS",
+      "classification": "EXPECTED FIX IMPROVEMENT",
+      "explanation": "All changed native enrichment ticks independently queried; Pawn/active handle/item definition/inventory match demoinfocs. Event-vs-FrameDone differences are separately traced to actual pawn transitions and weapon entity/index/serial/lifetimes, including all 108 changed enrichments. Event actors/effect entities match; unchanged analyzer input-to-output rules. R18 independent lifecycle anomaly retained; no inferred sub-tick ordering."
+    },
+    {
+      "fixture": "demo3",
+      "sha": "6c9dae6e5676f7e9498297c527393264d52a8944fdb03b972b8ed075a996e5ea",
+      "oldHash": "4e3e4ad1fe7c837b46bdd4685e648e3f62cecf296d1f871b891366b40e372625",
+      "fixedHash": "4e3e4ad1fe7c837b46bdd4685e648e3f62cecf296d1f871b891366b40e372625",
+      "players": {
+        "old": 10,
+        "fixed": 10
+      },
+      "events": {
+        "old": 4727,
+        "fixed": 4727
+      },
+      "spatialCoverage": {
+        "old": {
+          "status": "partial",
+          "reasons": [
+            "participant-unidentified",
+            "weapon-unavailable",
+            "context-outside-round",
+            "position-missing",
+            "view-missing",
+            "state-missing"
+          ]
+        },
+        "fixed": {
+          "status": "partial",
+          "reasons": [
+            "participant-unidentified",
+            "weapon-unavailable",
+            "context-outside-round",
+            "position-missing",
+            "view-missing",
+            "state-missing"
+          ]
+        }
+      },
+      "impactCoverage": {
+        "old": {
+          "roundState": {
+            "status": "partial",
+            "reasons": [
+              "lifecycle-anomaly"
+            ]
+          },
+          "attribution": {
+            "status": "partial",
+            "reasons": [
+              "self-kill"
+            ]
+          },
+          "engagementLinkage": {
+            "status": "complete",
+            "reasons": []
+          }
+        },
+        "fixed": {
+          "roundState": {
+            "status": "partial",
+            "reasons": [
+              "lifecycle-anomaly"
+            ]
+          },
+          "attribution": {
+            "status": "partial",
+            "reasons": [
+              "self-kill"
+            ]
+          },
+          "engagementLinkage": {
+            "status": "complete",
+            "reasons": []
+          }
+        }
+      },
+      "changes": {
+        "match": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        },
+        "spatial": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        },
+        "evidence": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        },
+        "findings": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        },
+        "nativeEvents": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        }
+      },
+      "unapprovedNativeChanges": [],
+      "invariants": "PASS",
+      "classification": "UNCHANGED"
+    },
+    {
+      "fixture": "nuke",
+      "sha": "dea9382b9cc263fed9ee4ed7e71fa6be8c176cf888868f05b26d850af6f5cb3c",
+      "oldHash": "ea0630a418c875b0f2d8af5ad6c0b7c3036c77fcde80bd2a66e5a185104bc380",
+      "fixedHash": "ea0630a418c875b0f2d8af5ad6c0b7c3036c77fcde80bd2a66e5a185104bc380",
+      "players": {
+        "old": 10,
+        "fixed": 10
+      },
+      "events": {
+        "old": 4736,
+        "fixed": 4736
+      },
+      "spatialCoverage": {
+        "old": {
+          "status": "partial",
+          "reasons": [
+            "participant-unidentified",
+            "weapon-unavailable",
+            "context-outside-round",
+            "position-missing",
+            "view-missing",
+            "state-missing",
+            "requested-tick-missing"
+          ]
+        },
+        "fixed": {
+          "status": "partial",
+          "reasons": [
+            "participant-unidentified",
+            "weapon-unavailable",
+            "context-outside-round",
+            "position-missing",
+            "view-missing",
+            "state-missing",
+            "requested-tick-missing"
+          ]
+        }
+      },
+      "impactCoverage": {
+        "old": {
+          "roundState": {
+            "status": "complete",
+            "reasons": []
+          },
+          "attribution": {
+            "status": "complete",
+            "reasons": []
+          },
+          "engagementLinkage": {
+            "status": "complete",
+            "reasons": []
+          }
+        },
+        "fixed": {
+          "roundState": {
+            "status": "complete",
+            "reasons": []
+          },
+          "attribution": {
+            "status": "complete",
+            "reasons": []
+          },
+          "engagementLinkage": {
+            "status": "complete",
+            "reasons": []
+          }
+        }
+      },
+      "changes": {
+        "match": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        },
+        "spatial": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        },
+        "evidence": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        },
+        "findings": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        },
+        "nativeEvents": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        }
+      },
+      "unapprovedNativeChanges": [],
+      "invariants": "PASS",
+      "classification": "UNCHANGED"
+    },
+    {
+      "fixture": "inferno",
+      "sha": "b61c040074f84f1f2c1b683642923243dbe123c2a0c70ed3c0670b0e4cd7a265",
+      "oldHash": "bb8b1c98815d48f2159da9b40f41d190bec12be25556141e11045446c0e14d61",
+      "fixedHash": "bb8b1c98815d48f2159da9b40f41d190bec12be25556141e11045446c0e14d61",
+      "players": {
+        "old": 10,
+        "fixed": 10
+      },
+      "events": {
+        "old": 5419,
+        "fixed": 5419
+      },
+      "spatialCoverage": {
+        "old": {
+          "status": "partial",
+          "reasons": [
+            "participant-unidentified",
+            "weapon-unavailable",
+            "context-outside-round",
+            "position-missing",
+            "view-missing",
+            "state-missing"
+          ]
+        },
+        "fixed": {
+          "status": "partial",
+          "reasons": [
+            "participant-unidentified",
+            "weapon-unavailable",
+            "context-outside-round",
+            "position-missing",
+            "view-missing",
+            "state-missing"
+          ]
+        }
+      },
+      "impactCoverage": {
+        "old": {
+          "roundState": {
+            "status": "complete",
+            "reasons": []
+          },
+          "attribution": {
+            "status": "partial",
+            "reasons": [
+              "killer-unidentified",
+              "side-unknown"
+            ]
+          },
+          "engagementLinkage": {
+            "status": "partial",
+            "reasons": [
+              "engagement-not-linked"
+            ]
+          }
+        },
+        "fixed": {
+          "roundState": {
+            "status": "complete",
+            "reasons": []
+          },
+          "attribution": {
+            "status": "partial",
+            "reasons": [
+              "killer-unidentified",
+              "side-unknown"
+            ]
+          },
+          "engagementLinkage": {
+            "status": "partial",
+            "reasons": [
+              "engagement-not-linked"
+            ]
+          }
+        }
+      },
+      "changes": {
+        "match": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        },
+        "spatial": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        },
+        "evidence": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        },
+        "findings": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        },
+        "nativeEvents": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        }
+      },
+      "unapprovedNativeChanges": [],
+      "invariants": "PASS",
+      "classification": "UNCHANGED"
+    },
+    {
+      "fixture": "dust2",
+      "sha": "db90fe85aab023a1d2c8a5996182e6120d98ef494f02a070b17982b235e4958c",
+      "oldHash": "e836fc49e04ebac334c24c8fd17d0246901aba1bff79057ac14a784ce18e7a1c",
+      "fixedHash": "e836fc49e04ebac334c24c8fd17d0246901aba1bff79057ac14a784ce18e7a1c",
+      "players": {
+        "old": 10,
+        "fixed": 10
+      },
+      "events": {
+        "old": 6083,
+        "fixed": 6083
+      },
+      "spatialCoverage": {
+        "old": {
+          "status": "partial",
+          "reasons": [
+            "participant-unidentified",
+            "weapon-unavailable",
+            "context-outside-round",
+            "position-missing",
+            "view-missing",
+            "state-missing"
+          ]
+        },
+        "fixed": {
+          "status": "partial",
+          "reasons": [
+            "participant-unidentified",
+            "weapon-unavailable",
+            "context-outside-round",
+            "position-missing",
+            "view-missing",
+            "state-missing"
+          ]
+        }
+      },
+      "impactCoverage": {
+        "old": {
+          "roundState": {
+            "status": "complete",
+            "reasons": []
+          },
+          "attribution": {
+            "status": "partial",
+            "reasons": [
+              "killer-unidentified",
+              "side-unknown"
+            ]
+          },
+          "engagementLinkage": {
+            "status": "complete",
+            "reasons": []
+          }
+        },
+        "fixed": {
+          "roundState": {
+            "status": "complete",
+            "reasons": []
+          },
+          "attribution": {
+            "status": "partial",
+            "reasons": [
+              "killer-unidentified",
+              "side-unknown"
+            ]
+          },
+          "engagementLinkage": {
+            "status": "complete",
+            "reasons": []
+          }
+        }
+      },
+      "changes": {
+        "match": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        },
+        "spatial": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        },
+        "evidence": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        },
+        "findings": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        },
+        "nativeEvents": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        }
+      },
+      "unapprovedNativeChanges": [],
+      "invariants": "PASS",
+      "classification": "UNCHANGED"
+    },
+    {
+      "fixture": "mirage",
+      "sha": "62cb3af35c3893a91c7dd8c9007fdb1105950ec8963a46eca6006dac96655acb",
+      "oldHash": "131bcf7491fc48f62fbfe0e3acd84593cc4077ca12887cbd657945aa59fb6b83",
+      "fixedHash": "131bcf7491fc48f62fbfe0e3acd84593cc4077ca12887cbd657945aa59fb6b83",
+      "players": {
+        "old": 10,
+        "fixed": 10
+      },
+      "events": {
+        "old": 3429,
+        "fixed": 3429
+      },
+      "spatialCoverage": {
+        "old": {
+          "status": "partial",
+          "reasons": [
+            "participant-unidentified",
+            "weapon-unavailable",
+            "context-outside-round",
+            "position-missing",
+            "view-missing",
+            "state-missing"
+          ]
+        },
+        "fixed": {
+          "status": "partial",
+          "reasons": [
+            "participant-unidentified",
+            "weapon-unavailable",
+            "context-outside-round",
+            "position-missing",
+            "view-missing",
+            "state-missing"
+          ]
+        }
+      },
+      "impactCoverage": {
+        "old": {
+          "roundState": {
+            "status": "complete",
+            "reasons": []
+          },
+          "attribution": {
+            "status": "complete",
+            "reasons": []
+          },
+          "engagementLinkage": {
+            "status": "partial",
+            "reasons": [
+              "engagement-not-linked"
+            ]
+          }
+        },
+        "fixed": {
+          "roundState": {
+            "status": "complete",
+            "reasons": []
+          },
+          "attribution": {
+            "status": "complete",
+            "reasons": []
+          },
+          "engagementLinkage": {
+            "status": "partial",
+            "reasons": [
+              "engagement-not-linked"
+            ]
+          }
+        }
+      },
+      "changes": {
+        "match": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        },
+        "spatial": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        },
+        "evidence": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        },
+        "findings": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        },
+        "nativeEvents": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        }
+      },
+      "unapprovedNativeChanges": [],
+      "invariants": "PASS",
+      "classification": "UNCHANGED"
+    },
+    {
+      "fixture": "ancient",
+      "sha": "ca7b6b7cefdde927d654ac101ea1bee4fd996efc9b86ac89dac33874a0115f4e",
+      "oldHash": "616e6c147e397246a5a9f73a5b929c1750b8e9a3eaec7b189a9a5bc7a0b5fc53",
+      "fixedHash": "616e6c147e397246a5a9f73a5b929c1750b8e9a3eaec7b189a9a5bc7a0b5fc53",
+      "players": {
+        "old": 10,
+        "fixed": 10
+      },
+      "events": {
+        "old": 4556,
+        "fixed": 4556
+      },
+      "spatialCoverage": {
+        "old": {
+          "status": "partial",
+          "reasons": [
+            "participant-unidentified",
+            "weapon-unavailable",
+            "context-outside-round",
+            "position-missing",
+            "view-missing",
+            "state-missing"
+          ]
+        },
+        "fixed": {
+          "status": "partial",
+          "reasons": [
+            "participant-unidentified",
+            "weapon-unavailable",
+            "context-outside-round",
+            "position-missing",
+            "view-missing",
+            "state-missing"
+          ]
+        }
+      },
+      "impactCoverage": {
+        "old": {
+          "roundState": {
+            "status": "partial",
+            "reasons": [
+              "lifecycle-anomaly"
+            ]
+          },
+          "attribution": {
+            "status": "partial",
+            "reasons": [
+              "killer-unidentified",
+              "same-tick-transition-ambiguous",
+              "self-kill",
+              "side-unknown",
+              "teamkill"
+            ]
+          },
+          "engagementLinkage": {
+            "status": "partial",
+            "reasons": [
+              "engagement-not-linked"
+            ]
+          }
+        },
+        "fixed": {
+          "roundState": {
+            "status": "partial",
+            "reasons": [
+              "lifecycle-anomaly"
+            ]
+          },
+          "attribution": {
+            "status": "partial",
+            "reasons": [
+              "killer-unidentified",
+              "same-tick-transition-ambiguous",
+              "self-kill",
+              "side-unknown",
+              "teamkill"
+            ]
+          },
+          "engagementLinkage": {
+            "status": "partial",
+            "reasons": [
+              "engagement-not-linked"
+            ]
+          }
+        }
+      },
+      "changes": {
+        "match": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        },
+        "spatial": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        },
+        "evidence": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        },
+        "findings": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        },
+        "nativeEvents": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        }
+      },
+      "unapprovedNativeChanges": [],
+      "invariants": "PASS",
+      "classification": "UNCHANGED"
+    },
+    {
+      "fixture": "anubis",
+      "sha": "5ee94d7f475a7723f214636e438bf33acccd8c30a85bdb192dfd1a26772b966d",
+      "oldHash": "3fbeb736f3300ee85c46a54107139b511686cced0e68f0af5e0570041762cfe3",
+      "fixedHash": "3fbeb736f3300ee85c46a54107139b511686cced0e68f0af5e0570041762cfe3",
+      "players": {
+        "old": 10,
+        "fixed": 10
+      },
+      "events": {
+        "old": 3718,
+        "fixed": 3718
+      },
+      "spatialCoverage": {
+        "old": {
+          "status": "partial",
+          "reasons": [
+            "participant-unidentified",
+            "weapon-unavailable",
+            "context-outside-round",
+            "position-missing",
+            "view-missing",
+            "state-missing"
+          ]
+        },
+        "fixed": {
+          "status": "partial",
+          "reasons": [
+            "participant-unidentified",
+            "weapon-unavailable",
+            "context-outside-round",
+            "position-missing",
+            "view-missing",
+            "state-missing"
+          ]
+        }
+      },
+      "impactCoverage": {
+        "old": {
+          "roundState": {
+            "status": "partial",
+            "reasons": [
+              "lifecycle-anomaly"
+            ]
+          },
+          "attribution": {
+            "status": "complete",
+            "reasons": []
+          },
+          "engagementLinkage": {
+            "status": "partial",
+            "reasons": [
+              "engagement-not-linked"
+            ]
+          }
+        },
+        "fixed": {
+          "roundState": {
+            "status": "partial",
+            "reasons": [
+              "lifecycle-anomaly"
+            ]
+          },
+          "attribution": {
+            "status": "complete",
+            "reasons": []
+          },
+          "engagementLinkage": {
+            "status": "partial",
+            "reasons": [
+              "engagement-not-linked"
+            ]
+          }
+        }
+      },
+      "changes": {
+        "match": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        },
+        "spatial": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        },
+        "evidence": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        },
+        "findings": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        },
+        "nativeEvents": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        }
+      },
+      "unapprovedNativeChanges": [],
+      "invariants": "PASS",
+      "classification": "UNCHANGED"
+    },
+    {
+      "fixture": "overpass",
+      "sha": "7b43fa4215d99ce767d17f9d1f36e8997b7aeeb6227fa8b2738b9d377b48f28e",
+      "oldHash": "8740142731a23c2d651607a13938436eae7522d37e63cf6e519a73ab1daf3c9b",
+      "fixedHash": "8740142731a23c2d651607a13938436eae7522d37e63cf6e519a73ab1daf3c9b",
+      "players": {
+        "old": 10,
+        "fixed": 10
+      },
+      "events": {
+        "old": 4041,
+        "fixed": 4041
+      },
+      "spatialCoverage": {
+        "old": {
+          "status": "partial",
+          "reasons": [
+            "participant-unidentified",
+            "weapon-unavailable",
+            "context-outside-round",
+            "position-missing",
+            "view-missing",
+            "state-missing"
+          ]
+        },
+        "fixed": {
+          "status": "partial",
+          "reasons": [
+            "participant-unidentified",
+            "weapon-unavailable",
+            "context-outside-round",
+            "position-missing",
+            "view-missing",
+            "state-missing"
+          ]
+        }
+      },
+      "impactCoverage": {
+        "old": {
+          "roundState": {
+            "status": "complete",
+            "reasons": []
+          },
+          "attribution": {
+            "status": "complete",
+            "reasons": []
+          },
+          "engagementLinkage": {
+            "status": "partial",
+            "reasons": [
+              "engagement-not-linked"
+            ]
+          }
+        },
+        "fixed": {
+          "roundState": {
+            "status": "complete",
+            "reasons": []
+          },
+          "attribution": {
+            "status": "complete",
+            "reasons": []
+          },
+          "engagementLinkage": {
+            "status": "partial",
+            "reasons": [
+              "engagement-not-linked"
+            ]
+          }
+        }
+      },
+      "changes": {
+        "match": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        },
+        "spatial": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        },
+        "evidence": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        },
+        "findings": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        },
+        "nativeEvents": {
+          "unchanged": true,
+          "changedValues": 0,
+          "fieldCounts": {},
+          "examples": []
+        }
+      },
+      "unapprovedNativeChanges": [],
+      "invariants": "PASS",
+      "classification": "UNCHANGED"
+    }
+  ]
+}

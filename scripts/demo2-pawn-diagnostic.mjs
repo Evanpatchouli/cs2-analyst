@@ -12,7 +12,11 @@ const option = (name, fallback) => args.includes(name) ? args[args.indexOf(name)
 const nativePath = option('--native', null);
 const output = resolve(root, option('--out', '.tmp/demo2-diagnostic/native-installed.json'));
 const require = createRequire(resolve(root, 'packages/dem-parser/package.json'));
-const native = nativePath ? require(resolve(nativePath)) : require('@laihoe/demoparser2');
+const production = args.includes('--production');
+assert.ok(!production || !nativePath, 'Production verification cannot use an external native binary');
+const referenceRequire = createRequire(resolve(root, 'vendor/demoparser/.build/reference/package.json'));
+const native = nativePath ? require(resolve(nativePath)) : production ? require('@cs2-analyst/demoparser-native') : referenceRequire('@laihoe/demoparser2');
+if(!production&&!nativePath)assert.equal(referenceRequire('@laihoe/demoparser2/package.json').version,'0.42.0');
 const bytes = readFileSync(resolve(root, '.demo/demo2.dem'));
 const sha256 = createHash('sha256').update(bytes).digest('hex');
 assert.equal(sha256, '253e5b719ac418b092ff3cdd1b5928bb0dfc8ccbf06cb9398963ea1e9fa44a25');
@@ -122,7 +126,16 @@ for(const file of ['demo1.dem','demo2.dem','demo3.dem','nuke.dem','inferno.dem',
   catch(error) { patchComparison.push({file,status:'UNVERIFIED',error:error.message}); }
 }
 const result={schemaVersion:1,fixture:{filename:'.demo/demo2.dem',sha256,bytes:bytes.length,header},environment:{node:process.version,platform:process.platform,arch:process.arch},
-  nativeSource:nativePath?'external diagnostic build':'installed @laihoe/demoparser2',players,affected,controlIds,fields,pawnFields:pawn,controllerFields:controller,
+  nativeSource:production?native.getBindingProvenance():nativePath?'external diagnostic build':'installed @laihoe/demoparser2',players,affected,controlIds,fields,pawnFields:pawn,controllerFields:controller,
   fullMatch,spawnCount:spawns.length,spawnEvents:spawns,lifecycle,eventExtra,queryShapes,allVsSubset,boundaries,boundaryRows,patchComparison};
 mkdirSync(dirname(output),{recursive:true}); writeFileSync(output,JSON.stringify(result,null,2)+'\n');
+if(production){
+  const fixed=fullMatch.players.find(p=>p.steamid===affected);
+  assert.equal(fixed.rows,107577);assert.equal(fixed.corePawnCompleteRows,107577);
+  for(const field of pawn.filter(f=>f!=='active_weapon_name'))assert.equal(fixed.fields[field].present,107577);
+  assert.deepEqual(fixed.entityIds,[2927]);assert.equal(fixed.indexMismatchRows,0);
+  assert.equal(fixed.aliveTrueRows,78986);assert.equal(fixed.aliveWeaponPresentRows,78577);
+  assert.deepEqual(fixed.aliveWeaponMissingRanges,[{startTick:75805,endTick:76213}]);
+  assert.equal(fixed.aliveWeaponMissingHandleCounts['16777215'],409);
+}
 console.log(JSON.stringify({output,rows:fullMatch.rows,affected:fullMatch.players.find(p=>p.steamid===affected),controlIds},null,2));

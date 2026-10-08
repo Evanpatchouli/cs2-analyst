@@ -1,6 +1,6 @@
 # DEM 解析（P2.2）
 
-`packages/dem-parser` 在 Node.js / Electron 主进程中读取本地 CS2 DEM。当前实现使用 `@laihoe/demoparser2` 0.42.0 的平台原生模块，返回 `packages/match-model` 定义的 `Match`。
+`packages/dem-parser` 在 Node.js / Electron 主进程中读取本地 CS2 DEM。当前实现使用内部 `@cs2-analyst/demoparser-native`：上游 v0.42.0 + 完整 #363 backport，Windows x64 MSVC，返回 `packages/match-model` 定义的 `Match`。固定源码、构建命令及来源校验见 [handle fix integration](./demoparser-handle-fix.md)。
 
 ## 使用
 
@@ -42,6 +42,8 @@ P5.7.1 可通过 `provider.parseWithSpatial(filePath, { tickBudget: 24000, conte
 
 ```powershell
 pnpm install --frozen-lockfile
+pnpm parser:build-fixed
+pnpm parser:verify
 pnpm --filter @cs2-analyst/dem-parser test
 pnpm build
 pnpm typecheck

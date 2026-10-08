@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@cs2-analyst/match-model": "workspace:^",
-    "@laihoe/demoparser2": "^0.42.0"
+    "@cs2-analyst/demoparser-native": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^24.19.0",

@@ -7,6 +7,8 @@
     "onlyBuiltDependencies": ["esbuild"]
   },
   "scripts": {
+    "parser:build-fixed": "pnpm --filter @cs2-analyst/demoparser-native build:native",
+    "parser:verify": "pnpm --filter @cs2-analyst/demoparser-native verify",
     "dev": "turbo run dev",
     "start": "turbo run start",
     "typecheck": "turbo run typecheck",

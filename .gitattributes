@@ -1,0 +1,2 @@
+# Preserve exact upstream artifact bytes; unified-diff blank context lines are spaces.
+vendor/demoparser/*.patch -text whitespace=-blank-at-eol

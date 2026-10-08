@@ -6,7 +6,11 @@ import { setTimeout as delay } from 'node:timers/promises';
 
 /** Shared CDP assertions for built and installed renderers, after demo1 import. */
 export async function checkReportUx(evaluate, send, qaDir) {
-  await evaluate("document.querySelector('[data-app-content]').scrollTo(0, 0)");
+  // Settle the previous Finding → Timeline scroll and CDP viewport restoration,
+  // then cancel its smooth scroll before asserting the exact top-of-page layout.
+  await send('Emulation.setFocusEmulationEnabled', { enabled: true });
+  await delay(1000);
+  await evaluate("document.activeElement?.blur(); document.querySelector('[data-app-content]').scrollTo({top:0,left:0,behavior:'instant'}); window.scrollTo({top:0,left:0,behavior:'instant'})");
   await checkWindowLayout(evaluate);
   // Wait in Node: occluded Electron windows can pause renderer animation frames.
   const settle = () => delay(100);

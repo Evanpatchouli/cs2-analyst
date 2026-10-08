@@ -1,4 +1,11 @@
-# Personal Compatibility Gate — 2026-10-09
+# P5.7.0.2 Native Handle Integration — 2026-10-09
+
+- Baseline `7b016278a8209b917df688b54be6763d04f53663`; fixed v0.42.0 + upstream #363, production Windows x64 MSVC binding. P5.7.0 **PASS**, P5.7 **FINAL PASS**, v0.1 Final Acceptance **READY TO RESUME**, not FINAL PASS. Next task: separately execute Final Acceptance Resume.
+- Source pins, exact backport scope, toolchain, SHA, clean builds and gates: [integration record](../docs/demoparser-handle-fix.md) / [JSON](../docs/demoparser-handle-fix.json). Native, full package tests, three Personal DEMs, four core + three extended maps, Desktop, both installers and clean installed smoke PASS; independent code/evidence review PASS. No Train run; no goldens/thresholds/analysis workaround; no push.
+- demo2 Pawn2927 has 107577 complete core ticks; 409 invalid weapon ticks75805–76213 retained. Required partial270→0; Desktop10/10; R1–R17 complete, R18 lifecycle-anomaly unavailable. 元屠1 Review+1 Highlight+1 context. Nine control core fields unchanged; weapon recovery independently traced including all108 changed event-vs-FrameDone enrichments.
+- UNKNOWN retained: native feed absolute completeness, other untested recording modes, absolute entity freshness guarantees, peak memory. Historical FAIL and diagnostic documents below are retained and superseded, not erased.
+
+## Historical Personal Compatibility Gate — 2026-10-09
 
 - Baseline `80437834a43960196bc65d85cbd35095d9a469f8`; P5.7.8 formally **PASS**. Older provenance/visual-pending entries below are historical and superseded.
 - All `.demo/demo1.dem`, `.demo/demo2.dem`, `.demo/demo3.dem` are Product Owner-confirmed actual personal matches. Header `SourceTV Demo` is recording metadata, not evidence against personal provenance.

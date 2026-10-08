@@ -23,7 +23,7 @@ const WORKSPACE_PACKAGES = [
  * the `node_modules` staged next to the worker bundle by scripts/prepare-pack.mjs,
  * so the bundle stays JavaScript-only.
  */
-const NATIVE_PACKAGES = ['@laihoe/demoparser2', '@laihoe/demoparser2-win32-x64-msvc'];
+const NATIVE_PACKAGES = ['@cs2-analyst/demoparser-native'];
 
 /** Packaged test seam. Off unless the test-seam installer is explicitly built. */
 const testSeam = process.env.CS2_ANALYST_TEST_SEAM === '1';

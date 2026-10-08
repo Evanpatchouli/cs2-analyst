@@ -1,0 +1,22 @@
+{
+  "repository": "https://github.com/LaihoE/demoparser.git",
+  "baseTag": "v0.42.0",
+  "baseCommit": "d3767705dc5846d73ed29db50eaeda58778dc934",
+  "upstreamPullRequest": 363,
+  "fixCommit": "451321a517ec9c0c6be7f0103dd07e7a805c3345",
+  "fixHeadCommit": "cc214aed17d23fa996929305df5413505a7dd40b",
+  "target": "x86_64-pc-windows-msvc",
+  "rustVersion": "1.90.0",
+  "patches": {
+    "entity-handle-363.patch": "f1b4e750a0fbb38136e4e5bf29c02d974b84c7eeee2aaf45353ceb8253bec8f9",
+    "backport-363.patch": "47a9b2bfcb5fd9ee0358f1362e7a5ccc61bdd0a69e526ba1717cd70b13fc2c68",
+    "build-support.patch": "94172e708cdb487ef3ae27248554260256f3dc653a5eddd107674c458772fd97"
+  },
+  "protobufSha256": "953ad3f19e1c1bd888d8d51292ff47cb1379a979353f07fb7977a4c152e4f5b5",
+  "cargoLockSha256": "316232d192147c84050bd9b069919dc66d45e3f113ffd2e7b5508852e9f0992c",
+  "generatedSourceHashes": {
+    "src/csgoproto/src/protobuf.rs": "953ad3f19e1c1bd888d8d51292ff47cb1379a979353f07fb7977a4c152e4f5b5",
+    "src/csgoproto/src/message_type.rs": "3db1c6244d8a9f8ec8701cc980c4bd13f2aad86cdde11ea69f305dd011c986f4",
+    "src/csgoproto/src/maps.rs": "82206b2cddfafc8b8cb60d78ce8cad8e9153a9177f16ac31075a63f1d4233a07"
+  }
+}

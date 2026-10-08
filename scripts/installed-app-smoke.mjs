@@ -4,6 +4,7 @@ import { checkWindowShell } from './window-shell-checks.mjs';
 import { checkWindowsInstallBranding } from './windows-branding-checks.mjs';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
+import nativeParser from '../packages/demoparser-native/index.cjs';
 import { spawn, spawnSync } from 'node:child_process';
 import { closeSync, existsSync, mkdirSync, openSync, readFileSync, readdirSync, readSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:net';
@@ -258,17 +259,24 @@ function checkInstalledLayout(variant, expectSeam) {
   for (const entry of entries) {
     assert.ok(entry === 'package.json' || entry.startsWith('dist/'), 'app.asar 含非应用内容：' + entry);
   }
-  for (const required of ['dist/electron/main.js', 'dist/electron/report-worker.js', 'dist/electron/node_modules/@laihoe/demoparser2/index.js', 'dist/preload/index.cjs', 'dist/renderer/index.html']) {
+  for (const required of ['dist/electron/main.js', 'dist/electron/report-worker.js', 'dist/electron/node_modules/@cs2-analyst/demoparser-native/index.cjs', 'dist/preload/index.cjs', 'dist/renderer/index.html']) {
     assert.ok(files.has(required), 'app.asar 缺少 ' + required);
   }
-  const nativeRelative = 'dist/electron/node_modules/@laihoe/demoparser2-' + NATIVE_TRIPLE + '/demoparser2.' + NATIVE_TRIPLE + '.node';
+  const nativeRelative = 'dist/electron/node_modules/@cs2-analyst/demoparser-native/native/demoparser2.' + NATIVE_TRIPLE + '.node';
   const nativeEntries = entries.filter(entry => entry.endsWith('.node'));
   assert.deepEqual(nativeEntries, [nativeRelative], 'app.asar 应只登记一个原生绑定，且位于 worker 的 node_modules');
   assert.equal(files.get(nativeRelative).unpacked, true, '原生绑定必须以 unpacked 形式打包到 app.asar.unpacked');
   assert.ok(!entries.some(entry => entry.toLowerCase().includes('demo1.dem')), 'app.asar 不应包含测试 DEM');
 
-  const native = join(resources, 'app.asar.unpacked', 'dist', 'electron', 'node_modules', '@laihoe', 'demoparser2-' + NATIVE_TRIPLE, 'demoparser2.' + NATIVE_TRIPLE + '.node');
+  const native = join(resources, 'app.asar.unpacked', nativeRelative);
   assert.ok(existsSync(native), '缺少 unpacked 原生绑定：' + native);
+  const built = nativeParser.getBindingProvenance();
+  const binarySha = createHash('sha256').update(readFileSync(native)).digest('hex');
+  assert.equal(binarySha, built.verifiedSha256, 'Installed binary differs from patched MSVC build');
+  const installedProvenance = JSON.parse(readAsarFile(asar, dataOffset, files.get('dist/electron/node_modules/@cs2-analyst/demoparser-native/native/provenance.json')).toString('utf8'));
+  assert.deepEqual(installedProvenance.source, built.source);
+  assert.equal(installedProvenance.binary.sha256, binarySha);
+  writeFileSync(join(workDir, 'native-'+(variant === variants.production ? 'production' : 'test-seam')+'.json'),JSON.stringify({path:native,sha256:binarySha,provenance:installedProvenance},null,2));
   const nativeMb = statSync(native).size / 1024 / 1024;
   assert.ok(nativeMb > 3, '原生绑定体积异常：' + nativeMb.toFixed(1) + ' MB');
 
@@ -303,8 +311,9 @@ function checkInstalledLayout(variant, expectSeam) {
   for (const forbidden of ['demoparser2', 'laihoe', '@cs2-analyst/analytics', '@cs2-analyst/dem-parser']) {
     assert.ok(!rendererSource.includes(forbidden), 'renderer bundle 不应包含 ' + forbidden);
   }
-  assert.ok(workerSource.includes('@laihoe/demoparser2'), 'worker bundle 应引用原生 parser');
-  assert.ok(!workerSource.includes('@cs2-analyst/'), 'worker bundle 不应外部依赖 workspace 包');
+  assert.ok(workerSource.includes('@cs2-analyst/demoparser-native'), 'worker bundle 应引用原生 parser');
+  assert.ok(!entries.some(e=>e.includes('@laihoe')), 'Installed package contains an official native fallback');
+  for(const pkg of ['dem-parser','match-model','analytics','findings','deep-review','report-contract']) assert.ok(!workerSource.includes(`"@cs2-analyst/${pkg}"`), 'worker bundle 不应外部依赖领域 workspace 包');
 
   console.log(variant.label + '：asar ' + asarSizeMb.toFixed(2) + ' MB、' + entries.length + ' 个条目、原生绑定 ' + nativeMb.toFixed(1) + ' MB unpacked、renderer 无 Node/原生 parser');
 }

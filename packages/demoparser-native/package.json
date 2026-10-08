@@ -1,0 +1,14 @@
+{
+  "name": "@cs2-analyst/demoparser-native",
+  "version": "0.42.0-backport.363.1",
+  "private": true,
+  "main": "index.cjs",
+  "types": "index.d.ts",
+  "scripts": {
+    "build": "node verify.mjs",
+    "build:native": "node ../../vendor/demoparser/build.mjs",
+    "verify": "node verify.mjs",
+    "typecheck": "node verify.mjs"
+  },
+  "devDependencies": { "@napi-rs/cli": "2.16.1" }
+}

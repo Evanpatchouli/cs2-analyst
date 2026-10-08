@@ -64,7 +64,7 @@ for (const pkg of ['dem-parser', 'match-model', 'analytics', 'findings', 'deep-r
     throw new Error(`report-worker.js still imports @cs2-analyst/${pkg}; workspace packages must be bundled`);
   }
 }
-if (!workerBundle.includes('@laihoe/demoparser2')) {
+if (!workerBundle.includes('@cs2-analyst/demoparser-native')) {
   throw new Error('report-worker.js does not reference the native parser; prepare-pack staging would be unused');
 }
 

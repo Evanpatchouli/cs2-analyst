@@ -5,7 +5,7 @@ import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { performance } from 'node:perf_hooks';
 import { cpus, totalmem } from 'node:os';
-import * as native from '@laihoe/demoparser2';
+import * as native from '@cs2-analyst/demoparser-native';
 import { Demoparser2Provider } from '../dist/index.js';
 
 export const required = ['X', 'Y', 'Z', 'yaw', 'pitch', 'velocity_X', 'velocity_Y', 'velocity_Z', 'active_weapon_name', 'health', 'is_alive', 'team_num'];
@@ -265,7 +265,7 @@ export async function probe(file, output) {
   for (const [field, c] of Object.entries(optionalCoverage)) if (!c.nonNullCount) warnings.push(`${field}: optional evidence unavailable`);
   const result = { schema: 'P5.7.0-dev-probe-v1', file: path, bytes: (await stat(path)).size, sha256: match.id, header,
     map: match.map, tickRate: match.tickRate ?? null, rounds: match.rounds.length, players: match.players,
-    environment: { node: process.version, platform: process.platform, arch: process.arch, cpu: cpus()[0]?.model, logicalCpus: cpus().length, ramBytes: totalmem(), nativeVersion: '0.42.0' },
+    environment: { node: process.version, platform: process.platform, arch: process.arch, cpu: cpus()[0]?.model, logicalCpus: cpus().length, ramBytes: totalmem(), nativeVersion: '0.42.0-backport.363.1', nativeBinding: native.getBindingProvenance() },
     eventCounts, domainEventCounts, baselineMs, parseEventsMs: eventsRun.ms, queries, timing, integrated, optionalMs, optionalCoverage, unsupported,
     peakMemory: null, memoryNote: 'Not measured: synchronous native calls block in-process RSS polling; no external high-water measurement. Endpoint RSS is not peak memory.',
     warnings, combatEvidence: evidence(match, finalRows, selected) };

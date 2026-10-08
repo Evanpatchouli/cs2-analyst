@@ -1,5 +1,15 @@
 # P5.7 Personal DEM Compatibility Acceptance
 
+## Current acceptance — P5.7.0.2 (2026-10-09)
+
+Baseline `7b016278a8209b917df688b54be6763d04f53663`，固定 v0.42.0 + upstream #363 的生产 MSVC parser：**Personal Gate PASS — demo1 PASS / demo2 PASS / demo3 PASS**。demo2 必需 partial samples 270→0，Desktop 10/10，KillImpact R1–R17 complete；R18 lifecycle-anomaly 仍 unavailable，optional invalid active-weapon interval 75805–76213（409 ticks）保持 unavailable。元屠恢复 1 Review + 1 Highlight + 1 context；未改阈值、goldens 或覆盖率规则。真实 analyzeDemoFile 重复导入、完整 evidence invariants、Desktop 和干净检出两安装包 installed smoke 通过。详情见 [handle fix](./demoparser-handle-fix.md) 和 [当前 JSON（含 historicalGate）](./deep-review-personal-acceptance.json)。
+
+**P5.7.0 PASS；P5.7 FINAL PASS；v0.1 Final Acceptance READY TO RESUME**。下一轮单独执行 Final Acceptance Resume；本轮没有宣布 v0.1 FINAL PASS。Native absolute completeness、其他未测试录制模式、绝对 entity freshness、peak memory 仍 UNKNOWN。
+
+## Historical acceptance — original official 0.42.0 Gate FAIL
+
+以下保留当时结论和数值，已由上方新生产 binding 验收取代；不是删除或改写失败记录。原始 native diagnostic Markdown/JSON 未修改。
+
 2026-10-09. Baseline `80437834a43960196bc65d85cbd35095d9a469f8`. **Gate FAIL: demo1 PASS, demo2 FAIL, demo3 PASS.** No production code, algorithm, threshold or semantic changes. The Product Owner subsequently authorized committing the diagnostic acceptance result despite the failed gate. This records evidence without upgrading acceptance status; no push.
 
 **P5.7.0 remains PARTIAL PASS; P5.7.1–P5.7.8 PASS; P5.7 Deep Review FINAL HOLD; v0.1 Final Acceptance PAUSED, not READY TO RESUME.** P5.7.8 visual acceptance is formally PASS per the Product Owner baseline.

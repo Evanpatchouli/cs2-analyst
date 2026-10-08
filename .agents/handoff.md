@@ -1,4 +1,11 @@
-# Personal Compatibility Gate — 2026-10-09
+# P5.7.0.2 Native Handle Integration — 2026-10-09
+
+- Baseline `7b016278a8209b917df688b54be6763d04f53663`; integration, regression, clean build and Windows packaging/installed gates **PASS**. P5.7.0 **PASS**, P5.7 **FINAL PASS**, v0.1 Final Acceptance **READY TO RESUME**, not FINAL PASS. Next: separate Final Acceptance Resume.
+- Only #363 is backported onto v0.42.0 in a pinned, SHA-verified internal native package; production target MSVC, no fallback. See [integration record](../docs/demoparser-handle-fix.md) / [JSON](../docs/demoparser-handle-fix.json) for exact source/build/artifact provenance and commands. Same-path cold build is byte-identical; separate clean checkout has its own verified SHA. Independent implementation/evidence review PASS.
+- Personal demo1/demo2/demo3 PASS; professional Nuke/Inferno/Dust2/Mirage plus optional Ancient/Anubis/Overpass PASS. Train not run. demo1 historical golden unchanged. demo2 requiredpartial270→0; target restored3 Findings,10 Desktop players; R18 lifecycle-anomaly and409 invalid weapon ticks retained. All108 changed frame-timing enrichments traced to real entities/serial/lifetimes/pawn transitions.
+- Analytics/Findings thresholds/Deep Review logic untouched; no SteamID/demo2 branch in product. Retain UNKNOWNs: absolute native completeness, untested recording modes, absolute entity freshness, peak memory. Commit is focused `fix(parser): integrate 14-bit entity handle decoder`, no amend/squash/push.
+
+## Historical Personal Compatibility Gate — 2026-10-09
 
 - Baseline `80437834a43960196bc65d85cbd35095d9a469f8`; P5.7.8 formally **PASS**. Older provenance/visual-pending entries below are historical and superseded.
 - All `.demo/demo1.dem`, `.demo/demo2.dem`, `.demo/demo3.dem` are Product Owner-confirmed actual personal matches. Header `SourceTV Demo` is recording metadata, not evidence against personal provenance.

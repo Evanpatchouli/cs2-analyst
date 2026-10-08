@@ -1,5 +1,7 @@
 # Windows 打包与安装（P5.2）
 
+2026-10-09 P5.7.0.2：原生依赖改为固定 v0.42.0 + #363 backport 的 `@cs2-analyst/demoparser-native`，MSVC 构建、source/binary SHA 校验、两安装包及干净检出 installed smoke **PASS**。完整 provenance、SHA 与当前验收见 [handle fix](./demoparser-handle-fix.md)；下文带日期的旧实测结果保留为历史。
+
 P5.2 把 P5.1 的桌面链路做成真正可安装、脱离 pnpm workspace 也能运行的 Windows 版本：
 
 ```text
@@ -52,12 +54,12 @@ pnpm --filter @cs2-analyst/desktop test:installed  # 安装 → 驱动安装版 
 
 | 依赖 | 打包方式 |
 | --- | --- |
-| `@cs2-analyst/dem-parser` / `match-model` / `analytics` / `findings` / `report-contract` | **打进 worker bundle**（`report-worker.js` 约 77 kB），发布版不再有 `import "@cs2-analyst/..."` |
-| `@laihoe/demoparser2` | **external**，运行期从 worker 同级 `node_modules` 解析 |
+| `@cs2-analyst/dem-parser` / `match-model` / `analytics` / `findings` / `deep-review` / `report-contract` | **打进 worker bundle**，安装后无需 workspace symlink |
+| `@cs2-analyst/demoparser-native` | **external**，运行期从 worker 同级 `node_modules` 解析 |
 | `demoparser2.win32-x64-msvc.node` | **原生 addon**，随安装目录以 asar-unpacked 形式分发 |
 
-- `electron.vite.config.ts`：`main.build.externalizeDeps = { exclude: [五个 workspace 包], include: ['@laihoe/demoparser2', '@laihoe/demoparser2-win32-x64-msvc'] }`。
-- `apps/desktop/scripts/prepare-pack.mjs`：在 electron-vite build 之后，把 loader 包（`index.js` / `index.d.ts` / `package.json`）与平台原生包（`.node`，约 3.9 MB）复制到 `dist/electron/node_modules/`，与 worker bundle 同级。Node 从 worker 目录向上查找 `node_modules`，命中的就是这份随包分发的副本；loader 的 fallback `require('@laihoe/demoparser2-win32-x64-msvc')` 与开发环境走的是同一条代码路径。
+- `electron.vite.config.ts`：六个 domain workspace 包 inline，内部 native 包 external。
+- `apps/desktop/scripts/prepare-pack.mjs`：复制内部 loader、source.json、native/provenance.json 与 MSVC `.node`（约 4.1 MB）到 worker 同级 `node_modules`，逐字节 SHA 校验。Loader 加载唯一 sibling binary，无旧官方 package fallback；安装 smoke 再次校验 ASAR 内 provenance 和 unpacked binary SHA。
 - electron-builder `asarUnpack: ["**/*.node"]`：`.node` 落在 `resources/app.asar.unpacked/...`，因为原生绑定无法从 asar 内部 dlopen。
 - 构建期校验（`build-installer.mjs`）会在打包前失败：worker bundle 仍 external 引用 workspace 包、worker 未引用原生 parser、或生产 `main.js` 含测试 seam 变量。
 
@@ -67,9 +69,9 @@ pnpm --filter @cs2-analyst/desktop test:installed  # 安装 → 驱动安装版 
 
 ```text
 CS2 Analyst.exe
-resources/app.asar                                    1.26 MB / 10 个条目
+resources/app.asar                                    3.43 MB / 83 个条目
 resources/app.asar.unpacked/dist/electron/node_modules/
-  @laihoe/demoparser2-win32-x64-msvc/demoparser2.win32-x64-msvc.node   3.9 MB
+  @cs2-analyst/demoparser-native/native/demoparser2.win32-x64-msvc.node   4.1 MB
 Uninstall CS2 Analyst.exe
 ```
 
@@ -82,7 +84,7 @@ Renderer bundle 不含 `demoparser2` / `laihoe` / `@cs2-analyst/*`，桌面与�
 - Main：`./report-worker.js`（Utility Process fork）
 - Main：`../preload/index.cjs`
 - Main：`../renderer/index.html`
-- worker：`dist/electron/node_modules/@laihoe/...`（Node 模块解析）
+- worker：`dist/electron/node_modules/@cs2-analyst/demoparser-native/`（Node 模块解析）
 
 `app.isPackaged === true` 下与开发环境行为一致，仅测试 seam 不同。
 

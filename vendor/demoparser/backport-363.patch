@@ -1,0 +1,382 @@
+diff --git a/src/parser/src/entity_handle.rs b/src/parser/src/entity_handle.rs
+new file mode 100644
+index 0000000..52c7509
+--- /dev/null
++++ b/src/parser/src/entity_handle.rs
+@@ -0,0 +1,150 @@
++// Demo/network handles use 14 index bits and 10 serial bits. Native
++// CEntityHandle values use 15 index bits and must not use this decoder.
++const ENTITY_INDEX_MASK: u32 = 0x3FFF;
++const INVALID_NETWORK_HANDLE: u32 = 0x00FF_FFFF;
++pub(crate) const INVALID_ENTITY_ID: i32 = -1;
++
++#[inline]
++pub(crate) fn entity_handle_index(handle: u32) -> i32 {
++    // Game events can also supply the signed -1 sentinel.
++    if handle == INVALID_NETWORK_HANDLE || handle == u32::MAX {
++        INVALID_ENTITY_ID
++    } else {
++        (handle & ENTITY_INDEX_MASK) as i32
++    }
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    use crate::first_pass::parser_settings::{FirstPassParser, ParserInputs};
++    use crate::first_pass::prop_controller::PropInfo;
++    use crate::second_pass::collect_data::PropType;
++    use crate::second_pass::entities::{Entity, EntityType};
++    use crate::second_pass::game_events::GameEventInfo;
++    use crate::second_pass::parser_settings::SecondPassParser;
++    use crate::second_pass::variants::Variant;
++    use std::sync::Arc;
++
++    #[test]
++    fn decodes_handles_reported_in_issue_362() {
++        assert_eq!(entity_handle_index(4_361_079), 2935);
++        assert_eq!(entity_handle_index(6_275_616), 544);
++    }
++
++    #[test]
++    fn keeps_index_boundaries_separate_from_invalid_handles() {
++        for index in [0, 2047, 2048, 0x3FFE, 0x3FFF] {
++            assert_eq!(entity_handle_index((1 << 14) | index), index as i32);
++        }
++        assert_eq!(entity_handle_index(INVALID_NETWORK_HANDLE), INVALID_ENTITY_ID);
++        assert_eq!(entity_handle_index(u32::MAX), INVALID_ENTITY_ID);
++    }
++
++    #[test]
++    fn resolves_player_weapon_and_event_props_from_network_handles() {
++        let huffman = vec![];
++        let settings = ParserInputs {
++            real_name_to_og_name: Default::default(),
++            wanted_players: vec![],
++            wanted_player_props: vec![],
++            wanted_other_props: vec![],
++            wanted_prop_states: Default::default(),
++            wanted_ticks: vec![],
++            wanted_events: vec![],
++            parse_ents: true,
++            parse_projectiles: false,
++            parse_grenades: false,
++            only_header: false,
++            only_convars: false,
++            huffman_lookup_table: &huffman,
++            order_by_steamid: false,
++            list_props: false,
++            fallback_bytes: None,
++        };
++        let mut first_pass = FirstPassParser::new(&settings);
++        first_pass.cls_by_id = Some(Arc::new(vec![]));
++        first_pass.prop_controller.special_ids.player_pawn = Some(1);
++        first_pass.prop_controller.special_ids.steamid = Some(2);
++        first_pass.prop_controller.special_ids.player_name = Some(3);
++        first_pass.prop_controller.special_ids.active_weapon = Some(4);
++        first_pass.prop_controller.special_ids.grenade_owner_id = Some(5);
++        first_pass.prop_controller.prop_infos = vec![PropInfo {
++            id: 6,
++            prop_type: PropType::Player,
++            prop_name: "CCSPlayerPawn.m_iHealth".to_string(),
++            prop_friendly_name: "health".to_string(),
++            is_player_prop: true,
++        }];
++        let mut parser = SecondPassParser::new(first_pass.create_first_pass_output().unwrap(), 0, false, None).unwrap();
++        parser.entities.resize(0x4000, None);
++        // A controller index above 2047 also exercises PlayerConnect's plain-index path.
++        let controller_id = 4097;
++        let weapon_id = 5000;
++        parser.entities[weapon_id] = Some(Entity {
++            cls_id: 0,
++            entity_id: weapon_id as i32,
++            props: [(7, Variant::U32(30))].into_iter().collect(),
++            entity_type: EntityType::Normal,
++        });
++        for (handle, pawn_id) in [(4_361_079, 2935), (6_275_616, 544), (0x47FF, 2047), (0x7FFF, 16383)] {
++            parser.players.clear();
++            parser.entities[controller_id] = Some(Entity {
++                cls_id: 0,
++                entity_id: controller_id as i32,
++                props: [
++                    (1, Variant::U32(handle)),
++                    (2, Variant::U64(76561198000000001)),
++                    (3, Variant::String("player".to_string())),
++                ]
++                .into_iter()
++                .collect(),
++                entity_type: EntityType::PlayerController,
++            });
++            parser.entities[pawn_id as usize] = Some(Entity {
++                cls_id: 0,
++                entity_id: pawn_id,
++                props: [
++                    (4, Variant::U32((1 << 14) | weapon_id as u32)),
++                    (5, Variant::U32(handle)),
++                    (6, Variant::U32(73)),
++                ]
++                .into_iter()
++                .collect(),
++                entity_type: EntityType::Normal,
++            });
++
++            parser.gather_extra_info(&(controller_id as i32), false).unwrap();
++            assert_eq!(parser.players.len(), 1);
++            assert_eq!(parser.players[&pawn_id].controller_entid, Some(controller_id as i32));
++            assert_eq!(parser.entity_id_from_user_pawn(handle as i32), Some(pawn_id));
++            assert_eq!(parser.find_weapon_prop(&7, &pawn_id), Ok(Variant::U32(30)));
++            assert_eq!(parser.grenade_owner_entid_from_grenade(&Some(Variant::I32(pawn_id))), Some(pawn_id));
++            assert_eq!(
++                parser.create_player_name_field(pawn_id, "user").data,
++                Some(Variant::String("player".to_string()))
++            );
++            let fields = parser.find_extra_props_events(pawn_id, "user");
++            assert_eq!(fields.len(), 1);
++            assert_eq!(fields[0].name, "user_health");
++            assert_eq!(fields[0].data, Some(Variant::U32(73)));
++
++            parser.players.clear();
++            parser.emit_events(vec![GameEventInfo::PlayerConnect(controller_id as i32)]).unwrap();
++            assert!(parser.players.contains_key(&pawn_id));
++        }
++
++        // Keep the valid player at index 16383: invalid handles must not alias it.
++        for handle in [INVALID_NETWORK_HANDLE, u32::MAX] {
++            let id = parser.entity_id_from_user_pawn(handle as i32).unwrap();
++            assert_eq!(parser.create_player_name_field(id, "user").data, None);
++            assert_eq!(parser.find_extra_props_events(id, "user")[0].data, None);
++            parser.players.clear();
++            parser.entities[controller_id].as_mut().unwrap().props.insert(1, Variant::U32(handle));
++            parser.gather_extra_info(&(controller_id as i32), false).unwrap();
++            assert!(parser.players.is_empty());
++            parser.emit_events(vec![GameEventInfo::PlayerConnect(controller_id as i32)]).unwrap();
++            assert!(parser.players.is_empty());
++        }
++    }
++}
+diff --git a/src/parser/src/first_pass/prop_controller.rs b/src/parser/src/first_pass/prop_controller.rs
+index 2a974d3..f3fdd97 100644
+--- a/src/parser/src/first_pass/prop_controller.rs
++++ b/src/parser/src/first_pass/prop_controller.rs
+@@ -9,7 +9,7 @@ use crate::second_pass::parser_settings::SpecialIDs;
+ use crate::second_pass::variants::Variant;
+ use ahash::AHashMap;
+ 
+-pub const PLAYER_ENTITY_HANDLE_MISSING: i32 = 2047;
++pub const PLAYER_ENTITY_HANDLE_MISSING: i32 = crate::entity_handle::INVALID_ENTITY_ID;
+ pub const SPECTATOR_TEAM_NUM: u32 = 1;
+ pub const BUTTONS_BASEID: u32 = 100000;
+ pub const NORMAL_PROP_BASEID: u32 = 1000;
+diff --git a/src/parser/src/lib.rs b/src/parser/src/lib.rs
+index 2ae9ed8..908a663 100644
+--- a/src/parser/src/lib.rs
++++ b/src/parser/src/lib.rs
+@@ -1,5 +1,6 @@
+ #[cfg(test)]
+ pub mod e2e_test;
++mod entity_handle;
+ pub mod first_pass;
+ pub mod maps;
+ pub mod parse_demo;
+diff --git a/src/parser/src/second_pass/collect_data.rs b/src/parser/src/second_pass/collect_data.rs
+index 28ae11d..ee4e524 100644
+--- a/src/parser/src/second_pass/collect_data.rs
++++ b/src/parser/src/second_pass/collect_data.rs
+@@ -1,6 +1,7 @@
+ use super::entities::PlayerMetaData;
+ use super::variants::Sticker;
+ use super::variants::Variant;
++use crate::entity_handle::entity_handle_index;
+ use crate::first_pass::prop_controller::*;
+ use crate::first_pass::read_bits::DemoParserError;
+ use crate::maps::BUTTONMAP;
+@@ -236,7 +237,7 @@ impl<'a> SecondPassParser<'a> {
+             None => return Err(PropCollectionError::GrenadeOwnerIdNotSet),
+         };
+         match self.get_prop_from_ent(&owner_id, entity_id) {
+-            Ok(Variant::U32(prop)) => Ok(prop & 0x7FF),
++            Ok(Variant::U32(prop)) => Ok(entity_handle_index(prop) as u32),
+             Ok(_) => return Err(PropCollectionError::GrenadeOwnerIdPropIncorrectVariant),
+             Err(e) => return Err(e),
+         }
+@@ -540,7 +541,7 @@ impl<'a> SecondPassParser<'a> {
+             return match self.get_prop_from_ent(&p, &eid) {
+                 Ok(Variant::U32(weap_handle)) => {
+                     // Could be more specific
+-                    let weapon_entity_id = (weap_handle & 0x7FF) as i32;
++                    let weapon_entity_id = entity_handle_index(weap_handle);
+                     self.find_stickers(&weapon_entity_id)
+                 }
+                 Ok(_) => Err(PropCollectionError::WeaponHandleIncorrectVariant),
+@@ -761,7 +762,7 @@ impl<'a> SecondPassParser<'a> {
+             match self.get_prop_from_ent(&(prop_id as u32), entity_id) {
+                 Err(_e) => {}
+                 Ok(Variant::U32(x)) => {
+-                    let eid = (x & ((1 << 14) - 1)) as i32;
++                    let eid = entity_handle_index(x);
+                     // Sometimes multiple references to same eid?
+                     if unique_eids.contains(&eid) {
+                         continue;
+@@ -799,7 +800,7 @@ impl<'a> SecondPassParser<'a> {
+             match self.get_prop_from_ent(&(prop_id as u32), entity_id) {
+                 Err(_e) => {}
+                 Ok(Variant::U32(x)) => {
+-                    let eid = (x & ((1 << 14) - 1)) as i32;
++                    let eid = entity_handle_index(x);
+                     // Sometimes multiple references to same eid?
+                     if unique_eids.contains(&eid) {
+                         continue;
+@@ -836,7 +837,7 @@ impl<'a> SecondPassParser<'a> {
+             match self.get_prop_from_ent(&(prop_id as u32), entity_id) {
+                 Err(_e) => {}
+                 Ok(Variant::U32(x)) => {
+-                    let eid = (x & ((1 << 14) - 1)) as i32;
++                    let eid = entity_handle_index(x);
+                     // Sometimes multiple references to same eid?
+                     if unique_eids.contains(&eid) {
+                         continue;
+@@ -948,7 +949,7 @@ impl<'a> SecondPassParser<'a> {
+         if let Some(c4ent) = self.c4_entity_id {
+             if let Some(id) = self.prop_controller.special_ids.h_owner_entity {
+                 if let Ok(Variant::U32(u)) = self.get_prop_from_ent(&id, &c4ent) {
+-                    return Some((u & 0x7FF) as i32);
++                    return Some(entity_handle_index(u));
+                 }
+             }
+         }
+@@ -1002,7 +1003,7 @@ impl<'a> SecondPassParser<'a> {
+         };
+         return match self.get_prop_from_ent(&p, player_entid) {
+             Ok(Variant::U32(weap_handle)) => {
+-                let weapon_entity_id = (weap_handle & 0x7FF) as i32;
++                let weapon_entity_id = entity_handle_index(weap_handle);
+                 self.find_weapon_skin_id(&weapon_entity_id)
+             }
+             Ok(_) => Err(PropCollectionError::WeaponHandleIncorrectVariant),
+@@ -1030,7 +1031,7 @@ impl<'a> SecondPassParser<'a> {
+         };
+         return match self.get_prop_from_ent(&p, player_entid) {
+             Ok(Variant::U32(weap_handle)) => {
+-                let weapon_entity_id = (weap_handle & 0x7FF) as i32;
++                let weapon_entity_id = entity_handle_index(weap_handle);
+                 self.find_weapon_skin(&weapon_entity_id)
+             }
+             Ok(_) => Err(PropCollectionError::WeaponHandleIncorrectVariant),
+@@ -1093,7 +1094,7 @@ impl<'a> SecondPassParser<'a> {
+         match self.get_prop_from_ent(&p, player_entid) {
+             Ok(Variant::U32(weap_handle)) => {
+                 // Could be more specific
+-                let weapon_entity_id = (weap_handle & 0x7FF) as i32;
++                let weapon_entity_id = entity_handle_index(weap_handle);
+                 match self.get_prop_from_ent(&prop, &weapon_entity_id) {
+                     Ok(p) => Ok(p),
+                     Err(e) => match e {
+@@ -1180,7 +1181,7 @@ impl<'a> SecondPassParser<'a> {
+             };
+             let player_entid = match self.prop_controller.special_ids.player_pawn {
+                 Some(id) => match self.get_prop_from_ent(&id, entity_id) {
+-                    Ok(Variant::U32(handle)) => Some((handle & 0x7FF) as i32),
++                    Ok(Variant::U32(handle)) => Some(entity_handle_index(handle)),
+                     Ok(_) => return Err(DemoParserError::IncorrectMetaDataProp),
+                     Err(_) => None,
+                 },
+diff --git a/src/parser/src/second_pass/game_events.rs b/src/parser/src/second_pass/game_events.rs
+index 718d8fd..1a3cb62 100644
+--- a/src/parser/src/second_pass/game_events.rs
++++ b/src/parser/src/second_pass/game_events.rs
+@@ -1,3 +1,4 @@
++use crate::entity_handle::{entity_handle_index, INVALID_ENTITY_ID};
+ use crate::first_pass::prop_controller::PLAYER_ENTITY_HANDLE_MISSING;
+ use crate::first_pass::prop_controller::PropController;
+ use crate::first_pass::prop_controller::PropInfo;
+@@ -75,7 +76,7 @@ pub enum GameEventInfo {
+ static ENTITIES_FIRST_EVENTS: &'static [&str] = &["inferno_startburn", "decoy_started", "inferno_expire"];
+ static REMOVEDEVENTS: &'static [&str] = &["server_cvar", "player_connect"];
+ 
+-const ENTITYIDNONE: i32 = 2047;
++const ENTITYIDNONE: i32 = INVALID_ENTITY_ID;
+ // https://developer.valvesoftware.com/wiki/SteamID
+ const STEAMID64INDIVIDUALIDENTIFIER: u64 = 0x0110000100000000;
+ 
+@@ -263,7 +264,7 @@ impl<'a> SecondPassParser<'a> {
+         Ok(extra_fields)
+     }
+     pub fn entity_id_from_user_pawn(&self, pawn_handle: i32) -> Option<i32> {
+-        Some(pawn_handle & 0x7FF)
++        Some(entity_handle_index(pawn_handle as u32))
+     }
+     pub fn grenade_owner_entid_from_grenade(&self, id_field: &Option<Variant>) -> Option<i32> {
+         let prop_id = match self.prop_controller.special_ids.grenade_owner_id {
+@@ -272,7 +273,7 @@ impl<'a> SecondPassParser<'a> {
+         };
+         if let Some(Variant::I32(id)) = id_field {
+             if let Ok(Variant::U32(entity_id)) = self.get_prop_from_ent(&prop_id, &id) {
+-                return Some((entity_id & 0x7ff) as i32);
++                return Some(entity_handle_index(entity_id));
+             }
+         }
+         None
+@@ -539,7 +540,8 @@ impl<'a> SecondPassParser<'a> {
+     fn handle_player_connect(&mut self, events: &[GameEventInfo]) -> Result<(), DemoParserError>{
+         for event in events{
+             if let GameEventInfo::PlayerConnect(id) = event{
+-                let entity_id = &(id & 0x7ff);
++                // PlayerConnect already carries an entity index, not a handle.
++                let entity_id = id;
+                 let team_num = match self.prop_controller.special_ids.teamnum {
+                     Some(team_num_id) => match self.get_prop_from_ent(&team_num_id, entity_id) {
+                         Ok(team_num) => match team_num {
+@@ -574,7 +576,7 @@ impl<'a> SecondPassParser<'a> {
+                 let player_entid = match self.prop_controller.special_ids.player_pawn {
+                     Some(id) => match self.get_prop_from_ent(&id, entity_id) {
+                         Ok(player_entid) => match player_entid {
+-                            Variant::U32(handle) => Some((handle & 0x7FF) as i32),
++                            Variant::U32(handle) => Some(entity_handle_index(handle)),
+                             _ => return Err(DemoParserError::IncorrectMetaDataProp),
+                         },
+                         Err(_) => None,
+@@ -697,7 +699,7 @@ impl<'a> SecondPassParser<'a> {
+                                 cost: *cost,
+                                 name: Some(name.to_string()),
+                                 entid: *entid,
+-                                weapon_entid: (handle & 0x7ff) as i32,
++                                weapon_entid: entity_handle_index(*handle as u32),
+                                 inventory_slot: (prop_id - ITEM_PURCHASE_DEF_IDX),
+                             });
+                         }
+@@ -706,7 +708,7 @@ impl<'a> SecondPassParser<'a> {
+                                 cost: *cost,
+                                 name: None,
+                                 entid: *entid,
+-                                weapon_entid: (handle & 0x7ff) as i32,
++                                weapon_entid: entity_handle_index(*handle as u32),
+                                 inventory_slot: (prop_id - ITEM_PURCHASE_DEF_IDX),
+                             });
+                         }
+@@ -1342,7 +1344,7 @@ impl<'a> SecondPassParser<'a> {
+             name: "player_scoped".to_string(),
+             data: msg.player_scoped.map(Variant::Bool),
+         });
+-        let entity_id = (msg.player.unwrap_or(0) & 0x7FF) as i32;
++        let entity_id = entity_handle_index(msg.player.unwrap_or(0));
+         fields.push(self.create_player_name_field(entity_id, "user"));
+         fields.push(self.create_player_steamid_field(entity_id, "user"));
+         fields.extend(self.find_extra_props_events(entity_id, "user"));
+diff --git a/src/parser/src/second_pass/parser.rs b/src/parser/src/second_pass/parser.rs
+index e7cf1eb..f2ae856 100644
+--- a/src/parser/src/second_pass/parser.rs
++++ b/src/parser/src/second_pass/parser.rs
+@@ -1,3 +1,4 @@
++use crate::entity_handle::entity_handle_index;
+ use crate::first_pass::parser::Frame;
+ use crate::first_pass::parser::HEADER_ENDS_AT_BYTE;
+ use crate::first_pass::parser_settings::FirstPassParser;
+@@ -329,7 +330,7 @@ impl<'a> SecondPassParser<'a> {
+         let Some(base) = user_cmd.base.as_ref() else {
+             return;
+         };
+-        let entity_id = base.pawn_entity_handle() & 0x7ff;
++        let entity_id = entity_handle_index(base.pawn_entity_handle());
+         let Some(Some(ent)) = self.entities.get_mut(entity_id as usize) else {
+             return;
+         };
