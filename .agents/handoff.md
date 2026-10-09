@@ -1,4 +1,13 @@
-# P5.7.0.2 Native Handle Integration — 2026-10-09
+# v0.1 Final Acceptance — FINAL PASS — 2026-10-09
+
+- Product Owner explicitly grants **FINAL PASS** for CS2 Analyst v0.1.0. The earlier HOLD was caused by the Product Owner stopping Computer Use to avoid interference with other work, not by a product defect.
+- Remaining manual production walkthrough/repeated-import/error-recovery/screenshot evidence is **waived**, not retroactively marked as executed.
+- Accepted baseline is `c20ca5343ab94f4854f84398a56ec6a13b0c0d42`; FA-01 and FA-02 are fixed there. P5.7 remains **FINAL PASS** and P5 is now **COMPLETE**.
+- Latest completed evidence: typecheck 15/15, build 8/8; model contracts, parser40, analytics53, Findings17, deep-review210, desktop29 all PASS with 0 FAIL/0 SKIP; Personal demo1/2/3 and core professional fixtures PASS; installers/installed smoke/native SHA/security PASS.
+- Preserve all known limitations and historical HOLD/FAIL records. Do not reopen P5 solely to obtain the waived manual evidence.
+- Next phase is not started automatically; require a new explicit scope before P6 or release-process work.
+
+## Historical — P5.7.0.2 Native Handle Integration — 2026-10-09
 
 - Baseline `7b016278a8209b917df688b54be6763d04f53663`; integration, regression, clean build and Windows packaging/installed gates **PASS**. P5.7.0 **PASS**, P5.7 **FINAL PASS**, v0.1 Final Acceptance **READY TO RESUME**, not FINAL PASS. Next: separate Final Acceptance Resume.
 - Only #363 is backported onto v0.42.0 in a pinned, SHA-verified internal native package; production target MSVC, no fallback. See [integration record](../docs/demoparser-handle-fix.md) / [JSON](../docs/demoparser-handle-fix.json) for exact source/build/artifact provenance and commands. Same-path cold build is byte-identical; separate clean checkout has its own verified SHA. Independent implementation/evidence review PASS.

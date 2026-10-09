@@ -45,6 +45,8 @@ Schema、阈值、coverage 门控、priority、真实 twinkle 输出与 future g
 
 ## P5 Desktop Report UI
 
+> **P5 — COMPLETE. v0.1 Final Acceptance — FINAL PASS (2026-10-09).** Product Owner accepted the product and explicitly waived the remaining manual production walkthrough evidence that was interrupted to avoid interfering with unrelated work; waived checks are not represented as executed.
+
 P5.1 End-to-End Desktop Report MVP — **PASS**。首次打通 `选择 .dem → Main 文件选择 → Utility Process 解析/分析 → Findings → Renderer 报告页`。Renderer 只在 sandbox + contextIsolation 下消费 JSON-only `@cs2-analyst/report-contract` DTO，不接触 Node/fs/demoparser2；原生解析与全部确定性计算在 Utility Process 中执行。report-contract `schemaVersion: 1` 为后续演进预留。实现、进程边界、IPC 契约、状态机、UI 结构与剩余缺口见 [桌面比赛报告](./desktop-report.md)。
 
 P5.2 Windows Packaging & Installable MVP — **PASS**。使用 electron-builder + NSIS 产出 Windows x64 安装包（`CS2 Analyst`，版本沿用项目版本）。Utility Process 的 workspace 依赖全部打进 `report-worker.js`，原生 parser 以 asar-unpacked 形式随安装目录分发，安装版不再依赖 pnpm workspace symlink；仍不包含签名、自动更新或发布流程。安装版 E2E 覆盖安装/启动、Renderer 无 Node 暴露、真实 demo1.dem 报告、损坏 DEM 错误、分析中途关闭无残留 worker 与卸载。见 [Windows 打包与安装](./windows-packaging.md)。
@@ -72,9 +74,9 @@ P5.6.5 Branding & App Icon — **FINAL PASS**。正式产品名冻结为 CS2 Ana
 
 ## v0.1 Final Acceptance
 
-**Status: READY TO RESUME — P5.7 FINAL PASS after the fixed native parser acceptance.** 本轮未执行 v0.1 Final Acceptance Resume，尚未宣布 v0.1 FINAL PASS。
+**Status: FINAL PASS — v0.1.0 accepted by Product Owner on 2026-10-09.** 此前 Resume 因 Product Owner 为避免 Computer Use 干扰其他工作而主动停止，剩余人工 walkthrough / 连续导入 / 错误恢复 / 最终截图证据由 Product Owner 明确 waiver；该 waiver 不表示这些检查已执行。
 
-Current: **P5.7.0.2 completed; next is v0.1 Final Acceptance Resume**。见 [14-bit handle integration](./demoparser-handle-fix.md)。
+Current: **v0.1 Final Acceptance FINAL PASS; P5 COMPLETE; P5.7 FINAL PASS.** 验收记录见 [v0.1 Final Acceptance](./v0.1-final-acceptance.md)；parser 修复见 [14-bit handle integration](./demoparser-handle-fix.md)。
 
 正式 [fixture matrix](./demo-fixtures.md)：Nuke + Inferno + Dust2 + Mirage 为核心 gate；Ancient / Anubis / Overpass 为 extended optional。Train **REMOVED / NOT REQUIRED**，不属于 P5.7 / Final Acceptance gate，不是 debt / blocker；仅本地保留，不运行。
 
@@ -87,8 +89,8 @@ Current: **P5.7.0.2 completed; next is v0.1 Final Acceptance Resume**。见 [14-
 - P5.7.6 Combat Execution Evidence：**PASS**；独立contract/analysis、shooter-only weapon_fire唯一inside/默认1s lead-in linkage、tick-only firstContactRole、同opponent return contact、reported damage/精确XY/Z/XYZ facts、五层coverage。三地图同一生产管线、结构invariants和自动抽样；无Aim评分/target/miss/reaction推断，View Alignment UNVERIFIED；见 [Combat Execution](./combat-execution-evidence.md)。
 - P5.7.7 Findings V2：**PASS after P5.7.7.1 Calibration / Semantic Repair**。原实现 technically valid，product calibration exposed overbroad/misaligned rules；exact received-only denominator、occurrence-only refs/rounds、same-Engagement no-follow context、lone context、teamflash context、priority/caps/dedup/source gates 修复。七图 calibration、33 synthetic 与全回归/独立复审 PASS。个人 DEM 来源已确认，当前 compatibility gate PASS；见 [Findings V2](./deep-review-findings-v2.md) 和 [calibration](./deep-review-findings-calibration.json)。P4 Findings V1 冻结。
 - P5.7.8 Deep Review Desktop UX：**PASS**。共享 parseWithSpatial、schema v2、默认比赛报告、深度复盘独立进阶入口与 V1/P3 共存、occurrence → Timeline、全玩家预计算已接入；见 [Desktop Deep Review](./deep-review-desktop.md)。
-- Personal DEM compatibility gate = **PASS**：三份真实 Personal DEM 均通过固定 native binding 验收。demo2 Pawn2927 全 tick 恢复，R18 lifecycle-anomaly 与 optional weapon unavailable 保留。P5.7 FINAL **PASS**；v0.1 Final Acceptance **READY TO RESUME**。见 [personal acceptance](./deep-review-personal-acceptance.md)。峰内存UNKNOWN。
-- P5.7.7 算法保持 PASS；P5.7.8 已完成 Renderer/Electron/report-contract 集成，P3/P4 算法与 Timeline filter 冻结。Train **REMOVED / NOT REQUIRED**；Final Acceptance Resume 单独执行。
+- Personal DEM compatibility gate = **PASS**：三份真实 Personal DEM 均通过固定 native binding 验收。demo2 Pawn2927 全 tick 恢复，R18 lifecycle-anomaly 与 optional weapon unavailable 保留。P5.7 FINAL **PASS**；v0.1 Final Acceptance **FINAL PASS**。见 [personal acceptance](./deep-review-personal-acceptance.md)。峰内存UNKNOWN。
+- P5.7.7 算法保持 PASS；P5.7.8 已完成 Renderer/Electron/report-contract 集成，P3/P4 算法与 Timeline filter 冻结。Train **REMOVED / NOT REQUIRED**；v0.1 Final Acceptance 已由 Product Owner 最终验收通过。
 - GitHub repository：`Evanpatchouli/cs2-analyst`（已正式改名）。
 
 - P5 Desktop MVP 已封板；当前仅推进已明确授权的P5.7 Deep Review evidence工作，不追加其他功能或polish。
@@ -97,7 +99,7 @@ Current: **P5.7.0.2 completed; next is v0.1 Final Acceptance Resume**。见 [14-
 - 目标样本约 3～5 场真实玩家 DEM，尽量覆盖不同地图、比分、发挥水平与特殊情况；拿到第 2 份 DEM 即可开始逐场验收，不必等待全部样本收齐。
 - 每场重点抽查最终比分、K/D/A、ADR、KAST、CT/T split、最高多杀、Opening/Trade、Clutch（如有）以及随机 3～5 个 Timeline 回合，并核对 Findings 是否有充分证据。
 - DEM 仍由用户主动选择；不引入自动目录扫描、登录、历史库、AI Coach、热力图或完整播放器。
-- P6 AI Coach 仅在 v0.1 Final Acceptance 完成后再评估。
+- P6 AI Coach 仅作为下一阶段候选；v0.1 已完成，但未经新的明确授权不自动开始 P6。
 
 ## P6 AI Coach
 

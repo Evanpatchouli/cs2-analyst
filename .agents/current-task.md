@@ -1,4 +1,14 @@
-# P5.7.0.2 Native Handle Integration — 2026-10-09
+# v0.1 Final Acceptance — FINAL PASS — 2026-10-09
+
+- Product Owner explicitly accepted CS2 Analyst v0.1.0 as release-ready and waived the remaining manual production walkthrough evidence after stopping Computer Use because it interfered with unrelated work. This waiver is an acceptance decision; it does **not** claim the interrupted checks were executed.
+- Final accepted code baseline: `c20ca5343ab94f4854f84398a56ec6a13b0c0d42` (presentation fixes FA-01 / FA-02 on top of parser integration `99f176e6383acf5636500b03643f99a787b44bc8`).
+- Latest completed automated/production evidence before the waiver: typecheck 15/15, build 8/8, model contracts PASS; parser 40, analytics 53, Findings V1 17, Deep Review 210, Desktop 29; 0 FAIL / 0 SKIP. Personal demo1/demo2/demo3 and professional Nuke/Inferno/Dust2/Mirage production pipelines PASS; packaging, installed smoke, native parser provenance/SHA and security boundaries PASS.
+- **v0.1 Final Acceptance — FINAL PASS. P5 — COMPLETE. P5.7 — FINAL PASS.**
+- Remaining unexecuted manual evidence (same-session repeated import, production-native demo1/demo2 walkthrough, same-session error recovery and final screenshot set) is explicitly waived by Product Owner and is not represented as executed.
+- Accepted limitations/UNKNOWNs remain: native feed absolute completeness, untested recording modes, absolute entity freshness guarantees, peak memory, no LOS/nav tactical inference, and the documented demo2 R18 lifecycle anomaly.
+- No P6 implementation is authorized by this status update. Next work, if any, starts from a new explicitly scoped phase.
+
+## Historical — P5.7.0.2 Native Handle Integration — 2026-10-09
 
 - Baseline `7b016278a8209b917df688b54be6763d04f53663`; fixed v0.42.0 + upstream #363, production Windows x64 MSVC binding. P5.7.0 **PASS**, P5.7 **FINAL PASS**, v0.1 Final Acceptance **READY TO RESUME**, not FINAL PASS. Next task: separately execute Final Acceptance Resume.
 - Source pins, exact backport scope, toolchain, SHA, clean builds and gates: [integration record](../docs/demoparser-handle-fix.md) / [JSON](../docs/demoparser-handle-fix.json). Native, full package tests, three Personal DEMs, four core + three extended maps, Desktop, both installers and clean installed smoke PASS; independent code/evidence review PASS. No Train run; no goldens/thresholds/analysis workaround; no push.
