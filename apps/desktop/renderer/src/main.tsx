@@ -17,6 +17,8 @@ import { UtilityIcon } from './utility-icons';
 import type { UtilityIconKind } from './utility-icons';
 import { coachTheme, palette, useScrollbarStyles } from './theme';
 import { AppTitlebar } from './app-titlebar';
+import { ReplayPlayer } from './replay-player';
+import type { ReplayJump } from './replay-player';
 
 /** One surface for every card on the page: same background, same weak border, same radius, no shadows. */
 const cardSurface = {
@@ -65,6 +67,8 @@ const useStyles = makeStyles({
   finding: { ...cardSurface, padding: '20px', display: 'flex', flexDirection: 'column', gap: '12px' },
   evidenceSummary: { cursor: 'pointer', borderRadius: tokens.borderRadiusMedium, padding: '4px', ':hover': { backgroundColor: palette.cardHover }, ':focus-visible': { outline: `2px solid ${tokens.colorBrandStroke1}`, outlineOffset: '2px' } },
   evidence: { padding: '8px 0', display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: '12px', borderBottom: `1px solid ${palette.rowDivider}`, overflowWrap: 'anywhere' },
+  evidenceActions: { display:'flex',alignItems:'center',gap:'8px',flexWrap:'wrap' },
+  replayEventRow: { gridTemplateColumns:'64px minmax(0,1fr) 56px' },
   empty: { ...cardSurface, padding: '72px 32px', alignItems: 'center', textAlign: 'center' },
   timelineRound: {
     borderTop: `1px solid ${palette.rowDivider}`, ':first-child': { borderTopStyle: 'none' },
@@ -174,8 +178,9 @@ function Stat({ label, value, hint, tip }: { label: string; value: string; hint?
   </Card>;
 }
 
-function Findings({ report, playerId, onShowRounds }: {
+function Findings({ report, playerId, onShowRounds, onReplay }: {
   report: DesktopMatchReport; playerId: string; onShowRounds: (rounds: number[]) => void;
+  onReplay?: (round:number,tick?:number)=>void;
 }) {
   const s = useStyles();
   const rows = report.findings.filter(f => f.playerId === playerId);
@@ -195,7 +200,9 @@ function Findings({ report, playerId, onShowRounds }: {
           const when = [e.round === undefined ? null : `R${e.round}`, e.roundTimeSeconds === undefined ? null : `回合开始后 ${seconds(e.roundTimeSeconds)}`].filter(Boolean).join(' · ');
           return <div key={i} className={s.evidence}>
             <Caption1 className={s.muted}>{metricLabel(e.metric)}{when ? ` · ${when}` : ''}</Caption1>
-            <Caption1>{evidenceText(e.value, e.unit)}</Caption1>
+            <div className={s.evidenceActions}><Caption1>{evidenceText(e.value, e.unit)}</Caption1>
+              {onReplay&&e.round!==undefined?<Button appearance="subtle" size="small" data-finding-replay-round={e.round} data-finding-replay-tick={e.tick} onClick={()=>onReplay(e.round!,e.tick)}>地图回放 R{e.round}</Button>:null}
+            </div>
           </div>;
         })}
       </details>
@@ -245,11 +252,12 @@ function UtilityPanel({ utility }: { utility: DesktopPlayerAnalytics['utility'] 
 }
 
 /** Round-by-round summary with click-to-expand key events; all rounds start collapsed. */
-function RoundTimeline({ rounds, expanded, highlighted, onToggle }: {
+function RoundTimeline({ rounds, expanded, highlighted, onToggle, onReplay }: {
   rounds: DesktopRoundTimeline[];
   expanded: number[];
   highlighted: number | null;
   onToggle: (round: number) => void;
+  onReplay?: (round:number,tick?:number)=>void;
 }) {
   const s = useStyles();
   return <section id="round-timeline" className={s.section} aria-label="回合时间线">
@@ -271,9 +279,11 @@ function RoundTimeline({ rounds, expanded, highlighted, onToggle }: {
               <span className={s.timelineToggle}>{open ? '收起' : '查看详情'}</span>
             </button>
             {open ? <div className={s.timelineDetail} data-round-detail={r.round}>
-              {r.events.length ? r.events.map(e => e.type === 'kill' || e.type === 'death' ? <KillFeedEvent key={e.id} event={e} round={r.round} /> : <div key={e.id} className={s.timelineEvent}>
+              {onReplay?<Button appearance="subtle" size="small" onClick={()=>onReplay(r.round,r.startTick??undefined)}>回放本回合</Button>:null}
+              {r.events.length ? r.events.map(e => e.type === 'kill' || e.type === 'death' ? <KillFeedEvent key={e.id} event={e} round={r.round} onReplay={onReplay?()=>onReplay(r.round,e.tick):undefined} /> : <div key={e.id} className={`${s.timelineEvent}${onReplay?` ${s.replayEventRow}`:''}`}>
                 <span className={s.timelineTime}>{eventTime(e)}</span>
                 <Tooltip content={e.description} relationship="description"><span className={s.playerName} tabIndex={0}>{e.description}</span></Tooltip>
+                {onReplay?<Button appearance="subtle" size="small" data-timeline-replay-tick={e.tick} onClick={()=>onReplay(r.round,e.tick)}>回放</Button>:null}
               </div>) : <Caption1 className={s.muted}>本回合没有可展示的关键事件。</Caption1>}
             </div> : null}
           </div>;
@@ -283,13 +293,24 @@ function RoundTimeline({ rounds, expanded, highlighted, onToggle }: {
   </section>;
 }
 
-function Report({ report, playerId }: { report: DesktopMatchReport; playerId: string }) {
+function Report({ report, playerId, replayActive }: { report: DesktopMatchReport; playerId: string; replayActive:boolean }) {
   const s = useStyles();
   const selectPlayer = useReport(state => state.selectPlayer);
   const player = report.players.find(p => p.id === playerId)!;
   const p = report.analytics.find(a => a.playerId === playerId)!;
   const timeline = report.timeline.find(t => t.playerId === playerId)?.rounds ?? [];
   const [activeTab, setActiveTab] = useState('report');
+  const [replayJump,setReplayJump]=useState<ReplayJump|null>(null);
+  const [replayNotice,setReplayNotice]=useState<string|null>(null);
+  const [unavailableReplayRound,setUnavailableReplayRound]=useState<number|null>(null);
+  const showReplay=(round:number,tick?:number)=>{
+    const target=report.replay?.rounds.find(r=>r.round===round);
+    if(!target){setUnavailableReplayRound(round);setActiveTab('replay');return;}
+    setUnavailableReplayRound(null);
+    const outside=tick!==undefined&&(tick<target.startTick||tick>target.endTick);
+    setReplayNotice(outside?'该证据位于正式回合窗口之外，仅定位回合起点，未回放该事件。':null);
+    setReplayJump(old=>({round,tick:outside?target.startTick:tick,sequence:(old?.sequence??0)+1}));setActiveTab('replay');
+  };
   const [expanded, setExpanded] = useState<number[]>([]);
   const [highlighted, setHighlighted] = useState<number | null>(null);
   const [scrollRound, setScrollRound] = useState<number | null>(null);
@@ -317,6 +338,7 @@ function Report({ report, playerId }: { report: DesktopMatchReport; playerId: st
     return () => cancelAnimationFrame(frame);
   }, [activeTab, scrollRound]);
   useEffect(() => () => { if (highlightTimer.current !== undefined) window.clearTimeout(highlightTimer.current); }, []);
+  useEffect(()=>{if(activeTab!=='replay')return;const frame=requestAnimationFrame(()=>document.getElementById('replay-panel')?.scrollIntoView({block:'start'}));return()=>cancelAnimationFrame(frame);},[activeTab,replayJump?.sequence]);
   return <>
     <div className={s.header}>
       <div className={s.column}><Title1>{report.match.map}</Title1><Body1>{report.match.score ? `${report.match.score.initialCT} : ${report.match.score.initialT}` : '比分不可用'} · 开局 CT 队 / 开局 T 队 · {report.match.rounds} 回合</Body1><Caption1 className={s.muted}>{report.match.fileName}</Caption1></div>
@@ -329,9 +351,10 @@ function Report({ report, playerId }: { report: DesktopMatchReport; playerId: st
       <Tab id="deep-review-tab" value="deep-review" aria-controls="deep-review-panel">深度复盘</Tab>
       <Tab id="timeline-tab" value="timeline" aria-controls="timeline-panel">回合时间线</Tab>
       <Tab id="analysis-tab" value="analysis" aria-controls="analysis-panel">分析</Tab>
+      <Tab id="replay-tab" value="replay" aria-controls="replay-panel">地图回放</Tab>
     </TabList>
     <div id="deep-review-panel" role="tabpanel" aria-labelledby="deep-review-tab" hidden={activeTab !== 'deep-review'}>
-      <DeepReview key={playerId} player={report.deepReview.players.find(p => p.playerId === playerId)!} onShowRounds={showRounds} />
+      <DeepReview key={playerId} player={report.deepReview.players.find(p => p.playerId === playerId)!} onShowRounds={showRounds} onReplayRound={report.replay?.available?showReplay:undefined} />
     </div>
     <div id="report-panel" role="tabpanel" aria-labelledby="report-tab" hidden={activeTab !== 'report'}>
       <div className={s.section}>
@@ -350,7 +373,7 @@ function Report({ report, playerId }: { report: DesktopMatchReport; playerId: st
       </div>
       <Divider />
       <div className={s.split}>
-        <Findings report={report} playerId={playerId} onShowRounds={showRounds} />
+        <Findings report={report} playerId={playerId} onShowRounds={showRounds} onReplay={report.replay?.available?showReplay:undefined} />
         <div className={s.section}>
           <Title2>道具与残局</Title2>
           <UtilityPanel utility={p.utility} />
@@ -379,25 +402,31 @@ function Report({ report, playerId }: { report: DesktopMatchReport; playerId: st
       </div>
     </div>
     <div id="timeline-panel" role="tabpanel" aria-labelledby="timeline-tab" hidden={activeTab !== 'timeline'}>
-      <RoundTimeline rounds={timeline} expanded={expanded} highlighted={highlighted} onToggle={toggleRound} />
+      <RoundTimeline rounds={timeline} expanded={expanded} highlighted={highlighted} onToggle={toggleRound} onReplay={report.replay?.available?showReplay:undefined} />
     </div>
     <div id="analysis-panel" role="tabpanel" aria-labelledby="analysis-tab" hidden={activeTab !== 'analysis'}>
       <AnalysisViews analysis={report.analysis} playerId={playerId} />
+    </div>
+    <div id="replay-panel" role="tabpanel" aria-labelledby="replay-tab" hidden={activeTab!=='replay'}>
+      {unavailableReplayRound!==null?<><Body1>R{unavailableReplayRound} 的正式回合窗口不可靠，无法定位回放。</Body1><Button appearance="subtle" onClick={()=>setUnavailableReplayRound(null)}>浏览可用回合</Button></>:<>
+        {replayNotice?<Caption1>{replayNotice}</Caption1>:null}
+        {report.replay?<ReplayPlayer key={report.replay.sessionId??'unavailable'} metadata={report.replay} playerId={playerId} onSelectPlayer={selectPlayer} active={activeTab==='replay'&&replayActive} jump={replayJump}/>:<Body1>此报告没有可用回放会话。</Body1>}
+      </>}
     </div>
   </>;
 }
 
 function App() {
   const s = useStyles();
-  const { status, report, playerId, error, importDemo, setPhase } = useReport();
+  const { status, report, playerId, error, importDemo, setPhase, cancelImport } = useReport();
   useEffect(() => window.cs2Analyst.onProgress(setPhase), [setPhase]);
   const busy = status === 'selecting' || status === 'parsing' || status === 'analyzing';
   const phase = status === 'selecting' ? '正在选择 DEM…' : status === 'parsing' ? '正在后台解析 DEM…' : '正在生成指标与深度复盘…';
   return <main className={s.content} data-status={status}>
     <header className={s.header}><div className={s.column}><Subtitle1>CS2 Analyst</Subtitle1><Caption1 className={s.muted}>本地赛后报告</Caption1></div><Button appearance="primary" disabled={busy} onClick={() => void importDemo()}>{report || status === 'error' ? '重新选择 DEM' : '选择 DEM'}</Button></header>
-    {busy ? <div role="status"><Spinner label={phase} /><Caption1 className={s.muted}>大型录像可能需要数十秒，请保持应用打开。</Caption1></div> : null}
+    {busy ? <div role="status"><Spinner label={phase} /><Caption1 className={s.muted}>大型录像可能需要数十秒，请保持应用打开。</Caption1>{status!=='selecting'?<Button appearance="subtle" onClick={()=>void cancelImport()}>取消导入</Button>:null}</div> : null}
     {error ? <MessageBar intent="error"><MessageBarBody>{error}</MessageBarBody></MessageBar> : null}
-    {report ? <>{status === 'error' || busy ? <Caption1>下方为上一次成功导入的报告。</Caption1> : null}<Report key={report.match.id} report={report} playerId={playerId} /></> : !busy ? <Card className={s.empty}><Title1>从一场比赛开始</Title1><Body1>选择 CS2 .dem 录像，查看玩家表现与有证据的复盘重点。</Body1><Caption1 className={s.muted}>文件只在本机处理。</Caption1></Card> : null}
+    {report ? <>{status === 'error' || busy ? <Caption1>下方为上一次成功导入的报告。</Caption1> : null}<Report key={report.match.id} report={report} playerId={playerId} replayActive={!busy&&status==='success'} /></> : !busy ? <Card className={s.empty}><Title1>从一场比赛开始</Title1><Body1>选择 CS2 .dem 录像，查看玩家表现与有证据的复盘重点。</Body1><Caption1 className={s.muted}>文件只在本机处理。</Caption1></Card> : null}
   </main>;
 }
 

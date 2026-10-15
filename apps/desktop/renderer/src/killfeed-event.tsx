@@ -1,4 +1,4 @@
-import { Tooltip, makeStyles, tokens } from '@fluentui/react-components';
+import { Button, Tooltip, makeStyles, tokens } from '@fluentui/react-components';
 import type { DesktopTimelineEvent } from '@cs2-analyst/report-contract';
 import { FlashAssistIcon, HeadshotIcon, WeaponIcon, weaponLabel } from './killfeed-icons';
 import { palette } from './theme';
@@ -10,9 +10,10 @@ const useStyles = makeStyles({
   attacker: { textAlign: 'right' },
   icons: { display: 'flex', alignItems: 'center', gap: '6px', color: tokens.colorNeutralForeground2 },
   icon: { display: 'inline-flex', flexShrink: 0 },
+  withReplay: { gridTemplateColumns:'88px minmax(0,1fr) auto minmax(0,1fr) 56px' },
 });
 
-export function KillFeedEvent({ event, round }: { event: DesktopTimelineEvent; round: number }) {
+export function KillFeedEvent({ event, round, onReplay }: { event: DesktopTimelineEvent; round: number; onReplay?:()=>void }) {
   const s = useStyles();
   const time = event.roundTimeSeconds === undefined ? '—' : `+${event.roundTimeSeconds.toFixed(2)} 秒`;
   const target = event.targetName ?? '未知玩家';
@@ -22,7 +23,7 @@ export function KillFeedEvent({ event, round }: { event: DesktopTimelineEvent; r
   const weapon = world ? '世界伤害 / 无已知攻击者' : event.weapon ? weaponLabel(event.weapon) : '未知武器';
   const when = event.roundTimeSeconds === undefined ? '回合内时间证据不足' : `回合开始后 ${event.roundTimeSeconds.toFixed(2)} 秒`;
   const label = `R${round} ${when}，${world ? `${target} 因${weapon}阵亡` : `${attacker} 使用 ${weapon} 击杀 ${target}`}${event.headshot === true ? '，爆头' : ''}${event.assistedFlash === true ? '，闪光助攻' : ''}`;
-  return <div className={s.row} tabIndex={0} aria-label={label} data-killfeed-event={event.type}>
+  return <div className={`${s.row}${onReplay?` ${s.withReplay}`:''}`} tabIndex={0} aria-label={label} data-killfeed-event={event.type}>
     <span className={s.time}>{time}</span>
     <Tooltip content={attacker} relationship="description"><span className={`${s.name} ${s.attacker}`} tabIndex={0} data-killfeed-attacker>{attacker}</span></Tooltip>
     <span className={s.icons}>
@@ -31,5 +32,6 @@ export function KillFeedEvent({ event, round }: { event: DesktopTimelineEvent; r
       {event.assistedFlash === true ? <Tooltip content="闪光助攻" relationship="description"><span className={s.icon} tabIndex={0} aria-label="闪光助攻"><FlashAssistIcon /></span></Tooltip> : null}
     </span>
     <Tooltip content={victim} relationship="description"><span className={s.name} tabIndex={0} data-killfeed-victim>{victim}</span></Tooltip>
+    {onReplay?<Button appearance="subtle" size="small" aria-label={`在地图回放中查看 ${label}`} data-timeline-replay-tick={event.tick} onClick={onReplay}>回放</Button>:null}
   </div>;
 }

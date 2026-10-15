@@ -33,6 +33,7 @@ export const palette = {
   scrollbarThumbActive: 'rgba(143, 157, 176, 0.62)',
   scrollbarThumbFallback: 'rgba(143, 157, 176, 0.36)',
   currentPlayer: '#62abf5',
+  replay: { ct: '#62abf5', t: '#ffb13b', unknown: '#8f9db0', selection: '#ffffff', bomb: '#ffe08a', surface: '#111821' },
   /** Colours reserved for the utility icons; every one is a visual anchor, not a data encoding. */
   utility: {
     flashbang: '#4DB6FF',

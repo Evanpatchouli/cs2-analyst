@@ -141,4 +141,28 @@ Utility一次共享输入生成原报告和回放，再只保留有界JSON块；
 完整desktop测试首次因旧Nuke硬性fixture要求失败（本机无`nuke.dem`），另有新测试mock缺方法已修正。
 按用户只要求Dust2的范围，未修改旧测试：`node --test --test-skip-pattern='Nuke Desktop' apps/desktop/tests/*.test.mjs`
 执行38 PASS/1 SKIP（demo1缺失），Nuke case显式过滤；随后新增在途请求限额测试另通过。
-P6.3播放器与P6.4真实Electron/安装验收待完成。
+P6.3播放器与P6.4安装验收继续如下。
+
+## P6.3 — Canvas播放器与联动通过
+
+新增第五个mounted Tab「地图回放」，React/Fluent UI v9控件与双层Canvas；播放/暂停、0.25–4倍速、
+进度seek、回合/玩家/楼层选择、键盘操作、文字玩家状态/事件浏览、全局观察与地图未确认说明。
+时钟按performance锚点计算，隐藏Tab/后台暂停；Renderer最多3块缓存/单在途请求，旧session返回忽略。
+位置与朝向仅在同segment/两端有效/有界间隔插值，离散状态来自完整frame，不进入分析。
+炸弹位置标明事件关联/携带者采样，道具仅精确tick生效点，不画烟火区域、抛物线或LOS。
+
+Timeline逐事件tick、基础Finding证据、Deep Review回合均可进入回放；正式窗口外证据明确回退回合起点，
+无可靠窗口显示不可用，不静默定位其他事件。既有报告/Timeline/Analysis/Deep Review仍保留。
+实际导入启动会退休旧回放元数据；取消文件对话框保留旧会话，解析取消后原报告保持可读。
+
+6个显示时钟/插值/LRU测试、2个store生命周期测试与6个既有SSR回归测试通过，desktop build/typecheck通过。
+独立复核发现并修复小数tick块缝及插值携带炸弹消失，新增边界回归；同tick/生命期仍保守处理。
+真实Electron（离线网络）执行：播放/暂停、2倍速、Slider seek、跨真实块、换回合/玩家、键盘、
+Timeline精确事件与Finding证据联动、原报告与旧公开入口完整hash相同、会话释放后OS worker退出。
+首个全通过运行：导入8.99秒、首帧172.5ms、12次IPC p95=10.1ms、Canvas绘制p95=0.4ms；
+worker OS峰值1498742784字节，低于2.5GiB目标。最终P6.4会另测安装版。
+
+真实应用截图已检查1280×900、900×760、800×600，无整页横向溢出；这些是CDP viewport模拟，
+不是声称原生窗口逐尺寸拖动。P6.3测试脚本曾因未重建采样仪表、首帧等待条件过早、
+CDP进程类型/不支持的Browser窗口命令而失败，已修正测试并完整重跑通过；失败未计PASS。
+截图/原始metrics在本机`.tmp/p6-qa/`，不提交。脚本：`node scripts/replay-smoke.mjs`。
