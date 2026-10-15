@@ -62,7 +62,7 @@ P5.5 Round Timeline MVP — **PASS**。报告页底部新增独立“回合时�
 - P5.5 已完成：回合时间线与 Findings → Timeline 联动。
 - P5.5.1 已完成：名单与 Timeline 统一隐藏原始长数字玩家标识，保留 DTO 追溯 ID。
 - P5.6 已完成：Analysis Views MVP（全场玩家指标对比、回合击杀趋势、CT/T 对比），基于冻结 Analytics 与 Timeline 的只读展示投影。
-- 未开始：完整播放器、地图热力图、额外 Analytics 算法。
+- 未开始：2D 地图回放、地图热力图、额外 Analytics 算法。回放范围仅限 2D，不做 3D 回放；具体阶段尚未排期。
 
 P5.6.2 Report UX Polish — **PASS**。比赛报告 / 回合时间线 / 分析三个 mounted Tab；Findings 原生证据入口 hover/focus 与先切 Tab 的回合联动；当前玩家姓名和条图统一 #62abf5；Frozen multiKills counts 直接投影、零项隐藏；CT/T 独立内缩 divider；Timeline 单色自绘 SVG kill-feed、爆头/闪光助攻原样投影与未知武器 fallback。严格保持 P3/P4 与 Timeline 筛选、round time、nickname 原样规则；无新增算法或产品模块。
 
@@ -98,7 +98,7 @@ Current: **v0.1 Final Acceptance FINAL PASS; P5 COMPLETE; P5.7 FINAL PASS.** 验
 - Final Acceptance 的核心目标从“继续开发功能”切换为“验证不同真实比赛上的泛化可靠性”。
 - 目标样本约 3～5 场真实玩家 DEM，尽量覆盖不同地图、比分、发挥水平与特殊情况；拿到第 2 份 DEM 即可开始逐场验收，不必等待全部样本收齐。
 - 每场重点抽查最终比分、K/D/A、ADR、KAST、CT/T split、最高多杀、Opening/Trade、Clutch（如有）以及随机 3～5 个 Timeline 回合，并核对 Findings 是否有充分证据。
-- DEM 仍由用户主动选择；不引入自动目录扫描、登录、历史库、AI Coach、热力图或完整播放器。
+- DEM 仍由用户主动选择；本轮不引入自动目录扫描、登录、历史库、AI Coach、热力图或 2D 地图回放。
 - P6 AI Coach 仅作为下一阶段候选；v0.1 已完成，但未经新的明确授权不自动开始 P6。
 
 ## P6 AI Coach
