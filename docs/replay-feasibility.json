@@ -1,0 +1,550 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-15",
+  "scope": "P6.0 developer experiment, one explicitly selected Dust2 DEM; not Electron/IPC acceptance",
+  "fixture": {
+    "fileName": "spirit-vs-faze-m3-dust2.dem",
+    "sha256": "db90fe85aab023a1d2c8a5996182e6120d98ef494f02a070b17982b235e4958c",
+    "bytes": 557650967,
+    "map": "de_dust2",
+    "tickRate": 64,
+    "matchFingerprint": "87791b1cce793369dbba0ee2e4b35a1c20eeaec320e7a4a4723643e465535e35",
+    "header": {
+      "addons": "",
+      "allow_clientside_entities": "true",
+      "allow_clientside_particles": "true",
+      "client_name": "SourceTV Demo",
+      "demo_file_stamp": "PBDEMS2\u0000",
+      "demo_version_guid": "8e9d71ab-04a1-4c01-bb61-acfede27c046",
+      "demo_version_name": "valve_demo_2",
+      "fullpackets_version": "2",
+      "game_directory": "/data/cs2-linux-server/cs2/game/csgo",
+      "map_name": "de_dust2",
+      "patch_version": "14055",
+      "server_name": "[MAJOR] Team Spirit vs FaZe Clan BO3-3"
+    }
+  },
+  "environment": {
+    "node": "v24.22.0",
+    "cpu": "AMD Ryzen 7 5700G with Radeon Graphics         ",
+    "totalMemoryBytes": 33684189184,
+    "nativeSha256": "64aa7e63117dbb1fc0c9c986bc32396bd58e6f5e42ffe6193621d82985065868"
+  },
+  "candidates": [
+    {
+      "hz": 8,
+      "baseMs": 2610.3531,
+      "queryMs": [
+        3256.3089,
+        3241.0662,
+        3841.202799999999
+      ],
+      "rounds": 24,
+      "excludedRounds": [],
+      "requestedTicks": 27466,
+      "returnedTicks": 27466,
+      "rows": 274660,
+      "missingTicks": 0,
+      "missingPlayerRows": 0,
+      "validPositionRows": 274660,
+      "aliveRows": 235604,
+      "fullRawJsonBytes": 59385485,
+      "candidate20sRawChunkBytes": {
+        "count": 159,
+        "p50": 374741,
+        "p95": 524110,
+        "max": 593918
+      },
+      "candidate20sLookupAndSerializeMs": {
+        "count": 159,
+        "p50": 4.427299999999377,
+        "p95": 7.228599999998551,
+        "max": 28.790800000000672
+      },
+      "reference": {
+        "hz": 64,
+        "windows": [
+          {
+            "round": 1,
+            "start": 6080,
+            "end": 6336,
+            "anchor": 6208,
+            "kind": "first-kill-or-freeze-end"
+          },
+          {
+            "round": 9,
+            "start": 66546,
+            "end": 66802,
+            "anchor": 66674,
+            "kind": "first-kill-or-freeze-end"
+          },
+          {
+            "round": 17,
+            "start": 143877,
+            "end": 144133,
+            "anchor": 144005,
+            "kind": "first-kill-or-freeze-end"
+          },
+          {
+            "round": 24,
+            "start": 199190,
+            "end": 199446,
+            "anchor": 199318,
+            "kind": "first-kill-or-freeze-end"
+          }
+        ],
+        "rows": 10280,
+        "positionErrorWorldUnits": {
+          "count": 7193,
+          "p50": 0.27154791719094395,
+          "p95": 1.8467171835314011,
+          "max": 12.400167931326587
+        },
+        "yawErrorDegrees": {
+          "count": 7193,
+          "p50": 0.0583648681640625,
+          "p95": 2.705810546875,
+          "max": 21.691997528076172
+        },
+        "excluded": 517,
+        "scope": "four distributed rounds around first kill; native final-tick observations, no absolute freshness claim"
+      },
+      "peakProcessRssKiB": 1520996,
+      "peakScope": "OS process lifetime: input/native/base/query repetitions/reference/serialization, not Electron application peak"
+    },
+    {
+      "hz": 16,
+      "baseMs": 1910.0365000000002,
+      "queryMs": [
+        5835.3988,
+        6124.036799999999,
+        6356.8886999999995
+      ],
+      "rounds": 24,
+      "excludedRounds": [],
+      "requestedTicks": 50302,
+      "returnedTicks": 50302,
+      "rows": 503020,
+      "missingTicks": 0,
+      "missingPlayerRows": 0,
+      "validPositionRows": 503020,
+      "aliveRows": 433699,
+      "fullRawJsonBytes": 108677114,
+      "candidate20sRawChunkBytes": {
+        "count": 159,
+        "p50": 719698,
+        "p95": 847042,
+        "max": 911813
+      },
+      "candidate20sLookupAndSerializeMs": {
+        "count": 159,
+        "p50": 8.806000000000495,
+        "p95": 13.444100000000617,
+        "max": 39.67859999999928
+      },
+      "reference": {
+        "hz": 64,
+        "windows": [
+          {
+            "round": 1,
+            "start": 6080,
+            "end": 6336,
+            "anchor": 6208,
+            "kind": "first-kill-or-freeze-end"
+          },
+          {
+            "round": 9,
+            "start": 66546,
+            "end": 66802,
+            "anchor": 66674,
+            "kind": "first-kill-or-freeze-end"
+          },
+          {
+            "round": 17,
+            "start": 143877,
+            "end": 144133,
+            "anchor": 144005,
+            "kind": "first-kill-or-freeze-end"
+          },
+          {
+            "round": 24,
+            "start": 199190,
+            "end": 199446,
+            "anchor": 199318,
+            "kind": "first-kill-or-freeze-end"
+          }
+        ],
+        "rows": 10280,
+        "positionErrorWorldUnits": {
+          "count": 6105,
+          "p50": 0.11685666787503242,
+          "p95": 0.5823720895697455,
+          "max": 9.679272578583298
+        },
+        "yawErrorDegrees": {
+          "count": 6105,
+          "p50": 0.02952067057287877,
+          "p95": 1.0869598388671875,
+          "max": 8.021728515625
+        },
+        "excluded": 435,
+        "scope": "four distributed rounds around first kill; native final-tick observations, no absolute freshness claim"
+      },
+      "peakProcessRssKiB": 2028004,
+      "peakScope": "OS process lifetime: input/native/base/query repetitions/reference/serialization, not Electron application peak"
+    },
+    {
+      "hz": 32,
+      "baseMs": 2092.9084000000003,
+      "queryMs": [
+        12258.1172,
+        12385.216100000001,
+        14367.906999999996
+      ],
+      "rounds": 24,
+      "excludedRounds": [],
+      "requestedTicks": 95888,
+      "returnedTicks": 95887,
+      "rows": 958870,
+      "missingTicks": 1,
+      "missingPlayerRows": 10,
+      "validPositionRows": 958870,
+      "aliveRows": 829110,
+      "fullRawJsonBytes": 207071189,
+      "candidate20sRawChunkBytes": {
+        "count": 159,
+        "p50": 1413894,
+        "p95": 1498597,
+        "max": 1554248
+      },
+      "candidate20sLookupAndSerializeMs": {
+        "count": 159,
+        "p50": 16.391799999997602,
+        "p95": 21.65389999999752,
+        "max": 44.728900000001886
+      },
+      "reference": {
+        "hz": 64,
+        "windows": [
+          {
+            "round": 1,
+            "start": 6080,
+            "end": 6336,
+            "anchor": 6208,
+            "kind": "first-kill-or-freeze-end"
+          },
+          {
+            "round": 9,
+            "start": 66546,
+            "end": 66802,
+            "anchor": 66674,
+            "kind": "first-kill-or-freeze-end"
+          },
+          {
+            "round": 17,
+            "start": 143877,
+            "end": 144133,
+            "anchor": 144005,
+            "kind": "first-kill-or-freeze-end"
+          },
+          {
+            "round": 24,
+            "start": 199190,
+            "end": 199446,
+            "anchor": 199318,
+            "kind": "first-kill-or-freeze-end"
+          }
+        ],
+        "rows": 10280,
+        "positionErrorWorldUnits": {
+          "count": 4063,
+          "p50": 0.047719699050196164,
+          "p95": 0.20189961209016813,
+          "max": 5.842653844831685
+        },
+        "yawErrorDegrees": {
+          "count": 4063,
+          "p50": 0.0163116455078125,
+          "p95": 0.43894195556640625,
+          "max": 3.75372314453125
+        },
+        "excluded": 287,
+        "scope": "four distributed rounds around first kill; native final-tick observations, no absolute freshness claim"
+      },
+      "peakProcessRssKiB": 3209848,
+      "peakScope": "OS process lifetime: input/native/base/query repetitions/reference/serialization, not Electron application peak"
+    }
+  ],
+  "landmarkObservations": [
+    {
+      "round": 1,
+      "tick": 2712,
+      "playerId": "76561197989430253",
+      "side": 2,
+      "x": -428,
+      "y": -843,
+      "z": 95.2962875366211,
+      "yaw": 103.60174560546875,
+      "kind": "freeze_end",
+      "planter": false
+    },
+    {
+      "round": 1,
+      "tick": 2712,
+      "playerId": "76561197991272318",
+      "side": 2,
+      "x": -1076,
+      "y": -843,
+      "z": 116.78946685791016,
+      "yaw": 119.3643798828125,
+      "kind": "freeze_end",
+      "planter": false
+    },
+    {
+      "round": 1,
+      "tick": 2712,
+      "playerId": "76561197997351207",
+      "side": 2,
+      "x": -1015,
+      "y": -808,
+      "z": 116.0826187133789,
+      "yaw": 120.63021850585938,
+      "kind": "freeze_end",
+      "planter": false
+    },
+    {
+      "round": 1,
+      "tick": 2712,
+      "playerId": "76561198045898864",
+      "side": 3,
+      "x": 160.12274169921875,
+      "y": 2369.67626953125,
+      "z": -119.918701171875,
+      "yaw": -101.91020965576172,
+      "kind": "freeze_end",
+      "planter": false
+    },
+    {
+      "round": 1,
+      "tick": 2712,
+      "playerId": "76561198068422762",
+      "side": 2,
+      "x": -760.6629638671875,
+      "y": -836.1740112304688,
+      "z": 117.07176971435547,
+      "yaw": 10.712005615234375,
+      "kind": "freeze_end",
+      "planter": false
+    },
+    {
+      "round": 1,
+      "tick": 2712,
+      "playerId": "76561198081484775",
+      "side": 3,
+      "x": 351.3921203613281,
+      "y": 2352.9423828125,
+      "z": -120.47491455078125,
+      "yaw": -29.960052490234375,
+      "kind": "freeze_end",
+      "planter": false
+    },
+    {
+      "round": 1,
+      "tick": 2712,
+      "playerId": "76561198201620490",
+      "side": 2,
+      "x": -657.2713623046875,
+      "y": -755.879638671875,
+      "z": 119.88401794433594,
+      "yaw": 175.59930419921875,
+      "kind": "freeze_end",
+      "planter": false
+    },
+    {
+      "round": 1,
+      "tick": 2712,
+      "playerId": "76561198386265483",
+      "side": 3,
+      "x": 182.24990844726562,
+      "y": 2439.01171875,
+      "z": -120.96875,
+      "yaw": -107.20733642578125,
+      "kind": "freeze_end",
+      "planter": false
+    },
+    {
+      "round": 1,
+      "tick": 2712,
+      "playerId": "76561198995880877",
+      "side": 3,
+      "x": 258.1593933105469,
+      "y": 2480.5537109375,
+      "z": -121.07666015625,
+      "yaw": -129.08419799804688,
+      "kind": "freeze_end",
+      "planter": false
+    },
+    {
+      "round": 1,
+      "tick": 2712,
+      "playerId": "76561199063238565",
+      "side": 3,
+      "x": 334.3687438964844,
+      "y": 2433.733642578125,
+      "z": -120.362548828125,
+      "yaw": -40.71533203125,
+      "kind": "freeze_end",
+      "planter": false
+    },
+    {
+      "round": 3,
+      "tick": 21621,
+      "playerId": "76561198201620490",
+      "side": 2,
+      "x": 1211.649169921875,
+      "y": 2460.96630859375,
+      "z": 97.2196273803711,
+      "yaw": 146.34716796875,
+      "kind": "plant_tick",
+      "planter": true
+    },
+    {
+      "round": 6,
+      "tick": 43991,
+      "playerId": "76561198201620490",
+      "side": 2,
+      "x": 987.9684448242188,
+      "y": 2465.659423828125,
+      "z": 96.53125762939453,
+      "yaw": 84.51541137695312,
+      "kind": "plant_tick",
+      "planter": true
+    },
+    {
+      "round": 8,
+      "tick": 61675,
+      "playerId": "76561198201620490",
+      "side": 2,
+      "x": -1696.2841796875,
+      "y": 2545.845458984375,
+      "z": 8.144002914428711,
+      "yaw": -53.027915954589844,
+      "kind": "plant_tick",
+      "planter": true
+    },
+    {
+      "round": 9,
+      "tick": 70450,
+      "playerId": "76561198201620490",
+      "side": 2,
+      "x": -1684.029296875,
+      "y": 2563.60009765625,
+      "z": 6.803537368774414,
+      "yaw": -99.11418914794922,
+      "kind": "plant_tick",
+      "planter": true
+    },
+    {
+      "round": 11,
+      "tick": 91257,
+      "playerId": "76561198201620490",
+      "side": 2,
+      "x": 991.4967041015625,
+      "y": 2540.872314453125,
+      "z": 96.53125,
+      "yaw": -88.40835571289062,
+      "kind": "plant_tick",
+      "planter": true
+    },
+    {
+      "round": 12,
+      "tick": 101668,
+      "playerId": "76561198201620490",
+      "side": 2,
+      "x": 1235.9676513671875,
+      "y": 2561.03125,
+      "z": 99.60236358642578,
+      "yaw": 108.67709350585938,
+      "kind": "plant_tick",
+      "planter": true
+    },
+    {
+      "round": 13,
+      "tick": 114041,
+      "playerId": "76561198045898864",
+      "side": 2,
+      "x": -1391.434814453125,
+      "y": 2565.96826171875,
+      "z": 3.609518527984619,
+      "yaw": 94.4034423828125,
+      "kind": "plant_tick",
+      "planter": true
+    },
+    {
+      "round": 15,
+      "tick": 124988,
+      "playerId": "76561198081484775",
+      "side": 2,
+      "x": 987.9682006835938,
+      "y": 2526.04443359375,
+      "z": 96.53125,
+      "yaw": 110.994873046875,
+      "kind": "plant_tick",
+      "planter": true
+    },
+    {
+      "round": 17,
+      "tick": 144817,
+      "playerId": "76561198995880877",
+      "side": 2,
+      "x": 1091.703369140625,
+      "y": 2502.560791015625,
+      "z": 96.03125,
+      "yaw": -174.60708618164062,
+      "kind": "plant_tick",
+      "planter": true
+    },
+    {
+      "round": 19,
+      "tick": 161643,
+      "playerId": "76561198045898864",
+      "side": 2,
+      "x": -1684.0321044921875,
+      "y": 2532.741455078125,
+      "z": 7.929522514343262,
+      "yaw": -80.6674575805664,
+      "kind": "plant_tick",
+      "planter": true
+    },
+    {
+      "round": 22,
+      "tick": 183400,
+      "playerId": "76561198386265483",
+      "side": 2,
+      "x": 1102.547607421875,
+      "y": 2523.131103515625,
+      "z": 96.03125,
+      "yaw": -138.143798828125,
+      "kind": "plant_tick",
+      "planter": true
+    },
+    {
+      "round": 24,
+      "tick": 199980,
+      "playerId": "76561198081484775",
+      "side": 2,
+      "x": -1567.0377197265625,
+      "y": 2642.25244140625,
+      "z": 5.084902763366699,
+      "yaw": -35.654754638671875,
+      "kind": "plant_tick",
+      "planter": true
+    }
+  ],
+  "limitations": [
+    "Native final-tick reference in four combat windows only; no absolute freshness or whole-match interpolation guarantee",
+    "Peak is process lifetime including raw rows and reference/JSON allocations, not app memory",
+    "20s raw JSON lookup/serialization is a candidate envelope, not production DTO/IPC/seek measurement",
+    "No production replay API or worker lifecycle implemented in this work unit"
+  ]
+}
