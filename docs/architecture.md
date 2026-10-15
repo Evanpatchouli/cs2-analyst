@@ -43,6 +43,25 @@ v0.1 Final Acceptance remains **PAUSED**. P5.7.0 is **PARTIAL PASS**; P5.7.1–P
 
 `analytics` implements the P3 deterministic player and combat metrics and depends only on `match-model` domain types. Round windowing and roster coverage are centralized in `packages/analytics/src/coverage.ts` so individual metrics do not re-implement eligibility; the shared survival/trade timeline for KAST, Trade and Clutch lives in `packages/analytics/src/timeline.ts`. Definitions and limits: [analytics metrics](./analytics-metrics.md).
 
+## Planned P6 2D replay (not implemented)
+
+[Replay technical route](./replay-technical-route.md) defines a fully local Canvas 2D viewer using
+versioned radar images paired with overview metadata. Prepare assets in a maintenance environment,
+prefer Valve-distributed source content and verify community extraction packages before use;
+neither development nor end-user playback assumes an installed CS2 directory.
+
+Add explicit continuous replay sampling through dem-parser with independent match-model contracts;
+keep the existing sparse Spatial/Deep Review semantics and deterministic metrics unchanged. The
+Utility Process owns bounded replay sessions/chunks, Main/preload authorize requests, report-contract
+carries JSON presentation data, and Renderer performs only coordinate projection and display interpolation.
+Worker lifetime, chunk baselines, stale-session rejection and cleanup require implementation validation.
+
+Radar/overview pairing, map versions, independent landmark calibration and multi-floor Z ranges must
+be checked; missing/uncertain evidence remains explicit. Display interpolation never becomes analytics
+evidence. P6 has no P7 heatmap or P8 backend dependency and does not establish LOS or tactical quality.
+The development machine has no CS2 installation; no game-directory discovery or runtime asset extraction
+is planned. All P6 subphases remain unimplemented in this documentation update.
+
 ## Principles
 
 DEM parsing, analysis logic and UI presentation must remain independent.
