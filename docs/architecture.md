@@ -49,6 +49,12 @@ DEM parsing, analysis logic and UI presentation must remain independent.
 
 AI coaching is an optional interpretation layer built on top of structured findings.
 
+P8's planned model-independent knowledge, coaching and evaluation route is documented in
+[AI Coach technical route](./ai-coach-technical-route.md). It preserves local deterministic analysis,
+stores reviewed professional-demo knowledge outside model weights, and separates conditional AI
+recommendations from verified Findings. This is a future design, not an implemented component;
+map geometry/visibility capabilities require independent validation beyond P6 2D rendering.
+
 ## Future boundary (not implemented)
 
 Auto DEM discovery / directory scanning is **not planned**: the user always selects the DEM explicitly, and no code scans Steam / CS2 directories. A future `apps/api` may add account / session and match-history summary storage, but DEM parsing, Analytics and Findings stay local to Desktop — the service never receives DEM files and never analyzes them.
