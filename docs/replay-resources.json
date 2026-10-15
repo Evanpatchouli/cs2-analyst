@@ -1,0 +1,284 @@
+{
+  "schemaVersion": 1,
+  "resourceId": "valve-730-2347770-2312433566686574487-vrf20.1",
+  "date": "2026-10-15",
+  "source": {
+    "kind": "Valve Steam distribution; locally extracted with open-source tools",
+    "appId": 730,
+    "depotId": 2347770,
+    "manifestId": "2312433566686574487",
+    "manifestTimestampFromDownloader": "2026-10-15T00:05:59 (downloader locale; timezone not established)",
+    "manifestSha256": "c0616aacbf03fc201c7b20c3aa2b87e8332ce0473143e1c91ccf6fe25d56f755",
+    "buildId": null,
+    "clientVersion": null,
+    "tools": [
+      {
+        "name": "DepotDownloader",
+        "version": "3.4.0",
+        "archive": "DepotDownloader-framework.zip",
+        "bytes": 2661253,
+        "sha256": "7419f65efb7eb16b6e56987ed1b76475f29c02475c0016166c84798388e796bc",
+        "publisherDigest": null,
+        "downloadUrl": "https://github.com/SteamRE/DepotDownloader/releases/download/DepotDownloader_3.4.0/DepotDownloader-framework.zip"
+      },
+      {
+        "name": "Source2Viewer-CLI",
+        "version": "20.1.7467+9e2e6c7f67e3c4e5a5f443a60c3a5d841ba8f304",
+        "archive": "cli-windows-x64.zip",
+        "bytes": 52773073,
+        "sha256": "67aaf8a67a85ca60fd09ff343e62103a4cdf3a2d177fc656231d7d734c5b3aa3",
+        "publisherDigest": "67aaf8a67a85ca60fd09ff343e62103a4cdf3a2d177fc656231d7d734c5b3aa3",
+        "downloadUrl": "https://github.com/ValveResourceFormat/ValveResourceFormat/releases/download/20.1/cli-windows-x64.zip"
+      }
+    ],
+    "archiveFiles": [
+      {
+        "name": "pak01_022.vpk",
+        "bytes": 111048084,
+        "sha256": "f96763d0dc5a126c7f7051dca0823b570ab5027c6a122acc5a3e2e532e4d4322"
+      },
+      {
+        "name": "pak01_137.vpk",
+        "bytes": 108702239,
+        "sha256": "79b0abcf10fcfeea5bda8148102340f7e1105aa91286f25c4f0e76edd3bfff11"
+      },
+      {
+        "name": "pak01_157.vpk",
+        "bytes": 116354463,
+        "sha256": "48c0ebe7459c92b97bf416f6f42f9f94d2af29df41764adb4b7b275aaab8d88e"
+      },
+      {
+        "name": "pak01_339.vpk",
+        "bytes": 107971185,
+        "sha256": "d0d925a4fd2e94549e9497823e50b51b6a084c5332e414c586779e90f8358bdf"
+      },
+      {
+        "name": "pak01_409.vpk",
+        "bytes": 99649569,
+        "sha256": "502b3e012c7b2eff4f6f9cb44fc29ac83e13454c2eaac7e2934a750d91caabcd"
+      },
+      {
+        "name": "pak01_433.vpk",
+        "bytes": 115416860,
+        "sha256": "c6180648a690859d9c6fe9b1b58f674278e356952f6af67672003980e55c408e"
+      },
+      {
+        "name": "pak01_dir.vpk",
+        "bytes": 7706712,
+        "sha256": "d219493f5ba3205e544ec5320e109c390d3dd55ce37c0e7ced2f732f19210953"
+      }
+    ]
+  },
+  "usage": {
+    "scope": "local personal non-commercial development and installation verification confirmed by user",
+    "owner": "Valve Corporation",
+    "publicRedistribution": "unconfirmed; no publish or push authorization",
+    "references": [
+      "https://store.steampowered.com/subscriber_agreement/",
+      "https://github.com/pnxenopoulos/awpy-data/blob/7c73907f74521d271f0eb40bcbe14a4912184e05/README.md",
+      "https://github.com/MurkyYT/cs2-map-icons/tree/9a22f424dab892f8fd59cec100029883c05e6116"
+    ],
+    "publicSourcePolicy": "Only code, digests, normalized numeric coordinate/layer metadata and verification records are committed. Extracted Valve PNGs and original overview files stay ignored/local."
+  },
+  "maps": [
+    {
+      "map": "de_dust2",
+      "overview": {
+        "path": "resource/overviews/de_dust2.txt",
+        "bytes": 541,
+        "sha256": "97947e99bc7930fc06dc15af3dcf942dbca5ca1c6f36119a089615fd4b383620",
+        "transform": {
+          "posX": -2476,
+          "posY": 3239,
+          "scale": 4.4
+        },
+        "layers": []
+      },
+      "images": [
+        {
+          "id": "default",
+          "minZ": null,
+          "maxZ": null,
+          "path": "panorama/images/overheadmaps/de_dust2_radar_psd.png",
+          "bytes": 175761,
+          "sha256": "0828297130ce26db25a299806ff743df9104de634a3e64b52b358f6f4399354d",
+          "width": 1024,
+          "height": 1024
+        }
+      ],
+      "demVersionMatch": "unconfirmed",
+      "registration": "four-region-pass; see replay-calibration.json"
+    },
+    {
+      "map": "de_nuke",
+      "overview": {
+        "path": "resource/overviews/de_nuke.txt",
+        "bytes": 746,
+        "sha256": "877a8df76cee8e5abc4756df162790ed25c5f5dd994ed9d895a7bc3a9c3ac585",
+        "transform": {
+          "posX": -3453,
+          "posY": 2887,
+          "scale": 7
+        },
+        "layers": [
+          {
+            "id": "default",
+            "minZ": -495,
+            "maxZ": 10000
+          },
+          {
+            "id": "lower",
+            "minZ": -10000,
+            "maxZ": -495
+          }
+        ]
+      },
+      "images": [
+        {
+          "id": "default",
+          "minZ": -495,
+          "maxZ": 10000,
+          "path": "panorama/images/overheadmaps/de_nuke_radar_psd.png",
+          "bytes": 96995,
+          "sha256": "21167d05292e80eebe7b068f0bba36a2e3f9116d154d96952a8366cdcc72e6b1",
+          "width": 1024,
+          "height": 1024
+        },
+        {
+          "id": "lower",
+          "minZ": -10000,
+          "maxZ": -495,
+          "path": "panorama/images/overheadmaps/de_nuke_lower_radar_psd.png",
+          "bytes": 96487,
+          "sha256": "b8c4e659491ba79be60b7d3f9bc78bdaeb808afc2bae14bf3b25b1801220ebe0",
+          "width": 1024,
+          "height": 1024
+        }
+      ],
+      "demVersionMatch": "unconfirmed",
+      "registration": "not independently registered with a real DEM"
+    },
+    {
+      "map": "de_inferno",
+      "overview": {
+        "path": "resource/overviews/de_inferno.txt",
+        "bytes": 414,
+        "sha256": "ff93b0ff1f6705ccfb4daf3b038dd88ccdf3ca776823667c19782650e94d2c54",
+        "transform": {
+          "posX": -2087,
+          "posY": 3870,
+          "scale": 4.9
+        },
+        "layers": []
+      },
+      "images": [
+        {
+          "id": "default",
+          "minZ": null,
+          "maxZ": null,
+          "path": "panorama/images/overheadmaps/de_inferno_radar_psd.png",
+          "bytes": 136914,
+          "sha256": "53e1d660d5e61a9b876cc56725c2e891c56efcb788657520fa9c10fec321dce3",
+          "width": 1024,
+          "height": 1024
+        }
+      ],
+      "demVersionMatch": "unconfirmed",
+      "registration": "not independently registered with a real DEM"
+    },
+    {
+      "map": "de_mirage",
+      "overview": {
+        "path": "resource/overviews/de_mirage.txt",
+        "bytes": 640,
+        "sha256": "f201fd608d6ea0bd091920620a4f74e97197d26caf36f133875b58d5ba1d77fe",
+        "transform": {
+          "posX": -3230,
+          "posY": 1713,
+          "scale": 5
+        },
+        "layers": []
+      },
+      "images": [
+        {
+          "id": "default",
+          "minZ": null,
+          "maxZ": null,
+          "path": "panorama/images/overheadmaps/de_mirage_radar_psd.png",
+          "bytes": 143685,
+          "sha256": "c8032f6c83ffca63c0a20ebdcc598a0e1aa618efd746e381e2db26f33a4a964f",
+          "width": 1024,
+          "height": 1024
+        }
+      ],
+      "demVersionMatch": "unconfirmed",
+      "registration": "not independently registered with a real DEM"
+    }
+  ],
+  "communityComparison": {
+    "awpy": {
+      "release": "2000930",
+      "commit": "7c73907f74521d271f0eb40bcbe14a4912184e05",
+      "imagesZipSha256": "c9d6739c28057858cae17f9bedf7f62b338205dbeccaf06b5a221c31740c5e49",
+      "mapDataSha256": "b0c8e7e95839b283f311e01c7d7022e5fe701bcfbb44134e7cedccec0f916e67",
+      "manifestSha256": "9eb53defdf7b8c67f36095c30544de7a8fa97322fd8fbad8edd94e03b4517e0c"
+    },
+    "murky": {
+      "commit": "9a22f424dab892f8fd59cec100029883c05e6116",
+      "advertisedManifest": "2312433566686574487"
+    },
+    "images": [
+      {
+        "map": "de_dust2",
+        "layer": "default",
+        "awpySha256": "0828297130ce26db25a299806ff743df9104de634a3e64b52b358f6f4399354d",
+        "awpyMatchesOfficial": true,
+        "murkySha256": "3be20317d1383da6f390a5bb245cabb65857ef08b1e2c5b82b5938a8cb3167bb",
+        "murkyMatchesOfficial": false
+      },
+      {
+        "map": "de_nuke",
+        "layer": "default",
+        "awpySha256": "21167d05292e80eebe7b068f0bba36a2e3f9116d154d96952a8366cdcc72e6b1",
+        "awpyMatchesOfficial": true,
+        "murkySha256": "6230346d3ce969006062fbd02220b083245f621ef366ce26a42dc27a80120bd0",
+        "murkyMatchesOfficial": false
+      },
+      {
+        "map": "de_nuke",
+        "layer": "lower",
+        "awpySha256": "b8c4e659491ba79be60b7d3f9bc78bdaeb808afc2bae14bf3b25b1801220ebe0",
+        "awpyMatchesOfficial": true,
+        "murkySha256": "040c958f141d0365ca9125388bc20228b0df0ac6abd1fe78d743ecfa1be4bb64",
+        "murkyMatchesOfficial": false
+      },
+      {
+        "map": "de_inferno",
+        "layer": "default",
+        "awpySha256": "53e1d660d5e61a9b876cc56725c2e891c56efcb788657520fa9c10fec321dce3",
+        "awpyMatchesOfficial": true,
+        "murkySha256": "e4929829f8475d2edcb44ee3537ffad094dc8008b4d6f5aa81e66e77ddb077ba",
+        "murkyMatchesOfficial": false
+      },
+      {
+        "map": "de_mirage",
+        "layer": "default",
+        "awpySha256": "c8032f6c83ffca63c0a20ebdcc598a0e1aa618efd746e381e2db26f33a4a964f",
+        "awpyMatchesOfficial": true,
+        "murkySha256": "5de1cc16362e538dc5f4561a24661cb1fb1c15c77ec289e32b44c0fc07bfb85b",
+        "murkyMatchesOfficial": false
+      }
+    ]
+  },
+  "extraction": {
+    "imageFilter": "panorama/images/overheadmaps/de_dust2,panorama/images/overheadmaps/de_nuke,panorama/images/overheadmaps/de_inferno,panorama/images/overheadmaps/de_mirage",
+    "overviewFilter": "resource/overviews/de_dust2.txt,resource/overviews/de_nuke.txt,resource/overviews/de_inferno.txt,resource/overviews/de_mirage.txt",
+    "method": "Source2Viewer-CLI -i <explicit pak01_dir.vpk> -o <output directory/> -d -f <exact filter>",
+    "notes": [
+      "No game installation or local Steam directory scan",
+      "Only dir VPK plus six required archive volumes downloaded",
+      "One Inferno overview extraction attempted while the volume was locked; CLI returned 0 despite logging an IO error. Retried after download; offline audit confirms all nine files",
+      "Community PNG encoders/alpha handling differ; images are not mixed with other-release overview data"
+    ]
+  }
+}

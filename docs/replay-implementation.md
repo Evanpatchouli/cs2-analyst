@@ -7,7 +7,7 @@ SHA-256 `db90fe85aab023a1d2c8a5996182e6120d98ef494f02a070b17982b235e4958c`，557
 缺少其他 DEM 不作为阻塞；未执行的其他地图/个人 DEM 验证不得称为通过。
 用户确认资源仅用于本机个人、非商业开发与安装验证；公开分发许可保持未确认，不 push/发布资源或安装包。
 
-## P6.0 — 采样试验工作单元通过，资源提取验证进行中
+## P6.0 — 本机个人非商业开发验证通过
 
 新增 dem-parser 内部 `dev/replay-probe.mjs`，不进入生产导出或 Desktop：每候选独立 OS 进程，
 读取一次 DEM，共享 bytes、基础 Match/事件查询，再执行三次独立采样以观察波动。
@@ -65,8 +65,39 @@ foreach ($rate in @(8,16,32)) {
 资源调查已固定 DepotDownloader 3.4.0、Source2Viewer CLI 20.1；直接 Steam 匿名获取
 app 730 / depot 2347770 / manifest 2312433566686574487 的 `pak01_dir.vpk` 成功，
 仅据目录索引获取六个所需 VPK 分卷。未安装游戏、未扫描 Steam/CS2、未执行社区下载脚本。
-完整分卷与图片/overview 提取、配准摘要将在同一记录中追加。
+资源获取现已完成：压缩传输约 574 MB，仅获取索引和 6 个分卷（解压后共 666849112 字节），
+未获取地图/游戏可执行文件，不构成安装 CS2。工具、manifest、VPK、4 份原始 overview、5 张图片的尺寸/摘要
+以及两社区来源交叉比对见 [资源记录](./replay-resources.json)。五张 PNG 均为 1024×1024，实际解码并视觉检查；
+与 awpy 2000930 的图片逐字节相同，Murky 固定 commit 的 PNG 字节不同，未混用。
+Steam 原始 manifest 成功验证下载可用性；社区元数据不被称为 Valve 官方 API。
+
+[Dust2 配准记录](./replay-calibration.json)对从原始图片独立辨认的 T 出生区、CT 出生区、东西两个安包区域
+作区域测试：5 个 T / 5 个 CT freeze-end 状态、7 个东侧与 5 个西侧精确 planted 玩家位置全部落在相应区域内。
+覆盖顶部/底部、东西方向、比例与边缘；这是 4 区域一致性证据，不是像素精确地形或地图版本等价证明。
+原始图片的 `rotate/zoom/inset` 是 overview 中保留的 HUD 配置，不机械应用到自然尺寸雷达；
+实际区域对齐支持 X 正向右、Y 正向上、scale 4.4。朝向投影和多尺寸画布由 P6.1 纯函数测试。
+Nuke 原始上下层范围分别为 [-495,10000] / [-10000,-495]，共享边界在 P6.1 保留未知。
+Inferno/Mirage 只验证资源配套与装载，不声称真实 DEM 配准通过。
+
+原始 DEM header patch_version=14055，资源当前 manifest 的 client/build version 没有可验证等价关系；
+所有四图 DEM 版本匹配均为 unconfirmed。后续 UI 明示“地图版本未确认，仅示意”，不按地图名声称匹配。
+个人本机开发/安装验证范围由用户明确确认；公开/商业分发许可 UNKNOWN，不在本任务中 push 或发布。
+本阶段通过仅针对上述本机技术前置验证，不表示取得公开分发许可。
+
+复现官方资源提取：固定工具包地址与摘要见资源 JSON；两个工具均不放入运行时/安装包。
+
+```powershell
+# 第一份 filelist 只包含 game/csgo/pak01_dir.vpk；随后按索引固定六个分卷：022/137/157/339/409/433。
+dotnet .tmp/p6-resources/depotdownloader/DepotDownloader.dll -app 730 -depot 2347770 -manifest 2312433566686574487 -filelist .tmp/p6-resources/map-filelist.txt -dir .tmp/p6-depot -max-downloads 2
+# 使用 replay-resources.json 中精确的图片/overview 筛选范围，保留原始路径。
+.tmp/p6-resources/vrf/Source2Viewer-CLI.exe -i .tmp/p6-depot/game/csgo/pak01_dir.vpk -o '.tmp/p6-official/' -d -f '<exact filters from replay-resources.json>'
+node scripts/replay-resource-audit.mjs .tmp/p6-official .tmp/p6-resources/official-audit.json
+node scripts/replay-calibration.mjs
+```
+
+提取 Inferno overview 曾因分卷尚在下载而锁定失败，CLI 错误时仍返回 0；等待下载完成后重试成功，
+最终通过独立目录检查器确认全部九份文件，未把退出码 0 单独当作成功证据。
 
 ## 后续阶段
 
-P6.1–P6.4 尚未开始。资源验证结束前不声称 P6.0 整体通过；安装版/Electron/真实 IPC 性能尚未执行。
+P6.1–P6.4 尚未开始；安装版/Electron/真实 IPC 性能尚未执行。

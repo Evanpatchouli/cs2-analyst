@@ -1,0 +1,444 @@
+{
+  "schemaVersion": 1,
+  "resourceId": "valve-730-2347770-2312433566686574487-vrf20.1",
+  "imageSha256": "0828297130ce26db25a299806ff743df9104de634a3e64b52b358f6f4399354d",
+  "overviewSha256": "97947e99bc7930fc06dc15af3dcf942dbca5ca1c6f36119a089615fd4b383620",
+  "fixtureSha256": "db90fe85aab023a1d2c8a5996182e6120d98ef494f02a070b17982b235e4958c",
+  "dimensions": {
+    "width": 1024,
+    "height": 1024
+  },
+  "transform": {
+    "posX": -2476,
+    "posY": 3239,
+    "scale": 4.4
+  },
+  "method": "Visual radar region selection compared with exact native freeze-end / planted actor observations; no inverse-transform self-proof",
+  "status": "four-region-registration-pass",
+  "versionMatch": "unconfirmed",
+  "limits": [
+    "Region checks establish axis/sign/scale/edge consistency, not pixel-exact geometry or DEM map build equivalence",
+    "Bomb site labels inferred visually from radar topology for calibration only; no native siteIndex to A/B mapping added",
+    "No LOS, collision, nav mesh or tactical conclusion; yaw projection cardinal tests pending P6.1"
+  ],
+  "observations": [
+    {
+      "name": "T spawn",
+      "bounds": [
+        295,
+        875,
+        490,
+        960
+      ],
+      "points": [
+        {
+          "round": 1,
+          "tick": 2712,
+          "playerId": "76561197989430253",
+          "side": 2,
+          "x": -428,
+          "y": -843,
+          "z": 95.2962875366211,
+          "yaw": 103.60174560546875,
+          "kind": "freeze_end",
+          "planter": false,
+          "pixel": {
+            "x": 465.45454545454544,
+            "y": 927.7272727272726
+          },
+          "inside": true
+        },
+        {
+          "round": 1,
+          "tick": 2712,
+          "playerId": "76561197991272318",
+          "side": 2,
+          "x": -1076,
+          "y": -843,
+          "z": 116.78946685791016,
+          "yaw": 119.3643798828125,
+          "kind": "freeze_end",
+          "planter": false,
+          "pixel": {
+            "x": 318.18181818181813,
+            "y": 927.7272727272726
+          },
+          "inside": true
+        },
+        {
+          "round": 1,
+          "tick": 2712,
+          "playerId": "76561197997351207",
+          "side": 2,
+          "x": -1015,
+          "y": -808,
+          "z": 116.0826187133789,
+          "yaw": 120.63021850585938,
+          "kind": "freeze_end",
+          "planter": false,
+          "pixel": {
+            "x": 332.0454545454545,
+            "y": 919.7727272727273
+          },
+          "inside": true
+        },
+        {
+          "round": 1,
+          "tick": 2712,
+          "playerId": "76561198068422762",
+          "side": 2,
+          "x": -760.6629638671875,
+          "y": -836.1740112304688,
+          "z": 117.07176971435547,
+          "yaw": 10.712005615234375,
+          "kind": "freeze_end",
+          "planter": false,
+          "pixel": {
+            "x": 389.849326393821,
+            "y": 926.1759116432883
+          },
+          "inside": true
+        },
+        {
+          "round": 1,
+          "tick": 2712,
+          "playerId": "76561198201620490",
+          "side": 2,
+          "x": -657.2713623046875,
+          "y": -755.879638671875,
+          "z": 119.88401794433594,
+          "yaw": 175.59930419921875,
+          "kind": "freeze_end",
+          "planter": false,
+          "pixel": {
+            "x": 413.34741765802556,
+            "y": 907.9271906072443
+          },
+          "inside": true
+        }
+      ]
+    },
+    {
+      "name": "CT spawn",
+      "bounds": [
+        570,
+        150,
+        685,
+        265
+      ],
+      "points": [
+        {
+          "round": 1,
+          "tick": 2712,
+          "playerId": "76561198045898864",
+          "side": 3,
+          "x": 160.12274169921875,
+          "y": 2369.67626953125,
+          "z": -119.918701171875,
+          "yaw": -101.91020965576172,
+          "kind": "freeze_end",
+          "planter": false,
+          "pixel": {
+            "x": 599.1188049316406,
+            "y": 197.57357510653407
+          },
+          "inside": true
+        },
+        {
+          "round": 1,
+          "tick": 2712,
+          "playerId": "76561198081484775",
+          "side": 3,
+          "x": 351.3921203613281,
+          "y": 2352.9423828125,
+          "z": -120.47491455078125,
+          "yaw": -29.960052490234375,
+          "kind": "freeze_end",
+          "planter": false,
+          "pixel": {
+            "x": 642.5891182639382,
+            "y": 201.37673117897725
+          },
+          "inside": true
+        },
+        {
+          "round": 1,
+          "tick": 2712,
+          "playerId": "76561198386265483",
+          "side": 3,
+          "x": 182.24990844726562,
+          "y": 2439.01171875,
+          "z": -120.96875,
+          "yaw": -107.20733642578125,
+          "kind": "freeze_end",
+          "planter": false,
+          "pixel": {
+            "x": 604.1477064652876,
+            "y": 181.81551846590907
+          },
+          "inside": true
+        },
+        {
+          "round": 1,
+          "tick": 2712,
+          "playerId": "76561198995880877",
+          "side": 3,
+          "x": 258.1593933105469,
+          "y": 2480.5537109375,
+          "z": -121.07666015625,
+          "yaw": -129.08419799804688,
+          "kind": "freeze_end",
+          "planter": false,
+          "pixel": {
+            "x": 621.3998621160333,
+            "y": 172.37415660511363
+          },
+          "inside": true
+        },
+        {
+          "round": 1,
+          "tick": 2712,
+          "playerId": "76561199063238565",
+          "side": 3,
+          "x": 334.3687438964844,
+          "y": 2433.733642578125,
+          "z": -120.362548828125,
+          "yaw": -40.71533203125,
+          "kind": "freeze_end",
+          "planter": false,
+          "pixel": {
+            "x": 638.7201690673828,
+            "y": 183.0150812322443
+          },
+          "inside": true
+        }
+      ]
+    },
+    {
+      "name": "east bomb area",
+      "bounds": [
+        775,
+        135,
+        855,
+        215
+      ],
+      "points": [
+        {
+          "round": 3,
+          "tick": 21621,
+          "playerId": "76561198201620490",
+          "side": 2,
+          "x": 1211.649169921875,
+          "y": 2460.96630859375,
+          "z": 97.2196273803711,
+          "yaw": 146.34716796875,
+          "kind": "plant_tick",
+          "planter": true,
+          "pixel": {
+            "x": 838.1020840731534,
+            "y": 176.8258389559659
+          },
+          "inside": true
+        },
+        {
+          "round": 6,
+          "tick": 43991,
+          "playerId": "76561198201620490",
+          "side": 2,
+          "x": 987.9684448242188,
+          "y": 2465.659423828125,
+          "z": 96.53125762939453,
+          "yaw": 84.51541137695312,
+          "kind": "plant_tick",
+          "planter": true,
+          "pixel": {
+            "x": 787.2655556418679,
+            "y": 175.7592218572443
+          },
+          "inside": true
+        },
+        {
+          "round": 11,
+          "tick": 91257,
+          "playerId": "76561198201620490",
+          "side": 2,
+          "x": 991.4967041015625,
+          "y": 2540.872314453125,
+          "z": 96.53125,
+          "yaw": -88.40835571289062,
+          "kind": "plant_tick",
+          "planter": true,
+          "pixel": {
+            "x": 788.067432750355,
+            "y": 158.66538307883522
+          },
+          "inside": true
+        },
+        {
+          "round": 12,
+          "tick": 101668,
+          "playerId": "76561198201620490",
+          "side": 2,
+          "x": 1235.9676513671875,
+          "y": 2561.03125,
+          "z": 99.60236358642578,
+          "yaw": 108.67709350585938,
+          "kind": "plant_tick",
+          "planter": true,
+          "pixel": {
+            "x": 843.6290116743608,
+            "y": 154.0838068181818
+          },
+          "inside": true
+        },
+        {
+          "round": 15,
+          "tick": 124988,
+          "playerId": "76561198081484775",
+          "side": 2,
+          "x": 987.9682006835938,
+          "y": 2526.04443359375,
+          "z": 96.53125,
+          "yaw": 110.994873046875,
+          "kind": "plant_tick",
+          "planter": true,
+          "pixel": {
+            "x": 787.2655001553621,
+            "y": 162.03535600142044
+          },
+          "inside": true
+        },
+        {
+          "round": 17,
+          "tick": 144817,
+          "playerId": "76561198995880877",
+          "side": 2,
+          "x": 1091.703369140625,
+          "y": 2502.560791015625,
+          "z": 96.03125,
+          "yaw": -174.60708618164062,
+          "kind": "plant_tick",
+          "planter": true,
+          "pixel": {
+            "x": 810.8416748046874,
+            "y": 167.37254749644885
+          },
+          "inside": true
+        },
+        {
+          "round": 22,
+          "tick": 183400,
+          "playerId": "76561198386265483",
+          "side": 2,
+          "x": 1102.547607421875,
+          "y": 2523.131103515625,
+          "z": 96.03125,
+          "yaw": -138.143798828125,
+          "kind": "plant_tick",
+          "planter": true,
+          "pixel": {
+            "x": 813.3062744140624,
+            "y": 162.69747647372157
+          },
+          "inside": true
+        }
+      ]
+    },
+    {
+      "name": "west bomb area",
+      "bounds": [
+        165,
+        78,
+        260,
+        180
+      ],
+      "points": [
+        {
+          "round": 8,
+          "tick": 61675,
+          "playerId": "76561198201620490",
+          "side": 2,
+          "x": -1696.2841796875,
+          "y": 2545.845458984375,
+          "z": 8.144002914428711,
+          "yaw": -53.027915954589844,
+          "kind": "plant_tick",
+          "planter": true,
+          "pixel": {
+            "x": 177.20814098011363,
+            "y": 157.53512295809657
+          },
+          "inside": true
+        },
+        {
+          "round": 9,
+          "tick": 70450,
+          "playerId": "76561198201620490",
+          "side": 2,
+          "x": -1684.029296875,
+          "y": 2563.60009765625,
+          "z": 6.803537368774414,
+          "yaw": -99.11418914794922,
+          "kind": "plant_tick",
+          "planter": true,
+          "pixel": {
+            "x": 179.99334161931816,
+            "y": 153.49997780539772
+          },
+          "inside": true
+        },
+        {
+          "round": 13,
+          "tick": 114041,
+          "playerId": "76561198045898864",
+          "side": 2,
+          "x": -1391.434814453125,
+          "y": 2565.96826171875,
+          "z": 3.609518527984619,
+          "yaw": 94.4034423828125,
+          "kind": "plant_tick",
+          "planter": true,
+          "pixel": {
+            "x": 246.49208762428975,
+            "y": 152.96175870028407
+          },
+          "inside": true
+        },
+        {
+          "round": 19,
+          "tick": 161643,
+          "playerId": "76561198045898864",
+          "side": 2,
+          "x": -1684.0321044921875,
+          "y": 2532.741455078125,
+          "z": 7.929522514343262,
+          "yaw": -80.6674575805664,
+          "kind": "plant_tick",
+          "planter": true,
+          "pixel": {
+            "x": 179.99270352450282,
+            "y": 160.5133056640625
+          },
+          "inside": true
+        },
+        {
+          "round": 24,
+          "tick": 199980,
+          "playerId": "76561198081484775",
+          "side": 2,
+          "x": -1567.0377197265625,
+          "y": 2642.25244140625,
+          "z": 5.084902763366699,
+          "yaw": -35.654754638671875,
+          "kind": "plant_tick",
+          "planter": true,
+          "pixel": {
+            "x": 206.58233642578122,
+            "y": 135.62444513494316
+          },
+          "inside": true
+        }
+      ]
+    }
+  ]
+}
