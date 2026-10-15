@@ -15,6 +15,11 @@ const api: DesktopApi = {
     },
   },
   importDemo: () => ipcRenderer.invoke('report:import'),
+  cancelImport: () => ipcRenderer.invoke('report:cancel'),
+  replay: {
+    getChunk: request => ipcRenderer.invoke('replay:chunk', { sessionId:request.sessionId,round:request.round,block:request.block }),
+    release: sessionId => ipcRenderer.invoke('replay:release',sessionId),
+  },
   onProgress: (listener) => {
     const handler = (_event: Electron.IpcRendererEvent, phase: ImportPhase) => listener(phase);
     ipcRenderer.on('report:progress', handler);

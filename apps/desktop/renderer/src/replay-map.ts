@@ -1,5 +1,6 @@
 /** Numeric overview metadata, pinned to the locally verified Steam manifest. No game/filesystem API. */
-export const replayResourceId = 'valve-730-2347770-2312433566686574487-vrf20.1';
+import { replayResourceId } from '../../shared/replay-resource.ts';
+export { replayResourceId };
 export interface ReplayMapLayer { id: string; label: string; minZ: number | null; maxZ: number | null; image: string }
 export interface ReplayMapDefinition {
   id: string; width: number; height: number; posX: number; posY: number; scale: number;

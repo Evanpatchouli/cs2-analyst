@@ -123,4 +123,22 @@ UI/真实离线装载在P6.3/P6.4验证。
 6个新合成边界与1个指定真实DEM验证通过，parser全套45 PASS/2 SKIP，typecheck15/15、build8/8通过。
 独立复核发现并已修复跨回合断连状态重置，回归覆盖；不更改旧golden或算法。
 
-契约兼容性/进程方案见[Replay contract](./replay-contract.md)。P6.2传输/会话与P6.3–P6.4待完成。
+契约兼容性/进程方案见[Replay contract](./replay-contract.md)。
+
+## P6.2B — 会话/分块传输通过
+
+report-contract additive可选replay元数据、schema v1分块DTO与命名preload API已接入，原报告schema仍为2。
+Utility一次共享输入生成原报告和回放，再只保留有界JSON块；Main报告返回后保留worker，
+新文件实际导入/解析取消/会话释放/窗口关闭清理worker与pending，取消文件选择保留旧会话。
+当前窗口主frame+当前随机sessionId+登记round/block校验，最多4个在途请求，旧返回不能污染新会话。
+回放采样/缓存失败仅降级回放，成功报告保留。
+
+真实Dust2缓存34757998字节（33.15MiB）、159块、最大371621字节（≤1MiB），低于64MiB预算。
+逐块JSON与所有相邻guard frames比较、随机读取状态/炸弹基线一致，检查/投影合计1.55秒；
+此项仍不是实际IPC/UI seek耗时。真实cache测试进程峰值约1.46GiB。
+9个IPC/生命周期/缓存/worker合成测试通过，desktop typecheck/build通过，独立复核无阻塞。
+
+完整desktop测试首次因旧Nuke硬性fixture要求失败（本机无`nuke.dem`），另有新测试mock缺方法已修正。
+按用户只要求Dust2的范围，未修改旧测试：`node --test --test-skip-pattern='Nuke Desktop' apps/desktop/tests/*.test.mjs`
+执行38 PASS/1 SKIP（demo1缺失），Nuke case显式过滤；随后新增在途请求限额测试另通过。
+P6.3播放器与P6.4真实Electron/安装验收待完成。

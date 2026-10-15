@@ -1,4 +1,6 @@
 import type { Finding, FindingEvidence } from '@cs2-analyst/findings';
+import type { DesktopReplayMetadata, DesktopReplayRequest, DesktopReplayResult } from './replay.js';
+export type * from './replay.js';
 
 /**
  * Presentation-only addition to a frozen evidence row. Seconds from the round
@@ -151,6 +153,7 @@ export interface DesktopMatchReport {
   timeline: DesktopPlayerTimeline[];
   analysis: DesktopAnalysisViews;
   deepReview: { available: boolean; players: DesktopDeepReviewPlayer[] };
+  replay?: DesktopReplayMetadata;
 }
 /** Presentation contract owned here; Renderer has no dependency on analysis packages. */
 export interface DesktopDeepReviewFinding {
@@ -187,5 +190,10 @@ export interface DesktopApi {
     onMaximizedChange(listener: (maximized: boolean) => void): () => void;
   };
   importDemo(): Promise<ImportResult>;
+  cancelImport(): Promise<void>;
+  replay: {
+    getChunk(request: DesktopReplayRequest): Promise<DesktopReplayResult>;
+    release(sessionId: string): Promise<void>;
+  };
   onProgress(listener: (phase: ImportPhase) => void): () => void;
 }

@@ -98,4 +98,8 @@ test('preload exposes only named window operations and removes the exact event l
   ipcRenderer.emit('window:maximized-changed', {}, true);
   assert.deepEqual(values, [true, false]);
   assert.equal(ipcRenderer.listenerCount('window:maximized-changed'), 0);
+  await api.cancelImport();
+  await api.replay.getChunk({sessionId:'session',round:1,block:0,filePath:'must-not-cross'});
+  await api.replay.release('session');
+  assert.deepEqual(calls.slice(-3),['report:cancel','replay:chunk','replay:release']);
 });

@@ -1,7 +1,8 @@
 import { app, BrowserWindow, dialog, ipcMain, utilityProcess } from 'electron';
 import { fileURLToPath } from 'node:url';
 import { extname, join } from 'node:path';
-import type { ImportPhase, ImportResult } from '@cs2-analyst/report-contract';
+import { randomUUID } from 'node:crypto';
+import type { ImportPhase, ImportResult, DesktopReplayMetadata, DesktopReplayRequest, DesktopReplayResult } from '@cs2-analyst/report-contract';
 
 /** Replaced at build time by electron.vite.config.ts. False in production installers. */
 declare const __CS2_ANALYST_TEST_SEAM__: boolean;
@@ -9,6 +10,15 @@ declare const __CS2_ANALYST_TEST_SEAM__: boolean;
 let mainWindow: BrowserWindow | null = null;
 let importing = false;
 let activeWorker: Electron.UtilityProcess | null = null;
+let activeReplay: DesktopReplayMetadata | null = null;
+let cancelActiveImport: (() => void) | null = null;
+let requestSequence = 0;
+const pendingChunks = new Map<number, { worker: Electron.UtilityProcess; request: DesktopReplayRequest; timer: ReturnType<typeof setTimeout>; resolve: (result: DesktopReplayResult) => void }>();
+function stopReplayWorker() {
+  const worker=activeWorker;activeWorker=null;activeReplay=null;
+  for(const [id,pending] of pendingChunks){clearTimeout(pending.timer);pending.resolve({kind:'error',message:'回放会话已结束。'});pendingChunks.delete(id);}
+  worker?.removeAllListeners();worker?.kill();
+}
 
 /** Only the current application's main frame can invoke privileged actions. */
 function trustedWindow(event: Electron.IpcMainInvokeEvent): BrowserWindow | null {
@@ -26,6 +36,24 @@ ipcMain.handle('window:toggle-maximize', event => {
 });
 ipcMain.handle('window:close', event => { trustedWindow(event)?.close(); });
 ipcMain.handle('window:is-maximized', event => trustedWindow(event)?.isMaximized() ?? false);
+ipcMain.handle('report:cancel', event => { if(trustedWindow(event)&&importing)cancelActiveImport?.(); });
+ipcMain.handle('replay:release', (event, sessionId:unknown) => {
+  if(trustedWindow(event)&&typeof sessionId==='string'&&sessionId===activeReplay?.sessionId)stopReplayWorker();
+});
+ipcMain.handle('replay:chunk', (event, value:unknown): Promise<DesktopReplayResult>|DesktopReplayResult => {
+  const fail=():DesktopReplayResult=>({kind:'error',message:'无效或已过期的回放请求。'});
+  if(!trustedWindow(event)||!value||typeof value!=='object'||Array.isArray(value)||Object.keys(value).length!==3)return fail();
+  const request=value as DesktopReplayRequest,session=activeReplay,worker=activeWorker;
+  if(!worker||!session||request.sessionId!==session.sessionId||typeof request.sessionId!=='string'||request.sessionId.length!==36
+    ||!Number.isSafeInteger(request.round)||request.round<1||!Number.isSafeInteger(request.block)||request.block<0||pendingChunks.size>=4)return fail();
+  if(!session.rounds.find(r=>r.round===request.round)?.blocks.some(b=>b.index===request.block))return fail();
+  return new Promise(resolve=>{
+    const id=++requestSequence,timer=setTimeout(()=>{pendingChunks.delete(id);resolve({kind:'error',message:'回放数据请求超时。'});},15_000);
+    pendingChunks.set(id,{worker,request:{...request},timer,resolve});
+    try {worker.postMessage({kind:'replay-chunk',requestId:id,request});}
+    catch {clearTimeout(timer);pendingChunks.delete(id);resolve(fail());}
+  });
+});
 
 /**
  * Import path used by automated tests instead of the native file dialog.
@@ -42,27 +70,46 @@ function injectedDemoPath(): string | undefined {
 }
 
 function analyzeDemo(filePath: string, window: BrowserWindow): Promise<ImportResult> {
+  stopReplayWorker();
   return new Promise(resolve => {
+    const sessionId=randomUUID();
     const worker = utilityProcess.fork(fileURLToPath(new URL('./report-worker.js', import.meta.url)), [], { serviceName: 'CS2 DEM Analysis' });
     activeWorker = worker;
     let settled = false;
-    const finish = (result: ImportResult) => {
+    const finish = (result: ImportResult, retain = false) => {
       if (settled) return;
       settled = true;
       clearTimeout(timeout);
-      worker.removeAllListeners();
-      worker.kill();
-      if (activeWorker === worker) activeWorker = null;
+      if(cancelActiveImport===cancel)cancelActiveImport=null;
+      if(!retain&&activeWorker===worker)stopReplayWorker();
       resolve(result);
     };
+    const cancel=()=>finish({kind:'cancelled'});
+    cancelActiveImport=cancel;
     const timeout = setTimeout(() => finish({ kind: 'error', message: '分析超时（10 分钟）。请重新选择 DEM。' }), 10 * 60_000);
-    worker.on('spawn', () => worker.postMessage({ filePath }));
+    worker.on('spawn', () => worker.postMessage({ filePath, sessionId }));
     worker.on('message', (message) => {
+      if(activeWorker!==worker)return;
+      if(message.kind==='replay-chunk'){
+        const pending=pendingChunks.get(message.requestId);if(!pending||pending.worker!==worker)return;
+        const result=message.result as DesktopReplayResult;
+        if(result?.kind==='success'){
+          const chunk=result.chunk;
+          if(chunk?.schemaVersion!==1||chunk?.matchId!==activeReplay?.matchId||chunk?.sessionId!==activeReplay?.sessionId||chunk?.sessionId!==pending.request.sessionId||chunk?.round!==pending.request.round||chunk?.block!==pending.request.block
+            ||Buffer.byteLength(JSON.stringify(chunk))>1024*1024)return;
+        }else if(result?.kind!=='error')return;
+        clearTimeout(pending.timer);pendingChunks.delete(message.requestId);pending.resolve(result);return;
+      }
+      if(settled)return;
       if (message.kind === 'progress' && message.phase === 'analyzing') {
         if (!window.isDestroyed()) window.webContents.send('report:progress', 'analyzing');
-      } else if (message.kind === 'success' || message.kind === 'error') finish(message);
+      } else if (message.kind === 'success') {
+        const metadata=message.report?.replay as DesktopReplayMetadata|undefined;
+        const retain=metadata?.available===true&&metadata.sessionId===sessionId;
+        activeReplay=retain?metadata!:null;finish(message,retain);
+      } else if(message.kind==='error')finish(message);
     });
-    worker.on('exit', () => finish({ kind: 'error', message: '分析进程意外退出。请重新选择 DEM。' }));
+    worker.on('exit', () => { if(!settled)finish({ kind: 'error', message: '分析进程意外退出。请重新选择 DEM。' });else if(activeWorker===worker)stopReplayWorker(); });
   });
 }
 
@@ -126,7 +173,7 @@ async function createWindow() {
   window.on('unmaximize', maximizedChanged);
 
   mainWindow.on('closed', () => {
-    activeWorker?.kill();
+    cancelActiveImport?.();stopReplayWorker();
     mainWindow = null;
   });
   mainWindow.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
