@@ -20,9 +20,13 @@ const useStyles = makeStyles({
   muted: { color:tokens.colorNeutralForeground3 },
   events: { display:'flex',flexDirection:'column',maxHeight:'280px',overflowY:'auto',gap:'4px' },
   event: { justifyContent:'flex-start',textAlign:'left',whiteSpace:'normal' },
+  progress: { width:'100%' },
+  // Thousands of one-tick steps otherwise produce an opaque Fluent rail tick-mark overlay.
+  progressRail: { '::before':{display:'none'} },
 });
 export interface ReplayJump { round:number; tick?:number; sequence:number }
 const blockAt=replayBlockAt;
+const bombText:Record<string,string>={unknown:'未知',pickup:'拾取',drop:'掉落',plant_start:'开始安放',planted:'安放完成',defuse_start:'开始拆除',defused:'拆除成功',exploded:'爆炸'};
 const timeText=(tick:number,round:DesktopReplayRoundInfo,rate:number|null)=>rate===null?`原始 tick ${Math.round(tick)}`:`+${((tick-round.startTick)/rate).toFixed(2)} 秒`;
 
 export function ReplayPlayer({ metadata, playerId, onSelectPlayer, active, jump }: {
@@ -40,8 +44,8 @@ export function ReplayPlayer({ metadata, playerId, onSelectPlayer, active, jump 
   const info=metadata.rounds.find(r=>r.round===roundNumber);
   const block=info?blockAt(info,tick):undefined,chunk=block?cache.current.get(roundNumber,block.index):undefined;
   const playerIds=metadata.players.map(p=>p.id);
-  const frame=chunk?replayDisplayFrame(chunk,tick,metadata.maxInterpolationTicks,playerIds):null;
   const mapState=mapResourceState(metadata.map,replayMapAssets),map=mapState.definition;
+  const frame=chunk?replayDisplayFrame(chunk,tick,metadata.maxInterpolationTicks,playerIds,map?z=>resolveMapLayer(map,z):undefined):null;
   const selectedIndex=metadata.players.findIndex(p=>p.id===playerId),selected=frame?.players.find(p=>p[0]===selectedIndex);
   const layerId=map?(floor==='auto'?resolveMapLayer(map,selected?.[4]??null):floor):null;
   const layer=map?.layers.find(l=>l.id===layerId),url=layer?replayMapAssets[layer.image]:undefined;
@@ -126,7 +130,7 @@ export function ReplayPlayer({ metadata, playerId, onSelectPlayer, active, jump 
         if(clock.current.playing){resume.current=true;clock.current.seek(at,now);clock.current.pause(now,metadata.tickRate);setPlaying(false);}
         void load(round,needed.index);
       }
-      paint(data?replayDisplayFrame(data,at,metadata.maxInterpolationTicks,playerIds):null,data,at);
+      paint(data?replayDisplayFrame(data,at,metadata.maxInterpolationTicks,playerIds,live.current.map?z=>resolveMapLayer(live.current.map!,z):undefined):null,data,at);
       if(now-lastUi>=100){setTick(at);lastUi=now;}
       if(data&&needed&&!inFlight.current){const neighbor=[needed.index+1,needed.index-1].find(index=>round.blocks.some(b=>b.index===index)&&!cache.current.get(round.round,index)&&!failed.current.has(`${round.round}:${index}`));if(neighbor!==undefined)void load(round,neighbor,true);}
       raf=requestAnimationFrame(animate);
@@ -137,6 +141,7 @@ export function ReplayPlayer({ metadata, playerId, onSelectPlayer, active, jump 
   },[active,metadata.sessionId]);
   useEffect(()=>{
     image.current=null;setImageReady(false);setImageFailed(false);
+    const base=baseCanvas.current;if(base)base.getContext('2d')?.clearRect(0,0,base.width,base.height);
     if(!url||mapState.status==='unavailable')return;
     const img=new Image();let disposed=false;
     img.onload=()=>{if(!disposed){image.current=img;setImageReady(true);drawBackground();}};
@@ -164,8 +169,7 @@ export function ReplayPlayer({ metadata, playerId, onSelectPlayer, active, jump 
         {map&&map.layers.length>1?<Dropdown className={s.dropdown} aria-label="回放楼层" value={floor==='auto'?'跟随玩家':map.layers.find(l=>l.id===floor)?.label} selectedOptions={[floor]} onOptionSelect={(_,d)=>d.optionValue&&setFloor(d.optionValue)}><Option value="auto">跟随玩家</Option>{map.layers.map(l=><Option key={l.id} value={l.id}>{l.label}</Option>)}</Dropdown>:null}
         <Badge appearance="tint" color="warning">地图版本未确认 · 仅示意</Badge>
       </div>
-      <Slider aria-label="回放进度" style={{width:'100%'}}
-        rail={{style:{width:'100%',height:4,background:`linear-gradient(90deg, ${palette.currentPlayer} ${(tick-info.startTick)/(info.endTick-info.startTick||1)*100}%, ${palette.borderStrong} ${(tick-info.startTick)/(info.endTick-info.startTick||1)*100}%)`}}}
+      <Slider aria-label="回放进度" className={s.progress} rail={{className:s.progressRail}}
         min={info.startTick} max={info.endTick} step={1} value={Math.round(tick)} aria-valuetext={timeText(tick,info,metadata.tickRate)} onChange={(_,d)=>seek(d.value)} />
       <div className={s.toolbar}><Body1 data-replay-time>{timeText(tick,info,metadata.tickRate)} / {timeText(info.endTick,info,metadata.tickRate)}</Body1>{info.freezeEndTick!==null&&tick<info.freezeEndTick?<Badge appearance="outline">冻结阶段</Badge>:null}{loading?<Spinner size="tiny" label="加载回放数据…"/>:null}</div>
       {metadata.tickRate===null?<Caption1>时钟不可靠，仅支持原始 tick 与事件定位，不能正常倍速播放。</Caption1>:null}
@@ -178,6 +182,7 @@ export function ReplayPlayer({ metadata, playerId, onSelectPlayer, active, jump 
         <div className={s.players} aria-label="回放玩家状态">
           {metadata.players.map((player,index)=>{const p=frame?.players.find(p=>p[0]===index);return <Button key={player.id} className={s.player} appearance={player.id===playerId?'secondary':'subtle'} aria-pressed={player.id===playerId} onClick={()=>onSelectPlayer(player.id)} title={player.nickname}><span className={s.name}>{index+1}. {player.nickname}</span><Caption1>{p?.[8]??'Unknown'} · {p?.[7]===false?'阵亡':p?.[7]===true?`${p[6]??'—'} HP`:'未知'}</Caption1></Button>;})}
           <Caption1 className={s.muted}>CT 蓝方块 / T 橙圆点；白框为选中玩家。</Caption1>
+          <Caption1>最近炸弹记录：{frame?bombText[frame.bomb.action]??'未知':'未知'}{frame?.bomb.ambiguous?'（同 tick 有冲突，顺序未知）':''}</Caption1>
           {map&&map.layers.length>1?<Caption1>{layer?`当前${layer.label}；其他层点位隐藏。`:'选中玩家楼层未知，请手动选层。'}未知 Z 与共享高度边界不自动归层。</Caption1>:null}
           <Caption1 className={s.muted}>炸弹标记为事件关联位置；道具十字仅标示已记录生效点，不表示飞行轨迹或烟火范围。</Caption1>
           {info.coverage==='partial'?<Caption1>该回合存在缺失或歧义状态；断点不连接，未知状态不补齐。</Caption1>:null}

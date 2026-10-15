@@ -4,6 +4,14 @@
 
 ## 使用
 
+P6新增显式`provider.parseWithReplay(filePath, spatialOptions?)`，同一输入字节和基础Match/事件查询返回
+`{ match, spatial, replay, replayUnavailableReason, replayMs, performance }`。旧parse/parseWithSpatial内容与外形保持，
+Desktop Utility使用新入口，冻结分析只消费原Match/Spatial；回放失败不替换它们。
+独立8Hz+正式回合精确事件/生命周期/边界计划，在native前限制60000 tick、600000玩家样本、64已识别玩家，
+只查询这些SteamID。断连跨回合保留至本人spawn，缺失/同tick歧义/死亡/换边/回合切段。
+`performance`沿用原Match/Spatial耗时范围，`replayMs`为额外回放采样/归一化耗时；完整应用导入耗时另外实测。
+领域语义见[Replay contract](./replay-contract.md)，实现/真实Dust2验收见[实施记录](./replay-implementation.md)。
+
 ```ts
 import { Demoparser2Provider } from "@cs2-analyst/dem-parser";
 

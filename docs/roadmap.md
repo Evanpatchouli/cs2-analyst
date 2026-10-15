@@ -62,7 +62,7 @@ P5.5 Round Timeline MVP — **PASS**。报告页底部新增独立“回合时�
 - P5.5 已完成：回合时间线与 Findings → Timeline 联动。
 - P5.5.1 已完成：名单与 Timeline 统一隐藏原始长数字玩家标识，保留 DTO 追溯 ID。
 - P5.6 已完成：Analysis Views MVP（全场玩家指标对比、回合击杀趋势、CT/T 对比），基于冻结 Analytics 与 Timeline 的只读展示投影。
-- 未开始：P6 2D 地图回放、P7 地图热力图、额外 Analytics 算法。回放范围仅限 2D，不做 3D 回放；额外 Analytics 算法尚未排期。
+- 后续阶段：P6 2D地图回放已完成本机Dust2验收（见下文）；P7地图热力图、额外Analytics算法未开始。不做3D回放；额外Analytics算法尚未排期。
 
 P5.6.2 Report UX Polish — **PASS**。比赛报告 / 回合时间线 / 分析三个 mounted Tab；Findings 原生证据入口 hover/focus 与先切 Tab 的回合联动；当前玩家姓名和条图统一 #62abf5；Frozen multiKills counts 直接投影、零项隐藏；CT/T 独立内缩 divider；Timeline 单色自绘 SVG kill-feed、爆头/闪光助攻原样投影与未知武器 fallback。严格保持 P3/P4 与 Timeline 筛选、round time、nickname 原样规则；无新增算法或产品模块。
 
@@ -93,7 +93,7 @@ Current: **v0.1 Final Acceptance FINAL PASS; P5 COMPLETE; P5.7 FINAL PASS.** 验
 - P5.7.7 算法保持 PASS；P5.7.8 已完成 Renderer/Electron/report-contract 集成，P3/P4 算法与 Timeline filter 冻结。Train **REMOVED / NOT REQUIRED**；v0.1 Final Acceptance 已由 Product Owner 最终验收通过。
 - GitHub repository：`Evanpatchouli/cs2-analyst`（已正式改名）。
 
-- P5 Desktop MVP 已封板；当前仅推进已明确授权的P5.7 Deep Review evidence工作，不追加其他功能或polish。
+- P5 Desktop MVP / P5.7已封板；P6按独立授权实施并完成本机验收，不追加P7/P8或其他功能。
 - `demo1` 继续作为 deterministic golden，现有 K/D/A、ADR、KAST、Trade、CT/T、Multi-kill、R24 clutch、R22 posthumous HE 与 Findings ruleId 顺序不得回归。
 - Final Acceptance 的核心目标从“继续开发功能”切换为“验证不同真实比赛上的泛化可靠性”。
 - 目标样本约 3～5 场真实玩家 DEM，尽量覆盖不同地图、比分、发挥水平与特殊情况；拿到第 2 份 DEM 即可开始逐场验收，不必等待全部样本收齐。
@@ -101,13 +101,16 @@ Current: **v0.1 Final Acceptance FINAL PASS; P5 COMPLETE; P5.7 FINAL PASS.** 验
 - DEM 仍由用户主动选择；本轮不引入自动目录扫描、登录、历史库、AI Coach、热力图或 2D 地图回放。
 - v0.1 已完成；后续阶段顺序为 P6 2D 地图回放 → P7 地图热力图 → P8 AI Coach（原 P6）。本次仅调整路线图，不自动开始实现。
 
-## P6 2D 地图回放（实施中）
+## P6 2D 地图回放（本机验收完成）
 
 - 仅实现 2D 地图回放，不做 3D 回放。
 - 采样与地图版本/坐标映射需独立验证；现有事件稀疏空间证据不能直接充当完整回放轨迹。
 - 技术路线：官方雷达底图/overview 优先 + 本地独立回放采样/精确事件 + 按回合分块 + Canvas 2D；运行时不依赖 CS2 安装或 P8 后端。
-- 子阶段：P6.0 资源与可行性验证 → P6.1 地图资源基础 → P6.2 回放采样与传输 → P6.3 播放器与证据联动 → P6.4 回归与安装验收。实际资源配准和性能预算在 P6.0 验证并固定，不标作已通过。
-- 设计与验收机制见 [P6 回放技术路线](./replay-technical-route.md)。P6.0–P6.2通过：指定Dust2的采样/四区域配准、固定8Hz与预算、Valve固定manifest定向提取、纯投影/Nuke层级、独立领域与有界会话/分块IPC。地图版本/公开分发许可未确认，素材仅本机使用且不推送；P6.3播放器与P6.4安装验收待完成。实际结果见 [实施记录](./replay-implementation.md)。
+- 子阶段：P6.0 资源与可行性验证 → P6.1 地图资源基础 → P6.2 回放采样与传输 → P6.3 播放器与证据联动 → P6.4 回归与安装验收。P6.0 已完成 Dust2 四区域配准与采样预算验证；这不代表 DEM 与底图版本一致或像素级配准已确认。
+- P6.0–P6.4已按用户指定的单一Dust2 fixture与本机个人非商业使用范围通过自动化验收：固定Valve manifest定向提取与区域配准、独立8Hz采样、生命周期断点、有界会话/受信分块IPC、Canvas播放器、Timeline/Findings联动、源码外安装与离线资源检查。
+- `pnpm typecheck` / `pnpm build`、相关回归、真实Electron与生产/测试seam安装检查通过；原报告与旧公开入口完整hash相同。其他地图/个人DEM及缺少的demo1 golden未重跑，不冒充PASS。Nuke仅资源/楼层边界合成验证。
+- 地图版本匹配仍未确认，所有地图明确标示示意；公开分发许可未确认，Valve PNG/raw overview仅本机准备，不推送。公开源码缺图时可构建并浏览报告/事件。
+- 技术机制见 [P6 回放技术路线](./replay-technical-route.md)，实际范围、命令、失败历史、预算实测和限制见 [实施记录](./replay-implementation.md) / [验收JSON](./replay-acceptance.json)。P7/P8仍未开始。
 
 ## P7 地图热力图（未开始）
 

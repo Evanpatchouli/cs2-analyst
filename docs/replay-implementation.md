@@ -166,3 +166,78 @@ worker OS峰值1498742784字节，低于2.5GiB目标。最终P6.4会另测安装
 不是声称原生窗口逐尺寸拖动。P6.3测试脚本曾因未重建采样仪表、首帧等待条件过早、
 CDP进程类型/不支持的Browser窗口命令而失败，已修正测试并完整重跑通过；失败未计PASS。
 截图/原始metrics在本机`.tmp/p6-qa/`，不提交。脚本：`node scripts/replay-smoke.mjs`。
+
+## P6.4 — 最终本机自动化验收通过
+
+仅对用户指定Dust2与本机个人非商业使用范围作PASS结论；不表示其他录制模式、历史地图版本、个人DEM或公开素材分发许可已获验证。
+完整数据见[验收JSON](./replay-acceptance.json)，没有通过修改P3/P4/Deep Review算法、阈值、golden或旧fixture断言逃避回归。
+
+最终预算实测（同一Windows x64 / 5700G / 32GiB）：
+
+| 指标 | Built Electron | 源码目录外安装版 | 预算 |
+| --- | --- | --- | --- |
+| 完整导入 | 8.03秒 | 8.30秒 | ≤15秒 |
+| 打开回放首帧 | 244.8ms | 94.7ms | ≤1500ms |
+| 12次分块IPC往返p95 | 9.4ms | 8.3ms | ≤250ms |
+| Canvas动态绘制p95 | 0.6ms | 0.3ms | ≤16.7ms |
+| 解析Utility OS生命周期峰值 | 1505501184字节 | 1509363712字节 | ≤2.5GiB |
+
+最终parser真实测试回放额外耗时4.36秒（≤5秒）、27466请求tick、无缺失玩家行；完整Match/Spatial hash与旧入口一致。
+真实会话缓存34757998字节/159块，全部块最大371621字节（≤1MiB），Renderer最多3块。
+IPC表为12次实际Renderer往返；缓存全量最大值另由逐块集成测试验证，不能把12次抽样最大值当成全量。
+峰值为各OS进程生命周期峰值，不是同时发生的整应用总峰值；Canvas指标只覆盖动态绘制函数，不宣称全应用恒定60fps。
+
+最终新增/相关验证：
+
+- parser：46 PASS / 2 SKIP；包含指定Dust2、7个回放边界与原有契约回归。
+- Desktop：48 PASS / 1 SKIP；另明确过滤缺`nuke.dem`的旧Nuke集成case，未改其断言。
+- Analytics：48 PASS / 5 SKIP；Findings V1：16 PASS / 1 SKIP。
+- Deep Review：195 PASS / 11 SKIP；明确过滤缺原core aliases的Findings calibration gate，未伪称跨图通过。
+- `pnpm typecheck` 15/15、`pnpm build` 8/8、`pnpm test:smoke` dev/preview通过。
+- 独立复核的最终小集15/15通过，无剩余阻塞发现；最终真实/安装结果由主Agent执行并复查。
+
+真实Electron/安装版执行：离线五图解码、无Node暴露、正常报告与旧入口完整hash相等、播放/暂停/2倍速、
+Slider/键盘seek、真实跨块、回合/玩家切换、Timeline精确tick与Finding证据联动、后台最小化后恢复保持暂停且不跳进、
+导入取消后恢复旧报告、重导入新session、旧session拒绝、显式释放worker、仍在解析时关闭窗口无残留worker。
+同tick/缺失/跨死亡与spawn/断连跨回合/层级过渡以合成边界另验，不拿合成样本冒充第二份真实比赛。
+Nuke未知或跨层的相邻样本不从插值Z推断楼层；无层时清除旧底图。
+
+安装检查实际使用OS临时目录`cs2-analyst-p6-installed`（源码仓库之外）并清空`NODE_PATH`，验证包内workspace依赖已内联、
+唯一native `.node`正确unpacked且SHA一致，五PNG与固定来源摘要一致，Renderer只从安装ASAR相对URL离线装载。
+生产包检查启动/沙箱/无测试seam及资产；完整真实DEM交互使用单独test-seam安装包。两包均实际NSIS安装并卸载，
+不覆盖既有用户安装：前置检查HKCU/HKLM两个注册表视图，既有任务路径必须有`.p6-owned`标记。
+
+产物（仅本机，不发布/不push）：
+
+- `release/0.1.0/CS2-Analyst-Setup-0.1.0.exe`：115906552字节，SHA-256 `91d0a32cf6d15be50c606a13b28b2dbef7e8c227b9eed4ff63f075c61c3e7302`。
+- `.tmp/test-output/0.1.0/CS2-Analyst-TestSeam-Setup-0.1.0.exe`：115906561字节，SHA-256 `4e0226722a412ff4e9a38b19c8398ec9eedacb76312f8d49829d9ba7c9d9bd8d`。
+
+另实际移开Git忽略的本机图片、重新构建并运行Dust2：空源码资源模式仍可导入报告/浏览事件与玩家状态，不画虚构底图；
+测试后恢复全部5张原始图片并再次完成正常build/真实Electron验证。构建/打包增加摘要预检；Desktop构建禁缓存，
+防止Git忽略的可选素材导致含图/缺图构建误用同一缓存。查询前新增600000玩家样本上限并只查询已识别SteamID。
+Fluent Slider的密集逐tick刻度会覆盖轨道，已仅隐藏刻度伪元素，保留原生Fluent结构与逐tick操作，并实测轨道尺寸/拇指对齐。
+
+失败历史：首次安装总体脚本在损坏DEM场景已打印场景通过后仍被父进程超时终止，原因是测试CDP客户端在窗口关闭时遗留120秒RPC计时器；
+修正客户端关闭时清理所有pending后，对最终两包完整重跑通过。安装保护、后台恢复、解析中关闭断言由独立复核补强并实际重跑。
+
+未执行：其他地图/个人DEM真实验收与demo1历史golden；独立完整生产原生选文件walkthrough；多显示器DPI切换。
+三种截图尺寸属于CDP viewport模拟，人工视觉复查与自动布局检查不替代这些未执行项。
+所有地图版本均标记未确认，只做示意；无LOS、3D、道具轨迹/烟火区域、热力图、AI、登录或历史库。
+
+复现最终命令：
+
+```powershell
+pnpm --filter @cs2-analyst/dem-parser test
+node --test --test-skip-pattern='Nuke Desktop' apps/desktop/tests/*.test.mjs
+pnpm --filter @cs2-analyst/analytics test
+pnpm --filter @cs2-analyst/findings test
+pnpm --filter @cs2-analyst/deep-review exec tsc -p tests/tsconfig.json
+node --test --test-skip-pattern='^Findings calibration:' packages/deep-review/tests/*.test.mjs
+pnpm typecheck
+pnpm build
+pnpm test:smoke
+node scripts/replay-smoke.mjs
+pnpm --filter @cs2-analyst/desktop pack:win
+pnpm --filter @cs2-analyst/desktop pack:win:test
+node scripts/replay-installed-smoke.mjs
+```

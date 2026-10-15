@@ -1,8 +1,10 @@
 # P6 2D 地图回放技术路线
 
-日期：2026-10-15。状态：P6.0 实施中；真实采样试验与固定预算见 [实施记录](./replay-implementation.md)。
+日期：2026-10-15。状态：P6.0–P6.4已完成本机范围的实现/自动化验收；真实结果、失败历史与固定预算见 [实施记录](./replay-implementation.md) / [验收JSON](./replay-acceptance.json)。
 用户指定仅使用现有 `spirit-vs-faze-m3-dust2.dem` 作本次真实 DEM 验证；其他样本缺失不阻塞，未执行项如实保留。
 资源仅用于本机个人、非商业开发/安装验证，公开分发许可仍未确认。
+用户随后授权工作完成后提交并推送代码；Valve原始素材/安装包仍仅本机保留，不随公共源码推送。
+其他真实地图/个人DEM与旧golden缺失按用户限定范围不阻塞，未执行项不记PASS；所有地图版本匹配仍未确认。
 
 ## 1. 已确定的方向
 
@@ -22,7 +24,7 @@
 | 验证与备选 | 社区从官方内容提取的版本包，如 `pnxenopoulos/awpy-data` | 固定 release/commit，核对实际文件、来源说明、清单与摘要，不直接依赖不断变化的 latest/main |
 | 交叉核对 | `MurkyYT/cs2-map-icons` 的底图及原始 overview | 对照资源配对和坐标信息；同样固定版本，不把社区发布渠道称为 Valve 官方 API |
 
-已查到 DepotDownloader 的文件列表下载能力及社区按 VPK 索引选择分卷的实现，可用于研究只获取所需内容；实际下载权限、文件布局、分卷体积和提取路径仍须实测。Source2Viewer 是开源提取工具，不是 Valve 官方工具。本次未执行游戏下载、资源提取或坐标校准。
+P6.0 已通过 DepotDownloader 文件列表定向获取固定 Valve depot/manifest 的 VPK 索引及所需六个分卷，并用固定版本 Source2Viewer 提取配套图片/overview；未安装或扫描 CS2。Source2Viewer 是开源提取工具，不是 Valve 官方工具。实际文件布局、体积、摘要及 Dust2 四区域配准结果见 [实施记录](./replay-implementation.md) 与 [资源清单](./replay-resources.json)；DEM 与底图版本匹配仍未确认。
 
 资源必须保留来源与适用条款记录；开源提取脚本的许可不等于 Valve 素材的许可。若某来源无法证明其所提供资源的版本或来源，应降级或换源，不能补写“已确认”。是否可随安装包分发在资源验证阶段核实并记录。
 
@@ -116,10 +118,10 @@ Dust2 是首个可验证纵向切片，不把整个 P6 锁死到 Dust2；Nuke �
 
 ## 8. 调研来源与未验证事项
 
-- [DepotDownloader](https://github.com/SteamRE/DepotDownloader)：Steam 内容下载的开源工具，支持文件列表；本项目尚未验证实际资源获取流程。
+- [DepotDownloader](https://github.com/SteamRE/DepotDownloader)：Steam 内容下载的开源工具；本项目已验证固定 3.4.0 版本通过文件列表获取指定 manifest 的索引和所需分卷。
 - [Source2Viewer / ValveResourceFormat](https://github.com/ValveResourceFormat/ValveResourceFormat)：开源 VPK/Source 2 资源提取工具。
-- [cs2-map-icons](https://github.com/MurkyYT/cs2-map-icons)、[提取脚本](https://github.com/MurkyYT/cs2-map-icons/blob/main/download-map-icons.js)：社区官方素材提取路径参考；可读取 [Dust2 原始 overview](https://raw.githubusercontent.com/MurkyYT/cs2-map-icons/main/data/radar_info/de_dust2.txt)。引用 main 只用于调研，实施前必须固定 commit。
-- [awpy-data](https://github.com/pnxenopoulos/awpy-data)、[已查到的版本包 2000930](https://github.com/pnxenopoulos/awpy-data/releases/tag/2000930)：公开发布包含图片、地图配置与清单；实际 ZIP 内容/配对/坐标匹配仍未由本项目验证，README 中的未验证提取假设不能当作既定事实。
+- [cs2-map-icons 固定 commit](https://github.com/MurkyYT/cs2-map-icons/tree/9a22f424dab892f8fd59cec100029883c05e6116)：社区素材提取路径参考；本项目未执行其下载脚本。该版本 PNG 与本机 Valve 提取结果字节不同，未混用。
+- [awpy-data](https://github.com/pnxenopoulos/awpy-data)、[版本包 2000930](https://github.com/pnxenopoulos/awpy-data/releases/tag/2000930)：已核对实际版本包，五张目标图片与本机固定 Valve manifest 提取结果逐字节相同，摘要见资源清单。实际应用使用本机配套提取的 overview；Dust2 只完成四区域配准，不能据此确认 DEM 地图版本或其他地图实战配准。
 - [CS Demo Manager 2D viewer](https://cs-demo-manager.com/docs/guides/2d-viewer)：交互与楼层显示参考，不代表直接复用其代码或更换现有 parser。
 - Valve Developer Community 的 SteamCMD/CS2 Dedicated Servers 页面本次读取返回 403；未找到并验证可直接使用的 Valve 独立雷达下载接口。官方内容来源与社区提取工具/发布渠道必须分别注明。
 - 现有 [空间契约](./spatial-evidence.md)、[解析边界](./dem-parser.md)、[桌面报告](./desktop-report.md)、[架构](./architecture.md) 约束实施。历史验收状态以当前 [路线图](./roadmap.md) 和最新验收结论为准，不能因旧章节恢复已修复的阻塞。

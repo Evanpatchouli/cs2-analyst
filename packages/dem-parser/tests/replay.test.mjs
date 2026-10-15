@@ -54,3 +54,8 @@ test('missing yaw is partial even when positions and discrete state remain valid
   const m=fixture(),p=planReplay(m),rows=all(p);delete rows[0].yaw;
   const out=buildReplay(m,p,rows);assert.equal(out.rounds[0].coverage.status,'partial');assert.equal(out.rounds[0].frames[0].players[0].yaw,null);
 });
+test('player count and total requested player samples are bounded before native queries',()=>{
+  const m=fixture();m.players=Array.from({length:65},(_,i)=>({steamId:String(i+1),nickname:'',team:'Unknown'}));
+  assert.throws(()=>planReplay(m),/player budget/);m.players.pop();m.rounds[0].endTick=100000;
+  assert.throws(()=>planReplay(m),/sample budget/);m.players=[];assert.throws(()=>planReplay(m),/player budget/);
+});

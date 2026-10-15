@@ -4,6 +4,7 @@
   "tasks": {
     "@cs2-analyst/demoparser-native#build": { "cache": false },
     "@cs2-analyst/demoparser-native#typecheck": { "cache": false },
+    "@cs2-analyst/desktop#build": { "dependsOn": ["^build"], "cache": false, "outputs": ["dist/**"] },
     "dev": {
       "dependsOn": ["^build"],
       "cache": false,

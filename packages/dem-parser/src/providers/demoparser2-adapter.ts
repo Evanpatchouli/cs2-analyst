@@ -50,7 +50,8 @@ export class Demoparser2Adapter implements ParserAdapter {
     if (includeReplay) {
       try {
         const replayPlan = planReplay(match);
-        replay = buildReplay(match, replayPlan, replayPlan.ticks.length ? native.parseTicks(bytes, replayFields, replayPlan.ticks) : []);
+        replay = buildReplay(match, replayPlan, replayPlan.ticks.length ? native.parseTicks(bytes, replayFields, replayPlan.ticks,
+          [...new Set(match.players.map(player=>player.steamId))]) : []);
         if (!replay.rounds.length) { replay = null; replayUnavailableReason = '没有可靠的正式回合窗口。'; }
       } catch { replayUnavailableReason = '回放采样失败或超出本机会话预算；比赛报告仍可用。'; }
     }

@@ -8,10 +8,14 @@ report-contract新增可选replay会话描述，不修改原报告字段/旧消�
 领域Replay包含内容身份、schema/采样版本、精确requested/actual tick状态、逐玩家连续segment、
 回合窗口、精确事件引用与coverage。只有dem-parser内部adapter查询native，单次读取与基础查询共享，
 独立8 Hz回放预算不裁剪稀疏证据。Unknown clock仅保留事件tick，不编造秒数或倍速。
+native查询前检查1–64个已识别玩家、最多60000个唯一tick/600000个玩家样本，并显式只请求这些SteamID；
+超限独立降级回放，不在查询后才限制结果大小。
 
 显示插值不进入领域/Analytics。sample仅表示native该tick最终状态；same-tick生命周期冲突明确歧义。
 缺失位置/状态、死亡、spawn、disconnect、side_change、回合和超间隔均切断segment。
 Utility仅保留已验证生效点；不表示轨迹或区域。Bomb事件在Utility Process投影，未知位置保持null。
+Renderer对跨楼层/未知楼层的相邻样本保留过渡未知，不从插值Z推断楼层。整数块使用floor(displayTick)
+归属，guard仅支持有依据的块边界显示，不在末尾外推。
 
 Utility会话缓存按内容SHA/schema/解析器采样版本/地图资源身份隔离；最多64MiB序列化内容，
 固定请求tick≤60000。按回合、最长20秒分块，超过1MiB继续拆分。每块含边界frame，

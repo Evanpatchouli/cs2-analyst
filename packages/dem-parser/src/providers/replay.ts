@@ -5,10 +5,16 @@ export const replaySamplingVersion = 'native-0.42.0-backport363-replay8-v1';
 const validTick = (n: unknown): n is number => typeof n === 'number' && Number.isSafeInteger(n) && n >= 0;
 export function planReplay(match: Match, maxTicks = 60_000) {
   if (!Number.isSafeInteger(maxTicks) || maxTicks < 0 || maxTicks > 60_000) throw new Error('Invalid replay tick budget');
+  const playerCount=new Set(match.players.map(p=>p.steamId)).size;
+  if(playerCount===0||playerCount>64)throw new Error('Replay player budget exceeded');
   const rate = match.tickRate;
   const step = rate !== undefined && Number.isSafeInteger(rate) && rate >= 8 && rate % 8 === 0 ? rate / 8 : null;
   const ticks = new Set<number>(), excludedRounds: number[] = [];
-  const add = (tick: number) => { ticks.add(tick); if (ticks.size > maxTicks) throw new Error('Replay tick budget exceeded'); };
+  const add = (tick: number) => {
+    ticks.add(tick);
+    if(ticks.size>maxTicks)throw new Error('Replay tick budget exceeded');
+    if(ticks.size*playerCount>600_000)throw new Error('Replay player sample budget exceeded');
+  };
   const rounds: { round: Match['rounds'][number]; ticks: number[] }[] = [];
   let previousEnd = -1;
   for (const round of match.rounds) {

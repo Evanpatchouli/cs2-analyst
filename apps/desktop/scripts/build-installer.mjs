@@ -19,6 +19,8 @@ import { fileURLToPath } from 'node:url';
  * test seam is compiled out and asserted absent below.
  */
 
+const { checkReplayAssets } = await import('../../../scripts/check-replay-map-assets.mjs');
+console.log('Replay asset preflight:', await checkReplayAssets());
 const variant = process.argv[2] ?? 'production';
 if (variant !== 'production' && variant !== 'test-seam') {
   throw new Error(`unknown packaging variant "${variant}"; expected production or test-seam`);

@@ -1,0 +1,272 @@
+{
+  "schemaVersion": 1,
+  "date": "2026-10-15",
+  "status": "PASS within user-approved local personal noncommercial / single Dust2 fixture scope",
+  "fixture": {
+    "fileName": "spirit-vs-faze-m3-dust2.dem",
+    "sha256": "db90fe85aab023a1d2c8a5996182e6120d98ef494f02a070b17982b235e4958c",
+    "bytes": 557650967,
+    "map": "de_dust2",
+    "tickRate": 64
+  },
+  "resourceId": "valve-730-2347770-2312433566686574487-vrf20.1",
+  "parserMeasurement": {
+    "fixture": "db90fe85aab023a1d2c8a5996182e6120d98ef494f02a070b17982b235e4958c",
+    "requested": 27466,
+    "missing": 0,
+    "replayMs": 4360.2914,
+    "peakProcessRssKiB": 1559060
+  },
+  "cacheMeasurement": {
+    "cacheBytes": 34757998,
+    "largestChunkBytes": 371621,
+    "blocks": 159,
+    "projectionAndChecksMs": 1287.3665999999994,
+    "peakProcessRssKiB": 1526024
+  },
+  "measurements": [
+    {
+      "status": "PASS",
+      "mode": "built-electron",
+      "totalImportMs": 8027.80000000447,
+      "firstFrameMs": 244.80000000447035,
+      "ipcMs": {
+        "count": 12,
+        "p50": 6.4000000059604645,
+        "p95": 9.399999998509884,
+        "max": 9.399999998509884
+      },
+      "chunkBytes": {
+        "count": 12,
+        "p50": 178862,
+        "p95": 204127,
+        "max": 204127
+      },
+      "drawP95Ms": 0.5999999940395355,
+      "metadataBytes": 10825,
+      "workerPeakWorkingSetBytes": 1505501184,
+      "rendererPeakWorkingSetBytes": 105664512,
+      "reportUnchanged": true,
+      "reportFingerprint": "cad9d5c4b4e0b48a797c6f995ea287ce1c8822dae23cbc57d79603e0af87017f",
+      "nativeBackgroundPause": "PASS",
+      "cancelAndReimport": "PASS",
+      "closeDuringParse": "PASS",
+      "findingLink": "PASS",
+      "offlineDecodedImages": [
+        {
+          "file": "de_dust2-DuOjijC8.png",
+          "width": 1024,
+          "height": 1024
+        },
+        {
+          "file": "de_inferno-Ixb1MNCY.png",
+          "width": 1024,
+          "height": 1024
+        },
+        {
+          "file": "de_mirage-BhqzEeE9.png",
+          "width": 1024,
+          "height": 1024
+        },
+        {
+          "file": "de_nuke-Bgexg5TX.png",
+          "width": 1024,
+          "height": 1024
+        },
+        {
+          "file": "de_nuke_lower-tQ1-uxWd.png",
+          "width": 1024,
+          "height": 1024
+        }
+      ],
+      "sliderRail": {
+        "width": 1064,
+        "height": 4,
+        "background": "rgba(0, 0, 0, 0) linear-gradient(90deg, rgb(71, 158, 245) 0%, rgb(71, 158, 245) 99.5654%, rgb(197, 207, 220) 99.5654%) repeat scroll 0% 0% / auto padding-box border-box",
+        "display": "block",
+        "opacity": "1",
+        "centerGap": 0
+      },
+      "screenshotSizing": "CDP viewport simulation; native window remains the application default"
+    },
+    {
+      "status": "PASS",
+      "mode": "installed-test-seam",
+      "totalImportMs": 8295.69999999553,
+      "firstFrameMs": 94.70000000298023,
+      "ipcMs": {
+        "count": 12,
+        "p50": 7.100000001490116,
+        "p95": 8.299999997019768,
+        "max": 8.299999997019768
+      },
+      "chunkBytes": {
+        "count": 12,
+        "p50": 178862,
+        "p95": 204127,
+        "max": 204127
+      },
+      "drawP95Ms": 0.30000000447034836,
+      "metadataBytes": 10825,
+      "workerPeakWorkingSetBytes": 1509363712,
+      "rendererPeakWorkingSetBytes": 102219776,
+      "reportUnchanged": true,
+      "reportFingerprint": "cad9d5c4b4e0b48a797c6f995ea287ce1c8822dae23cbc57d79603e0af87017f",
+      "nativeBackgroundPause": "PASS",
+      "cancelAndReimport": "PASS",
+      "closeDuringParse": "PASS",
+      "findingLink": "PASS",
+      "offlineDecodedImages": [
+        {
+          "file": "de_dust2-DuOjijC8.png",
+          "width": 1024,
+          "height": 1024
+        },
+        {
+          "file": "de_nuke-Bgexg5TX.png",
+          "width": 1024,
+          "height": 1024
+        },
+        {
+          "file": "de_nuke_lower-tQ1-uxWd.png",
+          "width": 1024,
+          "height": 1024
+        },
+        {
+          "file": "de_inferno-Ixb1MNCY.png",
+          "width": 1024,
+          "height": 1024
+        },
+        {
+          "file": "de_mirage-BhqzEeE9.png",
+          "width": 1024,
+          "height": 1024
+        }
+      ],
+      "sliderRail": {
+        "width": 1064,
+        "height": 4,
+        "background": "rgba(0, 0, 0, 0) linear-gradient(90deg, rgb(71, 158, 245) 0%, rgb(71, 158, 245) 99.5654%, rgb(197, 207, 220) 99.5654%) repeat scroll 0% 0% / auto padding-box border-box",
+        "display": "block",
+        "opacity": "1",
+        "centerGap": 0
+      },
+      "screenshotSizing": "CDP viewport simulation; native window remains the application default"
+    }
+  ],
+  "installations": [
+    {
+      "variant": "production",
+      "installerBytes": 115906552,
+      "installerSha256": "91d0a32cf6d15be50c606a13b28b2dbef7e8c227b9eed4ff63f075c61c3e7302",
+      "package": {
+        "variant": "production",
+        "asarBytes": 4330413,
+        "imagePaths": [
+          "assets/de_dust2-DuOjijC8.png",
+          "assets/de_nuke-Bgexg5TX.png",
+          "assets/de_nuke_lower-tQ1-uxWd.png",
+          "assets/de_inferno-Ixb1MNCY.png",
+          "assets/de_mirage-BhqzEeE9.png"
+        ],
+        "nativeSha256": "64aa7e63117dbb1fc0c9c986bc32396bd58e6f5e42ffe6193621d82985065868",
+        "sourceIndependentBundle": true
+      },
+      "status": "PASS",
+      "uninstalled": true
+    },
+    {
+      "variant": "test-seam",
+      "installerBytes": 115906561,
+      "installerSha256": "4e0226722a412ff4e9a38b19c8398ec9eedacb76312f8d49829d9ba7c9d9bd8d",
+      "package": {
+        "variant": "test-seam",
+        "asarBytes": 4330389,
+        "imagePaths": [
+          "assets/de_dust2-DuOjijC8.png",
+          "assets/de_nuke-Bgexg5TX.png",
+          "assets/de_nuke_lower-tQ1-uxWd.png",
+          "assets/de_inferno-Ixb1MNCY.png",
+          "assets/de_mirage-BhqzEeE9.png"
+        ],
+        "nativeSha256": "64aa7e63117dbb1fc0c9c986bc32396bd58e6f5e42ffe6193621d82985065868",
+        "sourceIndependentBundle": true
+      },
+      "status": "PASS",
+      "uninstalled": true
+    }
+  ],
+  "productionStartup": "PASS",
+  "installedCorruptDem": "PASS",
+  "assetFreeSourceCheckout": "PASS",
+  "sourceIndependence": {
+    "installedOutsideRepository": true,
+    "nodePathCleared": true,
+    "workspacePackagesBundled": true,
+    "nativeBindingUnpackedAndDigestVerified": true,
+    "offlineFileUrlsOnly": true,
+    "ipcBoundary": "current main frame + session/round/block; synthetic IPC rejection tests"
+  },
+  "tests": {
+    "typecheck": {
+      "tasks": 15,
+      "status": "PASS"
+    },
+    "build": {
+      "tasks": 8,
+      "status": "PASS"
+    },
+    "shellSmoke": {
+      "dev": "PASS",
+      "preview": "PASS"
+    },
+    "parser": {
+      "total": 48,
+      "pass": 46,
+      "skip": 2,
+      "fail": 0
+    },
+    "desktop": {
+      "total": 49,
+      "pass": 48,
+      "skip": 1,
+      "fail": 0,
+      "explicitlyFiltered": "Nuke Desktop integrates shared spatial pipeline (missing exact nuke.dem)"
+    },
+    "analytics": {
+      "total": 53,
+      "pass": 48,
+      "skip": 5,
+      "fail": 0
+    },
+    "findingsV1": {
+      "total": 17,
+      "pass": 16,
+      "skip": 1,
+      "fail": 0
+    },
+    "deepReview": {
+      "total": 206,
+      "pass": 195,
+      "skip": 11,
+      "fail": 0,
+      "explicitlyFiltered": "Findings calibration core structural gate (missing exact core fixture aliases)"
+    },
+    "independentReview": "No remaining blocking findings; synthetic boundaries independently rerun"
+  },
+  "limits": [
+    "Map/DEM version equivalence is unconfirmed; all available maps are explicitly schematic",
+    "Only the selected professional Dust2 DEM was run; other-map/personal real-demo gates and demo1 legacy goldens were not rerun per user scope",
+    "Nuke layers/boundaries are validated from paired assets and synthetic tests, without a real Nuke DEM run",
+    "Public/commercial redistribution of Valve assets remains unconfirmed; PNG/raw overview/installers/screenshots are local and excluded from Git",
+    "Peak memory is per OS process lifetime; renderer/worker maxima are not a simultaneous aggregate application peak",
+    "Viewport screenshots are simulations, not native resize walkthroughs; multi-monitor DPI transitions and other recording modes were not manually validated"
+  ],
+  "notImplemented": [
+    "P7 heatmaps",
+    "P8 AI/backend",
+    "3D/LOS/nav/collision analysis",
+    "persistent match history",
+    "unobserved projectile trajectories or smoke/fire boundaries"
+  ]
+}

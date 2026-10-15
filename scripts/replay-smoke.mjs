@@ -2,31 +2,42 @@
 import assert from 'node:assert/strict';
 import { spawn,spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync,mkdirSync,mkdtempSync,readFileSync,rmSync,writeFileSync } from 'node:fs';
+import { existsSync,mkdirSync,mkdtempSync,readdirSync,rmSync,writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { createServer } from 'node:net';
 import { dirname,join,resolve,sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { setTimeout as delay } from 'node:timers/promises';
+import { inspectReplayPackage } from './replay-package-inspection.mjs';
 const root=fileURLToPath(new URL('../',import.meta.url)),desktop=join(root,'apps/desktop');
 const require=createRequire(new URL('../apps/desktop/package.json',import.meta.url));
-const demo=join(root,'.demo/spirit-vs-faze-m3-dust2.dem');assert.ok(existsSync(demo),'Selected local DEM required; no downloads');
-const installed=process.argv[2]?resolve(process.argv[2]):null;
-const executable=installed??require('electron');assert.ok(existsSync(executable));
+const production=process.argv.includes('--production'),broken=process.argv.includes('--broken'),noMaps=process.argv.includes('--no-map');
 const qa=join(root,'.tmp/p6-qa');mkdirSync(qa,{recursive:true});
+if(broken)writeFileSync(join(qa,'broken.dem'),'synthetic corrupt input, not a real DEM fixture');
+const demo=broken?join(qa,'broken.dem'):join(root,'.demo/spirit-vs-faze-m3-dust2.dem');assert.ok(existsSync(demo),'Selected local DEM required; no downloads');
+const executableArgument=process.argv.slice(2).find(arg=>!arg.startsWith('--'));
+const installed=executableArgument?resolve(executableArgument):null;
+const executable=installed??require('electron');assert.ok(existsSync(executable));
 const server=createServer();await new Promise(r=>server.listen(0,'127.0.0.1',r));const port=server.address().port;await new Promise(r=>server.close(r));
 const profile=mkdtempSync(join(root,'.tmp/replay-profile-'));
-const env={...process.env,CS2_ANALYST_DEM_PATH:demo,CS2_ANALYST_TEST_DEM_PATH:demo};delete env.ELECTRON_RUN_AS_NODE;delete env.ELECTRON_RENDERER_URL;
+const env={...process.env,NODE_PATH:'',CS2_ANALYST_DEM_PATH:demo,CS2_ANALYST_TEST_DEM_PATH:demo};delete env.ELECTRON_RUN_AS_NODE;delete env.ELECTRON_RENDERER_URL;
 const child=spawn(executable,[...(installed?[]:['.']),`--remote-debugging-port=${port}`,`--user-data-dir=${profile}`,'--disable-features=CalculateNativeWinOcclusion','--disable-backgrounding-occluded-windows'],{cwd:installed?dirname(installed):desktop,env,windowsHide:true,stdio:['ignore','pipe','pipe']});
 let logs='',page,browser,metrics={};child.stdout.on('data',d=>logs+=d);child.stderr.on('data',d=>logs+=d);
 async function waitFor(fn,label,timeout=30_000){const end=Date.now()+timeout;while(Date.now()<end){const result=await fn();if(result)return result;if(child.exitCode!==null)throw new Error(`Electron exited: ${logs}`);await delay(50);}throw new Error(`Timed out: ${label}`);}
-async function connect(url){const socket=new WebSocket(url);await new Promise((r,j)=>{socket.addEventListener('open',r,{once:true});socket.addEventListener('error',j,{once:true});});let sequence=0;
-  return {socket,send:(method,params={})=>new Promise((resolve,reject)=>{const id=++sequence,timer=setTimeout(()=>{socket.removeEventListener('message',receive);reject(new Error(`${method} timeout`));},120_000);
-    function receive(event){const m=JSON.parse(event.data);if(m.id!==id)return;clearTimeout(timer);socket.removeEventListener('message',receive);m.error?reject(new Error(JSON.stringify(m.error))):resolve(m.result);}
-    socket.addEventListener('message',receive);socket.send(JSON.stringify({id,method,params}));})};}
+async function connect(url){
+  const socket=new WebSocket(url);
+  await new Promise((r,j)=>{socket.addEventListener('open',r,{once:true});socket.addEventListener('error',j,{once:true});});
+  let sequence=0;const pending=new Map();
+  socket.addEventListener('message',event=>{const m=JSON.parse(event.data),request=pending.get(m.id);if(!request)return;pending.delete(m.id);clearTimeout(request.timer);m.error?request.reject(new Error(JSON.stringify(m.error))):request.resolve(m.result);});
+  socket.addEventListener('close',()=>{for(const request of pending.values()){clearTimeout(request.timer);request.reject(new Error('CDP connection closed'));}pending.clear();});
+  return {socket,send:(method,params={})=>new Promise((resolve,reject)=>{
+    const id=++sequence,timer=setTimeout(()=>{pending.delete(id);reject(new Error(`${method} timeout`));},120_000);
+    pending.set(id,{resolve,reject,timer});socket.send(JSON.stringify({id,method,params}));
+  })};
+}
 const hash=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
 function processTree(){
-  // CDP SystemInfo omits Electron's forked Node utility service. Inspect only this app's OS children.
+  // OS children identify the Node utility service and provide lifetime peak working set.
   const result=spawnSync('pwsh',['-NoProfile','-Command',`Get-CimInstance Win32_Process -Filter "ParentProcessId = ${child.pid}" | ForEach-Object { $taskProcess=Get-Process -Id $_.ProcessId -ErrorAction SilentlyContinue; [pscustomobject]@{ Id=$_.ProcessId; Role=if($_.CommandLine -match 'node.mojom.NodeService'){'analysis-utility'}elseif($_.CommandLine -match '--type=renderer'){'renderer'}elseif($_.CommandLine -match '--type=gpu-process'){'gpu'}else{'other'}; PeakWorkingSet64=$taskProcess.PeakWorkingSet64; WorkingSet64=$taskProcess.WorkingSet64 } } | ConvertTo-Json -Compress`],{encoding:'utf8',windowsHide:true});
   if(result.status!==0)throw new Error(result.stderr);const value=JSON.parse(result.stdout||'[]');return Array.isArray(value)?value:[value];
 }
@@ -40,6 +51,18 @@ try{
   await page.send('Runtime.enable');await page.send('Page.enable');await page.send('Network.enable');await page.send('Network.emulateNetworkConditions',{offline:true,latency:0,downloadThroughput:-1,uploadThroughput:-1});
   await waitFor(()=>evaluate('Boolean(window.cs2Analyst&&document.querySelector("main"))'),'preload/React');
   assert.equal(await evaluate('typeof window.require'),'undefined');
+  const packageInfo=installed?inspectReplayPackage(dirname(installed),production?'production':'test-seam'):null;
+  const imagePaths=packageInfo?.imagePaths??readdirSync(join(desktop,'dist/renderer/assets')).filter(f=>/^de_(dust2|nuke|inferno|mirage)[-_].*\.png$/.test(f)).map(f=>'assets/'+f);
+  const decoded=await evaluate(`Promise.all(${JSON.stringify(imagePaths)}.map(path=>new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve({url:image.src,width:image.naturalWidth,height:image.naturalHeight});image.onerror=()=>reject(new Error('Offline radar failed: '+path));image.src=new URL(path,location.href).href;})))`);
+  assert.equal(decoded.length,noMaps?0:5);assert.ok(decoded.every(i=>i.width===1024&&i.height===1024));
+  if(installed)assert.ok(decoded.every(i=>i.url.includes('/resources/app.asar/dist/renderer/assets/')));
+  if(production||broken||noMaps){
+    metrics={mode:noMaps?'built-event-only':production?'installed-production-startup':installed?'installed-broken':'built-broken',packageInfo,offlineDecodedImages:decoded};
+    if(noMaps){await evaluate('[...document.querySelectorAll("button")].find(b=>b.textContent.includes("选择 DEM")).click()');await waitFor(()=>evaluate('document.querySelector("main")?.dataset.status==="success"'),'event-only report',120000);await evaluate('document.getElementById("replay-tab").click()');await waitFor(()=>evaluate('Number(document.querySelector("[data-replay-session]")?.dataset.replayRevision)>0'),'event-only data');assert.ok((await evaluate('document.getElementById("replay-panel").innerText')).includes('本机没有配套雷达资源'));assert.equal(await evaluate('document.querySelectorAll("#replay-panel canvas").length'),0);assert.ok(await evaluate('document.querySelectorAll("[aria-label=回放玩家状态] button").length>0'));metrics.eventOnlyFallback='PASS';}
+    else if(broken){await evaluate('[...document.querySelectorAll("button")].find(b=>b.textContent.includes("选择 DEM")).click()');await waitFor(()=>evaluate('document.querySelector("main")?.dataset.status==="error"'),'corrupt DEM error');assert.ok((await evaluate('document.body.innerText')).includes('无法分析此 DEM'));await waitFor(async()=>!processTree().some(p=>p.Role==='analysis-utility'),'failed import worker cleanup');metrics.corruptError='PASS';}
+    else assert.equal(await evaluate('document.querySelector("main").dataset.status'),'idle');
+    void evaluate('window.cs2Analyst.window.close()').catch(()=>{});await waitFor(async()=>child.exitCode!==null,'startup/error window close');
+  }else{
   const before=processTree().map(p=>p.Id);
   const imported=await evaluate('(async()=>{const start=performance.now();window.__p6=await window.cs2Analyst.importDemo();return {result:window.__p6,totalMs:performance.now()-start};})()');
   assert.equal(imported.result.kind,'success');const report=imported.result.report,meta=report.replay;
@@ -50,6 +73,7 @@ try{
   const workerIds=osProcesses.filter(p=>!before.includes(p.Id)&&p.Role==='analysis-utility').map(p=>p.Id);
   assert.ok(workerIds.length>0,'A real persistent Utility Process must exist');
   metrics={mode:installed?'installed-test-seam':'built-electron',fixtureSha256:meta.matchId,totalImportMs:imported.totalMs,metadataBytes:Buffer.byteLength(JSON.stringify(meta)),processes,workerIds,processMemory:osProcesses};
+  metrics.packageInfo=packageInfo;metrics.offlineDecodedImages=decoded;
   assert.ok(osProcesses.filter(p=>workerIds.includes(p.Id)).every(p=>p.PeakWorkingSet64<=2.5*1024**3),'Analysis utility peak stays within 2.5 GiB');
   const requests=meta.rounds.flatMap(r=>[r.blocks[0],r.blocks.at(-1)].map(b=>({sessionId:meta.sessionId,round:r.round,block:b.index}))).slice(0,12);
   const timings=[],sizes=[];
@@ -87,6 +111,8 @@ try{
   await waitFor(()=>evaluate(`Math.abs(Number(document.querySelector("#replay-panel canvas[role=img]")?.dataset.tick)-${linkedTick})<.01&&Number(document.querySelector('#replay-panel canvas[role=img]')?.dataset.playerCount)>0`),'Timeline exact tick link and rendered living players');
   await evaluate('document.querySelector("[aria-label=回放玩家状态] button:nth-child(2)").click()');assert.equal(await evaluate('document.querySelector("[aria-label=回放玩家状态] button:nth-child(2)").getAttribute("aria-pressed")'),'true');
   metrics.drawP95Ms=await evaluate('Number(document.querySelector("#replay-panel canvas[role=img]").dataset.drawP95)');assert.ok(metrics.drawP95Ms<=16.7);assert.ok(await evaluate('Number(document.querySelector("[data-replay-session]").dataset.replayCache)<=3'));
+  metrics.sliderRail=await evaluate('(()=>{const e=document.querySelector("#replay-panel .fui-Slider__rail"),r=e.getBoundingClientRect(),t=document.querySelector("#replay-panel .fui-Slider__thumb").getBoundingClientRect(),c=getComputedStyle(e);return {width:r.width,height:r.height,background:c.background,display:c.display,opacity:c.opacity,centerGap:Math.abs(r.y+r.height/2-t.y-t.height/2)};})()');
+  assert.ok(metrics.sliderRail.width>100&&metrics.sliderRail.height>=2&&metrics.sliderRail.centerGap<=1,'The visible progress rail aligns with its thumb');
   const finding=report.findings.find(f=>f.evidence.some(e=>e.round!==undefined&&meta.rounds.some(r=>r.round===e.round)));
   if(finding){const index=meta.players.findIndex(p=>p.id===finding.playerId);await evaluate(`document.querySelector('[aria-label="回放玩家状态"] button:nth-child(${index+1})').click();document.getElementById('report-tab').click();document.querySelector('#report-panel details summary').click()`);
     const linked=await evaluate('(()=>{const b=document.querySelector("#report-panel [data-finding-replay-round]");if(!b)return null;const value={round:Number(b.dataset.findingReplayRound),tick:b.dataset.findingReplayTick?Number(b.dataset.findingReplayTick):null};b.click();return value;})()');assert.ok(linked);
@@ -100,15 +126,38 @@ try{
     assert.equal(await evaluate('document.documentElement.scrollWidth>window.innerWidth'),false,`horizontal overflow ${width}`);
     const screenshot=await page.send('Page.captureScreenshot',{format:'png'});writeFileSync(join(qa,`${metrics.mode}-${width}x${height}.png`),Buffer.from(screenshot.data,'base64'));
   }
-  // A current session can be explicitly released; it must reject further requests and terminate its worker.
+  // Real OS minimize: the page must pause, then restore through the existing native window controls.
+  await evaluate('document.querySelector("[aria-label=播放回放]").click();window.cs2Analyst.window.minimize()');
+  await waitFor(()=>evaluate('document.hidden'),'native minimize visibility');await delay(150);
+  const backgroundTick=await evaluate('Number(document.querySelector("[data-replay-session]").dataset.replayTick)');await delay(250);
+  assert.equal(await evaluate('Number(document.querySelector("[data-replay-session]").dataset.replayTick)'),backgroundTick);
+  await evaluate('window.cs2Analyst.window.toggleMaximize()');await waitFor(()=>evaluate('!document.hidden'),'native restore');await evaluate('window.cs2Analyst.window.toggleMaximize()');
+  await waitFor(()=>evaluate('Boolean(document.querySelector("[aria-label=播放回放]"))'),'restored playback stays paused');await delay(200);
+  const restoredTick=await evaluate('Number(document.querySelector("#replay-panel canvas[role=img]").dataset.tick)');
+  assert.ok(restoredTick>=backgroundTick&&restoredTick-backgroundTick<=meta.tickRate*.25,'Restore must not advance by background elapsed time');await delay(300);
+  assert.equal(await evaluate('Number(document.querySelector("#replay-panel canvas[role=img]").dataset.tick)'),restoredTick,'Paused clock stays stable after restore');metrics.nativeBackgroundPause='PASS';
+  const beforeCancel=await evaluate('document.querySelector("[data-replay-session]").dataset.replaySession');
+  await evaluate('[...document.querySelectorAll("button")].find(b=>b.textContent.includes("重新选择 DEM")).click()');
+  await waitFor(()=>evaluate('[...document.querySelectorAll("button")].some(b=>b.textContent==="取消导入")'),'cancel button');
+  await evaluate('[...document.querySelectorAll("button")].find(b=>b.textContent==="取消导入").click()');
+  await waitFor(()=>evaluate('document.querySelector("main").dataset.status==="success"'),'cancel retains previous report');
+  assert.equal((await evaluate(`window.cs2Analyst.replay.getChunk({sessionId:${JSON.stringify(beforeCancel)},round:1,block:0})`)).kind,'error');
+  await waitFor(async()=>!processTree().some(p=>p.Role==='analysis-utility'),'cancelled worker cleanup');
+  await evaluate('[...document.querySelectorAll("button")].find(b=>b.textContent.includes("重新选择 DEM")).click()');
+  await waitFor(()=>evaluate('document.querySelector("main").dataset.status==="success"&&Boolean(document.querySelector("[data-replay-session]"))'),'successful reimport after cancellation',120_000);metrics.cancelAndReimport='PASS';
+  // A current session can be explicitly released; it must reject requests and terminate its worker.
   const current=await evaluate('document.querySelector("[data-replay-session]").dataset.replaySession');
   const currentWorkerIds=processTree().filter(p=>p.Role==='analysis-utility').map(p=>p.Id);assert.ok(currentWorkerIds.length>0);
   await evaluate(`window.cs2Analyst.replay.release(${JSON.stringify(current)})`);
   assert.equal((await evaluate(`window.cs2Analyst.replay.getChunk({sessionId:${JSON.stringify(current)},round:1,block:0})`)).kind,'error');
   await waitFor(async()=>!processTree().some(p=>currentWorkerIds.includes(p.Id)),'current worker cleanup');
   assert.deepEqual(exceptions,[]);
-  writeFileSync(join(qa,`${metrics.mode}.json`),JSON.stringify(metrics,null,2)+'\n');
-  void evaluate('window.cs2Analyst.window.close()').catch(()=>{});await waitFor(async()=>child.exitCode!==null,'window close');
+  await evaluate('[...document.querySelectorAll("button")].find(b=>b.textContent.includes("重新选择 DEM")).click()');
+  await waitFor(async()=>processTree().some(p=>p.Role==='analysis-utility'),'worker exists before close');
+  assert.ok(['parsing','analyzing'].includes(await evaluate('document.querySelector("main").dataset.status')),'Close-during-parse check must observe an in-flight import');
+  void evaluate('window.cs2Analyst.window.close()').catch(()=>{});await waitFor(async()=>child.exitCode!==null,'window close during native parse');
+  await waitFor(async()=>!processTree().some(p=>p.Role==='analysis-utility'),'no orphan worker');metrics.closeDuringParse='PASS';
+  }
 }catch(error){
   if(page)try{const state=await page.send('Runtime.evaluate',{expression:'({text:document.body.innerText,root:document.querySelector("[data-replay-session]")?.outerHTML.slice(0,1000),canvas:[...document.querySelectorAll("#replay-panel canvas")].map(c=>({width:c.width,height:c.height,data:{...c.dataset}}))})',returnByValue:true});writeFileSync(join(qa,'failure-state.json'),JSON.stringify(state,null,2));const shot=await page.send('Page.captureScreenshot',{format:'png'});writeFileSync(join(qa,'failure.png'),Buffer.from(shot.data,'base64'));}catch{}
   throw new Error(`Replay Electron check failed\n${logs}`,{cause:error});
@@ -119,6 +168,6 @@ finally{
   assert.ok(resolve(profile).startsWith(resolve(root,'.tmp')+sep),'Profile cleanup stays within task .tmp');rmSync(profile,{recursive:true,force:true,maxRetries:8,retryDelay:250});
 }
 // The unchanged public report path must equal the worker's report, excluding additive replay metadata.
-const { analyzeDemoFile }=await import('../apps/desktop/electron/report.ts');
-const baseline=await analyzeDemoFile(demo);assert.equal(baseline.kind,'success');assert.equal(hash(baseline.report),reportFingerprint);
-console.log(JSON.stringify({stage:'PASS',mode:metrics.mode,firstFrameMs:metrics.firstFrameMs,drawP95Ms:metrics.drawP95Ms,reportUnchanged:true}));
+if(!production&&!broken&&!noMaps){const { analyzeDemoFile }=await import('../apps/desktop/electron/report.ts');const baseline=await analyzeDemoFile(demo);assert.equal(baseline.kind,'success');assert.equal(hash(baseline.report),reportFingerprint);metrics.reportUnchanged=true;metrics.reportFingerprint=reportFingerprint;}
+metrics.status='PASS';writeFileSync(join(qa,`${metrics.mode}.json`),JSON.stringify(metrics,null,2)+'\n');
+console.log(JSON.stringify({stage:'PASS',mode:metrics.mode,firstFrameMs:metrics.firstFrameMs,drawP95Ms:metrics.drawP95Ms,reportUnchanged:metrics.reportUnchanged??'not-run-in-this-mode'}));

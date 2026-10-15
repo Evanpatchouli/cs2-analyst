@@ -1,4 +1,17 @@
-# Current Desktop contract — P5.7.8
+# Current Desktop addition — P6
+
+原报告schema仍为v2，新增可选`replay`元数据，独立回放块schema v1。Utility以一次parseWithReplay
+共享输入生成原Match/Spatial报告与回放，只保留≤64MiB序列化会话缓存；Main在报告返回后保留worker，
+通过受信主frame/当前session/登记round-block读取≤1MiB块，取消/重导入/释放/关闭清理worker。
+Renderer第五个mounted Tab为Canvas 2D+Fluent v9播放器，3块LRU，统一时钟，保守显示插值与文字入口。
+Timeline/Findings可定位回合与精确tick，原数据/筛选/确定性算法不变。
+
+地图仅来自维护阶段固定manifest提取的本机资源；公开仓库仅含代码/摘要/归一参数，不包含Valve PNG或原overview。
+`node scripts/prepare-replay-maps.mjs .tmp/p6-official`准备后构建本机离线地图；未准备时仍可构建/查看报告和事件。
+Desktop构建缓存禁用，防止Git忽略的可选图片导致错误复用；build/pack校验所有现有图片摘要，不运行下载工具。
+新接口、限制与本次实际验收以[Replay contract](./replay-contract.md)和[实施记录](./replay-implementation.md)为准。
+
+# Historical Desktop contract — P5.7.8
 
 **implementation complete / visual product acceptance pending**. 比赛报告 is the default of
 four mounted tabs. The Utility Process invokes one shared-input `parseWithSpatial()` and the

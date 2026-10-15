@@ -33,3 +33,9 @@ test('carrier marker follows only a valid interpolated carrier; missing/lifecycl
   assert.deepEqual(replayDisplayFrame(c,4,8,['player']).bomb.position,[4,0,0]);
   c.frames[1].players[0][9]=2;assert.equal(replayDisplayFrame(c,4,8,['player']).bomb.position,null);
 });
+test('cross-floor observations do not manufacture a floor from interpolated Z',()=>{
+  const c=chunk();c.frames[0].players[0][4]=-496;c.frames[1].players[0][4]=-494;
+  const floor=z=>z===null||z===-495?null:z< -495?'lower':'default';
+  assert.equal(replayDisplayFrame(c,4,8,[],floor).players[0][4],null);
+  assert.equal(replayDisplayFrame(c,0,8,[],floor).players[0][4],-496,'Exact observed floor remains available');
+});
