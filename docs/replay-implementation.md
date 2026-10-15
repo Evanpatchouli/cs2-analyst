@@ -98,6 +98,15 @@ node scripts/replay-calibration.mjs
 提取 Inferno overview 曾因分卷尚在下载而锁定失败，CLI 错误时仍返回 0；等待下载完成后重试成功，
 最终通过独立目录检查器确认全部九份文件，未把退出码 0 单独当作成功证据。
 
-## 后续阶段
+## P6.1 — 地图基础通过
 
-P6.1–P6.4 尚未开始；安装版/Electron/真实 IPC 性能尚未执行。
+`replay-map.ts` 的纯数值投影统一处理1024参考平面与自然图像尺寸、Canvas Y反向与记录 yaw；
+Nuke根据版本元数据判层，-495/缺Z/越界保留未知。4个测试覆盖独立Dust2区域、倍尺寸、四向朝向、
+Nuke层级边界、未知地图/缺图回退；desktop typecheck通过，独立复核无阻塞。
+
+`node scripts/prepare-replay-maps.mjs .tmp/p6-official` 先核验全部原始overview/PNG摘要及参数，再准备5张本地图片。
+远端仓库已核实为PUBLIC，用户要求完成后push代码；为遵守本机素材用途，PNG/raw overview不提交或推送。
+图片位于受Git忽略的renderer assets目录，Vite按相对URL打包；空源码检出允许缺图并降级事件浏览，
+不会热链或下载。归一数值元数据/摘要、准备工具及验证记录提交；公开素材分发许可仍未确认。
+
+UI/真实离线装载在P6.3/P6.4验证；P6.2–P6.4尚未开始。
