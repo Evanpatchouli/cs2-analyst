@@ -6,6 +6,8 @@ import type { ParserAdapter } from "../adapter.js";
 import type { SpatialParseResult, SpatialSamplingOptions } from "../spatial.js";
 import { convertToMatch } from "./converters.js";
 import { buildSpatialEvidence, planSpatialSampling, spatialFields } from "./spatial-evidence.js";
+import { buildReplay, planReplay, replayFields } from './replay.js';
+import type { ReplayParseResult } from '../replay.js';
 
 // Keep all native APIs and their untyped results behind this adapter.
 export class Demoparser2Adapter implements ParserAdapter {
@@ -17,6 +19,15 @@ export class Demoparser2Adapter implements ParserAdapter {
   }
 
   async parseWithSpatial(filePath: string, options: SpatialSamplingOptions = {}): Promise<SpatialParseResult> {
+    const { match, spatial, performance } = await this.parseEvidence(filePath, options, false);
+    return { match, spatial, performance };
+  }
+
+  async parseWithReplay(filePath: string, options: SpatialSamplingOptions = {}): Promise<ReplayParseResult> {
+    return this.parseEvidence(filePath, options, true);
+  }
+
+  private async parseEvidence(filePath: string, options: SpatialSamplingOptions, includeReplay: boolean): Promise<ReplayParseResult> {
     const started = performance.now();
     const { bytes, native } = await this.readInput(filePath);
     const match = convertToMatch(this.parseInput(bytes, native));
@@ -35,7 +46,15 @@ export class Demoparser2Adapter implements ParserAdapter {
     }
     const spatial = buildSpatialEvidence(match, plan, rawRows, failed);
     const finished = performance.now();
-    return { match, spatial, performance: {
+    let replay = null, replayUnavailableReason: string | null = null;
+    if (includeReplay) {
+      try {
+        const replayPlan = planReplay(match);
+        replay = buildReplay(match, replayPlan, replayPlan.ticks.length ? native.parseTicks(bytes, replayFields, replayPlan.ticks) : []);
+        if (!replay.rounds.length) { replay = null; replayUnavailableReason = '没有可靠的正式回合窗口。'; }
+      } catch { replayUnavailableReason = '回放采样失败或超出本机会话预算；比赛报告仍可用。'; }
+    }
+    return { match, spatial, replay, replayUnavailableReason, replayMs: performance.now() - finished, performance: {
       parserMs: parsed - started, spatialMs: finished - parsed, totalMs: finished - started, peakMemory: "UNKNOWN",
     } };
   }

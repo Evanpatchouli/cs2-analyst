@@ -4,6 +4,7 @@ import type { DemoParser } from "../parser.js";
 import type { SpatialParseResult, SpatialSamplingOptions } from "../spatial.js";
 import { convertToMatch } from "./converters.js";
 import { Demoparser2Adapter } from "./demoparser2-adapter.js";
+import type { ReplayParseResult } from '../replay.js';
 
 /**
  * demoparser2 implementation entry point.
@@ -29,5 +30,11 @@ export class Demoparser2Provider implements DemoParser {
     } catch (cause) {
       throw new Error(`无法解析 DEM 空间证据：${filePath}`, { cause });
     }
+  }
+
+  /** Explicit continuous replay; shares input/Match/Spatial without changing sparse evidence. */
+  async parseWithReplay(filePath: string, options?: SpatialSamplingOptions): Promise<ReplayParseResult> {
+    try { return await this.adapter.parseWithReplay(filePath, options); }
+    catch (cause) { throw new Error(`无法解析 DEM 回放：${filePath}`, { cause }); }
   }
 }

@@ -109,4 +109,18 @@ Nuke层级边界、未知地图/缺图回退；desktop typecheck通过，独立�
 图片位于受Git忽略的renderer assets目录，Vite按相对URL打包；空源码检出允许缺图并降级事件浏览，
 不会热链或下载。归一数值元数据/摘要、准备工具及验证记录提交；公开素材分发许可仍未确认。
 
-UI/真实离线装载在P6.3/P6.4验证；P6.2–P6.4尚未开始。
+UI/真实离线装载在P6.3/P6.4验证。
+
+## P6.2A — 独立领域/采样通过
+
+新增match-model独立Replay契约及显式parseWithReplay()，同一次readInput/基础Match与事件查询复用，
+独立8Hz+正式边界/精确事件/生命周期计划，60000唯一tick上限；旧parseWithSpatial仍保持原三字段与稀疏证据。
+真实Dust2自动比较Match/Spatial完整内容hash相同，27466请求tick、无缺失玩家行；首轮采样归一化4.01秒，
+全parser套件另一次2.95秒，进程生命周期峰值约1.49GiB（包含测试比较，不是app峰值）。
+
+逐玩家segment保留缺失、生命期与跨回合断点；断连跨回合/未采样post-round间隙持续未知，仅本人spawn解除；
+死亡后陈旧Pawn存活行记歧义，不能自行复活；same-tick冲突无顺序推断。未知时钟保留事件tick且tickRate=null。
+6个新合成边界与1个指定真实DEM验证通过，parser全套45 PASS/2 SKIP，typecheck15/15、build8/8通过。
+独立复核发现并已修复跨回合断连状态重置，回归覆盖；不更改旧golden或算法。
+
+契约兼容性/进程方案见[Replay contract](./replay-contract.md)。P6.2传输/会话与P6.3–P6.4待完成。
