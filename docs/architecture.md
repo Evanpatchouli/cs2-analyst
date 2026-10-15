@@ -51,13 +51,49 @@ AI coaching is an optional interpretation layer built on top of structured findi
 
 P8's planned model-independent knowledge, coaching and evaluation route is documented in
 [AI Coach technical route](./ai-coach-technical-route.md). It preserves local deterministic analysis,
-stores reviewed professional-demo knowledge outside model weights, and separates conditional AI
-recommendations from verified Findings. This is a future design, not an implemented component;
+stores reviewed professional-demo knowledge in private backends outside model weights, and separates
+conditional AI recommendations from verified Findings. This is a future design, not an implemented component;
 map geometry/visibility capabilities require independent validation beyond P6 2D rendering.
+
+## Planned P8 backend applications (not implemented)
+
+Keep all applications in this monorepo, with independently built and deployed backends. Paths below
+are planned names, not existing directories or newly authorized implementation work.
+
+| Application | Responsibility | Boundary |
+| --- | --- | --- |
+| Existing `apps/desktop` | Local personal DEM parsing, deterministic analysis, P6/P7 and coaching presentation | Sends only necessary structured evidence to the coaching API; no personal DEM upload, professional knowledge database, internal system prompts or provider credentials |
+| Planned `apps/knowledge-pipeline` | Internal professional DEM ingestion, evidence extraction, candidate-rule review, isolated evaluation, knowledge release and revocation | Operator-only jobs/admin interfaces; owns the private draft database and publishes immutable versioned knowledge snapshots through an internal channel |
+| Planned `apps/coach-api` | Authenticated client analysis API, released-knowledge retrieval, validated geometry queries, provider-independent model orchestration and output validation | No personal DEM parsing or core metric recomputation; reads published snapshots only, not drafts or held-out evaluation material; returns filtered coaching DTOs |
+
+Professional DEMs may be parsed in the internal knowledge pipeline by reusing `dem-parser` and the
+domain packages. This explicitly replaces the earlier blanket no-server-DEM restriction for this
+internal professional-data workflow only; personal DEMs remain local. The current native binding
+is validated for Windows x64, so backend platform compatibility must be checked before ingestion.
+
+Shared domain/service contracts belong in `packages/`, independently of Electron. Applications do
+not import one another's entry points; the deterministic packages never depend on backend storage,
+networking or models. Concrete package names, HTTP framework and API schemas remain implementation
+design work. No existing public contracts or package dependencies change in this documentation update.
+
+The knowledge pipeline is the sole writer of its initial private SQLite store. The coaching API
+loads immutable reviewed snapshots with version/digest checks; the applications do not share a
+writable database. Provider SDKs, model credentials, internal prompts, full professional cases,
+private coaching rules and evaluation assets are excluded from desktop bundles and client-accessible endpoints.
+User-facing explanations and necessary version identifiers may be returned, not raw private assets,
+provider responses or debug logs. The backend may use hosted or self-hosted models; no client-side
+offline knowledge mode is planned by this route.
+
+Internal administration and client analysis must be isolated by deployment/routing and authorization.
+Before public exposure, define and validate authentication, authorization, request limits, quotas,
+and evidence/log retention. Do not embed a permanent shared backend secret in the desktop installer.
+This service-access prerequisite does not start the separate future account/history product.
+Client-side schema consistency does not prove source-DEM authenticity; the API's advice is based on
+submitted evidence, with unknown information preserved. Network/model failure leaves local reports usable.
 
 ## Future boundary (not implemented)
 
-Auto DEM discovery / directory scanning is **not planned**: the user always selects the DEM explicitly, and no code scans Steam / CS2 directories. A future `apps/api` may add account / session and match-history summary storage, but DEM parsing, Analytics and Findings stay local to Desktop — the service never receives DEM files and never analyzes them.
+Auto DEM discovery / directory scanning is **not planned**: the user always selects personal DEMs explicitly, and no code scans Steam / CS2 directories. A future `apps/api` may add account / session and match-history summary storage; it is separate from the two P8 backend applications above and is not started here. Personal DEM parsing, Analytics and Findings stay local to Desktop; the history service does not receive or parse personal DEMs. Internal professional DEM ingestion is confined to the planned knowledge pipeline.
 
 `findings` consumes only frozen `MatchAnalytics` via the Analytics public package. `generateFindings` runs pure deterministic rules and returns ranked evidence with per-player caps (3 issues, 2 highlights). It does not parse DEMs or recompute Analytics; parser is a devDependency only for real-demo golden tests. Policy and gaps: [Findings Engine](./findings-engine.md).
 

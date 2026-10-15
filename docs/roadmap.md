@@ -115,9 +115,11 @@ Current: **v0.1 Final Acceptance FINAL PASS; P5 COMPLETE; P5.7 FINAL PASS.** 验
 
 ## P8 AI Coach（原 P6，未开始）
 
-- 模型可替换的 AI 解释与训练建议；职业 DEM 经验沉淀为本地规则、案例与评测资产，不依赖特定模型记忆。
+- 模型可替换的 AI 解释与训练建议；职业 DEM 经验沉淀为后端私有规则、案例与评测资产，不依赖特定模型记忆。
 - 首批范围：Dust2 的 1v1 残局，研究个人操作与决策；手动补充已知信息后续再做。
-- 技术路线：TypeScript 本地证据管线 + SQLite 知识库 + 版本化 Prompt/规则快照 + 统一模型适配 + 独立评测。
+- 应用划分：同一 monorepo 内规划独立构建部署的 `apps/knowledge-pipeline`（内部知识管线）与 `apps/coach-api`（AI 分析服务）；目录与服务尚未创建。
+- 技术路线：Desktop 本地个人 DEM/确定性分析 → 最小结构化证据请求 → 后端私有知识快照/模型编排 → 校验后的教练结果；职业知识库、系统 Prompt 与模型凭据不下发客户端。
+- 内部知识管线可复用领域包解析职业 DEM；后端 SQLite、native 部署、鉴权和只读快照发布需在 P8.1 验证。个人 DEM 不上传，不启动未来账号/比赛历史产品。
 - 职业案例库作为 P8 的一部分；候选规律须经人工审核与验证后发布，不能仅凭职业比赛结果认定正确。
 - 子阶段：P8.1 基础与可行性验证 → P8.2 知识积累 → P8.3 独立评测 → P8.4 教练复盘 → P8.5 持续积累。
 - 完整设计及空间能力门槛见 [P8 AI Coach 技术路线](./ai-coach-technical-route.md)。当前仅完成路线设计，未开始实现。
@@ -128,14 +130,14 @@ Current: **v0.1 Final Acceptance FINAL PASS; P5 COMPLETE; P5.7 FINAL PASS.** 验
 
 - **不做自动扫描 / 自动寻找 DEM。** Auto DEM discovery / directory scanning: **NOT PLANNED**。DEM 始终由用户主动选择。
 - 历史记录未来再做，并建立在登录机制之上。
-- DEM 解析、Analytics 与 Findings 永远由 Desktop 本地完成；服务端不解析 DEM，也不需要上传 DEM 文件。
+- 个人 DEM 的解析、Analytics 与 Findings 仍由 Desktop 本地完成；不上传个人 DEM。未来历史服务只存摘要；P8 内部知识管线独立处理维护者导入的职业 DEM，AI 分析服务仅接收必要个人结构化证据。
 
 ```text
 apps/api
 ├── Auth / Session
 ├── 保存比赛历史摘要
 ├── 查询比赛历史
-└── 不上传 DEM，不做服务端 DEM 分析
+└── 不上传个人 DEM，不做服务端个人 DEM 分析
 
 Desktop
 ├── 本地解析 DEM
