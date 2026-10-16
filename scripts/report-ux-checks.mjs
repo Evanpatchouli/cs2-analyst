@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { checkWindowLayout, assertNoPageScroll } from './window-shell-checks.mjs';
+import { checkWindowLayout, assertNoPageScroll, checkSidebarImport, waitForUi } from './window-shell-checks.mjs';
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
@@ -20,6 +20,22 @@ export async function checkReportUx(evaluate, send, qaDir) {
   assert.deepEqual(await evaluate(`[...document.querySelectorAll('[role="tab"]')].map(t => t.querySelector('.fui-Tab__content').textContent)`), ['比赛报告', '深度复盘', '回合时间线', '分析', '地图回放']);
   assert.equal(await evaluate(`document.querySelectorAll('[role="tabpanel"]').length`), 5);
   assert.equal(await evaluate(`document.getElementById('report-panel').hidden`), false);
+  await checkSidebarImport(evaluate, send, '重新选择 DEM');
+  await evaluate(`document.querySelector('[data-sidebar-toggle]').click()`);
+  await waitForUi(evaluate, `document.querySelector('[data-app-sidebar]').dataset.collapsed === 'true' && document.getAnimations().every(a => a.playState !== 'running')`, 'collapsed report sidebar');
+  await checkSidebarImport(evaluate, send, '重新选择 DEM');
+  await assertNoPageScroll(evaluate, '报告折叠导航');
+  await evaluate(`document.querySelector('[data-sidebar-toggle]').click()`);
+  await waitForUi(evaluate, `document.querySelector('[data-app-sidebar]').dataset.collapsed === 'false' && document.getAnimations().every(a => a.playState !== 'running')`, 'expanded report sidebar');
+  // Prove these checks reject clipping and hidden-panel false positives on the actual report DOM.
+  assert.ok(await evaluate(`document.getElementById('report-panel').scrollHeight > document.getElementById('report-panel').clientHeight`));
+  await evaluate(`document.getElementById('report-panel').style.overflowY = 'hidden'`);
+  try { await assert.rejects(() => assertNoPageScroll(evaluate, 'intentional clipping probe'), /inaccessible content/); }
+  finally { await evaluate(`document.getElementById('report-panel').style.removeProperty('overflow-y')`); }
+  await evaluate(`document.getElementById('report-panel').hidden = true`);
+  try { await assert.rejects(() => assertNoPageScroll(evaluate, 'intentional hidden panel probe'), /selected Tab/); }
+  finally { await evaluate(`document.getElementById('report-panel').hidden = false`); }
+  await assertNoPageScroll(evaluate, '比赛报告滚动末端');
   // Native summary retains keyboard activation and clear focus feedback.
   const summary = await evaluate(`(() => { const s = document.querySelector('#report-panel summary'); s.focus(); return { cursor: getComputedStyle(s).cursor, focused: document.activeElement === s }; })()`);
   assert.equal(summary.cursor, 'pointer');
@@ -93,9 +109,10 @@ export async function checkReportUx(evaluate, send, qaDir) {
     const shot = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
     writeFileSync(join(qaDir, name + '.png'), Buffer.from(shot.data, 'base64'));
   };
-  for (const [width, height] of [[1280, 900], [900, 760], [800, 600], [650, 760]]) {
+  for (const [width, height] of [[1280, 900], [1024, 640], [900, 760], [800, 600], [650, 760]]) {
     await send('Emulation.setDeviceMetricsOverride', { width, height, deviceScaleFactor: 1, mobile: false });
-    await settle();
+    await evaluate(`document.getElementById('analysis-tab').click()`);
+    await waitForUi(evaluate, `document.getElementById('analysis-panel').checkVisibility() && document.getElementById('analysis-panel').clientHeight > 0`, 'visible Analysis layout');
     const divider = await evaluate(`(() => { const s = getComputedStyle(document.querySelector('[data-side-divider]')); return { display: s.display, top: s.marginTop, bottom: s.marginBottom, width: s.width }; })()`);
     if (width <= 650) assert.equal(divider.display, 'none');
     else { assert.notEqual(divider.display, 'none'); assert.equal(divider.top, '16px'); assert.equal(divider.bottom, '16px'); assert.equal(divider.width, '1px'); }

@@ -2,36 +2,73 @@
 import assert from 'node:assert/strict';
 import { spawn,spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync,mkdirSync,mkdtempSync,readFileSync,readdirSync,rmSync,writeFileSync } from 'node:fs';
+import { existsSync,mkdirSync,mkdtempSync,readFileSync,readdirSync,writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
+import { rm } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
 import { createServer } from 'node:net';
-import { dirname,join,resolve,sep } from 'node:path';
+import { dirname,join,resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { setTimeout as delay } from 'node:timers/promises';
 import { inspectReplayPackage } from './replay-package-inspection.mjs';
-import { assertNoPageScroll } from './window-shell-checks.mjs';
+import { assertNoPageScroll, assertLocalScroll, waitForUi } from './window-shell-checks.mjs';
 /** Map Replay must behave like a tool surface: no page scroll, square radar, locally scrolling rail. */
 async function checkReplayLayout(evaluate, label) {
+  await waitForUi(evaluate, `(() => {
+    const c = document.querySelector('#replay-panel canvas[role=img]');
+    return c && Math.abs(c.width - c.getBoundingClientRect().width * devicePixelRatio) <= 1 && [...c.parentElement.querySelectorAll('canvas')].every(canvas => canvas.getContext('2d').getImageData(0, 0, canvas.width, canvas.height).data.some((v, i) => i % 4 === 3 && v > 0));
+  })()`, label + ' Canvas resize');
   await assertNoPageScroll(evaluate, label);
   const layout = await evaluate(`(() => {
     const panel = document.getElementById('replay-panel');
-    const map = document.querySelector('#replay-panel canvas[role=img]')?.parentElement;
-    const rect = map?.getBoundingClientRect();
-    const rail = document.querySelector('[data-replay-rail]');
-    const body = document.querySelector('[data-replay-body]');
-    return { panelOverflow: panel.scrollHeight - panel.clientHeight, viewport: window.innerWidth,
-      square: rect ? Math.abs(rect.width - rect.height) <= 1 : null, size: rect ? Math.round(rect.width) : null,
-      railOverflow: rail ? getComputedStyle(rail).overflowY : null,
-      bodyOverflow: body ? getComputedStyle(body).overflowY : null };
+    const canvas = panel.querySelector('canvas[role=img]'), map = canvas.parentElement, host = map.parentElement;
+    const r = map.getBoundingClientRect(), h = host.getBoundingClientRect(), s = getComputedStyle(host);
+    const left = h.left + parseFloat(s.borderLeftWidth) + parseFloat(s.paddingLeft);
+    const top = h.top + parseFloat(s.borderTopWidth) + parseFloat(s.paddingTop);
+    const right = h.right - parseFloat(s.borderRightWidth) - parseFloat(s.paddingRight);
+    const bottom = h.bottom - parseFloat(s.borderBottomWidth) - parseFloat(s.paddingBottom);
+    const contained = e => { const r = e.getBoundingClientRect(), p = panel.getBoundingClientRect(); return r.width > 0 && r.height > 0 && r.left >= p.left - 1 && r.right <= p.right + 1 && r.top >= p.top - 1 && r.bottom <= p.bottom + 1; };
+    const bitmapNonempty = c => { const ctx = c.getContext('2d'), data = ctx.getImageData(0, 0, c.width, c.height).data; return data.some((v, i) => i % 4 === 3 && v > 0); };
+    return { panelOverflow: panel.scrollHeight - panel.clientHeight,
+      square: Math.abs(r.width - r.height) <= 1, size: r.width, available: Math.min(right - left, bottom - top),
+      contained: r.left >= left - .1 && r.right <= right + .1 && r.top >= top - .1 && r.bottom <= bottom + .1,
+      canvases: [...map.querySelectorAll('canvas')].map(c => ({ pixels: c.width, height: c.height, css: c.getBoundingClientRect().width, dpr: devicePixelRatio, drawn: bitmapNonempty(c) })),
+      controls: contained(document.querySelector('[aria-label="播放回放"], [aria-label="暂停回放"]')),
+      timeline: contained(document.querySelector('[aria-label="回放进度"]')),
+      players: !!panel.querySelector('[aria-label="回放玩家状态"] button'), events: !!panel.querySelector('[aria-label="回放事件浏览"]') };
   })()`);
-  assert.ok(layout.panelOverflow <= 0, `${label}：地图回放面板本身不应出现滚动（溢出 ${layout.panelOverflow}px）`);
-  if (layout.square !== null) {
-    assert.equal(layout.square, true, `${label}：雷达图应保持 1:1`);
-    assert.ok(layout.size >= 200, `${label}：雷达图应充分利用可用空间，实际 ${layout.size}px`);
+  assert.ok(layout.panelOverflow <= 1, `${label}: panel must not clip overflow`);
+  assert.equal(layout.square, true, `${label}: radar must be square`);
+  assert.equal(layout.contained, true, `${label}: radar exceeds padding/border content bounds ${JSON.stringify(layout)}`);
+  assert.ok(layout.size > 0 && layout.size >= Math.floor(layout.available) - 1, `${label}: radar uses the available square`);
+  for (const c of layout.canvases) {
+    assert.equal(c.pixels, c.height);
+    assert.ok(Math.abs(c.pixels - c.css * c.dpr) <= 1, `${label}: DPR bitmap mismatch`);
+    assert.equal(c.drawn, true, `${label}: Canvas must be redrawn after resize`);
   }
-  // Wide layout: the right rail owns its overflow. Narrow layout: the whole middle region does.
-  if (layout.viewport > 860) assert.notEqual(layout.railOverflow, 'visible', `${label}：右侧信息栏应自行滚动`);
-  else assert.notEqual(layout.bodyOverflow, 'visible', `${label}：窄窗口下地图区应局部滚动`);
+  assert.equal(layout.controls, true, `${label}: playback control clipped`);
+  assert.equal(layout.timeline, true, `${label}: bottom timeline clipped`);
+  assert.equal(layout.players, true); assert.equal(layout.events, true);
+  const narrow=await evaluate('innerWidth <= 860');
+  // Narrow mode deliberately delegates the visible-overflow rail to the body scroller.
+  await assertLocalScroll(evaluate, '[data-replay-body], ' + (narrow ? '' : '[data-replay-rail], ') + '[aria-label="回放玩家状态"], [aria-label="回放事件浏览"]', label);
+  const accessible=await evaluate(`(() => {
+    const panel=document.getElementById('replay-panel');
+    const saved=[panel,...panel.querySelectorAll('*')].filter(e=>typeof e.scrollTo==='function').map(e=>[e,e.scrollTop,e.scrollLeft]);
+    const selectors=['[aria-label="回放玩家状态"] button:first-child','[aria-label="回放玩家状态"] button:last-child','[aria-label="回放事件浏览"] > :first-child','[aria-label="回放事件浏览"] > :last-child','[aria-label="回放进度"]','[aria-label="回放回合"]'];
+    try{return selectors.map(selector=>{
+      const element=panel.querySelector(selector);if(!element)return {selector,ok:false};
+      element.scrollIntoView({block:'nearest',inline:'nearest',behavior:'instant'});
+      const r=element.getBoundingClientRect();
+      let ok=r.width>0&&r.height>0&&r.left>=-1&&r.right<=innerWidth+1&&r.top>=-1&&r.bottom<=innerHeight+1;
+      for(let ancestor=element.parentElement;ancestor;ancestor=ancestor.parentElement){
+        const style=getComputedStyle(ancestor),a=ancestor.getBoundingClientRect();
+        if(['auto','scroll','hidden','clip'].includes(style.overflowY))ok=ok&&r.top>=a.top+ancestor.clientTop-1&&r.bottom<=a.top+ancestor.clientTop+ancestor.clientHeight+1;
+      }
+      return {selector,ok};
+    });}finally{for(const [e,top,left] of saved)e.scrollTo({top,left,behavior:'instant'});}
+  })()`);
+  for(const item of accessible)assert.equal(item.ok,true,`${label}: unreachable ${item.selector}`);
 }
 const root=fileURLToPath(new URL('../',import.meta.url)),desktop=join(root,'apps/desktop');
 const require=createRequire(new URL('../apps/desktop/package.json',import.meta.url));
@@ -45,7 +82,8 @@ const executableArgument=process.argv.slice(2).find(arg=>!arg.startsWith('--'));
 const installed=executableArgument?resolve(executableArgument):null;
 const executable=installed??require('electron');assert.ok(existsSync(executable));
 const server=createServer();await new Promise(r=>server.listen(0,'127.0.0.1',r));const port=server.address().port;await new Promise(r=>server.close(r));
-const profile=mkdtempSync(join(root,'.tmp/replay-profile-'));
+const profilePrefix=join(tmpdir(),'cs2-analyst-replay-profile-');
+const profile=mkdtempSync(profilePrefix);
 const env={...process.env,NODE_PATH:'',CS2_ANALYST_DEM_PATH:demo,CS2_ANALYST_TEST_DEM_PATH:demo};delete env.ELECTRON_RUN_AS_NODE;delete env.ELECTRON_RENDERER_URL;
 const child=spawn(executable,[...(installed?[]:['.']),`--remote-debugging-port=${port}`,`--user-data-dir=${profile}`,'--disable-features=CalculateNativeWinOcclusion','--disable-backgrounding-occluded-windows'],{cwd:installed?dirname(installed):desktop,env,windowsHide:true,stdio:['ignore','pipe','pipe']});
 let logs='',page,browser,metrics={};child.stdout.on('data',d=>logs+=d);child.stderr.on('data',d=>logs+=d);
@@ -68,7 +106,7 @@ function processTree(){
   if(result.status!==0)throw new Error(result.stderr);const value=JSON.parse(result.stdout||'[]');return Array.isArray(value)?value:[value];
 }
 const quantiles=values=>{const s=values.toSorted((a,b)=>a-b);return {count:s.length,p50:s[Math.floor(s.length*.5)],p95:s[Math.floor(s.length*.95)],max:s.at(-1)};};
-let reportFingerprint;
+let reportFingerprint,runFailure;
 try{
   const target=await waitFor(async()=>{try{return (await(await fetch(`http://127.0.0.1:${port}/json/list`)).json()).find(p=>p.type==='page');}catch{return null;}},'CDP page');
   page=await connect(target.webSocketDebuggerUrl);const version=await(await fetch(`http://127.0.0.1:${port}/json/version`)).json();browser=await connect(version.webSocketDebuggerUrl);
@@ -147,14 +185,21 @@ try{
     const r=meta.rounds.find(r=>r.round===linked.round),expected=linked.tick===null||linked.tick<r.startTick||linked.tick>r.endTick?r.startTick:linked.tick;
     await waitFor(()=>evaluate(`Number(document.querySelector('[data-replay-session]')?.dataset.replayRound)===${linked.round}&&Math.abs(Number(document.querySelector('#replay-panel canvas[role=img]')?.dataset.tick)-${expected})<.01`),'Finding evidence link');metrics.findingLink='PASS';
   }else metrics.findingLink='not eligible';
-  metrics.screenshotSizing='CDP viewport simulation; native window remains the application default';
-  for(const [width,height] of [[1280,900],[900,760],[800,600]]){
-    await page.send('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile:false});await delay(300);
-    await evaluate('document.getElementById("replay-panel").scrollIntoView({block:"start"})');await delay(150);
+  metrics.screenshotSizing='CDP viewport/DPR simulation; native maximize/restore checked separately';
+  for(const [width,height,dpr] of [[1280,800,1],[1024,640,1],[1280,800,2],[800,600,1],[1280,800,1]]){
+    await page.send('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:dpr,mobile:false});
+    await waitForUi(evaluate, `innerWidth === ${width} && innerHeight === ${height}`, 'viewport resize');
     assert.equal(await evaluate('document.documentElement.scrollWidth>window.innerWidth'),false,`horizontal overflow ${width}`);
     await checkReplayLayout(evaluate, `地图回放 ${width}×${height}`);
     const screenshot=await page.send('Page.captureScreenshot',{format:'png'});writeFileSync(join(qa,`${metrics.mode}-${width}x${height}.png`),Buffer.from(screenshot.data,'base64'));
   }
+  await evaluate('document.querySelector("[data-sidebar-toggle]").click()');
+  await waitForUi(evaluate, `document.querySelector('[data-app-sidebar]').dataset.collapsed === 'true' && document.getAnimations().every(a => a.playState !== 'running')`, 'replay collapsed sidebar');
+  await checkReplayLayout(evaluate, '地图回放折叠导航');
+  await evaluate('document.querySelector("[data-sidebar-toggle]").click()');
+  await waitForUi(evaluate, `document.querySelector('[data-app-sidebar]').dataset.collapsed === 'false' && document.getAnimations().every(a => a.playState !== 'running')`, 'replay expanded sidebar');
+  await checkReplayLayout(evaluate, '地图回放展开导航');
+  await page.send('Emulation.clearDeviceMetricsOverride');
   // Real OS minimize: the page must pause, then restore through the existing native window controls.
   await evaluate('document.querySelector("[aria-label=播放回放]").click();window.cs2Analyst.window.minimize()');
   await waitFor(()=>evaluate('document.hidden'),'native minimize visibility');await delay(150);
@@ -188,13 +233,16 @@ try{
   await waitFor(async()=>!processTree().some(p=>p.Role==='analysis-utility'),'no orphan worker');metrics.closeDuringParse='PASS';
   }
 }catch(error){
+  runFailure=error;
   if(page)try{const state=await page.send('Runtime.evaluate',{expression:'({text:document.body.innerText,root:document.querySelector("[data-replay-session]")?.outerHTML.slice(0,1000),canvas:[...document.querySelectorAll("#replay-panel canvas")].map(c=>({width:c.width,height:c.height,data:{...c.dataset}}))})',returnByValue:true});writeFileSync(join(qa,'failure-state.json'),JSON.stringify(state,null,2));const shot=await page.send('Page.captureScreenshot',{format:'png'});writeFileSync(join(qa,'failure.png'),Buffer.from(shot.data,'base64'));}catch{}
   throw new Error(`Replay Electron check failed\n${logs}`,{cause:error});
 }
 finally{
   page?.socket.close();browser?.socket.close();
   if(child.exitCode===null&&child.pid)spawnSync('taskkill',['/PID',String(child.pid),'/T','/F'],{windowsHide:true,stdio:'ignore'});
-  assert.ok(resolve(profile).startsWith(resolve(root,'.tmp')+sep),'Profile cleanup stays within task .tmp');rmSync(profile,{recursive:true,force:true,maxRetries:8,retryDelay:250});
+  assert.ok(resolve(profile).startsWith(resolve(profilePrefix)),'Profile cleanup stays within this task temporary profile');
+  try{await rm(profile,{recursive:true,force:true,maxRetries:8,retryDelay:250});}
+  catch(error){if(runFailure)console.warn('Profile cleanup also failed:',error.message);else throw error;}
 }
 // The unchanged public report path must equal the worker's report, excluding additive replay metadata.
 if(!production&&!broken&&!noMaps){const { analyzeDemoFile }=await import('../apps/desktop/electron/report.ts');const baseline=await analyzeDemoFile(demo);assert.equal(baseline.kind,'success');assert.equal(hash(baseline.report),reportFingerprint);metrics.reportUnchanged=true;metrics.reportFingerprint=reportFingerprint;}

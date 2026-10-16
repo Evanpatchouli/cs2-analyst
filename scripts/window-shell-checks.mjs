@@ -37,24 +37,73 @@ export async function checkWindowLayout(evaluate) {
  * Page-level scroll must never be the way content becomes reachable: the document, the body
  * and the main column stay locked to the viewport, and every long view scrolls inside its own panel.
  */
+export async function waitForUi(evaluate, expression, label) {
+  for (let attempt = 0; attempt < 100; attempt++) {
+    if (await evaluate(expression)) return;
+    await delay(50);
+  }
+  assert.fail(`UI state did not settle: ${label}`);
+}
+
+// Exercise the actual scroll range, and restore it so acceptance does not change navigation state.
+export async function assertLocalScroll(evaluate, selector, label) {
+  const results = await evaluate(`(() => {
+    const roots = [...document.querySelectorAll(${JSON.stringify(selector)})].filter(e => e.checkVisibility() && e.clientHeight > 0);
+    return roots.map(e => {
+      const overflow = e.scrollHeight - e.clientHeight, style = getComputedStyle(e).overflowY;
+      if (overflow <= 1) return { overflow, ok: true };
+      if (!['auto', 'scroll'].includes(style)) return { overflow, style, ok: false };
+      const original = e.scrollTop;
+      e.scrollTo({ top: e.scrollHeight, behavior: 'instant' });
+      const reached = Math.abs(e.scrollTop - overflow) <= 1;
+      const last = e.lastElementChild?.getBoundingClientRect();
+      const bottom = e.getBoundingClientRect().top + e.clientTop + e.clientHeight;
+      const lastReachable = !last || last.bottom <= bottom + 1;
+      e.scrollTo({ top: original, behavior: 'instant' });
+      return { overflow, style, reached, lastReachable, ok: reached && lastReachable };
+    });
+  })()`);
+  assert.ok(results.length > 0, `${label}: no visible scroll surface matched ${selector}`);
+  for (const result of results) assert.equal(result.ok, true, `${label}: inaccessible content ${JSON.stringify(result)}`);
+}
+
 export async function assertNoPageScroll(evaluate, label) {
   const scroll = await evaluate(`(() => {
     const content = document.querySelector('[data-app-content]');
-    const panel = [...document.querySelectorAll('[role="tabpanel"]')].find(p => !p.hidden);
-    return { document: document.documentElement.scrollHeight - window.innerHeight,
-      body: document.body.scrollHeight - window.innerHeight,
+    const panels = [...document.querySelectorAll('[role="tabpanel"]')].filter(p => !p.hidden && p.checkVisibility() && p.clientHeight > 0);
+    const selected = document.querySelector('[role="tab"][aria-selected="true"]');
+    return { document: document.documentElement.scrollHeight - innerHeight,
+      body: document.body.scrollHeight - innerHeight,
+      horizontal: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) - innerWidth,
       content: content.scrollHeight - content.clientHeight,
-      panelScrollsLocally: panel ? panel.scrollHeight - panel.clientHeight >= 0 : null,
-      panelOverflow: panel ? getComputedStyle(panel).overflowY : null };
+      panels: panels.map(p => p.id), selected: selected?.getAttribute('aria-controls') ?? null };
   })()`);
-  assert.ok(scroll.document <= 0, `${label}：出现了页面级纵向滚动（document 溢出 ${scroll.document}px）`);
-  assert.ok(scroll.body <= 0, `${label}：body 出现了纵向滚动（溢出 ${scroll.body}px）`);
-  assert.ok(scroll.content <= 0, `${label}：主内容区出现了纵向滚动（溢出 ${scroll.content}px）`);
-  if (scroll.panelOverflow !== null) assert.notEqual(scroll.panelOverflow, 'visible', `${label}：当前 Tab 面板未接管自己的滚动`);
+  for (const key of ['document', 'body', 'content', 'horizontal']) assert.ok(scroll[key] <= 1, `${label}: ${key} overflow ${scroll[key]}px`);
+  assert.deepEqual(scroll.panels, scroll.selected ? [scroll.selected] : [], `${label}: selected Tab must identify exactly the visible panel`);
+  if (scroll.selected && scroll.selected !== 'replay-panel') {
+    await assertLocalScroll(evaluate, '#' + scroll.selected, label);
+    // Nested Timeline/Analysis/Deep Review surfaces also need usable local scrolling.
+    await assertLocalScroll(evaluate, '#' + scroll.selected + ', #' + scroll.selected + ' *', label);
+  } else if (!scroll.selected) {
+    await assertLocalScroll(evaluate, '[data-import-card] > button, [data-import-card]', label);
+  }
+}
+
+export async function checkSidebarImport(evaluate, send, expectedLabel) {
+  const button = await evaluate(`(() => { const b = document.querySelector('[data-sidebar-import]'); b.focus();
+    return { label: b.getAttribute('aria-label'), disabled: b.disabled, focus: document.activeElement === b, tabIndex: b.tabIndex }; })()`);
+  assert.equal(button.label, expectedLabel);
+  assert.equal(button.disabled, false);
+  assert.equal(button.focus, true);
+  assert.equal(button.tabIndex, 0);
+  if (send) {
+    const tree = await send('Accessibility.getFullAXTree');
+    assert.ok(tree.nodes.some(n => !n.ignored && n.role?.value === 'button' && n.name?.value === expectedLabel), 'import has a real accessibility-tree name');
+  }
 }
 
 /** App shell acceptance: home import card, drag-drop wiring, collapsible sidebar and icon alignment. Runs pre-import. */
-export async function checkAppShell(evaluate) {
+export async function checkAppShell(evaluate, send) {
   const shell = await evaluate(`(() => {
     const sidebar = document.querySelector('[data-app-sidebar]');
     const toggle = document.querySelector('[data-sidebar-toggle]');
@@ -79,22 +128,20 @@ export async function checkAppShell(evaluate) {
   assert.ok(shell.width > 150, '展开态侧边栏应显示图标与文本');
 
   // Drag-and-drop wiring: dragover highlights the card, drop runs the file-entry pipeline.
-  const drag = await evaluate(`(() => {
-    const card = document.querySelector('[data-import-card]');
-    const transfer = new DataTransfer();
-    transfer.items.add(new File(['synthetic'], 'demo.dem', { type: '' }));
-    card.dispatchEvent(new DragEvent('dragover', { bubbles: true, cancelable: true, dataTransfer: transfer }));
-    const highlighted = card.dataset.dragOver;
-    card.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer: transfer }));
-    return { highlighted, afterDrop: card.dataset.dragOver, text: card.textContent };
+  await evaluate(`(() => {
+    const transfer = new DataTransfer(); transfer.items.add(new File(['synthetic'], 'demo.dem'));
+    window.__testDrop = transfer;
+    document.querySelector('[data-import-card]').dispatchEvent(new DragEvent('dragover', { bubbles: true, cancelable: true, dataTransfer: transfer }));
   })()`);
-  await delay(150);
-  assert.equal(drag.highlighted, 'true', '拖入 .dem 时导入卡片应高亮');
-  assert.equal(drag.afterDrop, 'false', '放下后导入卡片应取消高亮');
-  assert.ok(drag.text.includes('无法读取拖入文件的位置'), '拖放应走文件导入通道（合成文件无本机路径，给出可点击兜底）');
+  await waitForUi(evaluate, `document.querySelector('[data-import-card]')?.dataset.dragOver === 'true'`, 'drop highlight');
+  await evaluate(`document.querySelector('[data-import-card]').dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer: window.__testDrop })); delete window.__testDrop`);
+  await waitForUi(evaluate, `document.querySelector('main').dataset.status === 'error' && document.body.textContent.includes('无法读取拖入文件的位置')`, 'synthetic File rejection');
+  assert.equal(await evaluate(`document.querySelector('[data-import-card]').dataset.dragOver`), 'false');
+  assert.equal(await evaluate(`typeof window.cs2Analyst.importDemoFile + ',' + typeof window.cs2Analyst.getFilePath`), 'undefined,undefined');
+  await assertNoPageScroll(evaluate, '首页拖放错误');
 
   await evaluate(`document.querySelector('[data-sidebar-toggle]').click()`);
-  await delay(400);
+  await waitForUi(evaluate, `document.getAnimations().every(a => a.playState !== 'running')`, 'sidebar transition');
   const collapsed = await evaluate(`(() => {
     const sidebar = document.querySelector('[data-app-sidebar]');
     const iconCenter = el => { const icon = el.querySelector('svg').getBoundingClientRect(); return icon.x + icon.width / 2; };
@@ -113,9 +160,11 @@ export async function checkAppShell(evaluate) {
   assert.equal(collapsed.hiddenLabels, true, '折叠态不应显示导航文本');
   assert.ok(Math.abs(collapsed.navIconX - collapsed.toggleIconX) <= 1, '折叠后折叠按钮与导航图标应在同一垂直线');
   assert.equal(collapsed.toggleLabel, '展开导航');
+  await checkSidebarImport(evaluate, send, '重新选择 DEM');
+  await waitForUi(evaluate, `document.querySelector('[role="tooltip"]')?.textContent.includes('重新选择 DEM')`, 'collapsed import tooltip');
 
   await evaluate(`document.querySelector('[data-sidebar-toggle]').click()`);
-  await delay(400);
+  await waitForUi(evaluate, `document.getAnimations().every(a => a.playState !== 'running')`, 'sidebar transition');
   const restored = await evaluate(`(() => {
     const sidebar = document.querySelector('[data-app-sidebar]');
     const labels = [...document.querySelectorAll('[data-app-sidebar] .fui-Tab__content')];
@@ -125,13 +174,14 @@ export async function checkAppShell(evaluate) {
   assert.equal(restored.attr, 'false');
   assert.equal(restored.width, shell.width, '展开后宽度应恢复');
   assert.equal(restored.visibleLabels, true, '展开态应恢复图标与文本');
+  await checkSidebarImport(evaluate, send, '重新选择 DEM');
   console.log('App shell: 首页导入卡片、点击/拖放入口、侧边栏展开/折叠与图标对齐 PASS');
 }
 
 export async function checkWindowShell(evaluate, send) {
   await send('Emulation.setFocusEmulationEnabled', { enabled: true });
   await checkWindowLayout(evaluate);
-  await checkAppShell(evaluate);
+  await checkAppShell(evaluate, send);
   assert.equal(await evaluate(`document.querySelector('[data-window-control="maximize"]').getAttribute('aria-label')`), '最大化');
   const waitLabel = async expected => {
     for (let n = 0; n < 80; n++) {

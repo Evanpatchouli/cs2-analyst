@@ -1,3 +1,4 @@
+import { assertNoPageScroll } from './window-shell-checks.mjs';
 import assert from 'node:assert/strict';
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -21,6 +22,7 @@ export async function checkDeepReviewUx(evaluate, send, qaDir) {
   await settle();
   assert.deepEqual(await evaluate(`[...document.querySelectorAll('[role="tab"]')].map(t => t.querySelector('.fui-Tab__content').textContent)`), ['比赛报告', '深度复盘', '回合时间线', '分析', '地图回放']);
   assert.equal(await evaluate(`document.querySelectorAll('[role="tabpanel"]').length`), 5);
+  await assertNoPageScroll(evaluate, '深度复盘初始导航');
   // Find the actual report consumed by this Renderer. Fixtures mutate only this QA process.
   assert.equal(await evaluate(`(() => {
     const node = document.getElementById('deep-review-panel');

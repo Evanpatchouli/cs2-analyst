@@ -67,16 +67,14 @@ test('home exposes one central import card with both click and drag entry points
   assert.ok(/disabled/.test(busy), '导入进行中必须禁用再次点击');
 });
 
-test('the shell locks page scrolling and keeps every long view inside its own panel', () => {
-  const source = readFileSync(new URL('../renderer/src/main.tsx', import.meta.url), 'utf8');
-  const theme = readFileSync(new URL('../renderer/src/theme.ts', import.meta.url), 'utf8');
-  // The document itself must never scroll; each tab panel owns its overflow instead.
-  assert.ok(/useAppShellStyles/.test(theme), '缺少应用外壳的静态样式');
-  assert.ok(/overflow: 'hidden', overscrollBehavior: 'none'/.test(theme), 'html/body 必须禁用页面滚动');
-  assert.ok(/useAppShellStyles\(\)/.test(source), '外壳样式未接入根组件');
-  const panels = [...source.matchAll(/id="([a-z-]+-panel)"[^>]*className=\{s\.(tabPanel|replayPanel)\}/g)].map(match => match[2]);
-  assert.deepEqual(panels, ['tabPanel', 'tabPanel', 'tabPanel', 'tabPanel', 'replayPanel'], '每个面板都必须接管自己的滚动');
-  assert.ok(/tabPanel: \{[^}]*overflowY: 'auto'/.test(source), 'Tab 面板需要内部滚动');
-  assert.ok(/replayPanel: \{[^}]*overflow: 'hidden'/.test(source), '地图回放面板由内部区块滚动');
-  assert.equal(/<TabList(?! vertical)/.test(source), false, '导航不应再使用横向 TabList');
+test('sidebar import keeps its current accessible name and native disabled semantics in both states', () => {
+  for (const collapsed of [false, true]) for (const busy of [false, true]) for (const importLabel of ['选择 DEM', '重新选择 DEM']) {
+    const html = render(createElement(Sidebar, { reportReady: true, busy, collapsed, activeView: 'report',
+      importLabel, onSelectView: noop, onToggleCollapsed: noop, onImport: noop }));
+    const button = html.match(/<button[^>]*data-sidebar-import[^>]*>/)?.[0];
+    assert.ok(button);
+    assert.ok(button.includes(`aria-label="${importLabel}"`));
+    assert.equal(button.includes('disabled'), busy);
+    assert.ok(button.includes('type="button"'));
+  }
 });

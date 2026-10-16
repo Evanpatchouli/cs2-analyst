@@ -87,10 +87,12 @@ export function Sidebar({ reportReady, busy, collapsed, activeView, importLabel,
       })}
     </TabList>
     <div className={s.footer}>
-      <button type="button" className={s.footerButton} data-sidebar-import disabled={busy} onClick={onImport}>
+      <Tooltip content={importLabel} relationship="description" positioning="after">
+      <button type="button" className={s.footerButton} data-sidebar-import aria-label={importLabel} disabled={busy} onClick={onImport}>
         <ImportIcon size={20} />
         {collapsed ? null : <span className={s.label}>{importLabel}</span>}
       </button>
+      </Tooltip>
       <button type="button" className={s.footerButton} data-sidebar-toggle onClick={onToggleCollapsed}
         aria-label={collapsed ? '展开导航' : '收起导航'} aria-expanded={!collapsed}>
         {collapsed ? <ExpandNavIcon size={20} /> : <CollapseNavIcon size={20} />}

@@ -30,7 +30,7 @@ const useStyles = makeStyles({
     position: 'relative', minWidth: 0, minHeight: 0, overflow: 'hidden',
     display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px', boxSizing: 'border-box',
     backgroundColor: palette.replay.surface, border: `1px solid ${palette.border}`, borderRadius: tokens.borderRadiusLarge,
-    '@media (max-width: 860px)': { aspectRatio: '1', alignSelf: 'start', minHeight: '220px' },
+    '@media (max-width: 860px)': { aspectRatio: '1', alignSelf: 'start' },
   },
   map: { position: 'relative', flexShrink: 0 },
   canvas: { position:'absolute',inset:0,width:'100%',height:'100%',':focus-visible':{outline:`2px solid ${tokens.colorBrandStroke1}`,outlineOffset:'2px'} },
@@ -194,16 +194,29 @@ export function ReplayPlayer({ metadata, playerId, onSelectPlayer, active, jump 
     if(!host||!map)return;
     const apply=()=>{
       const rect=host.getBoundingClientRect();
-      if(rect.width<=0||rect.height<=0)return;
-      const size=Math.max(160,Math.floor(Math.min(rect.width,rect.height)));
+      const style=getComputedStyle(host);
+      // The bounding box includes padding/borders under either box-sizing mode.
+      const width=rect.width-parseFloat(style.borderLeftWidth)-parseFloat(style.borderRightWidth)-parseFloat(style.paddingLeft)-parseFloat(style.paddingRight);
+      const height=rect.height-parseFloat(style.borderTopWidth)-parseFloat(style.borderBottomWidth)-parseFloat(style.paddingTop)-parseFloat(style.paddingBottom);
+      const size=Math.floor(Math.min(width,height));
+      if(size<=0)return; // Mounted inactive Tabs have no measurable content box.
       if(map.style.width!==`${size}px`){map.style.width=`${size}px`;map.style.height=`${size}px`;}
       const pixels=Math.max(1,Math.round(size*(window.devicePixelRatio||1)));
-      for(const c of [baseCanvas.current,canvas.current])if(c&&(c.width!==pixels||c.height!==pixels)){c.width=pixels;c.height=pixels;}
-      fit.current();
+      let resized=false;
+      for(const c of [baseCanvas.current,canvas.current])if(c&&(c.width!==pixels||c.height!==pixels)){c.width=pixels;c.height=pixels;resized=true;}
+      if(resized)fit.current();
     };
     apply();
     const observer=new ResizeObserver(apply);observer.observe(host);
-    return()=>observer.disconnect();
+    // Moving between monitors can change DPR without changing the CSS content box.
+    let resolution:MediaQueryList;
+    const watchResolution=()=>{
+      resolution?.removeEventListener('change',watchResolution);
+      apply();resolution=matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
+      resolution.addEventListener('change',watchResolution);
+    };
+    watchResolution();
+    return()=>{observer.disconnect();resolution.removeEventListener('change',watchResolution);};
   },[availableMap]);
   if(!metadata.available||!info)return <section className={s.root} aria-label="2D地图回放"><div className={s.group}><Title2>2D 地图回放</Title2><Body1>{metadata.unavailableReason??'本场缺少可靠回放窗口，比赛报告仍可用。'}</Body1></div></section>;
   const currentEvents=(chunk?.events??[]).filter(e=>e.type!=='weapon_fire'&&e.type!=='damage'&&e.type!=='flash');

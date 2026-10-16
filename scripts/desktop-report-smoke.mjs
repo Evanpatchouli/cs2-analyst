@@ -45,7 +45,7 @@ async function waitFor(probe, timeoutMs, label) {
 }
 
 /** Launches the built app with CS2_ANALYST_DEM_PATH so the import skips the native dialog. */
-async function scenario({ label, demPath, ready, assertReport, assertDom }) {
+async function scenario({ label, demPath, ready, assertReport, assertDom, importMode = 'keyboard' }) {
   const port = await freePort();
   const env = { ...process.env, CS2_ANALYST_DEM_PATH: demPath };
   delete env.ELECTRON_RUN_AS_NODE;
@@ -113,8 +113,20 @@ async function scenario({ label, demPath, ready, assertReport, assertDom }) {
     assert.equal(shell.version, '0.1.0', 'preload 桥接未加载');
     await checkWindowShell(evaluate, send);
 
-    const clicked = await evaluate(`(() => { const b = [...document.querySelectorAll('button')].find(x => x.textContent.includes('选择 DEM')); b?.click(); return Boolean(b); })()`);
-    assert.equal(clicked, true, '未找到“选择 DEM”按钮');
+    if (importMode === 'file-drop') {
+      // Chromium-backed File from the repository fixture, through the real contextBridge.
+      // This exercises the File -> preload -> IPC -> Utility chain, not Windows Explorer drag.
+      await evaluate(`(() => { const input = document.createElement('input'); input.type = 'file'; input.id = 'qa-file'; input.hidden = true; document.body.append(input); })()`);
+      const { root } = await send('DOM.getDocument');
+      const { nodeId } = await send('DOM.querySelector', { nodeId: root.nodeId, selector: '#qa-file' });
+      await send('DOM.setFileInputFiles', { nodeId, files: [demPath] });
+      await evaluate(`(() => { const transfer = new DataTransfer(); transfer.items.add(document.getElementById('qa-file').files[0]);
+        document.querySelector('[data-import-card]').dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, dataTransfer: transfer })); document.getElementById('qa-file').remove(); })()`);
+    } else {
+      await evaluate(`document.querySelector('[data-sidebar-import]').focus()`);
+      await send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Enter', code: 'Enter', text: '\r', windowsVirtualKeyCode: 13 });
+      await send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
+    }
     const body = await waitFor(async () => {
       const text = await evaluate('document.body.textContent');
       return ready(text) ? text : null;
@@ -151,6 +163,7 @@ ${logs}`, { cause: error });
 
 await scenario({
   label: '真实 DEM 报告',
+  importMode: 'file-drop',
   demPath: demo,
   ready: text => text.includes('twinkle') && text.includes('25 / 20 / 4'),
   assertReport: text => {
