@@ -52,6 +52,10 @@ async function checkReplayLayout(evaluate, label) {
   const narrow=await evaluate('innerWidth <= 860');
   // Narrow mode deliberately delegates the visible-overflow rail to the body scroller.
   await assertLocalScroll(evaluate, '[data-replay-body], ' + (narrow ? '' : '[data-replay-rail], ') + '[aria-label="回放玩家状态"], [aria-label="回放事件浏览"]', label);
+  await assertReplayContentAccessible(evaluate,label);
+}
+
+async function assertReplayContentAccessible(evaluate,label) {
   const accessible=await evaluate(`(() => {
     const panel=document.getElementById('replay-panel');
     const saved=[panel,...panel.querySelectorAll('*')].filter(e=>typeof e.scrollTo==='function').map(e=>[e,e.scrollTop,e.scrollLeft]);
@@ -63,6 +67,8 @@ async function checkReplayLayout(evaluate, label) {
       let ok=r.width>0&&r.height>0&&r.left>=-1&&r.right<=innerWidth+1&&r.top>=-1&&r.bottom<=innerHeight+1;
       for(let ancestor=element.parentElement;ancestor;ancestor=ancestor.parentElement){
         const style=getComputedStyle(ancestor),a=ancestor.getBoundingClientRect();
+        // scrollIntoView can programmatically scroll hidden containers; users cannot.
+        if(['hidden','clip'].includes(style.overflowY)&&ancestor.scrollHeight-ancestor.clientHeight>1)ok=false;
         if(['auto','scroll','hidden','clip'].includes(style.overflowY))ok=ok&&r.top>=a.top+ancestor.clientTop-1&&r.bottom<=a.top+ancestor.clientTop+ancestor.clientHeight+1;
       }
       return {selector,ok};
@@ -191,6 +197,12 @@ try{
     await waitForUi(evaluate, `innerWidth === ${width} && innerHeight === ${height}`, 'viewport resize');
     assert.equal(await evaluate('document.documentElement.scrollWidth>window.innerWidth'),false,`horizontal overflow ${width}`);
     await checkReplayLayout(evaluate, `地图回放 ${width}×${height}`);
+    if(width===800){
+      await evaluate(`(() => { const rail=document.querySelector('[data-replay-rail]'); window.__railStyle=rail.getAttribute('style'); rail.style.maxHeight='100px'; rail.style.overflowY='hidden'; })()`);
+      try{await assert.rejects(()=>assertReplayContentAccessible(evaluate,'intentional hidden rail probe'),/unreachable/);}
+      finally{await evaluate(`(() => { const rail=document.querySelector('[data-replay-rail]'); if(window.__railStyle===null)rail.removeAttribute('style');else rail.setAttribute('style',window.__railStyle); delete window.__railStyle; })()`);}
+      await checkReplayLayout(evaluate,'窄布局反向裁切检查后恢复');
+    }
     const screenshot=await page.send('Page.captureScreenshot',{format:'png'});writeFileSync(join(qa,`${metrics.mode}-${width}x${height}.png`),Buffer.from(screenshot.data,'base64'));
   }
   await evaluate('document.querySelector("[data-sidebar-toggle]").click()');
