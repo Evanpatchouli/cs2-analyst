@@ -1,5 +1,7 @@
 # UI / IPC 修复 — 2026-10-17
 
+后续质量回归见 [质量验收记录](./ui-ipc-quality-acceptance.md)。Renderer store 的 `reportRevision` 仅在成功导入时递增，驱动默认报告 Tab 和 Report 本地状态重建；同一 DEM 的成功重导入也生效，解析/失败/取消不会递增。不改变报告 DTO 或分析业务语义。
+
 本轮基线 `f143169a7c82dcdf811d27425344ab6fc784c1c1`，实现与自动验收见 [UI / IPC 验收记录](./ui-ipc-acceptance.md)。
 
 - Renderer 只公开 `importDroppedFile(file: File)`；preload 用 Electron `webUtils.getPathForFile` 解析磁盘 File 后立即提交 `report:import-file`，不向 Renderer 返回路径，也不公开任意路径导入或通用 IPC。

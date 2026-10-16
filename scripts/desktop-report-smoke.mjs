@@ -1,14 +1,18 @@
 import { checkDeepReviewUx } from './deep-review-ux-checks.mjs';
 import { checkReportUx } from './report-ux-checks.mjs';
+import { settleUi } from './window-shell-checks.mjs';
+import { closeApp, connectCdp, waitFor, withCleanup } from './smoke-runtime.mjs';
+import { ProcessScope } from './installed-smoke-lifecycle.mjs';
 import { checkWindowShell } from './window-shell-checks.mjs';
 import assert from 'node:assert/strict';
-import { spawn, spawnSync } from 'node:child_process';
-import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { spawn } from 'node:child_process';
+import { existsSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { rm } from 'node:fs/promises';
 import { setTimeout as delay } from 'node:timers/promises';
 
 const desktop = fileURLToPath(new URL('../apps/desktop/', import.meta.url));
@@ -33,17 +37,6 @@ async function freePort() {
   return port;
 }
 
-async function waitFor(probe, timeoutMs, label) {
-  const deadline = Date.now() + timeoutMs;
-  let last;
-  while (Date.now() < deadline) {
-    last = await probe();
-    if (last) return last;
-    await delay(250);
-  }
-  throw new Error(`等待 ${label} 超时`);
-}
-
 /** Launches the built app with CS2_ANALYST_DEM_PATH so the import skips the native dialog. */
 async function scenario({ label, demPath, ready, assertReport, assertDom, importMode = 'keyboard' }) {
   const port = await freePort();
@@ -51,9 +44,13 @@ async function scenario({ label, demPath, ready, assertReport, assertDom, import
   delete env.ELECTRON_RUN_AS_NODE;
   delete env.ELECTRON_RENDERER_URL;
   const profile = mkdtempSync(join(tmpdir(), 'cs2-analyst-report-profile-'));
+  const startedAt = Date.now();
   const child = spawn(electron, ['.', `--remote-debugging-port=${port}`, `--user-data-dir=${profile}`, '--disable-features=CalculateNativeWinOcclusion', '--disable-backgrounding-occluded-windows'], {
     cwd: desktop, env, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'],
   });
+  const scope = new ProcessScope();
+  const tracked = scope.track(child, label, startedAt);
+  let runFailure;
   let logs = '';
   child.stdout.on('data', data => { logs += data; });
   child.stderr.on('data', data => { logs += data; });
@@ -62,7 +59,9 @@ async function scenario({ label, demPath, ready, assertReport, assertDom, import
     let page;
     const deadline = Date.now() + 60_000;
     while (Date.now() < deadline) {
-      if (child.exitCode !== null) throw new Error(`应用提前退出：${logs}`);
+      await scope.live();
+      if (tracked.error) throw new Error(`应用启动器异常：${tracked.error.message}`, { cause: tracked.error });
+      if (child.exitCode !== null) throw new Error(`应用提前退出：${child.exitCode} ${logs}`);
       try {
         const response = await fetch(`http://127.0.0.1:${port}/json/list`, { signal: AbortSignal.timeout(1000) });
         page = (await response.json()).find(target => target.type === 'page');
@@ -71,37 +70,14 @@ async function scenario({ label, demPath, ready, assertReport, assertDom, import
       await delay(200);
     }
     assert.ok(page?.webSocketDebuggerUrl, `等待窗口超时：${logs}`);
-    socket = new WebSocket(page.webSocketDebuggerUrl);
-    await new Promise((resolve, reject) => {
-      socket.addEventListener('open', resolve, { once: true });
-      socket.addEventListener('error', reject, { once: true });
-    });
-    let id = 0;
+    const connection = await connectCdp(page.webSocketDebuggerUrl);
+    socket = connection.socket;
+    const { send, evaluate } = connection;
     const errors = [];
     socket.addEventListener('message', event => {
       const message = JSON.parse(event.data);
       if (message.method === 'Runtime.exceptionThrown') errors.push(message.params);
     });
-    const send = (method, params = {}) => {
-      const requestId = ++id;
-      return new Promise((resolve, reject) => {
-        const timer = setTimeout(() => { socket.removeEventListener('message', onMessage); reject(new Error(`${method} 超时`)); }, 20_000);
-        function onMessage(event) {
-          const message = JSON.parse(event.data);
-          if (message.id !== requestId) return;
-          clearTimeout(timer);
-          socket.removeEventListener('message', onMessage);
-          if (message.error) reject(new Error(JSON.stringify(message.error)));
-          else resolve(message.result);
-        }
-        socket.addEventListener('message', onMessage);
-        socket.send(JSON.stringify({ id: requestId, method, params }));
-      });
-    };
-    const evaluate = async expression => {
-      try { return (await send('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true })).result.value; }
-      catch (error) { throw new Error(`CDP evaluate: ${expression.slice(0, 200)}`, { cause: error }); }
-    };
     await send('Runtime.enable');
     await send('Page.enable');
 
@@ -130,34 +106,23 @@ async function scenario({ label, demPath, ready, assertReport, assertDom, import
     const body = await waitFor(async () => {
       const text = await evaluate('document.body.textContent');
       return ready(text) ? text : null;
-    }, 120_000, label);
+    }, 120_000, label, { diagnostics: () => evaluate('({text:document.body.innerText,status:document.querySelector("main")?.dataset.status})') });
     assertReport(body);
     assertNoStiffEnglish(body);
     await assertDom?.(evaluate, send);
     assert.deepEqual(errors, [], '页面存在未捕获异常');
     console.log(`${label}：通过`);
 
-    void evaluate(`document.querySelector('[data-window-control="close"]').click()`).catch(() => {});
-    await waitFor(async () => child.exitCode !== null, 30_000, '应用正常退出');
-    assert.equal(child.exitCode, 0, '关闭窗口后应用未正常退出');
+    await closeApp({ child, evaluate, socket });
   } catch (error) {
-    throw new Error(`${label} 失败
-${logs}`, { cause: error });
+    runFailure = new Error(`${label} 失败\n${logs}`, { cause: error });
   } finally {
-    socket?.close();
-    if (child.exitCode === null && child.pid) {
-      if (process.platform === 'win32') spawnSync('taskkill', ['/PID', String(child.pid), '/T', '/F'], { windowsHide: true, stdio: 'ignore' });
-      else child.kill();
-    }
-    // Windows helpers may briefly hold profile handles after the parent exits.
-    // Keep cleanup from masking the assertion that caused the scenario to fail.
-    for (let attempt = 0; attempt < 10; attempt++) {
-      try { rmSync(profile, { recursive: true, force: true, maxRetries: 5, retryDelay: 200 }); break; }
-      catch (error) {
-        if (attempt === 9) console.warn(`临时 profile 清理失败：${error.message}`);
-        else await delay(500);
-      }
-    }
+    await withCleanup(() => { if (runFailure) throw runFailure; }, [
+      () => socket?.close(),
+      () => scope.cleanup(),
+      // Windows helpers may briefly hold profile handles after the parent exits.
+      () => rm(profile, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 }),
+    ]);
   }
 }
 
@@ -184,7 +149,7 @@ await scenario({
     assert.equal(await evaluate(`document.querySelectorAll('[role="tabpanel"]').length`), 5);
     await checkDeepReviewUx(evaluate, send, process.env.CS2_ANALYST_QA_DIR);
     await evaluate(`document.getElementById('report-tab').click()`);
-    await delay(100);
+    await settleUi(evaluate, 'report Tab render');
     const helps = await evaluate('document.querySelectorAll(\'button[aria-label$="说明"]\').length');
     assert.ok(helps >= 9, `核心指标与道具面板的 Tooltip 入口不足：${helps}`);
 
@@ -305,17 +270,17 @@ await scenario({
     if (process.env.CS2_ANALYST_QA_DIR) {
       await send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
       await evaluate(`document.querySelector('[data-app-content]').scrollTo(0, 0)`);
-      await delay(1000);
+      await settleUi(evaluate, 'desktop screenshot');
       const shot = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
       writeFileSync(join(process.env.CS2_ANALYST_QA_DIR, 'analysis-desktop.png'), Buffer.from(shot.data, 'base64'));
       await send('Emulation.setDeviceMetricsOverride', { width: 900, height: 760, deviceScaleFactor: 1, mobile: false });
-      await delay(300);
+      await settleUi(evaluate, 'narrow screenshot');
       assert.equal(await evaluate('document.documentElement.scrollWidth <= window.innerWidth'), true, '窄窗口不应整页横向溢出');
       const narrow = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
       writeFileSync(join(process.env.CS2_ANALYST_QA_DIR, 'analysis-narrow.png'), Buffer.from(narrow.data, 'base64'));
       await send('Emulation.setDeviceMetricsOverride', { width: 1280, height: 900, deviceScaleFactor: 1, mobile: false });
       await evaluate(`document.querySelector('[aria-label="回合表现趋势"]').scrollIntoView({ block: 'start' })`);
-      await delay(500);
+      await settleUi(evaluate, 'scrolled screenshot');
       const detail = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
       writeFileSync(join(process.env.CS2_ANALYST_QA_DIR, 'analysis-trend-sides.png'), Buffer.from(detail.data, 'base64'));
       await send('Emulation.clearDeviceMetricsOverride');
@@ -360,7 +325,7 @@ await scenario({
 });
 
 const dir = mkdtempSync(join(tmpdir(), 'cs2-analyst-smoke-'));
-try {
+await withCleanup(async () => {
   const broken = join(dir, 'broken.dem');
   writeFileSync(broken, 'this is not a cs2 demo');
   await scenario({
@@ -387,6 +352,4 @@ try {
       assert.ok(text.includes('重新选择 DEM'), '拒绝后应保留重新选择入口');
     },
   });
-} finally {
-  rmSync(dir, { recursive: true, force: true });
-}
+}, [() => rm(dir, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 })]);

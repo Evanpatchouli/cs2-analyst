@@ -5,13 +5,15 @@ import { checkWindowsInstallBranding } from './windows-branding-checks.mjs';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import nativeParser from '../packages/demoparser-native/index.cjs';
-import { spawn, spawnSync } from 'node:child_process';
-import { closeSync, existsSync, mkdirSync, openSync, readFileSync, readdirSync, readSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { spawn } from 'node:child_process';
+import { closeSync, copyFileSync, existsSync, mkdirSync, openSync, readFileSync, readdirSync, readSync, statSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:net';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
+import { closeApp, connectCdp, dropDiskFile, waitFor as waitForState, withCleanup } from './smoke-runtime.mjs';
+import { assertNoConflicts, assertOwnedPath, createOwnedRun, directoryState, ProcessScope, runInstaller, windowsProcesses, windowsRegistrations } from './installed-smoke-lifecycle.mjs';
 
 /**
  * Installed-app smoke for the Windows packaging MVP.
@@ -20,7 +22,7 @@ import { setTimeout as delay } from 'node:timers/promises';
  *   pnpm --filter @cs2-analyst/desktop pack:win:test   (test-seam installer)
  *   pnpm --filter @cs2-analyst/desktop test:installed
  *
- * It silently installs each NSIS artifact into .tmp/installed-smoke, inspects the
+ * It silently installs each NSIS artifact into a fresh marked .tmp/installed-smoke-runs/run-*, inspects the
  * installed layout and app.asar, drives the packaged app over the Electron debugging
  * protocol, and uninstalls again. The production artifact is checked for the complete
  * absence of the test seam, so an installed production build cannot import an injected
@@ -30,8 +32,24 @@ import { setTimeout as delay } from 'node:timers/promises';
 const root = fileURLToPath(new URL('../', import.meta.url));
 const desktopDir = join(root, 'apps/desktop');
 const demo = join(root, '.demo/demo1.dem');
-const workDir = join(root, '.tmp/installed-smoke');
-const brokenDemo = join(workDir, 'broken.dem');
+let run, scope, workDir, brokenDemo, currentConnection;
+const auditEvents = [];
+function audit(event) {
+  auditEvents.push({ at: new Date().toISOString(), ...event });
+  if (workDir) writeFileSync(join(workDir, 'lifecycle.json'), JSON.stringify(auditEvents, null, 2));
+}
+async function prepareRun() {
+  if (run) return;
+  const [processes, registrations] = await Promise.all([windowsProcesses(), windowsRegistrations()]);
+  assertNoConflicts(processes, registrations);
+  run = createOwnedRun(root); workDir = run.directory; brokenDemo = join(workDir, 'broken.dem');
+  scope = new ProcessScope({ audit });
+  for (const [name, variant] of Object.entries(variants)) variant.installDir = join(workDir, 'app-' + name);
+  writeFileSync(brokenDemo, 'this is not a cs2 demo');
+  writeFileSync(join(workDir, 'not-demo.txt'), 'owned non-DEM fixture');
+  audit({ stage: 'preflight', processes: processes.filter(p => p.name === APP_EXE), registrations });
+  console.log('Installed smoke evidence directory: ' + workDir);
+}
 
 const version = JSON.parse(readFileSync(join(desktopDir, 'package.json'), 'utf8')).version;
 const APP_EXE = 'CS2 Analyst.exe';
@@ -43,12 +61,12 @@ const variants = {
   production: {
     label: '生产安装包',
     installer: join(root, 'release', version, 'CS2-Analyst-Setup-' + version + '.exe'),
-    installDir: join(workDir, 'app-production'),
+    installDir: undefined,
   },
   'test-seam': {
     label: '测试 seam 安装包',
     installer: join(root, '.tmp/test-output', version, 'CS2-Analyst-TestSeam-Setup-' + version + '.exe'),
-    installDir: join(workDir, 'app-test-seam'),
+    installDir: undefined,
   },
 };
 
@@ -60,28 +78,6 @@ function assertNoStiffEnglish(text) {
 
 // ---------------------------------------------------------------- process helpers
 
-function runSync(command, args, options = {}) {
-  const result = spawnSync(command, args, { encoding: 'utf8', windowsHide: true, ...options });
-  if (result.error) throw result.error;
-  return result;
-}
-
-async function waitFor(probe, timeoutMs, label) {
-  const deadline = Date.now() + timeoutMs;
-  let lastError;
-  while (Date.now() < deadline) {
-    try {
-      const value = await probe();
-      if (value) return value;
-      lastError = undefined;
-    } catch (error) {
-      lastError = error;
-    }
-    await delay(250);
-  }
-  throw new Error('等待 ' + label + ' 超时' + (lastError ? '：' + lastError.message : ''));
-}
-
 async function freePort() {
   const server = createServer();
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
@@ -91,14 +87,15 @@ async function freePort() {
 }
 
 /** Processes still running from the installed app. Utility Process workers share the image name. */
-function appProcesses() {
-  const result = runSync('tasklist', ['/FI', 'IMAGENAME eq ' + APP_EXE, '/FO', 'CSV', '/NH']);
-  if (result.status !== 0) return [];
-  return result.stdout.split(/\r?\n/).map(line => line.trim()).filter(line => line.toLowerCase().startsWith('"cs2 analyst.exe"'));
-}
-
-function killAppProcesses() {
-  runSync('taskkill', ['/IM', APP_EXE, '/T', '/F']);
+async function appProcesses() { return (await scope.live()).filter(p => p.name.toLowerCase() === APP_EXE.toLowerCase()); }
+async function killAppProcesses() { await scope.cleanup(); }
+async function waitFor(probe, timeoutMs, label, options = {}) {
+  return waitForState(probe, timeoutMs, label, { diagnostics: async () => ({
+    processes: [...(scope?.owned.values() ?? [])].map(p => ({ pid: p.pid, parentPid: p.parentPid, name: p.name, created: p.created, endedAt: p.endedAt })),
+    launches: scope?.roots.map(r => ({ label: r.label, pid: r.pid, exitCode: r.child.exitCode, error: r.error?.message, stderr: r.stderr.slice(-2000), stdout: r.stdout.slice(-2000) })),
+    target: workDir ? directoryState(workDir) : null,
+    ui: currentConnection?.socket.readyState === WebSocket.OPEN ? await currentConnection.evaluate(`({status:document.querySelector('main')?.dataset.status,selected:document.querySelector('[role=tab][aria-selected=true]')?.id,text:document.body.innerText.slice(-2000)})`).catch(error => ({ diagnosticError: error.message })) : null,
+  }), ...options });
 }
 
 // ---------------------------------------------------------------- asar inspection
@@ -144,40 +141,56 @@ function readAsarFile(archive, dataOffset, info) {
 // ---------------------------------------------------------------- install lifecycle
 
 async function install(variant) {
+  await prepareRun();
+  assertOwnedPath(run, variant.installDir);
+  assertNoConflicts(await windowsProcesses(), await windowsRegistrations());
   assert.ok(existsSync(variant.installer), '缺少安装包：' + variant.installer + '（先运行 pnpm --filter @cs2-analyst/desktop pack:win 和 pack:win:test）');
   const installerSize = (statSync(variant.installer).size / 1024 / 1024).toFixed(1);
-  rmSync(variant.installDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 500 });
+  assert.equal(existsSync(variant.installDir), false, 'refuse to overwrite an existing installation directory: ' + variant.installDir);
   mkdirSync(variant.installDir, { recursive: true });
-  const result = runSync(variant.installer, ['/S', '/D=' + variant.installDir]);
-  assert.equal(result.status, 0, variant.label + ' 静默安装退出码异常：' + result.status + ' ' + result.stderr);
-  await waitFor(() => existsSync(join(variant.installDir, APP_EXE)), 120_000, variant.label + ' 安装完成');
+  variant.attempted = true;
+  await runInstaller(scope, variant.installer, ['/S', '/D=' + variant.installDir], { label: variant.label + ' install', directory: variant.installDir, audit });
+  await waitFor(() => existsSync(join(variant.installDir, APP_EXE)), 15_000, variant.label + ' 安装文件出现', { diagnostics: () => directoryState(variant.installDir) });
+  variant.installed = true;
   console.log(variant.label + '：安装成功 → ' + variant.installDir + '（安装包 ' + installerSize + ' MB）');
 }
 
 async function uninstall(variant) {
+  if (!variant.attempted) return;
+  assertOwnedPath(run, variant.installDir);
   const uninstaller = join(variant.installDir, UNINSTALLER);
+  // Partial install without an uninstaller is preserved for diagnosis; never delete it.
   assert.ok(existsSync(uninstaller), variant.label + ' 缺少卸载器：' + uninstaller);
-  const result = runSync(uninstaller, ['/S']);
-  assert.equal(result.status, 0, variant.label + ' 卸载退出码异常：' + result.status);
-  await waitFor(() => !existsSync(join(variant.installDir, APP_EXE)), 120_000, variant.label + ' 卸载完成');
+  const entries = await windowsRegistrations();
+  for (const entry of entries) assert.ok(entry.uninstallString?.toLowerCase().includes(uninstaller.toLowerCase()), 'Foreign registration appeared; preserve installation: ' + JSON.stringify(entry));
+  await runInstaller(scope, uninstaller, ['/S', '/currentuser'], { label: variant.label + ' uninstall', directory: variant.installDir, audit });
+  await waitFor(async () => !existsSync(join(variant.installDir, APP_EXE)) && (await scope.live()).length === 0 && (await windowsRegistrations()).length === 0, 120_000, variant.label + ' 卸载文件、进程与注册移除', { diagnostics: async () => ({ target: directoryState(variant.installDir), registrations: await windowsRegistrations(), processes: await scope.live() }) });
+  variant.attempted = false;
   console.log(variant.label + '：卸载成功');
 }
 
 // ---------------------------------------------------------------- app driving
 
 async function launchSession(exePath, extraEnv, label, applicationArgs = []) {
+  await prepareRun();
   const port = await freePort();
+  const profile = join(workDir, 'profile-' + auditEvents.length);
+  assertOwnedPath(run, profile);
   const env = { ...process.env, ...extraEnv };
   delete env.ELECTRON_RUN_AS_NODE;
   delete env.ELECTRON_RENDERER_URL;
-  const child = spawn(exePath, [...applicationArgs, '--remote-debugging-port=' + port, '--disable-features=CalculateNativeWinOcclusion', '--disable-backgrounding-occluded-windows'], { cwd: join(exePath, '..'), env, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
+  const startedAt = Date.now();
+  const child = spawn(exePath, [...applicationArgs, '--user-data-dir=' + profile, '--remote-debugging-port=' + port, '--disable-features=CalculateNativeWinOcclusion', '--disable-backgrounding-occluded-windows'], { cwd: join(exePath, '..'), env, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
+  const tracked = scope.track(child, label, startedAt);
   let logs = '';
   child.stdout.on('data', data => { logs += data; });
   child.stderr.on('data', data => { logs += data; });
   let socket;
   try {
     const page = await waitFor(async () => {
-      if (child.exitCode !== null) throw new Error('应用提前退出：' + logs);
+      await scope.live();
+      if (tracked.error) throw new Error('应用启动器异常：' + tracked.error.message, { cause: tracked.error });
+      if (child.exitCode !== null) throw new Error('应用提前退出：' + child.exitCode + ' ' + logs);
       try {
         const response = await fetch('http://127.0.0.1:' + port + '/json/list', { signal: AbortSignal.timeout(1000) });
         const targets = await response.json();
@@ -186,50 +199,29 @@ async function launchSession(exePath, extraEnv, label, applicationArgs = []) {
       } catch {
         return null;
       }
-    }, 60_000, label + ' 打开调试端口');
+    }, 60_000, label + ' 打开调试端口', { diagnostics: () => ({ pid: child.pid, exitCode: child.exitCode, logs }) });
 
-    socket = new WebSocket(page.webSocketDebuggerUrl);
-    await new Promise((resolve, reject) => {
-      socket.addEventListener('open', resolve, { once: true });
-      socket.addEventListener('error', reject, { once: true });
-    });
-
-    let id = 0;
-    const errors = [];
-    const send = (method, params = {}) => {
-      const requestId = ++id;
-      return new Promise((resolve, reject) => {
-        const timer = setTimeout(() => { socket.removeEventListener('message', onMessage); reject(new Error(method + ' 超时')); }, 20_000);
-        function onMessage(event) {
-          const message = JSON.parse(event.data);
-          if (message.id !== requestId) return;
-          clearTimeout(timer);
-          socket.removeEventListener('message', onMessage);
-          if (message.error) reject(new Error(JSON.stringify(message.error)));
-          else resolve(message.result);
-        }
-        socket.addEventListener('message', onMessage);
-        socket.send(JSON.stringify({ id: requestId, method, params }));
-      });
-    };
+    const connection = await connectCdp(page.webSocketDebuggerUrl);
+    currentConnection = connection;
+    socket = connection.socket;
+    scope.sessions.add(socket);
+    const { send, evaluate } = connection, errors = [];
     socket.addEventListener('message', event => {
       const message = JSON.parse(event.data);
       if (message.method === 'Runtime.exceptionThrown') errors.push(message.params);
     });
     await send('Runtime.enable');
     await send('Page.enable');
-    const evaluate = async expression => (await send('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true })).result.value;
 
     const shell = await waitFor(async () => {
       const state = await evaluate('({ ready: document.readyState, text: document.body.textContent, node: typeof window.require, nodeProcess: typeof window.process, version: window.cs2Analyst?.version })');
       return state?.ready === 'complete' && state.text?.includes('CS2 Analyst') ? state : null;
     }, 60_000, label + ' React 页面');
     await checkWindowShell(evaluate, send);
-    return { child, send, evaluate, errors, shell };
+    return { child, send, evaluate, errors, shell, socket };
   } catch (error) {
     socket?.close();
-    if (child.exitCode === null) killAppProcesses();
-    throw new Error(label + ' 启动失败\n' + logs, { cause: error });
+    return withCleanup(() => { throw new Error(label + ' 启动失败\n' + logs, { cause: error }); }, [() => scope.cleanup()]);
   }
 }
 
@@ -238,11 +230,7 @@ async function clickSelectDemo(session) {
   assert.equal(clicked, true, '未找到“选择 DEM”按钮');
 }
 
-async function closeGracefully(session) {
-  session.evaluate(`document.querySelector('[data-window-control="close"]').click()`).catch(() => { /* Electron 退出时会断开协议连接。 */ });
-  for (let attempt = 0; attempt < 150 && session.child.exitCode === null; attempt++) await delay(100);
-  return session.child.exitCode;
-}
+async function closeGracefully(session) { return closeApp(session); }
 
 // ---------------------------------------------------------------- checks
 
@@ -332,8 +320,8 @@ function checkShortcut() {
 
 async function productionScenario() {
   const variant = variants.production;
-  await install(variant);
-  try {
+  await withCleanup(async () => {
+    await install(variant);
     checkInstalledLayout(variant, false);
     checkWindowsInstallBranding(variant, false);
     const exe = join(variant.installDir, APP_EXE);
@@ -347,40 +335,58 @@ async function productionScenario() {
     assert.ok(loadedAssets.length > 0 && loadedAssets.every(Boolean), '生产安装版官方图片 URL 必须全部可加载');
     const exitCode = await closeGracefully(session);
     assert.equal(exitCode, 0, '关闭窗口后应用未正常退出');
-    await waitFor(() => appProcesses().length === 0, 15_000, '应用进程退出');
+    await waitFor(async () => (await appProcesses()).length === 0, 15_000, '应用进程退出');
     console.log(variant.label + '：启动、preload 桥接、无 Node 暴露、正常关闭通过');
 
     // 2. 环境变量注入在正式安装版必须无效：点击选择 DEM 后仍走原生对话框，不自动导入。
-    killAppProcesses();
+    await killAppProcesses();
     const injected = await launchSession(exe, { CS2_ANALYST_DEM_PATH: demo, CS2_ANALYST_TEST_DEM_PATH: demo }, variant.label + '（注入测试）');
     await clickSelectDemo(injected);
     await waitFor(async () => {
       const text = await injected.evaluate('document.body.textContent');
       return text?.includes('正在选择 DEM') ? text : null;
     }, 20_000, '选择阶段');
-    await delay(15_000);
+    // Observe the negative security property continuously for a bounded 15s window.
+    const until = Date.now() + 15_000;
+    while (Date.now() < until) {
+      const status = await injected.evaluate('document.querySelector("main").dataset.status');
+      assert.equal(status, 'selecting', 'production injection unexpectedly completed or failed');
+      await delay(200);
+    }
     const afterWait = await injected.evaluate('document.body.textContent');
     assert.ok(!afterWait.includes('twinkle') && !afterWait.includes('25 / 20 / 4'), '正式安装版不得接受注入的 DEM 路径');
     assert.ok(afterWait.includes('CS2 Analyst'), '页面不应白屏');
-    killAppProcesses();
-    await waitFor(() => appProcesses().length === 0, 15_000, '强制结束应用进程');
-    console.log(variant.label + '：注入 DEM 路径无效，正式安装版只能通过原生文件对话框选择');
-  } finally {
-    killAppProcesses();
-    await uninstall(variant);
-  }
+    await killAppProcesses();
+    await waitFor(async () => (await appProcesses()).length === 0, 15_000, '强制结束应用进程');
+    console.log(variant.label + '：注入 DEM 路径无效，正式安装版保留原生文件对话框');
+    const disk = await launchSession(exe, {}, variant.label + '（磁盘 File）');
+    assert.equal(await disk.evaluate('typeof window.cs2Analyst.importDemoFile'), 'undefined');
+    assert.equal(await disk.evaluate('typeof window.cs2Analyst.getFilePath'), 'undefined');
+    await dropDiskFile(disk, join(workDir, 'not-demo.txt'));
+    await waitFor(() => disk.evaluate(`document.querySelector('main').dataset.status==='error'&&document.body.textContent.includes('请选择 .dem 文件')`), 10_000, 'production rejects non-DEM disk File');
+    assert.equal((await appProcesses()).some(p => p.commandLine?.includes('node.mojom.NodeService')), false, 'non-DEM never starts a worker');
+    await dropDiskFile(disk, demo);
+    await waitFor(() => disk.evaluate(`document.querySelector('main').dataset.status==='success'&&document.body.textContent.includes('25 / 20 / 4')&&document.body.textContent.includes('91.38')`), 120_000, 'production recovers via disk File / real report');
+    await checkReportUx(disk.evaluate, disk.send);
+    assert.deepEqual(disk.errors, []);
+    await closeGracefully(disk);
+    await waitFor(async () => (await appProcesses()).length === 0, 20_000, 'production disk File worker cleanup');
+    console.log(variant.label + '：真实磁盘 File、非 DEM 拒绝与恢复、报告和进程清理通过（CDP File，非 Explorer）');
+  }, [() => killAppProcesses(), () => uninstall(variant), () => killAppProcesses()]);
 }
 
 async function testSeamScenario() {
   const variant = variants['test-seam'];
-  await install(variant);
-  try {
+  await withCleanup(async () => {
+    await install(variant);
     checkInstalledLayout(variant, true);
     checkWindowsInstallBranding(variant, true);
     const exe = join(variant.installDir, APP_EXE);
 
     // 3. 真实 demo1.dem 全链路报告。
-    const session = await launchSession(exe, { CS2_ANALYST_TEST_DEM_PATH: demo }, variant.label);
+    const ownedDemo = join(workDir, 'reimport.dem');
+    copyFileSync(demo, ownedDemo);
+    const session = await launchSession(exe, { CS2_ANALYST_TEST_DEM_PATH: ownedDemo }, variant.label);
     await clickSelectDemo(session);
     const body = await waitFor(async () => {
       const text = await session.evaluate('document.body.textContent');
@@ -420,29 +426,46 @@ async function testSeamScenario() {
     await session.evaluate(`document.querySelector('[aria-label="目标玩家"]').click()`);
     await waitFor(async () => session.evaluate(`([...document.querySelectorAll('[role="option"]')].some(o => o.textContent === '8888888888888888888888'))`), 10_000, '安装版 Dropdown 长数字昵称');
     console.log(variant.label + '：Analysis Views、Tab 状态保留、Timeline / Analysis / Dropdown 长数字昵称通过');
+    await session.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
+    await session.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
+    const previousPlayer = await session.evaluate(`document.querySelector('[aria-label="目标玩家"]').textContent`);
+    writeFileSync(ownedDemo, 'owned corrupt reimport fixture');
+    await clickSelectDemo(session);
+    await waitFor(() => session.evaluate(`document.querySelector('main').dataset.status==='error'&&document.body.textContent.includes('无法分析此 DEM')`), 60_000, 'failed reimport error with old report');
+    assert.equal(await session.evaluate(`document.querySelector('[aria-label="目标玩家"]').textContent`), previousPlayer);
+    assert.equal(await session.evaluate(`document.querySelectorAll('[role=tab]').length`), 5, 'old report remains mounted');
+    assert.ok(await session.evaluate(`document.body.textContent.includes('25 / 20 / 4')`));
+    await session.evaluate(`document.getElementById('replay-tab').click()`);
+    await waitFor(() => session.evaluate(`document.getElementById('replay-panel').textContent.includes('上一次回放会话已结束')`), 10_000, 'failed import retires old replay session');
+    await waitFor(async () => !(await appProcesses()).some(p => p.commandLine?.includes('node.mojom.NodeService')), 20_000, 'failed reimport worker cleanup');
+    copyFileSync(demo, ownedDemo);
+    await clickSelectDemo(session);
+    await waitFor(() => session.evaluate(`document.querySelector('main').dataset.status==='success'&&document.getElementById('report-tab').getAttribute('aria-selected')==='true'`), 120_000, 'successful recovery after corrupt reimport');
+    console.log(variant.label + '：导入失败保留旧报告和玩家、旧回放失效、worker 释放及重新导入恢复通过');
     assertNoStiffEnglish(body);
     assert.deepEqual(session.errors, [], '页面存在未捕获异常');
     const exitCode = await closeGracefully(session);
     assert.equal(exitCode, 0, '关闭窗口后应用未正常退出');
-    await waitFor(() => appProcesses().length === 0, 20_000, '分析结束后无残留进程');
+    await waitFor(async () => (await appProcesses()).length === 0, 20_000, '分析结束后无残留进程');
     console.log(variant.label + '：demo1 报告与开发环境一致（twinkle 25/20/4、ADR 91.38、KAST 75%、Trade 22.2%、R24 1v3 win、5 条 Findings）');
 
     // 4. 分析进行中关闭应用不得残留 analysis worker。
-    killAppProcesses();
+    await killAppProcesses();
     const mid = await launchSession(exe, { CS2_ANALYST_TEST_DEM_PATH: demo }, variant.label + '（中途关闭）');
     await clickSelectDemo(mid);
     await waitFor(async () => {
       const text = await mid.evaluate('document.body.textContent');
       return text?.includes('正在后台解析 DEM') || text?.includes('正在生成指标') ? text : null;
     }, 60_000, variant.label + ' 进入解析阶段');
-    await waitFor(() => appProcesses().length >= 2, 30_000, variant.label + ' Utility Process 启动');
+    await waitFor(async () => (await appProcesses()).some(p => p.commandLine?.includes('node.mojom.NodeService')), 30_000, variant.label + ' Utility Process 启动');
+    assert.ok(['parsing', 'analyzing'].includes(await mid.evaluate(`document.querySelector('main').dataset.status`)), 'mid-close must still observe an in-flight analysis');
     const midExit = await closeGracefully(mid);
     assert.equal(midExit, 0, '分析中途关闭窗口应正常退出');
-    await waitFor(() => appProcesses().length === 0, 20_000, variant.label + ' 无残留 analysis worker');
+    await waitFor(async () => (await appProcesses()).length === 0, 20_000, variant.label + ' 无残留 analysis worker');
     console.log(variant.label + '：分析中途关闭应用后无残留 analysis worker');
 
     // 5. 损坏 DEM 仍显示错误且不白屏。
-    killAppProcesses();
+    await killAppProcesses();
     const broken = await launchSession(exe, { CS2_ANALYST_TEST_DEM_PATH: brokenDemo }, variant.label + '（损坏 DEM）');
     await clickSelectDemo(broken);
     const errorText = await waitFor(async () => {
@@ -454,10 +477,7 @@ async function testSeamScenario() {
     assertNoStiffEnglish(errorText);
     await closeGracefully(broken);
     console.log(variant.label + '：损坏 DEM 显示错误且不白屏');
-  } finally {
-    killAppProcesses();
-    await uninstall(variant);
-  }
+  }, [() => killAppProcesses(), () => uninstall(variant), () => killAppProcesses()]);
 }
 
 // ---------------------------------------------------------------- entry
@@ -465,17 +485,22 @@ async function testSeamScenario() {
 export { install, uninstall, launchSession, closeGracefully, clickSelectDemo, checkInstalledLayout, appProcesses, variants, waitFor };
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
-assert.ok(existsSync(demo), '缺少测试 DEM：' + demo + '（.demo/demo1.dem）');
-rmSync(workDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 500 });
-mkdirSync(workDir, { recursive: true });
-writeFileSync(brokenDemo, 'this is not a cs2 demo');
-killAppProcesses();
-
-try {
-  await productionScenario();
-  await testSeamScenario();
-  console.log('installed-app smoke 全部通过');
-} finally {
-  killAppProcesses();
-}
+  assert.ok(existsSync(demo), '缺少测试 DEM：' + demo);
+  await prepareRun();
+  // SIGINT/SIGTERM use the same owned-only cleanup; evidence survives interruption.
+  let interrupted = false;
+  const stop = async signal => {
+    if (interrupted) return;
+    interrupted = true;
+    console.error('Installed smoke interrupted:', signal);
+    try { await scope.cleanup(); } catch (error) { console.error(error); }
+    process.exit(1);
+  };
+  const onInt = () => void stop('SIGINT'), onTerm = () => void stop('SIGTERM');
+  process.once('SIGINT', onInt); process.once('SIGTERM', onTerm);
+  await withCleanup(async () => {
+    await productionScenario();
+    await testSeamScenario();
+    console.log('installed-app smoke 全部通过');
+  }, [() => scope.cleanup(), () => { process.off('SIGINT', onInt); process.off('SIGTERM', onTerm); }]);
 }

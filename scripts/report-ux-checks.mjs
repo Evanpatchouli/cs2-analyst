@@ -1,19 +1,19 @@
 import assert from 'node:assert/strict';
-import { checkWindowLayout, assertNoPageScroll, checkSidebarImport, waitForUi } from './window-shell-checks.mjs';
+import { checkWindowLayout, assertNoPageScroll, checkSidebarImport, waitForUi, settleUi } from './window-shell-checks.mjs';
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { setTimeout as delay } from 'node:timers/promises';
+import { withCleanup } from './smoke-runtime.mjs';
 
 /** Shared CDP assertions for built and installed renderers, after demo1 import. */
 export async function checkReportUx(evaluate, send, qaDir) {
   // Settle the previous Finding → Timeline scroll and CDP viewport restoration,
   // then cancel its smooth scroll before asserting the exact top-of-page layout.
   await send('Emulation.setFocusEmulationEnabled', { enabled: true });
-  await delay(1000);
+  await settleUi(evaluate, 'previous Finding scroll and viewport restoration');
   await evaluate("document.activeElement?.blur(); document.querySelector('[data-app-content]').scrollTo({top:0,left:0,behavior:'instant'}); window.scrollTo({top:0,left:0,behavior:'instant'})");
   await checkWindowLayout(evaluate);
   // Wait in Node: occluded Electron windows can pause renderer animation frames.
-  const settle = () => delay(100);
+  const settle = () => settleUi(evaluate);
   await send('Emulation.setFocusEmulationEnabled', { enabled: true });
   await evaluate(`document.getElementById('report-tab').click()`);
   await settle();
@@ -30,11 +30,11 @@ export async function checkReportUx(evaluate, send, qaDir) {
   // Prove these checks reject clipping and hidden-panel false positives on the actual report DOM.
   assert.ok(await evaluate(`document.getElementById('report-panel').scrollHeight > document.getElementById('report-panel').clientHeight`));
   await evaluate(`document.getElementById('report-panel').style.overflowY = 'hidden'`);
-  try { await assert.rejects(() => assertNoPageScroll(evaluate, 'intentional clipping probe'), /inaccessible content/); }
-  finally { await evaluate(`document.getElementById('report-panel').style.removeProperty('overflow-y')`); }
+  await withCleanup(() => assert.rejects(() => assertNoPageScroll(evaluate, 'intentional clipping probe'), /inaccessible content/),
+    [() => evaluate(`document.getElementById('report-panel').style.removeProperty('overflow-y')`)]);
   await evaluate(`document.getElementById('report-panel').hidden = true`);
-  try { await assert.rejects(() => assertNoPageScroll(evaluate, 'intentional hidden panel probe'), /selected Tab/); }
-  finally { await evaluate(`document.getElementById('report-panel').hidden = false`); }
+  await withCleanup(() => assert.rejects(() => assertNoPageScroll(evaluate, 'intentional hidden panel probe'), /selected Tab/),
+    [() => evaluate(`document.getElementById('report-panel').hidden = false`)]);
   await assertNoPageScroll(evaluate, '比赛报告滚动末端');
   // Native summary retains keyboard activation and clear focus feedback.
   const summary = await evaluate(`(() => { const s = document.querySelector('#report-panel summary'); s.focus(); return { cursor: getComputedStyle(s).cursor, focused: document.activeElement === s }; })()`);
@@ -105,7 +105,7 @@ export async function checkReportUx(evaluate, send, qaDir) {
   assert.equal(await evaluate(`document.querySelector('[aria-label="目标玩家"]').textContent`), player);
   const screenshot = async name => {
     if (!qaDir) return;
-    await delay(350);
+    await settleUi(evaluate, 'screenshot layout, fonts and scroll');
     const shot = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
     writeFileSync(join(qaDir, name + '.png'), Buffer.from(shot.data, 'base64'));
   };

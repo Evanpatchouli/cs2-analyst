@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { setTimeout as delay } from 'node:timers/promises';
+import { waitFor } from './smoke-runtime.mjs';
 
 /** Shared real-Electron assertions, including production installed apps. */
 export async function checkWindowLayout(evaluate) {
@@ -38,11 +39,31 @@ export async function checkWindowLayout(evaluate) {
  * and the main column stay locked to the viewport, and every long view scrolls inside its own panel.
  */
 export async function waitForUi(evaluate, expression, label) {
-  for (let attempt = 0; attempt < 100; attempt++) {
-    if (await evaluate(expression)) return;
-    await delay(50);
-  }
-  assert.fail(`UI state did not settle: ${label}`);
+  return waitFor(() => evaluate(expression), 5000, label, { intervalMs: 50, diagnostics: () => evaluate(`({
+    condition: ${JSON.stringify(expression)}, ready: document.readyState, status: document.querySelector('main')?.dataset.status,
+    selected: document.querySelector('[role=tab][aria-selected=true]')?.id,
+    replay: document.querySelector('[data-replay-session]')?.dataset,
+    canvases: [...document.querySelectorAll('#replay-panel canvas')].map(c=>({width:c.width,height:c.height,data:{...c.dataset}})),
+    viewport: [innerWidth, innerHeight, devicePixelRatio], text: document.body.innerText.slice(-2000)
+  })`) });
+}
+
+/** Geometry/scroll/font stability for screenshots and transitions, bounded to 5s.
+ * Poll in Node because occluded Electron windows may suspend requestAnimationFrame.
+ * Interaction-specific assertions still follow; three samples cannot replace those assertions.
+ */
+export async function settleUi(evaluate, label = 'rendered layout and scroll stability') {
+  let previous, stable = 0, last;
+  return waitFor(async () => {
+    last = await evaluate(`({ ready: document.readyState === 'complete' && document.fonts.status === 'loaded' && document.getAnimations().every(a => a.playState !== 'running'),
+      viewport: [innerWidth, innerHeight], selected: document.querySelector('[role=tab][aria-selected=true]')?.id,
+      text: document.querySelector('main')?.textContent, options: [...document.querySelectorAll('[role=option]')].map(o => o.textContent),
+      geometry: [...document.querySelectorAll('[role=tabpanel], [data-app-content], [data-app-sidebar], [data-replay-body]')].filter(e => e.checkVisibility()).map(e => { const r=e.getBoundingClientRect(); return [r.x,r.y,r.width,r.height,e.scrollTop,e.scrollLeft,e.scrollHeight]; }) })`);
+    const signature = JSON.stringify(last);
+    stable = last.ready && signature === previous ? stable + 1 : 0;
+    previous = signature;
+    return stable >= 2;
+  }, 5000, label, { intervalMs: 50, diagnostics: () => last });
 }
 
 // Exercise the actual scroll range, and restore it so acceptance does not change navigation state.
@@ -184,11 +205,7 @@ export async function checkWindowShell(evaluate, send) {
   await checkAppShell(evaluate, send);
   assert.equal(await evaluate(`document.querySelector('[data-window-control="maximize"]').getAttribute('aria-label')`), '最大化');
   const waitLabel = async expected => {
-    for (let n = 0; n < 80; n++) {
-      if (await evaluate(`document.querySelector('[data-window-control="maximize"]').getAttribute('aria-label')`) === expected) return;
-      await delay(100);
-    }
-    assert.fail('window state label did not become ' + expected);
+    await waitForUi(evaluate, `document.querySelector('[data-window-control="maximize"]').getAttribute('aria-label') === ${JSON.stringify(expected)}`, 'native window state label ' + expected);
   };
   await evaluate(`document.querySelector('[data-window-control="maximize"]').click()`);
   await waitLabel('还原');

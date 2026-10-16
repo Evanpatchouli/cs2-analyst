@@ -1,6 +1,6 @@
 // Real built/installed Electron validation, using only the explicitly selected local Dust2 DEM.
 import assert from 'node:assert/strict';
-import { spawn,spawnSync } from 'node:child_process';
+import { spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync,mkdirSync,mkdtempSync,readFileSync,readdirSync,writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -10,8 +10,10 @@ import { createServer } from 'node:net';
 import { dirname,join,resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { setTimeout as delay } from 'node:timers/promises';
+import { closeApp, connectCdp, waitFor as waitForState, withCleanup } from './smoke-runtime.mjs';
+import { ProcessScope } from './installed-smoke-lifecycle.mjs';
 import { inspectReplayPackage } from './replay-package-inspection.mjs';
-import { assertNoPageScroll, assertLocalScroll, waitForUi } from './window-shell-checks.mjs';
+import { assertNoPageScroll, assertLocalScroll, waitForUi, settleUi } from './window-shell-checks.mjs';
 /** Map Replay must behave like a tool surface: no page scroll, square radar, locally scrolling rail. */
 async function checkReplayLayout(evaluate, label) {
   await waitForUi(evaluate, `(() => {
@@ -76,14 +78,19 @@ async function assertReplayContentAccessible(evaluate,label) {
   })()`);
   for(const item of accessible)assert.equal(item.ok,true,`${label}: unreachable ${item.selector}`);
 }
+async function waitForPausedFrame(evaluate, label) {
+  // The button commits before the next rAF paints the clock's final paused tick.
+  // Require that final frame, then the existing exact 250ms stability assertion can observe it.
+  await waitForUi(evaluate, `Boolean(document.querySelector('[aria-label=播放回放]'))&&document.querySelector('#replay-panel canvas[role=img]').dataset.tick===document.querySelector('[data-replay-session]').dataset.replayTick`, label);
+}
 const root=fileURLToPath(new URL('../',import.meta.url)),desktop=join(root,'apps/desktop');
 const require=createRequire(new URL('../apps/desktop/package.json',import.meta.url));
-const production=process.argv.includes('--production'),broken=process.argv.includes('--broken'),noMaps=process.argv.includes('--no-map');
+const production=process.argv.includes('--production'),broken=process.argv.includes('--broken'),noMaps=process.argv.includes('--no-map'),nuke=process.argv.includes('--nuke');
 const qa=join(root,'.tmp/p6-qa');mkdirSync(qa,{recursive:true});
 const resourceManifest=JSON.parse(readFileSync(join(root,'docs/replay-resources.json'),'utf8'));
 const expectedImages=resourceManifest.maps.flatMap(map=>map.images.map(image=>({prefix:`${map.map}${image.id==='default'?'':'_'+image.id}-`,...image})));
 if(broken)writeFileSync(join(qa,'broken.dem'),'synthetic corrupt input, not a real DEM fixture');
-const demo=broken?join(qa,'broken.dem'):join(root,'.demo/spirit-vs-faze-m3-dust2.dem');assert.ok(existsSync(demo),'Selected local DEM required; no downloads');
+const demo=broken?join(qa,'broken.dem'):join(root,nuke?'.demo/nuke.dem':'.demo/spirit-vs-faze-m3-dust2.dem');assert.ok(existsSync(demo),'Selected local DEM required; no downloads');
 const executableArgument=process.argv.slice(2).find(arg=>!arg.startsWith('--'));
 const installed=executableArgument?resolve(executableArgument):null;
 const executable=installed??require('electron');assert.ok(existsSync(executable));
@@ -91,31 +98,29 @@ const server=createServer();await new Promise(r=>server.listen(0,'127.0.0.1',r))
 const profilePrefix=join(tmpdir(),'cs2-analyst-replay-profile-');
 const profile=mkdtempSync(profilePrefix);
 const env={...process.env,NODE_PATH:'',CS2_ANALYST_DEM_PATH:demo,CS2_ANALYST_TEST_DEM_PATH:demo};delete env.ELECTRON_RUN_AS_NODE;delete env.ELECTRON_RENDERER_URL;
+const startedAt=Date.now();
 const child=spawn(executable,[...(installed?[]:['.']),`--remote-debugging-port=${port}`,`--user-data-dir=${profile}`,'--disable-features=CalculateNativeWinOcclusion','--disable-backgrounding-occluded-windows'],{cwd:installed?dirname(installed):desktop,env,windowsHide:true,stdio:['ignore','pipe','pipe']});
+const scope=new ProcessScope(),tracked=scope.track(child,'replay Electron',startedAt);
 let logs='',page,browser,metrics={};child.stdout.on('data',d=>logs+=d);child.stderr.on('data',d=>logs+=d);
-async function waitFor(fn,label,timeout=30_000){const end=Date.now()+timeout;while(Date.now()<end){const result=await fn();if(result)return result;if(child.exitCode!==null)throw new Error(`Electron exited: ${logs}`);await delay(50);}throw new Error(`Timed out: ${label}`);}
-async function connect(url){
-  const socket=new WebSocket(url);
-  await new Promise((r,j)=>{socket.addEventListener('open',r,{once:true});socket.addEventListener('error',j,{once:true});});
-  let sequence=0;const pending=new Map();
-  socket.addEventListener('message',event=>{const m=JSON.parse(event.data),request=pending.get(m.id);if(!request)return;pending.delete(m.id);clearTimeout(request.timer);m.error?request.reject(new Error(JSON.stringify(m.error))):request.resolve(m.result);});
-  socket.addEventListener('close',()=>{for(const request of pending.values()){clearTimeout(request.timer);request.reject(new Error('CDP connection closed'));}pending.clear();});
-  return {socket,send:(method,params={})=>new Promise((resolve,reject)=>{
-    const id=++sequence,timer=setTimeout(()=>{pending.delete(id);reject(new Error(`${method} timeout`));},120_000);
-    pending.set(id,{resolve,reject,timer});socket.send(JSON.stringify({id,method,params}));
-  })};
+async function waitFor(fn,label,timeout=30_000){
+  return waitForState(async()=>{
+    if(tracked.error)throw new Error(`Electron launcher failed: ${tracked.error.message}`,{cause:tracked.error});
+    const result=await fn();if(result)return result;
+    if(child.exitCode!==null||child.signalCode!==null)throw new Error(`Electron exited while waiting for ${label}: ${child.exitCode} ${logs}`);
+    return result;
+  },timeout,label,{intervalMs:50,diagnostics:async()=>({pid:child.pid,exitCode:child.exitCode,logs:logs.slice(-4000),state:page?await page.evaluate('({status:document.querySelector("main")?.dataset.status,replay:document.querySelector("[data-replay-session]")?.dataset,text:document.body.innerText.slice(-1500)})'):null})});
 }
+const connect=connectCdp;
 const hash=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
-function processTree(){
-  // OS children identify the Node utility service and provide lifetime peak working set.
-  const result=spawnSync('pwsh',['-NoProfile','-Command',`Get-CimInstance Win32_Process -Filter "ParentProcessId = ${child.pid}" | ForEach-Object { $taskProcess=Get-Process -Id $_.ProcessId -ErrorAction SilentlyContinue; [pscustomobject]@{ Id=$_.ProcessId; Role=if($_.CommandLine -match 'node.mojom.NodeService'){'analysis-utility'}elseif($_.CommandLine -match '--type=renderer'){'renderer'}elseif($_.CommandLine -match '--type=gpu-process'){'gpu'}else{'other'}; PeakWorkingSet64=$taskProcess.PeakWorkingSet64; WorkingSet64=$taskProcess.WorkingSet64 } } | ConvertTo-Json -Compress`],{encoding:'utf8',windowsHide:true});
-  if(result.status!==0)throw new Error(result.stderr);const value=JSON.parse(result.stdout||'[]');return Array.isArray(value)?value:[value];
+async function processTree(){
+  return (await scope.live()).filter(p=>p.pid!==child.pid).map(p=>({Id:p.pid,Role:p.commandLine?.includes('node.mojom.NodeService')?'analysis-utility':p.commandLine?.includes('--type=renderer')?'renderer':p.commandLine?.includes('--type=gpu-process')?'gpu':'other',PeakWorkingSet64:p.peakWorkingSet,WorkingSet64:p.workingSet}));
 }
 const quantiles=values=>{const s=values.toSorted((a,b)=>a-b);return {count:s.length,p50:s[Math.floor(s.length*.5)],p95:s[Math.floor(s.length*.95)],max:s.at(-1)};};
 let reportFingerprint,runFailure;
 try{
-  const target=await waitFor(async()=>{try{return (await(await fetch(`http://127.0.0.1:${port}/json/list`)).json()).find(p=>p.type==='page');}catch{return null;}},'CDP page');
-  page=await connect(target.webSocketDebuggerUrl);const version=await(await fetch(`http://127.0.0.1:${port}/json/version`)).json();browser=await connect(version.webSocketDebuggerUrl);
+  await scope.live();
+  const target=await waitFor(async()=>{try{return (await(await fetch(`http://127.0.0.1:${port}/json/list`,{signal:AbortSignal.timeout(1000)})).json()).find(p=>p.type==='page');}catch{return null;}},'CDP page');
+  page=await connect(target.webSocketDebuggerUrl);const version=await(await fetch(`http://127.0.0.1:${port}/json/version`,{signal:AbortSignal.timeout(1000)})).json();browser=await connect(version.webSocketDebuggerUrl);
   const exceptions=[];page.socket.addEventListener('message',e=>{const m=JSON.parse(e.data);if(m.method==='Runtime.exceptionThrown')exceptions.push(m.params);});
   const evaluate=async expression=>{const r=await page.send('Runtime.evaluate',{expression,awaitPromise:true,returnByValue:true});if(r.exceptionDetails)throw new Error(JSON.stringify(r.exceptionDetails));return r.result?.value;};
   await page.send('Runtime.enable');await page.send('Page.enable');await page.send('Network.enable');await page.send('Network.emulateNetworkConditions',{offline:true,latency:0,downloadThroughput:-1,uploadThroughput:-1});
@@ -130,20 +135,20 @@ try{
   if(production||broken||noMaps){
     metrics={mode:noMaps?'built-event-only':production?'installed-production-startup':installed?'installed-broken':'built-broken',packageInfo,offlineDecodedImages:decoded};
     if(noMaps){await evaluate('[...document.querySelectorAll("button")].find(b=>b.textContent.includes("选择 DEM")).click()');await waitFor(()=>evaluate('document.querySelector("main")?.dataset.status==="success"'),'event-only report',120000);await evaluate('document.getElementById("replay-tab").click()');await waitFor(()=>evaluate('Number(document.querySelector("[data-replay-session]")?.dataset.replayRevision)>0'),'event-only data');assert.ok((await evaluate('document.getElementById("replay-panel").innerText')).includes('本机没有配套雷达资源'));assert.equal(await evaluate('document.querySelectorAll("#replay-panel canvas").length'),0);assert.ok(await evaluate('document.querySelectorAll("[aria-label=回放玩家状态] button").length>0'));metrics.eventOnlyFallback='PASS';}
-    else if(broken){await evaluate('[...document.querySelectorAll("button")].find(b=>b.textContent.includes("选择 DEM")).click()');await waitFor(()=>evaluate('document.querySelector("main")?.dataset.status==="error"'),'corrupt DEM error');assert.ok((await evaluate('document.body.innerText')).includes('无法分析此 DEM'));await waitFor(async()=>!processTree().some(p=>p.Role==='analysis-utility'),'failed import worker cleanup');metrics.corruptError='PASS';}
+    else if(broken){await evaluate('[...document.querySelectorAll("button")].find(b=>b.textContent.includes("选择 DEM")).click()');await waitFor(()=>evaluate('document.querySelector("main")?.dataset.status==="error"'),'corrupt DEM error');assert.ok((await evaluate('document.body.innerText')).includes('无法分析此 DEM'));await waitFor(async()=>!(await processTree()).some(p=>p.Role==='analysis-utility'),'failed import worker cleanup');metrics.corruptError='PASS';}
     else assert.equal(await evaluate('document.querySelector("main").dataset.status'),'idle');
-    void evaluate('window.cs2Analyst.window.close()').catch(()=>{});await waitFor(async()=>child.exitCode!==null,'startup/error window close');
+    await closeApp({child,evaluate,socket:page.socket});
   }else{
-  const before=processTree().map(p=>p.Id);
+  const before=(await processTree()).map(p=>p.Id);
   const imported=await evaluate('(async()=>{const start=performance.now();window.__p6=await window.cs2Analyst.importDemo();return {result:window.__p6,totalMs:performance.now()-start};})()');
   assert.equal(imported.result.kind,'success');const report=imported.result.report,meta=report.replay;
   assert.equal(meta.available,true,meta.unavailableReason??'Replay unavailable');assert.equal(report.schemaVersion,2);assert.equal(meta.perspective,'global');
   const {replay,...baseReport}=report;reportFingerprint=hash(baseReport);
   const processes=(await browser.send('SystemInfo.getProcessInfo')).processInfo;
-  const osProcesses=processTree();
+  const osProcesses=(await processTree());
   const workerIds=osProcesses.filter(p=>!before.includes(p.Id)&&p.Role==='analysis-utility').map(p=>p.Id);
   assert.ok(workerIds.length>0,'A real persistent Utility Process must exist');
-  metrics={mode:installed?'installed-test-seam':'built-electron',fixtureSha256:meta.matchId,totalImportMs:imported.totalMs,metadataBytes:Buffer.byteLength(JSON.stringify(meta)),processes,workerIds,processMemory:osProcesses};
+  metrics={mode:installed?'installed-test-seam':nuke?'built-nuke':'built-electron',fixtureSha256:meta.matchId,totalImportMs:imported.totalMs,metadataBytes:Buffer.byteLength(JSON.stringify(meta)),processes,workerIds,processMemory:osProcesses};
   metrics.packageInfo=packageInfo;metrics.offlineDecodedImages=decoded;
   assert.ok(osProcesses.filter(p=>workerIds.includes(p.Id)).every(p=>p.PeakWorkingSet64<=2.5*1024**3),'Analysis utility peak stays within 2.5 GiB');
   const requests=meta.rounds.flatMap(r=>[r.blocks[0],r.blocks.at(-1)].map(b=>({sessionId:meta.sessionId,round:r.round,block:b.index}))).slice(0,12);
@@ -160,23 +165,59 @@ try{
   metrics.firstFrameMs=await evaluate(`performance.now()-${opened}`);assert.ok(metrics.firstFrameMs<=1500);
   assert.ok((await evaluate('document.getElementById("replay-panel").innerText')).includes('全局比赛观察视角'));
   await checkReplayLayout(evaluate, '地图回放默认窗口');
+  if(nuke){
+    assert.equal(meta.map,'de_nuke');
+    const base=`document.querySelector('#replay-panel canvas[aria-hidden=true]')`;
+    // Record the exact decoded asset actually painted into the real base Canvas.
+    // Repeated GPU readback can switch Chromium to software resampling; encoded/pixel equality
+    // across those backends is not a reliable test of which floor was drawn.
+    await evaluate(`(() => {const original=CanvasRenderingContext2D.prototype.drawImage;window.__qaFloorDraws=[];
+      window.__qaRestoreFloorDraw=()=>{CanvasRenderingContext2D.prototype.drawImage=original;};
+      CanvasRenderingContext2D.prototype.drawImage=function(image,...args){if(this.canvas===${base})window.__qaFloorDraws.push({source:image.src,width:image.naturalWidth,height:image.naturalHeight,args});return original.call(this,image,...args);};})()`);
+    await withCleanup(async()=>{
+    for(const label of ['下层','主层','跟随玩家']){
+      await evaluate(`document.querySelector('[aria-label="回放楼层"]').click()`);
+      await waitForUi(evaluate, `Boolean([...document.querySelectorAll('[role=option]')].find(o=>o.textContent.trim()===${JSON.stringify(label)}))`, 'floor options '+label);
+      await evaluate(`[...document.querySelectorAll('[role=option]')].find(o=>o.textContent.trim()===${JSON.stringify(label)}).click()`);
+      await waitForUi(evaluate, `document.querySelector('[aria-label="回放楼层"]').textContent===${JSON.stringify(label)}&&document.querySelector('[data-replay-session]').dataset.replayMapReady==='true'&&${base}.getContext('2d').getImageData(0,0,${base}.width,${base}.height).data.some((v,i)=>i%4===3&&v>0)`, 'floor image ready '+label);
+      const expectedImage=decoded.find(i=>i.url.split('/').at(-1).startsWith(label==='下层'?'de_nuke_lower-':'de_nuke-'));
+      assert.ok(expectedImage,'known decoded Nuke floor asset');
+      await waitForUi(evaluate, `(()=>{const last=window.__qaFloorDraws.at(-1),b=${base};return last?.source===${JSON.stringify(expectedImage.url)}&&last.width===1024&&last.height===1024&&JSON.stringify(last.args)===JSON.stringify([0,0,b.width,b.height]);})()`, 'correct decoded floor painted '+label);
+      if(label==='下层') {
+        // R1 freeze-frame players are on the main floor: no overlay marks is the expected result.
+        await waitForUi(evaluate, `Number(document.querySelector('#replay-panel canvas[role=img]').dataset.playerCount)===0`, 'lower-floor overlay repaint');
+        const state=await evaluate(`(async()=>{const session=document.querySelector('[data-replay-session]');const result=await window.cs2Analyst.replay.getChunk({sessionId:session.dataset.replaySession,round:1,block:0});return {result,drawn:Number(document.querySelector('#replay-panel canvas[role=img]').dataset.playerCount)};})()`);
+        assert.equal(state.result.kind,'success');
+        const firstFrame=state.result.chunk.frames[0];
+        assert.ok(firstFrame.players.every(p=>p[4]!==null&&p[4]>-495),'fixture must independently prove no players on the lower floor');
+        assert.equal(state.drawn,0,'other-floor players must not be painted on the lower floor');
+        await assertReplayContentAccessible(evaluate,'Nuke lower-floor controls and rail');
+      } else await checkReplayLayout(evaluate,'Nuke '+label);
+      const shot=await page.send('Page.captureScreenshot',{format:'png'});writeFileSync(join(qa,`built-nuke-floor-${label}.png`),Buffer.from(shot.data,'base64'));
+    }
+    },[()=>evaluate('window.__qaRestoreFloorDraw();delete window.__qaRestoreFloorDraw;delete window.__qaFloorDraws')]);
+    metrics.floorSwitch='PASS (real Nuke DEM; main/lower/automatic and distinct bitmaps)';
+  }
+
   const uiStart=await evaluate('Number(document.querySelector("[data-replay-session]").dataset.replayTick)');
-  await evaluate('document.querySelector("[aria-label=播放回放]").click()');await delay(600);
-  await evaluate('document.querySelector("[aria-label=暂停回放]").click()');await delay(100);
+  await evaluate('document.querySelector("[aria-label=播放回放]").click()');
+  await waitFor(()=>evaluate(`Number(document.querySelector('#replay-panel canvas[role=img]')?.dataset.tick)>${uiStart}`),'playback frame advances');
+  await evaluate('document.querySelector("[aria-label=暂停回放]").click()');await waitForPausedFrame(evaluate, 'paused clock frame');
+  // A bounded 250ms observation verifies the paused clock stays stable.
   const paused=await evaluate('Number(document.querySelector("#replay-panel canvas[role=img]").dataset.tick)');assert.ok(paused>uiStart);await delay(250);assert.equal(await evaluate('Number(document.querySelector("#replay-panel canvas[role=img]").dataset.tick)'),paused);
   await evaluate('document.querySelector("[aria-label=回放倍速]").click()');
   await evaluate('[...document.querySelectorAll("[role=option]")].find(o=>o.textContent.trim()==="2×").click()');
   const speedStart=await evaluate('Number(document.querySelector("#replay-panel canvas[role=img]").dataset.tick)');
-  await evaluate('document.querySelector("[aria-label=播放回放]").click()');await delay(450);await evaluate('document.querySelector("[aria-label=暂停回放]").click()');await delay(100);
+  await evaluate('document.querySelector("[aria-label=播放回放]").click()');await waitFor(()=>evaluate(`Number(document.querySelector('#replay-panel canvas[role=img]')?.dataset.tick)-${speedStart}>40`),'2x playback advances >40 ticks');await evaluate('document.querySelector("[aria-label=暂停回放]").click()');await waitForPausedFrame(evaluate, '2x paused clock frame');
   const speedEnd=await evaluate('Number(document.querySelector("#replay-panel canvas[role=img]").dataset.tick)');assert.ok(speedEnd-speedStart>40,'2x playback advances the unified clock');
   const boundary=meta.rounds[0].blocks[0].endTick;
   await evaluate(`(()=>{const slider=document.querySelector('[aria-label="回放进度"]');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(slider,${boundary-4});slider.dispatchEvent(new Event('input',{bubbles:true}));})()`);
   await waitFor(()=>evaluate(`Math.abs(Number(document.querySelector('#replay-panel canvas[role=img]').dataset.tick)-${boundary-4})<.01`),'slider seek');
-  await evaluate('document.querySelector("[aria-label=播放回放]").click()');await delay(400);await evaluate('document.querySelector("[aria-label=暂停回放]").click()');await delay(150);
+  await evaluate('document.querySelector("[aria-label=播放回放]").click()');await waitFor(()=>evaluate('Number(document.querySelector("[data-replay-session]").dataset.replayBlock)>=1'),'playback crosses real chunk boundary');await evaluate('document.querySelector("[aria-label=暂停回放]").click()');await waitForUi(evaluate, `Boolean(document.querySelector('[aria-label=播放回放]'))`, 'paused after boundary');
   assert.ok(await evaluate('Number(document.querySelector("[data-replay-session]").dataset.replayBlock)>=1'),'Continuous playback crosses a real chunk boundary');
   await evaluate('document.querySelector("[aria-label=回放回合]").click()');await evaluate('[...document.querySelectorAll("[role=option]")].find(o=>o.textContent.trim()==="R2").click()');
   await waitFor(()=>evaluate('document.querySelector("[data-replay-session]").dataset.replayRound==="2"'),'round selection');
-  await evaluate('document.querySelector("#replay-panel canvas[role=img]").focus()');await page.send('Input.dispatchKeyEvent',{type:'keyDown',key:'ArrowRight',code:'ArrowRight',windowsVirtualKeyCode:39});await page.send('Input.dispatchKeyEvent',{type:'keyUp',key:'ArrowRight',code:'ArrowRight',windowsVirtualKeyCode:39});await delay(150);
+  await evaluate('document.querySelector("#replay-panel canvas[role=img]").focus()');await page.send('Input.dispatchKeyEvent',{type:'keyDown',key:'ArrowRight',code:'ArrowRight',windowsVirtualKeyCode:39});await page.send('Input.dispatchKeyEvent',{type:'keyUp',key:'ArrowRight',code:'ArrowRight',windowsVirtualKeyCode:39});await waitFor(()=>evaluate(`Number(document.querySelector("#replay-panel canvas[role=img]").dataset.tick)>=${meta.rounds[1].startTick+63}`),'keyboard seek frame');
   assert.ok(await evaluate(`Number(document.querySelector("#replay-panel canvas[role=img]").dataset.tick)>=${meta.rounds[1].startTick+63}`));
   await evaluate('document.getElementById("timeline-tab").click();document.querySelector("[data-round-summary]").click()');
   const linkedTick=await evaluate('(()=>{const b=document.querySelector("[data-timeline-replay-tick]");const tick=Number(b.dataset.timelineReplayTick);b.click();return tick;})()');
@@ -199,8 +240,8 @@ try{
     await checkReplayLayout(evaluate, `地图回放 ${width}×${height}`);
     if(width===800){
       await evaluate(`(() => { const rail=document.querySelector('[data-replay-rail]'); window.__railStyle=rail.getAttribute('style'); rail.style.maxHeight='100px'; rail.style.overflowY='hidden'; })()`);
-      try{await assert.rejects(()=>assertReplayContentAccessible(evaluate,'intentional hidden rail probe'),/unreachable/);}
-      finally{await evaluate(`(() => { const rail=document.querySelector('[data-replay-rail]'); if(window.__railStyle===null)rail.removeAttribute('style');else rail.setAttribute('style',window.__railStyle); delete window.__railStyle; })()`);}
+      await withCleanup(()=>assert.rejects(()=>assertReplayContentAccessible(evaluate,'intentional hidden rail probe'),/unreachable/),
+        [()=>evaluate(`(() => { const rail=document.querySelector('[data-replay-rail]'); if(window.__railStyle===null)rail.removeAttribute('style');else rail.setAttribute('style',window.__railStyle); delete window.__railStyle; })()`)]);
       await checkReplayLayout(evaluate,'窄布局反向裁切检查后恢复');
     }
     const screenshot=await page.send('Page.captureScreenshot',{format:'png'});writeFileSync(join(qa,`${metrics.mode}-${width}x${height}.png`),Buffer.from(screenshot.data,'base64'));
@@ -214,11 +255,12 @@ try{
   await page.send('Emulation.clearDeviceMetricsOverride');
   // Real OS minimize: the page must pause, then restore through the existing native window controls.
   await evaluate('document.querySelector("[aria-label=播放回放]").click();window.cs2Analyst.window.minimize()');
-  await waitFor(()=>evaluate('document.hidden'),'native minimize visibility');await delay(150);
+  await waitFor(()=>evaluate('document.hidden&&Boolean(document.querySelector("[aria-label=播放回放]"))'),'native minimize visibility and paused state');
+  // Observe 250ms in the background to detect unintended clock advancement.
   const backgroundTick=await evaluate('Number(document.querySelector("[data-replay-session]").dataset.replayTick)');await delay(250);
   assert.equal(await evaluate('Number(document.querySelector("[data-replay-session]").dataset.replayTick)'),backgroundTick);
   await evaluate('window.cs2Analyst.window.toggleMaximize()');await waitFor(()=>evaluate('!document.hidden'),'native restore');await evaluate('window.cs2Analyst.window.toggleMaximize()');
-  await waitFor(()=>evaluate('Boolean(document.querySelector("[aria-label=播放回放]"))'),'restored playback stays paused');await delay(200);
+  await waitFor(()=>evaluate('Boolean(document.querySelector("[aria-label=播放回放]"))'),'restored playback stays paused');await settleUi(evaluate,'restore geometry');
   const restoredTick=await evaluate('Number(document.querySelector("#replay-panel canvas[role=img]").dataset.tick)');
   assert.ok(restoredTick>=backgroundTick&&restoredTick-backgroundTick<=meta.tickRate*.25,'Restore must not advance by background elapsed time');await delay(300);
   assert.equal(await evaluate('Number(document.querySelector("#replay-panel canvas[role=img]").dataset.tick)'),restoredTick,'Paused clock stays stable after restore');metrics.nativeBackgroundPause='PASS';
@@ -228,33 +270,32 @@ try{
   await evaluate('[...document.querySelectorAll("button")].find(b=>b.textContent==="取消导入").click()');
   await waitFor(()=>evaluate('document.querySelector("main").dataset.status==="success"'),'cancel retains previous report');
   assert.equal((await evaluate(`window.cs2Analyst.replay.getChunk({sessionId:${JSON.stringify(beforeCancel)},round:1,block:0})`)).kind,'error');
-  await waitFor(async()=>!processTree().some(p=>p.Role==='analysis-utility'),'cancelled worker cleanup');
+  await waitFor(async()=>!(await processTree()).some(p=>p.Role==='analysis-utility'),'cancelled worker cleanup');
   await evaluate('[...document.querySelectorAll("button")].find(b=>b.textContent.includes("重新选择 DEM")).click()');
   await waitFor(()=>evaluate('document.querySelector("main").dataset.status==="success"&&Boolean(document.querySelector("[data-replay-session]"))'),'successful reimport after cancellation',120_000);metrics.cancelAndReimport='PASS';
   // A current session can be explicitly released; it must reject requests and terminate its worker.
   const current=await evaluate('document.querySelector("[data-replay-session]").dataset.replaySession');
-  const currentWorkerIds=processTree().filter(p=>p.Role==='analysis-utility').map(p=>p.Id);assert.ok(currentWorkerIds.length>0);
+  const currentWorkerIds=(await processTree()).filter(p=>p.Role==='analysis-utility').map(p=>p.Id);assert.ok(currentWorkerIds.length>0);
   await evaluate(`window.cs2Analyst.replay.release(${JSON.stringify(current)})`);
   assert.equal((await evaluate(`window.cs2Analyst.replay.getChunk({sessionId:${JSON.stringify(current)},round:1,block:0})`)).kind,'error');
-  await waitFor(async()=>!processTree().some(p=>currentWorkerIds.includes(p.Id)),'current worker cleanup');
+  await waitFor(async()=>!(await processTree()).some(p=>currentWorkerIds.includes(p.Id)),'current worker cleanup');
   assert.deepEqual(exceptions,[]);
   await evaluate('[...document.querySelectorAll("button")].find(b=>b.textContent.includes("重新选择 DEM")).click()');
-  await waitFor(async()=>processTree().some(p=>p.Role==='analysis-utility'),'worker exists before close');
+  await waitFor(async()=>(await processTree()).some(p=>p.Role==='analysis-utility'),'worker exists before close');
   assert.ok(['parsing','analyzing'].includes(await evaluate('document.querySelector("main").dataset.status')),'Close-during-parse check must observe an in-flight import');
-  void evaluate('window.cs2Analyst.window.close()').catch(()=>{});await waitFor(async()=>child.exitCode!==null,'window close during native parse');
-  await waitFor(async()=>!processTree().some(p=>p.Role==='analysis-utility'),'no orphan worker');metrics.closeDuringParse='PASS';
+  await closeApp({child,evaluate,socket:page.socket});
+  await waitFor(async()=>!(await processTree()).some(p=>p.Role==='analysis-utility'),'no orphan worker');metrics.closeDuringParse='PASS';
   }
 }catch(error){
-  runFailure=error;
-  if(page)try{const state=await page.send('Runtime.evaluate',{expression:'({text:document.body.innerText,root:document.querySelector("[data-replay-session]")?.outerHTML.slice(0,1000),canvas:[...document.querySelectorAll("#replay-panel canvas")].map(c=>({width:c.width,height:c.height,data:{...c.dataset}}))})',returnByValue:true});writeFileSync(join(qa,'failure-state.json'),JSON.stringify(state,null,2));const shot=await page.send('Page.captureScreenshot',{format:'png'});writeFileSync(join(qa,'failure.png'),Buffer.from(shot.data,'base64'));}catch{}
-  throw new Error(`Replay Electron check failed\n${logs}`,{cause:error});
+  runFailure=new Error(`Replay Electron check failed\n${logs}`,{cause:error});
+  if(page)try{const bitmap=await page.evaluate(`document.querySelector('#replay-panel canvas[aria-hidden=true]')?.toDataURL()`);if(bitmap)writeFileSync(join(qa,'failure-base.png'),Buffer.from(bitmap.split(',')[1],'base64'));const state=await page.send('Runtime.evaluate',{expression:'({text:document.body.innerText,root:document.querySelector("[data-replay-session]")?.outerHTML.slice(0,1000),canvas:[...document.querySelectorAll("#replay-panel canvas")].map(c=>({width:c.width,height:c.height,data:{...c.dataset}}))})',returnByValue:true});writeFileSync(join(qa,'failure-state.json'),JSON.stringify(state,null,2));const shot=await page.send('Page.captureScreenshot',{format:'png'});writeFileSync(join(qa,'failure.png'),Buffer.from(shot.data,'base64'));}catch(diagnosticError){console.warn('Failure diagnostic capture failed:',diagnosticError.message);}
 }
 finally{
-  page?.socket.close();browser?.socket.close();
-  if(child.exitCode===null&&child.pid)spawnSync('taskkill',['/PID',String(child.pid),'/T','/F'],{windowsHide:true,stdio:'ignore'});
-  assert.ok(resolve(profile).startsWith(resolve(profilePrefix)),'Profile cleanup stays within this task temporary profile');
-  try{await rm(profile,{recursive:true,force:true,maxRetries:8,retryDelay:250});}
-  catch(error){if(runFailure)console.warn('Profile cleanup also failed:',error.message);else throw error;}
+  await withCleanup(()=>{if(runFailure)throw runFailure;},[
+    ()=>{page?.socket.close();browser?.socket.close();},
+    ()=>scope.cleanup(),
+    async()=>{assert.ok(resolve(profile).startsWith(resolve(profilePrefix)),'Profile cleanup stays within this task temporary profile');await rm(profile,{recursive:true,force:true,maxRetries:8,retryDelay:250});}
+  ]);
 }
 // The unchanged public report path must equal the worker's report, excluding additive replay metadata.
 if(!production&&!broken&&!noMaps){const { analyzeDemoFile }=await import('../apps/desktop/electron/report.ts');const baseline=await analyzeDemoFile(demo);assert.equal(baseline.kind,'success');assert.equal(hash(baseline.report),reportFingerprint);metrics.reportUnchanged=true;metrics.reportFingerprint=reportFingerprint;}

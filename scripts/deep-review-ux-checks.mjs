@@ -1,8 +1,7 @@
-import { assertNoPageScroll } from './window-shell-checks.mjs';
+import { assertNoPageScroll, settleUi, waitForUi } from './window-shell-checks.mjs';
 import assert from 'node:assert/strict';
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { setTimeout as delay } from 'node:timers/promises';
 
 /** Internal domain vocabulary that must never reach Deep Review user copy. */
 const INTERNAL_TERMS = ['Engagement', 'direct contact', 'evidence', 'partial', 'coverage', 'linkage',
@@ -10,10 +9,10 @@ const INTERNAL_TERMS = ['Engagement', 'direct contact', 'evidence', 'partial', '
 
 /** Runtime-only fixtures through React's existing report props; no shipped test seam. */
 export async function checkDeepReviewUx(evaluate, send, qaDir) {
-  const settle = () => delay(150);
+  const settle = () => settleUi(evaluate);
   const screenshot = async name => {
     if (!qaDir) return;
-    await delay(350);
+    await settleUi(evaluate, 'screenshot layout, fonts and scroll');
     const shot = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false });
     writeFileSync(join(qaDir, name + '.png'), Buffer.from(shot.data, 'base64'));
   };
@@ -38,7 +37,8 @@ export async function checkDeepReviewUx(evaluate, send, qaDir) {
     await evaluate(`document.getElementById('deep-review-tab').click()`); await settle();
   };
   const select = async name => {
-    await evaluate(`document.querySelector('[aria-label="目标玩家"]').click()`); await settle();
+    await evaluate(`document.querySelector('[aria-label="目标玩家"]').click()`);
+    await waitForUi(evaluate, `document.querySelectorAll('[role=option]').length > 0`, 'player options');
     assert.equal(await evaluate(`(() => { const o = [...document.querySelectorAll('[role="option"]')].find(o => o.textContent === ${JSON.stringify(name)}); o?.click(); return Boolean(o); })()`), true);
     await settle();
   };

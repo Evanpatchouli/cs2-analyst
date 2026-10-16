@@ -124,3 +124,55 @@ test('renderer preserves report and player on drop failure/cancel and ignores du
   assert.equal(store.getState().report, next);
   assert.equal(store.getState().playerId, 'p2');
 });
+
+test('rejected dialog/File IPC promises preserve report, target and replay before parsing; recovery accepts a new report', async () => {
+  for (const method of ['importDemo', 'importDroppedFile']) {
+    let reject, resolve;
+    const bridge = { [method]: () => new Promise((ok, fail) => { resolve = ok; reject = fail; }) };
+    const module = { exports: {} };
+    const code = transformSync(readFileSync(new URL('../renderer/src/store.ts', import.meta.url), 'utf8'), { loader: 'ts', format: 'cjs' }).code;
+    vm.runInNewContext(code, { require, module, window: { cs2Analyst: bridge } });
+    const store = module.exports.useReport;
+    const report = { selectedPlayer: 'a', players: [{ id: 'a' }, { id: 'b' }], replay: { available: true, sessionId: 'old' } };
+    store.setState({ status: 'success', report, playerId: 'b' });
+    const pending = store.getState()[method]({});
+    reject(new Error('IPC disconnected')); await pending;
+    assert.equal(store.getState().status, 'error');
+    assert.match(store.getState().error, /桌面分析连接失败/);
+    assert.equal(store.getState().report, report); assert.equal(store.getState().playerId, 'b');
+    assert.equal(store.getState().report.replay.sessionId, 'old');
+    store.getState().selectPlayer('unknown'); assert.equal(store.getState().playerId, 'b');
+    const retry = store.getState()[method]({});
+    store.getState().setPhase('parsing');
+    assert.equal(store.getState().report.replay.available, false);
+    const next = { ...report, selectedPlayer: 'a', replay: { available: true, sessionId: 'new' } };
+    resolve({ kind: 'success', report: next }); await retry;
+    assert.equal(store.getState().status, 'success'); assert.equal(store.getState().report, next);
+    assert.equal(store.getState().playerId, 'a'); assert.equal(store.getState().report.replay.sessionId, 'new');
+  }
+});
+
+test('only successful imports advance the UI revision, including reimporting the same match through either entry', async () => {
+  for (const method of ['importDemo', 'importDroppedFile']) {
+    let complete;
+    const bridge = { [method]: () => new Promise(resolve => { complete = resolve; }) };
+    const module = { exports: {} };
+    const code = transformSync(readFileSync(new URL('../renderer/src/store.ts', import.meta.url), 'utf8'), { loader: 'ts', format: 'cjs' }).code;
+    vm.runInNewContext(code, { require, module, window: { cs2Analyst: bridge } });
+    const store = module.exports.useReport;
+    const report = { match: { id: 'same-match' }, selectedPlayer: 'a', players: [{ id: 'a' }], replay: { available: true, sessionId: 'old' } };
+    store.setState({ status: 'success', report, reportRevision: 7, playerId: 'a' });
+    for (const result of [{ kind: 'cancelled' }, { kind: 'error', message: 'parse failed' }]) {
+      const pending = store.getState()[method]({});
+      store.getState().setPhase('parsing');
+      assert.equal(store.getState().reportRevision, 7);
+      complete(result); await pending;
+      assert.equal(store.getState().reportRevision, 7, 'cancel/error preserves report navigation identity');
+    }
+    for (const revision of [8, 9]) {
+      const pending = store.getState()[method]({});
+      complete({ kind: 'success', report }); await pending;
+      assert.equal(store.getState().reportRevision, revision, 'same match still starts a fresh UI report');
+    }
+  }
+});

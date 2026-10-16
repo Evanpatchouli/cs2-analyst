@@ -13,7 +13,7 @@ const root=fileURLToPath(new URL('../',import.meta.url));
 const qa=join(root,'.tmp/v01-final');mkdirSync(qa,{recursive:true});
 const development=process.argv.includes('--baseline-dev');
 const variant=variants.production;
-variant.installDir=join(qa,'app-production');
+// install() allocates a fresh owned run; never reuse the historical walkthrough directory.
 if(!development) { await install(variant);checkInstalledLayout(variant,false); }
 const executable=development?createRequire(new URL('../apps/desktop/package.json',import.meta.url))('electron'):join(variant.installDir,'CS2 Analyst.exe');
 const session=await launchSession(executable,{},'final native chooser walkthrough',development?[join(root,'apps/desktop')]:[]);
@@ -50,7 +50,7 @@ const server=createServer(async(req,res)=>{
   } else if(command.action==='viewport') { await session.send('Emulation.setDeviceMetricsOverride',{width:1280,height:900,deviceScaleFactor:1,mobile:false});await session.send('Emulation.setFocusEmulationEnabled',{enabled:true});value=true; }
   else if(command.action==='finish') {
    assert.deepEqual(session.errors,[]);assert.equal(await closeGracefully(session),0);
-   await waitFor(()=>appProcesses().length===0,20000,'no workers');
+   await waitFor(async()=>(await appProcesses()).length===0,20000,'no workers');
    if(!development)await uninstall(variant);
    value={exit:0,workers:0,uninstalled:!development};
    setTimeout(()=>server.close(),100);

@@ -1,5 +1,17 @@
 # Windows 打包与安装（P5.2）
 
+## 当前安装 smoke 的隔离与诊断（2026-10-17）
+
+`test:installed` 现在先只读检查 Windows 进程及 HKCU/HKLM 的 32/64 位卸载注册。发现已有 CS2 Analyst 安装或进程时输出 PID、路径、卸载注册证据并退出；不会自动删除旧安装、注册或用户数据。生产与 test-seam 安装沿用各自 appId，顺序执行，前一包完全卸载后才安装后一包。
+
+- 每次运行分配新的 `<repo>/.tmp/installed-smoke-runs/run-*/`，写入 `.smoke-owner.json`；安装目标必须在该运行目录内，且不能经过 junction/symlink、越界或覆盖已有目录。历史 `.tmp/installed-smoke`、`.tmp/v01-final` 不会被重置。
+- 安装器及卸载器启动均有 120 秒退出期限；安装文件出现另等最多 15 秒，卸载的文件、注册与所属子进程退出另等最多 120 秒。NSIS 卸载启动器退出 0 不等于卸载完成：临时子进程仍可能工作。各次 OS 查询也有 10 秒上限。
+- 启动前记录时间，结合 PID、Windows CreationDate 确认根进程及后代；保留已退出父进程的关系，以识别孤儿 worker/NSIS helper。清理时持有进程句柄并核对 StartTime，只终止本次测试进程，不再按映像名杀进程。退出竞态必须通过另一次身份查询证实。
+- 每个应用会话使用本次运行目录内独立的 `--user-data-dir`，不读写通常的用户 profile。卸载器沿用 `deleteAppDataOnUninstall: false`。运行目录及诊断材料保留，脚本不递归删除旧目录。
+- `lifecycle.json` 记录启动顺序、PID/时间/已确认后代、退出码、耗时、可用 stdout/stderr 和安装目录状态；`native-*.json` 记录包内原生绑定摘要。超时或退出非零均失败，清理异常附加到主失败，不能将其覆盖。
+
+生产包验证 ASAR/原生绑定/安全开关/图标/快捷方式、环境变量路径注入无效，以及真实磁盘 File 经 Home drop/preload/IPC 导入、非 DEM 拒绝和恢复。磁盘 File 由 CDP 提供，**不等于 Explorer 拖放**。Test-seam 包另外验证真实报告、损坏重导入保留旧报告/玩家而退役旧回放、恢复、分析中关闭与 worker 清理。完整本轮结果见 [质量验收记录](./ui-ipc-quality-acceptance.md)。下方有日期的结果均为历史记录。
+
 2026-10-09 P5.7.0.2：原生依赖改为固定 v0.42.0 + #363 backport 的 `@cs2-analyst/demoparser-native`，MSVC 构建、source/binary SHA 校验、两安装包及干净检出 installed smoke **PASS**。完整 provenance、SHA 与当前验收见 [handle fix](./demoparser-handle-fix.md)；下文带日期的旧实测结果保留为历史。
 
 P5.2 把 P5.1 的桌面链路做成真正可安装、脱离 pnpm workspace 也能运行的 Windows 版本：

@@ -422,15 +422,15 @@ function Report({ report, playerId, replayActive, activeTab, onSelectView }: {
 
 function App() {
   const s = useStyles();
-  const { status, report, playerId, error, importDemo, importDroppedFile, setPhase, cancelImport } = useReport();
+  const { status, report, reportRevision, playerId, error, importDemo, importDroppedFile, setPhase, cancelImport } = useReport();
   useEffect(() => window.cs2Analyst.onProgress(setPhase), [setPhase]);
   const busy = status === 'selecting' || status === 'parsing' || status === 'analyzing';
   const phase = status === 'selecting' ? '正在选择 DEM…' : status === 'parsing' ? '正在后台解析 DEM…' : '正在生成指标与深度复盘…';
   const [activeView, setActiveView] = useState<ViewId>('report');
   const [collapsed, setCollapsed] = useState(false);
-  // A freshly imported match always opens on its report view.
-  const matchId = report?.match.id;
-  useEffect(() => { setActiveView('report'); }, [matchId]);
+  // Every successful import opens a fresh report, including another import of the same DEM.
+  // Parsing, failure and cancellation keep the previous report's navigation state.
+  useEffect(() => { setActiveView('report'); }, [reportRevision]);
   return <>
     <Sidebar reportReady={Boolean(report)} busy={busy} collapsed={collapsed} activeView={activeView}
       importLabel={report || status === 'error' ? '重新选择 DEM' : '选择 DEM'}
@@ -444,7 +444,7 @@ function App() {
       </div> : null}
       {report ? <>
         {status === 'error' || busy ? <div className={s.banner}><Caption1>下方为上一次成功导入的报告。</Caption1></div> : null}
-        <Report key={report.match.id} report={report} playerId={playerId} replayActive={!busy&&status==='success'} activeTab={activeView} onSelectView={setActiveView} />
+        <Report key={reportRevision} report={report} playerId={playerId} replayActive={!busy&&status==='success'} activeTab={activeView} onSelectView={setActiveView} />
       </> : busy ? <div className={s.center} role="status">
         <Spinner size="large" label={phase} />
         <Caption1 className={s.muted}>大型录像可能需要数十秒，请保持应用打开。</Caption1>
