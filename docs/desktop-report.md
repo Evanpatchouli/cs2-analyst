@@ -6,7 +6,7 @@
 Renderer第五个mounted Tab为Canvas 2D+Fluent v9播放器，3块LRU，统一时钟，保守显示插值与文字入口。
 Timeline/Findings可定位回合与精确tick，原数据/筛选/确定性算法不变。
 
-地图来自维护阶段固定manifest提取的资源；按用户2026-10-16指令，仓库包含五张Valve PNG和四份原overview，来源/摘要见资源清单。
+地图来自维护阶段固定manifest提取的资源；按用户2026-10-16指令，仓库包含Dust2、Inferno、Mirage、Ancient、Overpass、Vertigo、Nuke、Anubis、Train、Cache十图的13张Valve PNG和10份原overview（Nuke/Vertigo/Train双层），来源/摘要见资源清单。
 正常检出即可构建离线地图；`node scripts/prepare-replay-maps.mjs .tmp/p6-official`可从已验证提取目录重新准备图片，缺图时仍可构建/查看报告和事件。
 Desktop构建缓存禁用，避免含图/缺图构建错误复用；build/pack校验所有现有图片摘要，不运行下载工具。
 新接口、限制与本次实际验收以[Replay contract](./replay-contract.md)和[实施记录](./replay-implementation.md)为准。

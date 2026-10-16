@@ -2,7 +2,7 @@
 
 日期：2026-10-15。状态：P6.0–P6.4已完成本机范围的实现/自动化验收；真实结果、失败历史与固定预算见 [实施记录](./replay-implementation.md) / [验收JSON](./replay-acceptance.json)。
 用户指定仅使用现有 `spirit-vs-faze-m3-dust2.dem` 作本次真实 DEM 验证；其他样本缺失不阻塞，未执行项如实保留。
-原P6验收使用范围为本机个人、非商业开发/安装验证。用户于2026-10-16进一步明确将地图资源一并提交/推送：五张PNG与四份原overview随仓库保存；第三方分发许可仍未确认的记录保留。
+原P6验收使用范围为本机个人、非商业开发/安装验证。用户于2026-10-16进一步明确将地图资源一并提交/推送，并扩展至Dust2、Inferno、Mirage、Ancient、Overpass、Vertigo、Nuke、Anubis、Train、Cache十图：13张PNG与10份原overview随仓库保存；第三方分发许可仍未确认的记录保留。
 安装包、DEM、VPK和提取工具仍为本机产物，不随本次地图资源提交。
 其他真实地图/个人DEM与旧golden缺失按用户限定范围不阻塞，未执行项不记PASS；所有地图版本匹配仍未确认。
 
@@ -102,7 +102,7 @@ P6 仅完成可核验的平面投影与层级展示，不需要 nav mesh 或 col
 | P6.3 播放器与证据联动 | Canvas 播放、暂停、倍速、seek、回合/玩家/楼层切换，Timeline/Findings 联动；缺失数据和长回合可理解地展示 |
 | P6.4 回归与安装验收 | 全链路与 Windows 安装版离线资源验证、性能实测及独立复核；同步实际状态和限制 |
 
-Dust2 是首个可验证纵向切片，不把整个 P6 锁死到 Dust2；Nuke 验证多层，Inferno/Mirage 验证既有核心跨图兼容。复用 [fixture matrix](./demo-fixtures.md)，核查真实文件与身份；Train 继续排除，extended 地图不自动升级为强制 gate。
+Dust2 是首个可验证纵向切片，不把整个 P6 锁死到 Dust2。当前按用户扩图指令支持十图底图，Nuke/Vertigo/Train按配套overview处理双层。真实DEM gate仍按用户指定的单一Dust2范围执行；资源支持不改变 [fixture matrix](./demo-fixtures.md) 的历史强制样本规则，也不代表新增地图已完成真实配准。
 
 具体验收至少覆盖：
 

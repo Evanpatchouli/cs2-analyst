@@ -7,7 +7,9 @@ const input = process.argv[2]; assert.ok(input, 'prepare-replay-maps <explicit e
 const manifest = JSON.parse(await readFile(new URL('../docs/replay-resources.json', import.meta.url), 'utf8'));
 const actual = await auditResourceDirectory(resolve(input));
 const output = new URL('../apps/desktop/renderer/src/assets/replay-maps/', import.meta.url);
+const overviewOutput = new URL('../apps/desktop/renderer/src/assets/replay-overviews/', import.meta.url);
 // Verify the whole set before copying any file. Never overwrite from an unverified package.
+assert.equal(actual.length, manifest.maps.length);
 for (const map of actual) {
   const expected = manifest.maps.find(m => m.map === map.map); assert.ok(expected);
   assert.equal(map.overview.sha256, expected.overview.sha256);
@@ -15,5 +17,9 @@ for (const map of actual) {
   assert.deepEqual(map.images, expected.images);
 }
 await mkdir(output, { recursive: true });
-for (const map of actual) for (const image of map.images) await copyFile(resolve(input, image.path), new URL(`${map.map}${image.id === 'default' ? '' : '_' + image.id}.png`, output));
-console.log('Prepared 5 verified radar images. Repository assets must match docs/replay-resources.json.');
+await mkdir(overviewOutput, { recursive: true });
+for (const map of actual) {
+  await copyFile(resolve(input, map.overview.path), new URL(`${map.map}.txt`, overviewOutput));
+  for (const image of map.images) await copyFile(resolve(input, image.path), new URL(`${map.map}${image.id === 'default' ? '' : '_' + image.id}.png`, output));
+}
+console.log(`Prepared ${actual.flatMap(map => map.images).length} verified radar images and ${actual.length} overviews. Repository assets must match docs/replay-resources.json.`);

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "resourceId": "valve-730-2347770-2312433566686574487-vrf20.1",
-  "date": "2026-10-15",
+  "date": "2026-10-16",
   "source": {
     "kind": "Valve Steam distribution; locally extracted with open-source tools",
     "appId": 730,
@@ -66,6 +66,46 @@
         "name": "pak01_dir.vpk",
         "bytes": 7706712,
         "sha256": "d219493f5ba3205e544ec5320e109c390d3dd55ce37c0e7ced2f732f19210953"
+      },
+      {
+        "name": "pak01_158.vpk",
+        "bytes": 103986280,
+        "sha256": "6ee31c225bdef1c13c5dec665fa0cd2c9c724e0acbe99f6a55a3e491f95a4210"
+      },
+      {
+        "name": "pak01_187.vpk",
+        "bytes": 100778367,
+        "sha256": "a15b1072ab36e9f16b7d88a687764bac8e9f85386127bb5794f54e079b567c84"
+      },
+      {
+        "name": "pak01_281.vpk",
+        "bytes": 103069897,
+        "sha256": "9f799ad63f024c87f4ddcfa9820e39dc1f1aec1d62057f8c97129c5f4a42e1ce"
+      },
+      {
+        "name": "pak01_309.vpk",
+        "bytes": 106815936,
+        "sha256": "75d78494f543cb31f164d67a5db19c309112fd36a350b02d38bf6642e985f6f8"
+      },
+      {
+        "name": "pak01_366.vpk",
+        "bytes": 102404699,
+        "sha256": "99b8842afe8db5fc6d51df53972f04bf96fed77bd0fecb083cdfd8d2de8e8b57"
+      },
+      {
+        "name": "pak01_462.vpk",
+        "bytes": 121201916,
+        "sha256": "6f1c118e8c2b284a5abacb96bd1d6f4374eb3d2316d4ee99154d9929eee1e789"
+      },
+      {
+        "name": "pak01_471.vpk",
+        "bytes": 82519517,
+        "sha256": "5a063baf103b1432fbd3908bd76f4f82082702f641ee8d04959edc79bcd67d53"
+      },
+      {
+        "name": "pak01_502.vpk",
+        "bytes": 99618250,
+        "sha256": "f42799aa20148f38699bd676099ec4428a6463f4588e4abcf14c9c6544719865"
       }
     ]
   },
@@ -78,7 +118,7 @@
       "https://github.com/pnxenopoulos/awpy-data/blob/7c73907f74521d271f0eb40bcbe14a4912184e05/README.md",
       "https://github.com/MurkyYT/cs2-map-icons/tree/9a22f424dab892f8fd59cec100029883c05e6116"
     ],
-    "publicSourcePolicy": "Five pinned radar PNGs and four original overviews are tracked with code, digests and normalized metadata. Installers, screenshots, DEMs, VPKs and extraction tools remain local."
+    "publicSourcePolicy": "Thirteen pinned radar PNGs and ten original overviews are tracked with code, digests and normalized metadata, covering the ten maps requested by the user on 2026-10-16. Installers, screenshots, DEMs, VPKs and extraction tools remain local."
   },
   "maps": [
     {
@@ -108,6 +148,167 @@
       ],
       "demVersionMatch": "unconfirmed",
       "registration": "four-region-pass; see replay-calibration.json"
+    },
+    {
+      "map": "de_inferno",
+      "overview": {
+        "path": "resource/overviews/de_inferno.txt",
+        "bytes": 414,
+        "sha256": "ff93b0ff1f6705ccfb4daf3b038dd88ccdf3ca776823667c19782650e94d2c54",
+        "transform": {
+          "posX": -2087,
+          "posY": 3870,
+          "scale": 4.9
+        },
+        "layers": []
+      },
+      "images": [
+        {
+          "id": "default",
+          "minZ": null,
+          "maxZ": null,
+          "path": "panorama/images/overheadmaps/de_inferno_radar_psd.png",
+          "bytes": 136914,
+          "sha256": "53e1d660d5e61a9b876cc56725c2e891c56efcb788657520fa9c10fec321dce3",
+          "width": 1024,
+          "height": 1024
+        }
+      ],
+      "demVersionMatch": "unconfirmed",
+      "registration": "not independently registered with a real DEM"
+    },
+    {
+      "map": "de_mirage",
+      "overview": {
+        "path": "resource/overviews/de_mirage.txt",
+        "bytes": 640,
+        "sha256": "f201fd608d6ea0bd091920620a4f74e97197d26caf36f133875b58d5ba1d77fe",
+        "transform": {
+          "posX": -3230,
+          "posY": 1713,
+          "scale": 5
+        },
+        "layers": []
+      },
+      "images": [
+        {
+          "id": "default",
+          "minZ": null,
+          "maxZ": null,
+          "path": "panorama/images/overheadmaps/de_mirage_radar_psd.png",
+          "bytes": 143685,
+          "sha256": "c8032f6c83ffca63c0a20ebdcc598a0e1aa618efd746e381e2db26f33a4a964f",
+          "width": 1024,
+          "height": 1024
+        }
+      ],
+      "demVersionMatch": "unconfirmed",
+      "registration": "not independently registered with a real DEM"
+    },
+    {
+      "map": "de_ancient",
+      "overview": {
+        "path": "resource/overviews/de_ancient.txt",
+        "bytes": 447,
+        "sha256": "f6b420a983e2702c3c0d903a901483b6bc61fcf5eef2b6fb62da485ba93eb3c1",
+        "transform": {
+          "posX": -2953,
+          "posY": 2164,
+          "scale": 5
+        },
+        "layers": []
+      },
+      "images": [
+        {
+          "id": "default",
+          "minZ": null,
+          "maxZ": null,
+          "path": "panorama/images/overheadmaps/de_ancient_radar_psd.png",
+          "bytes": 89550,
+          "sha256": "cb6adca45e32ecff0b131f742c129324ba5e2dd695247f61d2d21d85ef2c581c",
+          "width": 1024,
+          "height": 1024
+        }
+      ],
+      "demVersionMatch": "unconfirmed",
+      "registration": "not independently registered with a real DEM"
+    },
+    {
+      "map": "de_overpass",
+      "overview": {
+        "path": "resource/overviews/de_overpass.txt",
+        "bytes": 444,
+        "sha256": "23b44305d79a15dc9feea71528a7015d6f3612044a8367f29b20c65aec2e7897",
+        "transform": {
+          "posX": -4831,
+          "posY": 1781,
+          "scale": 5.2
+        },
+        "layers": []
+      },
+      "images": [
+        {
+          "id": "default",
+          "minZ": null,
+          "maxZ": null,
+          "path": "panorama/images/overheadmaps/de_overpass_radar_psd.png",
+          "bytes": 290940,
+          "sha256": "2a59b62668e80037b5a88e980f56af360269f5ea581d52eb0669d78a981f0d96",
+          "width": 1024,
+          "height": 1024
+        }
+      ],
+      "demVersionMatch": "unconfirmed",
+      "registration": "not independently registered with a real DEM"
+    },
+    {
+      "map": "de_vertigo",
+      "overview": {
+        "path": "resource/overviews/de_vertigo.txt",
+        "bytes": 767,
+        "sha256": "61cd5156d443c10c898283dfb98cdfaf5befb2a24afa18e27f76b89b4d908541",
+        "transform": {
+          "posX": -3168,
+          "posY": 1762,
+          "scale": 4
+        },
+        "layers": [
+          {
+            "id": "default",
+            "minZ": 11700,
+            "maxZ": 20000
+          },
+          {
+            "id": "lower",
+            "minZ": -10000,
+            "maxZ": 11700
+          }
+        ]
+      },
+      "images": [
+        {
+          "id": "default",
+          "minZ": 11700,
+          "maxZ": 20000,
+          "path": "panorama/images/overheadmaps/de_vertigo_radar_psd.png",
+          "bytes": 97762,
+          "sha256": "d2e2e18668f951f7d3b7c6a4fe4580632d5de253d0991f4b9639f9eca73264bf",
+          "width": 1024,
+          "height": 1024
+        },
+        {
+          "id": "lower",
+          "minZ": -10000,
+          "maxZ": 11700,
+          "path": "panorama/images/overheadmaps/de_vertigo_lower_radar_psd.png",
+          "bytes": 123826,
+          "sha256": "61639197f940d9702f6cb5476a38ae932a821170cdb6405f14733a5b83e32723",
+          "width": 1024,
+          "height": 1024
+        }
+      ],
+      "demVersionMatch": "unconfirmed",
+      "registration": "not independently registered with a real DEM"
     },
     {
       "map": "de_nuke",
@@ -159,15 +360,15 @@
       "registration": "not independently registered with a real DEM"
     },
     {
-      "map": "de_inferno",
+      "map": "de_anubis",
       "overview": {
-        "path": "resource/overviews/de_inferno.txt",
-        "bytes": 414,
-        "sha256": "ff93b0ff1f6705ccfb4daf3b038dd88ccdf3ca776823667c19782650e94d2c54",
+        "path": "resource/overviews/de_anubis.txt",
+        "bytes": 254,
+        "sha256": "f83755ed8a85365923ac565d3fbd2ab1391e75d8b89cfd759da9214bf80e9fff",
         "transform": {
-          "posX": -2087,
-          "posY": 3870,
-          "scale": 4.9
+          "posX": -2796,
+          "posY": 3328,
+          "scale": 5.22
         },
         "layers": []
       },
@@ -176,9 +377,9 @@
           "id": "default",
           "minZ": null,
           "maxZ": null,
-          "path": "panorama/images/overheadmaps/de_inferno_radar_psd.png",
-          "bytes": 136914,
-          "sha256": "53e1d660d5e61a9b876cc56725c2e891c56efcb788657520fa9c10fec321dce3",
+          "path": "panorama/images/overheadmaps/de_anubis_radar_psd.png",
+          "bytes": 218922,
+          "sha256": "b8f07c36edb13e34dbfaabf9a74e057961ac4fb29545d98d16ff9b7c4e6d1206",
           "width": 1024,
           "height": 1024
         }
@@ -187,15 +388,64 @@
       "registration": "not independently registered with a real DEM"
     },
     {
-      "map": "de_mirage",
+      "map": "de_train",
       "overview": {
-        "path": "resource/overviews/de_mirage.txt",
-        "bytes": 640,
-        "sha256": "f201fd608d6ea0bd091920620a4f74e97197d26caf36f133875b58d5ba1d77fe",
+        "path": "resource/overviews/de_train.txt",
+        "bytes": 547,
+        "sha256": "13600850d41b034d973102602e5694e6c09057390d4d37490e605f54b71b4d55",
         "transform": {
-          "posX": -3230,
-          "posY": 1713,
-          "scale": 5
+          "posX": -2308,
+          "posY": 2078,
+          "scale": 4.082077
+        },
+        "layers": [
+          {
+            "id": "default",
+            "minZ": -50,
+            "maxZ": 20000
+          },
+          {
+            "id": "lower",
+            "minZ": -5000,
+            "maxZ": -50
+          }
+        ]
+      },
+      "images": [
+        {
+          "id": "default",
+          "minZ": -50,
+          "maxZ": 20000,
+          "path": "panorama/images/overheadmaps/de_train_radar_psd.png",
+          "bytes": 146404,
+          "sha256": "ccdb11d6f9fbfb7bf199dfa35d58b3e86131a2c872f38b67502d1be3759e912e",
+          "width": 1024,
+          "height": 1024
+        },
+        {
+          "id": "lower",
+          "minZ": -5000,
+          "maxZ": -50,
+          "path": "panorama/images/overheadmaps/de_train_lower_radar_psd.png",
+          "bytes": 135051,
+          "sha256": "bc1aa9b1bbcceb06b8e82b7e0980ae11188aa1d460a2e799da9ecd8e21e4d67a",
+          "width": 1024,
+          "height": 1024
+        }
+      ],
+      "demVersionMatch": "unconfirmed",
+      "registration": "not independently registered with a real DEM"
+    },
+    {
+      "map": "de_cache",
+      "overview": {
+        "path": "resource/overviews/de_cache.txt",
+        "bytes": 527,
+        "sha256": "4344e0364bc9ec31f9f3fc04fe24aacb465e5252f8c173e661cebec586b54c0d",
+        "transform": {
+          "posX": -2000,
+          "posY": 3250,
+          "scale": 5.5
         },
         "layers": []
       },
@@ -204,9 +454,9 @@
           "id": "default",
           "minZ": null,
           "maxZ": null,
-          "path": "panorama/images/overheadmaps/de_mirage_radar_psd.png",
-          "bytes": 143685,
-          "sha256": "c8032f6c83ffca63c0a20ebdcc598a0e1aa618efd746e381e2db26f33a4a964f",
+          "path": "panorama/images/overheadmaps/de_cache_radar_psd.png",
+          "bytes": 93413,
+          "sha256": "94c058b3deaa5cc24be81006322da3af1ef0bbded116160a3fcdea6d87227967",
           "width": 1024,
           "height": 1024
         }
@@ -267,25 +517,91 @@
         "awpyMatchesOfficial": true,
         "murkySha256": "5de1cc16362e538dc5f4561a24661cb1fb1c15c77ec289e32b44c0fc07bfb85b",
         "murkyMatchesOfficial": false
+      },
+      {
+        "map": "de_ancient",
+        "layer": "default",
+        "awpySha256": "cb6adca45e32ecff0b131f742c129324ba5e2dd695247f61d2d21d85ef2c581c",
+        "awpyMatchesOfficial": true
+      },
+      {
+        "map": "de_overpass",
+        "layer": "default",
+        "awpySha256": "2a59b62668e80037b5a88e980f56af360269f5ea581d52eb0669d78a981f0d96",
+        "awpyMatchesOfficial": true
+      },
+      {
+        "map": "de_vertigo",
+        "layer": "default",
+        "awpySha256": "d2e2e18668f951f7d3b7c6a4fe4580632d5de253d0991f4b9639f9eca73264bf",
+        "awpyMatchesOfficial": true
+      },
+      {
+        "map": "de_vertigo",
+        "layer": "lower",
+        "awpySha256": "61639197f940d9702f6cb5476a38ae932a821170cdb6405f14733a5b83e32723",
+        "awpyMatchesOfficial": true
+      },
+      {
+        "map": "de_anubis",
+        "layer": "default",
+        "awpySha256": "b8f07c36edb13e34dbfaabf9a74e057961ac4fb29545d98d16ff9b7c4e6d1206",
+        "awpyMatchesOfficial": true
+      },
+      {
+        "map": "de_train",
+        "layer": "default",
+        "awpySha256": "ccdb11d6f9fbfb7bf199dfa35d58b3e86131a2c872f38b67502d1be3759e912e",
+        "awpyMatchesOfficial": true
+      },
+      {
+        "map": "de_train",
+        "layer": "lower",
+        "awpySha256": "bc1aa9b1bbcceb06b8e82b7e0980ae11188aa1d460a2e799da9ecd8e21e4d67a",
+        "awpyMatchesOfficial": true
+      },
+      {
+        "map": "de_cache",
+        "layer": "default",
+        "awpySha256": "94c058b3deaa5cc24be81006322da3af1ef0bbded116160a3fcdea6d87227967",
+        "awpyMatchesOfficial": true
       }
     ]
   },
   "extraction": {
-    "imageFilter": "panorama/images/overheadmaps/de_dust2,panorama/images/overheadmaps/de_nuke,panorama/images/overheadmaps/de_inferno,panorama/images/overheadmaps/de_mirage",
-    "overviewFilter": "resource/overviews/de_dust2.txt,resource/overviews/de_nuke.txt,resource/overviews/de_inferno.txt,resource/overviews/de_mirage.txt",
+    "imageFilter": "panorama/images/overheadmaps/de_dust2_radar_psd.vtex_c,panorama/images/overheadmaps/de_inferno_radar_psd.vtex_c,panorama/images/overheadmaps/de_mirage_radar_psd.vtex_c,panorama/images/overheadmaps/de_ancient_radar_psd.vtex_c,panorama/images/overheadmaps/de_overpass_radar_psd.vtex_c,panorama/images/overheadmaps/de_vertigo_radar_psd.vtex_c,panorama/images/overheadmaps/de_vertigo_lower_radar_psd.vtex_c,panorama/images/overheadmaps/de_nuke_radar_psd.vtex_c,panorama/images/overheadmaps/de_nuke_lower_radar_psd.vtex_c,panorama/images/overheadmaps/de_anubis_radar_psd.vtex_c,panorama/images/overheadmaps/de_train_radar_psd.vtex_c,panorama/images/overheadmaps/de_train_lower_radar_psd.vtex_c,panorama/images/overheadmaps/de_cache_radar_psd.vtex_c",
+    "overviewFilter": "resource/overviews/de_dust2.txt,resource/overviews/de_inferno.txt,resource/overviews/de_mirage.txt,resource/overviews/de_ancient.txt,resource/overviews/de_overpass.txt,resource/overviews/de_vertigo.txt,resource/overviews/de_nuke.txt,resource/overviews/de_anubis.txt,resource/overviews/de_train.txt,resource/overviews/de_cache.txt",
     "method": "Source2Viewer-CLI -i <explicit pak01_dir.vpk> -o <output directory/> -d -f <exact filter>",
     "notes": [
       "No game installation or local Steam directory scan",
-      "Only dir VPK plus six required archive volumes downloaded",
-      "One Inferno overview extraction attempted while the volume was locked; CLI returned 0 despite logging an IO error. Retried after download; offline audit confirms all nine files",
-      "Community PNG encoders/alpha handling differ; images are not mixed with other-release overview data"
+      "Initial four-map set used dir VPK plus six volumes; ten-map expansion added eight volumes selected by the same VPK index, without installing CS2",
+      "During initial four-map preparation, an Inferno overview extraction failed while its volume was locked despite CLI exit 0. Retry and audit verified those original nine files; the later expansion verifies all 23 repository files",
+      "Community PNG encoders/alpha handling differ; images are not mixed with other-release overview data",
+      "Cache uses de_cache_radar_psd from this fixed Valve manifest; the alternative radar_tga is not used. Map-name presence does not establish a DEM build match."
     ]
   },
   "repositoryAssets": {
     "images": "apps/desktop/renderer/src/assets/replay-maps/",
     "overviews": "apps/desktop/renderer/src/assets/replay-overviews/",
-    "files": 9,
-    "bytes": 652183,
+    "files": 23,
+    "bytes": 1851037,
     "overviewLineEndings": "Original bytes preserved via directory .gitattributes"
+  },
+  "expansion": {
+    "date": "2026-10-16",
+    "requestedMaps": [
+      "de_dust2",
+      "de_inferno",
+      "de_mirage",
+      "de_ancient",
+      "de_overpass",
+      "de_vertigo",
+      "de_nuke",
+      "de_anubis",
+      "de_train",
+      "de_cache"
+    ],
+    "source": "Same Valve app/depot/manifest and extraction tool as the initial four maps",
+    "realDemValidation": "Only the existing Dust2 validation; no added real DEM claims"
   }
 }

@@ -5,7 +5,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 
-export const replayMaps = ['de_dust2', 'de_nuke', 'de_inferno', 'de_mirage'];
+export const replayMaps = ['de_dust2', 'de_inferno', 'de_mirage', 'de_ancient', 'de_overpass', 'de_vertigo', 'de_nuke', 'de_anubis', 'de_train', 'de_cache'];
 export const sha256 = bytes => createHash('sha256').update(bytes).digest('hex');
 export function parseOverview(text, map) {
   const tokens = text.replace(/\/\/[^\r\n]*/g, '').match(/"[^"\r\n]*"|[{}]/g) ?? [];

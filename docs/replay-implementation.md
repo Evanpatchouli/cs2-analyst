@@ -7,6 +7,7 @@ SHA-256 `db90fe85aab023a1d2c8a5996182e6120d98ef494f02a070b17982b235e4958c`，557
 缺少其他 DEM 不作为阻塞；未执行的其他地图/个人 DEM 验证不得称为通过。
 初次验收时用户确认资源用于本机个人、非商业开发与安装验证；第三方公开分发许可保持未确认。
 2026-10-16用户进一步明确将地图资源一并提交/推送：仓库纳入五张PNG与四份原overview，安装包仍留本机；见本文末尾补充记录。
+随后同日按用户列出的十图扩展至13张PNG与10份原overview，并接入回放地图/楼层配置；各阶段原测量保留为历史记录。
 
 ## P6.0 — 本机个人非商业开发验证通过
 
@@ -255,3 +256,46 @@ node scripts/replay-installed-smoke.mjs
 九份资源均与固定来源清单摘要一致；资源/地图投影/楼层边界相关测试7/7通过，
 `pnpm --filter @cs2-analyst/desktop build`（含typecheck和资源摘要预检）通过，产物包含全部五张PNG。
 本次未改变回放逻辑或重新执行完整DEM/安装验收；P6.4测量仍为2026-10-15的实际记录。
+
+## 2026-10-16 — 补齐用户指定的十张地图
+
+最初P6范围为Dust2、Inferno、Mirage、Nuke四图，Nuke分上下层，因此原来是五张图片。
+用户随后明确要求Dust2、Inferno、Mirage、Ancient、Overpass、Vertigo、Nuke、Anubis、Train、Cache十图。
+现在共13张1024×1024雷达PNG、10份原始overview，合计1851037字节，全部随仓库保存。
+
+| 地图 | 图片数 | 层级 |
+| --- | --- | --- |
+| Dust2 / Inferno / Mirage / Ancient / Overpass / Anubis / Cache | 各1 | 配套单层底图 |
+| Nuke | 2 | 共享边界Z=-495 |
+| Vertigo | 2 | 共享边界Z=11700 |
+| Train | 2 | 共享边界Z=-50 |
+
+全部资源直接提取自同一Valve分发版本：app730 / depot2347770 / manifest2312433566686574487，
+使用已固定的DepotDownloader3.4.0和Source2Viewer CLI20.1。根据既有VPK索引追加获取8个分卷，
+实际压缩传输685997344字节、未压缩820394862字节；未安装CS2或扫描游戏目录。
+Cache使用该manifest中的`de_cache_radar_psd`及其配套overview，未采用另一个`radar_tga`版本。
+13张PNG均与固定[awpy-data 2000930](https://github.com/pnxenopoulos/awpy-data/releases/tag/2000930)逐字节相同，
+社区包仅作交叉核对。具体来源、提取路径、工具/VPK/文件摘要与坐标参数见[资源清单](./replay-resources.json)。
+
+Renderer新增六图定义，Train/Vertigo按配套overview分层；共享边界、未知/越界Z仍不自动归层。
+准备器同时校验并复制图片与原始overview；审计与Electron smoke按清单覆盖全部资源，移除四图正则/五图数量假设。
+
+实际验证：资源/投影/楼层/插值小集16/16，独立复核再次16/16；Desktop回归49 PASS / 1 SKIP，
+仍明确过滤缺`nuke.dem`的旧真实Nuke case。`pnpm typecheck`15/15、`pnpm build`8/8通过。
+构建后的13张PNG摘要与清单逐一相同；真实Electron断网条件下全部13张图片解码通过。
+指定Dust2的完整播放/seek/跨块/证据联动、取消重导入、后台暂停、关闭清理与原报告hash一致性smoke通过：
+导入7.62秒、首帧103.4ms、12次分块IPC p95=7.6ms、Canvas动态绘制p95=0.3ms。
+新增八张图片已实际查看；23份资源与直接提取文件、8新增VPK摘要另经独立复核。
+
+本次没有新增地图的真实DEM配准，也未重跑NSIS安装验收。所有地图/DEM版本匹配保持未确认、仅示意；
+不能据Cache或Train名称认定匹配某一历史/Workshop地图构建。P6.4的五图安装数据仍是当时实际结果。
+
+```powershell
+node scripts/prepare-replay-maps.mjs .tmp/p6-official
+node scripts/check-replay-map-assets.mjs
+node --test scripts/replay-resource-audit.test.mjs scripts/check-replay-map-assets.test.mjs apps/desktop/tests/replay-map.test.mjs apps/desktop/tests/replay-state.test.mjs
+node --test --test-skip-pattern='Nuke Desktop' apps/desktop/tests/*.test.mjs
+pnpm typecheck
+pnpm build
+node scripts/replay-smoke.mjs
+```

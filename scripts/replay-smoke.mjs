@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { spawn,spawnSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync,mkdirSync,mkdtempSync,readdirSync,rmSync,writeFileSync } from 'node:fs';
+import { existsSync,mkdirSync,mkdtempSync,readFileSync,readdirSync,rmSync,writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { createServer } from 'node:net';
 import { dirname,join,resolve,sep } from 'node:path';
@@ -13,6 +13,8 @@ const root=fileURLToPath(new URL('../',import.meta.url)),desktop=join(root,'apps
 const require=createRequire(new URL('../apps/desktop/package.json',import.meta.url));
 const production=process.argv.includes('--production'),broken=process.argv.includes('--broken'),noMaps=process.argv.includes('--no-map');
 const qa=join(root,'.tmp/p6-qa');mkdirSync(qa,{recursive:true});
+const resourceManifest=JSON.parse(readFileSync(join(root,'docs/replay-resources.json'),'utf8'));
+const expectedImages=resourceManifest.maps.flatMap(map=>map.images.map(image=>({prefix:`${map.map}${image.id==='default'?'':'_'+image.id}-`,...image})));
 if(broken)writeFileSync(join(qa,'broken.dem'),'synthetic corrupt input, not a real DEM fixture');
 const demo=broken?join(qa,'broken.dem'):join(root,'.demo/spirit-vs-faze-m3-dust2.dem');assert.ok(existsSync(demo),'Selected local DEM required; no downloads');
 const executableArgument=process.argv.slice(2).find(arg=>!arg.startsWith('--'));
@@ -52,9 +54,10 @@ try{
   await waitFor(()=>evaluate('Boolean(window.cs2Analyst&&document.querySelector("main"))'),'preload/React');
   assert.equal(await evaluate('typeof window.require'),'undefined');
   const packageInfo=installed?inspectReplayPackage(dirname(installed),production?'production':'test-seam'):null;
-  const imagePaths=packageInfo?.imagePaths??readdirSync(join(desktop,'dist/renderer/assets')).filter(f=>/^de_(dust2|nuke|inferno|mirage)[-_].*\.png$/.test(f)).map(f=>'assets/'+f);
+  const imagePaths=packageInfo?.imagePaths??readdirSync(join(desktop,'dist/renderer/assets')).filter(f=>expectedImages.some(image=>f.startsWith(image.prefix)&&f.endsWith('.png'))).map(f=>'assets/'+f);
   const decoded=await evaluate(`Promise.all(${JSON.stringify(imagePaths)}.map(path=>new Promise((resolve,reject)=>{const image=new Image();image.onload=()=>resolve({url:image.src,width:image.naturalWidth,height:image.naturalHeight});image.onerror=()=>reject(new Error('Offline radar failed: '+path));image.src=new URL(path,location.href).href;})))`);
-  assert.equal(decoded.length,noMaps?0:5);assert.ok(decoded.every(i=>i.width===1024&&i.height===1024));
+  assert.equal(decoded.length,noMaps?0:expectedImages.length);
+  for(const image of noMaps?[]:expectedImages){const matches=decoded.filter(i=>i.url.split('/').at(-1).startsWith(image.prefix));assert.equal(matches.length,1);assert.equal(matches[0].width,image.width);assert.equal(matches[0].height,image.height);}
   if(installed)assert.ok(decoded.every(i=>i.url.includes('/resources/app.asar/dist/renderer/assets/')));
   if(production||broken||noMaps){
     metrics={mode:noMaps?'built-event-only':production?'installed-production-startup':installed?'installed-broken':'built-broken',packageInfo,offlineDecodedImages:decoded};
