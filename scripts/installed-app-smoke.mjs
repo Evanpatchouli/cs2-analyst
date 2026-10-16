@@ -10,6 +10,7 @@ import { closeSync, existsSync, mkdirSync, openSync, readFileSync, readdirSync, 
 import { createServer } from 'node:net';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { resolve } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 
 /**
@@ -164,12 +165,12 @@ async function uninstall(variant) {
 
 // ---------------------------------------------------------------- app driving
 
-async function launchSession(exePath, extraEnv, label) {
+async function launchSession(exePath, extraEnv, label, applicationArgs = []) {
   const port = await freePort();
   const env = { ...process.env, ...extraEnv };
   delete env.ELECTRON_RUN_AS_NODE;
   delete env.ELECTRON_RENDERER_URL;
-  const child = spawn(exePath, ['--remote-debugging-port=' + port, '--disable-features=CalculateNativeWinOcclusion', '--disable-backgrounding-occluded-windows'], { cwd: join(exePath, '..'), env, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
+  const child = spawn(exePath, [...applicationArgs, '--remote-debugging-port=' + port, '--disable-features=CalculateNativeWinOcclusion', '--disable-backgrounding-occluded-windows'], { cwd: join(exePath, '..'), env, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'] });
   let logs = '';
   child.stdout.on('data', data => { logs += data; });
   child.stderr.on('data', data => { logs += data; });
@@ -461,6 +462,9 @@ async function testSeamScenario() {
 
 // ---------------------------------------------------------------- entry
 
+export { install, uninstall, launchSession, closeGracefully, clickSelectDemo, checkInstalledLayout, appProcesses, variants, waitFor };
+
+if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
 assert.ok(existsSync(demo), '缺少测试 DEM：' + demo + '（.demo/demo1.dem）');
 rmSync(workDir, { recursive: true, force: true, maxRetries: 10, retryDelay: 500 });
 mkdirSync(workDir, { recursive: true });
@@ -473,4 +477,5 @@ try {
   console.log('installed-app smoke 全部通过');
 } finally {
   killAppProcesses();
+}
 }

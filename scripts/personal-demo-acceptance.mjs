@@ -30,9 +30,16 @@ function sourceFor(ref,a) {
 
 const native=createRequire(new URL('../packages/dem-parser/package.json',import.meta.url))('@cs2-analyst/demoparser-native');
 const historicalReport=JSON.parse(await readFile(new URL('../docs/deep-review-personal-acceptance.json',import.meta.url),'utf8'));
+const finalAcceptance=process.argv.includes('--final');
 const report={schemaVersion:2,baseline:'7b016278a8209b917df688b54be6763d04f53663',historicalGate:historicalReport.historicalGate??{baseline:historicalReport.baseline,status:historicalReport.status,parser:'official 0.42.0',fixtures:historicalReport.fixtures.map(f=>({identity:f.identity,gate:f.gate,requiredPartial:f.spatial.requiredPartial.length}))},nativeBinding:native.getBindingProvenance(),provenance:'Product Owner confirmed all three fixtures are their actual matches; not parser-inferred',fixtures:[]};
 const manifest=JSON.parse(await readFile(new URL('../docs/deep-review-personal-fixtures.json',import.meta.url),'utf8'));
 assert.deepEqual(manifest.fixtures.map(f=>f.filename),['.demo/demo1.dem','.demo/demo2.dem','.demo/demo3.dem']);
+if(finalAcceptance) {
+ report.baseline='99f176e6383acf5636500b03643f99a787b44bc8';
+ const core=JSON.parse(await readFile(new URL('../docs/deep-review-findings-calibration.json',import.meta.url),'utf8')).maps.filter(m=>m.fixture.role==='mandatory core');
+ assert.deepEqual(core.map(m=>m.fixture.filename),['nuke.dem','inferno.dem','dust2.dem','mirage.dem']);
+ manifest.fixtures.push(...core.map(({fixture:f})=>({...f,filename:'.demo/'+f.filename,map:f.headerMap})));
+}
 for(const fixture of manifest.fixtures) {
  const filename=fixture.filename.split('/').at(-1);
  const path=fileURLToPath(new URL('../.demo/'+filename,import.meta.url));
@@ -45,6 +52,10 @@ for(const fixture of manifest.fixtures) {
  try {result=await analyzeDemoFile(path,undefined,t=>timings=t);} finally {Demoparser2Provider.prototype.parseWithSpatial=original;Demoparser2Provider.prototype.parse=old;}
  assert.equal(calls,1);assert.equal(result.kind,'success');
  const {match,spatial}=captured,baseline=hash({match,spatial});assert.equal(match.id,sha);assert.equal(sha,fixture.sha256);assert.equal(bytes.length,fixture.fileSize);assert.equal(match.map,fixture.map);assert.equal(header.map_name,fixture.map);assert.equal(baseline,preReportHash);
+ if(finalAcceptance) {
+  const identity=historicalReport.fixtures.find(f=>f.identity.filename===fixture.filename)?.identity??fixture;
+  assert.equal(match.tickRate,identity.tickRate);assert.equal(match.rounds.length,identity.roundCount);assert.equal(match.players.length,identity.playerCount);
+ }
  const e=analyzeEngagements(match,spatial),k=analyzeKillImpact(match,e),team=analyzeTeamplay(match,e,k,spatial),utility=analyzeUtilityContext(match,spatial,k),a=analyzeCombatExecution(match,e,k,spatial);
     for (const tick of spatial.sampling.coreTicks) {
       assert.ok(!spatial.sampling.omittedOptionalTicks.includes(tick));
@@ -160,7 +171,7 @@ for(const fixture of manifest.fixtures) {
  const rows=[...samples.values()],alive=rows.filter(s=>s.alive===true);
  const dto=result.report;jsonOnly(dto);assert.deepEqual(dto,JSON.parse(JSON.stringify(dto)));assert.equal(dto.schemaVersion,2);assert.equal(dto.deepReview.available,true);assert.deepEqual(dto.deepReview.players.map(p=>p.playerId),dto.players.map(p=>p.id));
  const analytics=analyzeMatch(match);assert.deepEqual(dto.players.map(p=>p.id).sort(),analytics.players.filter(p=>p.roundsPlayed>0).map(p=>p.steamId).sort());
- const actualTarget=dto.players.find(p=>p.nickname.trim()===fixture.targetNickname.trim());const target=actualTarget;
+ const actualTarget=fixture.targetNickname===undefined?dto.players[0]:dto.players.find(p=>p.nickname===fixture.targetNickname);const target=actualTarget;
  for(const p of dto.players){assert.ok(dto.analytics.some(a=>a.playerId===p.id));assert.ok(dto.timeline.some(a=>a.playerId===p.id));}
  assert.ok(dto.analysis);assert.ok(dto.findings.length);assert.ok(dto.deepReview.players.every(p=>p.coverage.status!=='unavailable'));
  let repeatedParse,repeatCalls=0;Demoparser2Provider.prototype.parseWithSpatial=async function(...args){repeatCalls++;repeatedParse=await original.apply(this,args);return repeatedParse;};
@@ -170,7 +181,7 @@ for(const fixture of manifest.fixtures) {
  entry.gate={status:requiredPartial.length||!actualTarget||k.coverage.roundState.status==='unavailable'?'FAIL':'PASS',blockers:[...(k.coverage.roundState.status==='unavailable'?['round-alive-state-unavailable']:[]),...(requiredPartial.length?['required-spatial-fields-missing']:[]),...(!actualTarget?['target-account-not-found']:[])]};report.fixtures.push(entry);console.log(filename,JSON.stringify({identity:entry.identity,requiredPartial:requiredPartial.length,gate:entry.gate,target:actualTarget??null,timings}));
 }
 report.status=report.fixtures.every(f=>f.gate.status==='PASS')?'PASS':'FAIL';
-await writeFile(new URL('../docs/deep-review-personal-acceptance.json',import.meta.url),JSON.stringify(report,null,2)+'\n');
+await writeFile(new URL(finalAcceptance?'../.tmp/v01-final/pipeline.json':'../docs/deep-review-personal-acceptance.json',import.meta.url),JSON.stringify(report,null,2)+'\n');
 
 // Diagnostics are saved even when a mandatory compatibility check fails.
 if(report.status!=='PASS')process.exitCode=1;
