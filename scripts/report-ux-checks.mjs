@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { checkWindowLayout } from './window-shell-checks.mjs';
+import { checkWindowLayout, assertNoPageScroll } from './window-shell-checks.mjs';
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
@@ -17,8 +17,8 @@ export async function checkReportUx(evaluate, send, qaDir) {
   await send('Emulation.setFocusEmulationEnabled', { enabled: true });
   await evaluate(`document.getElementById('report-tab').click()`);
   await settle();
-  assert.deepEqual(await evaluate(`[...document.querySelectorAll('[role="tab"]')].map(t => t.querySelector('.fui-Tab__content').textContent)`), ['比赛报告', '深度复盘', '回合时间线', '分析']);
-  assert.equal(await evaluate(`document.querySelectorAll('[role="tabpanel"]').length`), 4);
+  assert.deepEqual(await evaluate(`[...document.querySelectorAll('[role="tab"]')].map(t => t.querySelector('.fui-Tab__content').textContent)`), ['比赛报告', '深度复盘', '回合时间线', '分析', '地图回放']);
+  assert.equal(await evaluate(`document.querySelectorAll('[role="tabpanel"]').length`), 5);
   assert.equal(await evaluate(`document.getElementById('report-panel').hidden`), false);
   // Native summary retains keyboard activation and clear focus feedback.
   const summary = await evaluate(`(() => { const s = document.querySelector('#report-panel summary'); s.focus(); return { cursor: getComputedStyle(s).cursor, focused: document.activeElement === s }; })()`);
@@ -105,6 +105,7 @@ export async function checkReportUx(evaluate, send, qaDir) {
     await screenshot(`trend-sides-${width}`);
     await evaluate(`document.getElementById('timeline-tab').click()`);
     await settle();
+    await assertNoPageScroll(evaluate, `回合时间线 ${width}×${height}`);
     await evaluate(`document.getElementById('round-r24').scrollIntoView({ block: 'center' })`);
     await screenshot(`killfeed-r24-${width}`);
     assert.equal(await evaluate(`document.documentElement.scrollWidth <= window.innerWidth`), true, 'Timeline 整页不得溢出');
@@ -116,12 +117,17 @@ export async function checkReportUx(evaluate, send, qaDir) {
     await screenshot(`killfeed-headshot-r23-${width}`);
     await evaluate(`document.getElementById('report-tab').click(); document.querySelector('[data-app-content]').scrollTo(0, 0)`);
     await settle();
+    await assertNoPageScroll(evaluate, `比赛报告 ${width}×${height}`);
     await screenshot(`report-tabs-${width}`);
     await evaluate(`document.querySelector('#report-panel summary').scrollIntoView({ block: 'center' }); document.querySelector('#report-panel summary').focus()`);
     await screenshot(`finding-evidence-${width}`);
     await evaluate(`document.getElementById('analysis-tab').click()`);
     await settle();
+    await assertNoPageScroll(evaluate, `分析 ${width}×${height}`);
     assert.equal(await evaluate('document.documentElement.scrollWidth <= window.innerWidth'), true, 'Analysis 整页不得溢出');
+    await evaluate(`document.getElementById('deep-review-tab').click()`);
+    await settle();
+    await assertNoPageScroll(evaluate, `深度复盘 ${width}×${height}`);
   }
   await send('Emulation.clearDeviceMetricsOverride');
   await evaluate(`document.getElementById('report-tab').click()`);

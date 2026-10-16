@@ -10,6 +10,7 @@ interface ReportState {
   setPhase(phase: ImportPhase): void;
   selectPlayer(id: string): void;
   importDemo(): Promise<void>;
+  importDemoFile(filePath: string): Promise<void>;
   cancelImport(): Promise<void>;
 }
 export const useReport = create<ReportState>((set, get) => ({
@@ -26,6 +27,19 @@ export const useReport = create<ReportState>((set, get) => ({
     set({ status: 'selecting', error: null });
     try {
       const result = await window.cs2Analyst.importDemo();
+      if (result.kind === 'cancelled') set({ status: get().report ? 'success' : 'idle' });
+      else if (result.kind === 'error') set({ status: 'error', error: result.message });
+      else set({ status: 'success', report: result.report, playerId: result.report.selectedPlayer });
+    } catch {
+      set({ status: 'error', error: '桌面分析连接失败。请重新选择 DEM；若仍失败，请重启应用。' });
+    }
+  },
+  // Drag-and-drop entry: the path was already resolved and validated by the drop handler.
+  importDemoFile: async filePath => {
+    if (['selecting', 'parsing', 'analyzing'].includes(get().status)) return;
+    set({ status: 'parsing', error: null });
+    try {
+      const result = await window.cs2Analyst.importDemoFile(filePath);
       if (result.kind === 'cancelled') set({ status: get().report ? 'success' : 'idle' });
       else if (result.kind === 'error') set({ status: 'error', error: result.message });
       else set({ status: 'success', report: result.report, playerId: result.report.selectedPlayer });

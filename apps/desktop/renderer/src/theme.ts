@@ -67,6 +67,15 @@ export const useScrollbarStyles = makeStaticStyles({
 });
 
 /**
+ * Desktop shell lock: the document itself never scrolls. The titlebar, sidebar and
+ * main view fill the window exactly; every scrollable region lives inside a panel.
+ */
+export const useAppShellStyles = makeStaticStyles({
+  'html, body, #root': { height: '100%' },
+  'html, body': { overflow: 'hidden', overscrollBehavior: 'none' },
+});
+
+/**
  * Fluent UI neutral tokens re-pointed at the blue-grey palette so every Fluent component
  * (Card, Divider, Badge, Dropdown, Tooltip, MessageBar, Spinner) inherits the same system.
  * Brand and status ramps stay as `webDarkTheme` defines them: colour appears only on the

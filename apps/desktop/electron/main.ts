@@ -1,6 +1,6 @@
 import { app, BrowserWindow, dialog, ipcMain, utilityProcess } from 'electron';
 import { fileURLToPath } from 'node:url';
-import { extname, join } from 'node:path';
+import { extname, isAbsolute, join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 import type { ImportPhase, ImportResult, DesktopReplayMetadata, DesktopReplayRequest, DesktopReplayResult } from '@cs2-analyst/report-contract';
 
@@ -113,6 +113,13 @@ function analyzeDemo(filePath: string, window: BrowserWindow): Promise<ImportRes
   });
 }
 
+/** Shared tail of every import path: extension gate, parsing progress, worker analysis. */
+async function analyzeFromPath(filePath: string, window: BrowserWindow): Promise<ImportResult> {
+  if (extname(filePath).toLowerCase() !== '.dem') return { kind: 'error', message: '请选择 .dem 文件。' };
+  if (!window.isDestroyed()) window.webContents.send('report:progress', 'parsing');
+  return await analyzeDemo(filePath, window);
+}
+
 ipcMain.handle('report:import', async (event): Promise<ImportResult> => {
   const window = trustedWindow(event);
   if (!window) {
@@ -132,9 +139,24 @@ ipcMain.handle('report:import', async (event): Promise<ImportResult> => {
       if (result.canceled || !result.filePaths.length || window.isDestroyed()) return { kind: 'cancelled' };
       filePath = result.filePaths[0];
     }
-    if (extname(filePath).toLowerCase() !== '.dem') return { kind: 'error', message: '请选择 .dem 文件。' };
-    progress('parsing');
-    return await analyzeDemo(filePath, window);
+    return await analyzeFromPath(filePath, window);
+  } catch (error) {
+    console.error('DEM import failed', error);
+    return { kind: 'error', message: '无法导入 DEM。请检查文件权限后重新选择。' };
+  } finally {
+    importing = false;
+  }
+});
+
+/** Drag-and-drop import: same pipeline as the dialog, but the renderer supplies an absolute .dem path. */
+ipcMain.handle('report:import-file', async (event, value: unknown): Promise<ImportResult> => {
+  const window = trustedWindow(event);
+  if (!window) return { kind: 'error', message: '无效的报告请求。' };
+  if (typeof value !== 'string' || !value.trim() || !isAbsolute(value)) return { kind: 'error', message: '无效的 DEM 路径。' };
+  if (importing) return { kind: 'error', message: '已有分析任务正在运行。' };
+  importing = true;
+  try {
+    return await analyzeFromPath(value.trim(), window);
   } catch (error) {
     console.error('DEM import failed', error);
     return { kind: 'error', message: '无法导入 DEM。请检查文件权限后重新选择。' };
@@ -147,8 +169,10 @@ async function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1280,
     height: 800,
-    minWidth: 800,
-    minHeight: 600,
+    // Comfortable working window on a 1080p desktop: the navigation rail, the
+    // report split and the replay layout all stay intact down to this size.
+    minWidth: 1024,
+    minHeight: 640,
     frame: false,
     resizable: true,
     backgroundColor: '#111821',

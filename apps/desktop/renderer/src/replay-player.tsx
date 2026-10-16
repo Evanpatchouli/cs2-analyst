@@ -1,25 +1,60 @@
 import { useEffect, useRef, useState } from 'react';
-import { Badge, Body1, Button, Caption1, Card, Dropdown, Option, Slider, Spinner, Title2, makeStyles, tokens } from '@fluentui/react-components';
+import { Badge, Body1, Button, Caption1, Dropdown, Option, Slider, Spinner, Title2, makeStyles, tokens } from '@fluentui/react-components';
 import type { DesktopReplayChunk, DesktopReplayFrame, DesktopReplayMetadata, DesktopReplayRoundInfo } from '@cs2-analyst/report-contract';
 import { mapResourceState, radarHeading, resolveMapLayer, worldToRadar } from './replay-map';
 import { replayMapAssets } from './replay-map-assets';
 import { ReplayChunkCache, ReplayClock, replayBlockAt, replayDisplayFrame } from './replay-state';
 import { palette } from './theme';
 
+/**
+ * Desktop analysis layout: the panel owns the full height and nothing here scrolls as a page.
+ * Row 1 is the control bar, row 2 splits into map + side rail (each region scrolls locally),
+ * row 3 is the transport timeline. Below 860px the rail collapses under the map and the
+ * middle region becomes its own scroll area.
+ */
 const useStyles = makeStyles({
-  root: { display:'flex',flexDirection:'column',gap:'14px' },
-  toolbar: { display:'flex',alignItems:'center',flexWrap:'wrap',gap:'10px' },
-  dropdown: { minWidth:'110px',maxWidth:'180px' },
-  panel: { backgroundColor:palette.card,padding:'18px',display:'flex',flexDirection:'column',gap:'14px' },
-  layout: { display:'grid',gridTemplateColumns:'minmax(0,1fr) 240px',gap:'20px','@media (max-width: 900px)':{gridTemplateColumns:'minmax(0,1fr)'} },
-  map: { position:'relative',width:'100%',aspectRatio:'1',maxWidth:'640px',backgroundColor:palette.replay.surface,alignSelf:'start' },
+  root: { flex: 1, minHeight: 0, display: 'grid', gridTemplateRows: 'auto minmax(0, 1fr) auto', gap: '10px' },
+  bar: {
+    flexShrink: 0, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '10px', padding: '8px 10px',
+    backgroundColor: palette.card, border: `1px solid ${palette.border}`, borderRadius: tokens.borderRadiusLarge,
+  },
+  barTitle: { display: 'flex', alignItems: 'baseline', gap: '8px' },
+  controls: { display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px' },
+  dropdown: { minWidth: '104px', maxWidth: '168px' },
+  spacer: { flex: 1 },
+  body: {
+    minHeight: 0, display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 292px', gap: '10px',
+    '@media (max-width: 860px)': { gridTemplateColumns: 'minmax(0, 1fr)', overflowY: 'auto' },
+  },
+  mapColumn: {
+    position: 'relative', minWidth: 0, minHeight: 0, overflow: 'hidden',
+    display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '8px', boxSizing: 'border-box',
+    backgroundColor: palette.replay.surface, border: `1px solid ${palette.border}`, borderRadius: tokens.borderRadiusLarge,
+    '@media (max-width: 860px)': { aspectRatio: '1', alignSelf: 'start', minHeight: '220px' },
+  },
+  map: { position: 'relative', flexShrink: 0 },
   canvas: { position:'absolute',inset:0,width:'100%',height:'100%',':focus-visible':{outline:`2px solid ${tokens.colorBrandStroke1}`,outlineOffset:'2px'} },
-  players: { display:'flex',flexDirection:'column',gap:'2px',minWidth:0 },
+  side: {
+    minWidth: 0, minHeight: 0, display: 'flex', flexDirection: 'column', gap: '10px', overflowY: 'auto',
+    '@media (max-width: 860px)': { overflowY: 'visible' },
+  },
+  group: {
+    flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '6px', padding: '10px',
+    backgroundColor: palette.card, border: `1px solid ${palette.border}`, borderRadius: tokens.borderRadiusLarge,
+  },
+  groupHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' },
+  players: { display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0, maxHeight: 'min(34vh, 300px)', overflowY: 'auto' },
   player: { justifyContent:'space-between',minWidth:0,gap:'6px',textAlign:'left' },
   name: { overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',minWidth:0 },
+  notes: { display: 'flex', flexDirection: 'column', gap: '4px' },
   muted: { color:tokens.colorNeutralForeground3 },
-  events: { display:'flex',flexDirection:'column',maxHeight:'280px',overflowY:'auto',gap:'4px' },
+  events: { display: 'flex', flexDirection: 'column', maxHeight: '300px', overflowY: 'auto', gap: '4px' },
   event: { justifyContent:'flex-start',textAlign:'left',whiteSpace:'normal' },
+  transport: {
+    flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '6px', padding: '10px 12px',
+    backgroundColor: palette.card, border: `1px solid ${palette.border}`, borderRadius: tokens.borderRadiusLarge,
+  },
+  transportRow: { display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '10px' },
   progress: { width:'100%' },
   // Thousands of one-tick steps otherwise produce an opaque Fluent rail tick-mark overlay.
   progressRail: { '::before':{display:'none'} },
@@ -41,6 +76,7 @@ export function ReplayPlayer({ metadata, playerId, onSelectPlayer, active, jump 
   const inFlight=useRef(false),generation=useRef(0),resume=useRef(false),failed=useRef(new Set<string>());
   const baseCanvas=useRef<HTMLCanvasElement>(null),canvas=useRef<HTMLCanvasElement>(null),box=useRef<HTMLDivElement>(null);
   const image=useRef<HTMLImageElement|null>(null),drawTimes=useRef<number[]>([]);
+  const mapColumn=useRef<HTMLDivElement>(null),fit=useRef<()=>void>(()=>{});
   const info=metadata.rounds.find(r=>r.round===roundNumber);
   const block=info?blockAt(info,tick):undefined,chunk=block?cache.current.get(roundNumber,block.index):undefined;
   const playerIds=metadata.players.map(p=>p.id);
@@ -141,55 +177,90 @@ export function ReplayPlayer({ metadata, playerId, onSelectPlayer, active, jump 
   },[active,metadata.sessionId]);
   useEffect(()=>{
     image.current=null;setImageReady(false);setImageFailed(false);
+    fit.current=()=>{};
     const base=baseCanvas.current;if(base)base.getContext('2d')?.clearRect(0,0,base.width,base.height);
     if(!url||mapState.status==='unavailable')return;
     const img=new Image();let disposed=false;
     img.onload=()=>{if(!disposed){image.current=img;setImageReady(true);drawBackground();}};
     img.onerror=()=>{if(!disposed)setImageFailed(true);};img.src=url;
     function drawBackground(){const base=baseCanvas.current;if(!base)return;const ctx=base.getContext('2d');ctx?.clearRect(0,0,base.width,base.height);if(image.current)ctx?.drawImage(image.current,0,0,base.width,base.height);}
-    const observer=new ResizeObserver(()=>{
-      const size=box.current?.getBoundingClientRect().width??0;if(size<=0)return;
+    // Canvas pixel sizing lives in the layout effect below; drawing belongs to the image lifecycle.
+    fit.current=drawBackground;drawBackground();
+    return()=>{disposed=true;fit.current=()=>{};img.onload=null;img.onerror=null;};
+  },[url,active]);
+  // The radar keeps its 1:1 shape and fills the largest square the column allows; nothing here can push page height.
+  useEffect(()=>{
+    const host=mapColumn.current,map=box.current;
+    if(!host||!map)return;
+    const apply=()=>{
+      const rect=host.getBoundingClientRect();
+      if(rect.width<=0||rect.height<=0)return;
+      const size=Math.max(160,Math.floor(Math.min(rect.width,rect.height)));
+      if(map.style.width!==`${size}px`){map.style.width=`${size}px`;map.style.height=`${size}px`;}
       const pixels=Math.max(1,Math.round(size*(window.devicePixelRatio||1)));
       for(const c of [baseCanvas.current,canvas.current])if(c&&(c.width!==pixels||c.height!==pixels)){c.width=pixels;c.height=pixels;}
-      drawBackground();
-    });if(box.current)observer.observe(box.current);
-    return()=>{disposed=true;observer.disconnect();img.onload=null;img.onerror=null;};
-  },[url,active]);
-  if(!metadata.available||!info)return <section className={s.root} aria-label="2D地图回放"><Title2>2D 地图回放</Title2><Body1>{metadata.unavailableReason??'本场缺少可靠回放窗口，比赛报告仍可用。'}</Body1></section>;
+      fit.current();
+    };
+    apply();
+    const observer=new ResizeObserver(apply);observer.observe(host);
+    return()=>observer.disconnect();
+  },[availableMap]);
+  if(!metadata.available||!info)return <section className={s.root} aria-label="2D地图回放"><div className={s.group}><Title2>2D 地图回放</Title2><Body1>{metadata.unavailableReason??'本场缺少可靠回放窗口，比赛报告仍可用。'}</Body1></div></section>;
   const currentEvents=(chunk?.events??[]).filter(e=>e.type!=='weapon_fire'&&e.type!=='damage'&&e.type!=='flash');
   const sameTick=new Map<number,number>();for(const e of chunk?.events??[])sameTick.set(e.tick,(sameTick.get(e.tick)??0)+1);
   return <section className={s.root} aria-label="2D地图回放" data-replay-session={metadata.sessionId} data-replay-match={metadata.matchId} data-replay-round={roundNumber} data-replay-tick={tick} data-replay-cache={cache.current.size} data-replay-block={block?.index} data-replay-revision={revision} data-replay-map-ready={imageReady}>
-    <Title2>2D 地图回放</Title2>
-    <Caption1 className={s.muted}>全局比赛观察视角 · 朝向仅为记录方向，不表示看到了敌人。位置插值仅用于显示。</Caption1>
-    <Card className={s.panel}>
-      <div className={s.toolbar}>
+    <div className={s.bar}>
+      <div className={s.barTitle}><Title2>2D 地图回放</Title2><Caption1 className={s.muted}>R{roundNumber}</Caption1></div>
+      <div className={s.controls}>
         <Button appearance="primary" aria-label={playing?'暂停回放':'播放回放'} aria-pressed={playing} disabled={metadata.tickRate===null||!active} onClick={toggle}>{playing?'暂停':'播放'}</Button>
         <Dropdown className={s.dropdown} aria-label="回放倍速" value={`${speed}×`} selectedOptions={[String(speed)]} disabled={metadata.tickRate===null} onOptionSelect={(_,d)=>{if(!d.optionValue)return;const value=Number(d.optionValue);clock.current.setSpeed(value,performance.now(),metadata.tickRate);setSpeed(value);}}>{[.25,.5,1,2,4].map(v=><Option key={v} value={String(v)}>{`${v}×`}</Option>)}</Dropdown>
         <Dropdown className={s.dropdown} aria-label="回放回合" value={`R${roundNumber}`} selectedOptions={[String(roundNumber)]} onOptionSelect={(_,d)=>d.optionValue&&selectRound(Number(d.optionValue))}>{metadata.rounds.map(r=><Option key={r.round} value={String(r.round)}>{`R${r.round}`}</Option>)}</Dropdown>
         {map&&map.layers.length>1?<Dropdown className={s.dropdown} aria-label="回放楼层" value={floor==='auto'?'跟随玩家':map.layers.find(l=>l.id===floor)?.label} selectedOptions={[floor]} onOptionSelect={(_,d)=>d.optionValue&&setFloor(d.optionValue)}><Option value="auto">跟随玩家</Option>{map.layers.map(l=><Option key={l.id} value={l.id}>{l.label}</Option>)}</Dropdown>:null}
-        <Badge appearance="tint" color="warning">地图版本未确认 · 仅示意</Badge>
       </div>
-      <Slider aria-label="回放进度" className={s.progress} rail={{className:s.progressRail}}
-        min={info.startTick} max={info.endTick} step={1} value={Math.round(tick)} aria-valuetext={timeText(tick,info,metadata.tickRate)} onChange={(_,d)=>seek(d.value)} />
-      <div className={s.toolbar}><Body1 data-replay-time>{timeText(tick,info,metadata.tickRate)} / {timeText(info.endTick,info,metadata.tickRate)}</Body1>{info.freezeEndTick!==null&&tick<info.freezeEndTick?<Badge appearance="outline">冻结阶段</Badge>:null}{loading?<Spinner size="tiny" label="加载回放数据…"/>:null}</div>
-      {metadata.tickRate===null?<Caption1>时钟不可靠，仅支持原始 tick 与事件定位，不能正常倍速播放。</Caption1>:null}
-      {error?<div role="alert"><Body1>{error}</Body1><Button size="small" onClick={()=>{failed.current.clear();setError(null);}}>重试</Button></div>:null}
-      <div className={s.layout}>
-        {availableMap?<div ref={box} className={s.map}>
+      <span className={s.spacer} />
+      <Badge appearance="tint" color="warning">地图版本未确认 · 仅示意</Badge>
+    </div>
+    <div className={s.body} data-replay-body>
+      {availableMap?<div ref={mapColumn} className={s.mapColumn}>
+        <div ref={box} className={s.map}>
           <canvas ref={baseCanvas} className={s.canvas} aria-hidden="true" />
           <canvas ref={canvas} className={s.canvas} tabIndex={0} role="img" aria-label={`R${roundNumber} 全局地图；空格播放或暂停，左右方向键定位，Home/End跳至回合起止。`} onKeyDown={e=>{if(e.key===' '){e.preventDefault();toggle();}else if(['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){e.preventDefault();const at=clock.current.read(performance.now(),metadata.tickRate);seek(e.key==='Home'?info.startTick:e.key==='End'?info.endTick:at+(e.key==='ArrowLeft'?-1:1)*(metadata.tickRate??1));}}} />
-        </div>:<Body1>本机没有配套雷达资源或图片无法装载；仍可浏览事件与玩家状态。</Body1>}
-        <div className={s.players} aria-label="回放玩家状态">
-          {metadata.players.map((player,index)=>{const p=frame?.players.find(p=>p[0]===index);return <Button key={player.id} className={s.player} appearance={player.id===playerId?'secondary':'subtle'} aria-pressed={player.id===playerId} onClick={()=>onSelectPlayer(player.id)} title={player.nickname}><span className={s.name}>{index+1}. {player.nickname}</span><Caption1>{p?.[8]??'Unknown'} · {p?.[7]===false?'阵亡':p?.[7]===true?`${p[6]??'—'} HP`:'未知'}</Caption1></Button>;})}
-          <Caption1 className={s.muted}>CT 蓝方块 / T 橙圆点；白框为选中玩家。</Caption1>
-          <Caption1>最近炸弹记录：{frame?bombText[frame.bomb.action]??'未知':'未知'}{frame?.bomb.ambiguous?'（同 tick 有冲突，顺序未知）':''}</Caption1>
-          {map&&map.layers.length>1?<Caption1>{layer?`当前${layer.label}；其他层点位隐藏。`:'选中玩家楼层未知，请手动选层。'}未知 Z 与共享高度边界不自动归层。</Caption1>:null}
-          <Caption1 className={s.muted}>炸弹标记为事件关联位置；道具十字仅标示已记录生效点，不表示飞行轨迹或烟火范围。</Caption1>
-          {info.coverage==='partial'?<Caption1>该回合存在缺失或歧义状态；断点不连接，未知状态不补齐。</Caption1>:null}
+        </div>
+      </div>:<div ref={mapColumn} className={s.mapColumn}><Body1>本机没有配套雷达资源或图片无法装载；仍可浏览事件与玩家状态。</Body1></div>}
+      <div className={s.side} data-replay-rail>
+        <div className={s.group}>
+          <div className={s.groupHeader}><Caption1>玩家状态</Caption1><Caption1 className={s.muted}>{metadata.players.length} 人</Caption1></div>
+          <div className={s.players} aria-label="回放玩家状态">
+            {metadata.players.map((player,index)=>{const p=frame?.players.find(p=>p[0]===index);return <Button key={player.id} className={s.player} appearance={player.id===playerId?'secondary':'subtle'} aria-pressed={player.id===playerId} onClick={()=>onSelectPlayer(player.id)} title={player.nickname}><span className={s.name}>{index+1}. {player.nickname}</span><Caption1>{p?.[8]??'Unknown'} · {p?.[7]===false?'阵亡':p?.[7]===true?`${p[6]??'—'} HP`:'未知'}</Caption1></Button>;})}
+          </div>
+        </div>
+        <div className={s.group}>
+          <div className={s.groupHeader}><Caption1>地图说明</Caption1><Caption1 className={s.muted}>最近炸弹：{frame?bombText[frame.bomb.action]??'未知':'未知'}{frame?.bomb.ambiguous?' · 同 tick 冲突，顺序未知':''}</Caption1></div>
+          <div className={s.notes}>
+            <Caption1 className={s.muted}>全局比赛观察视角 · 朝向仅为记录方向，不表示看到了敌人。位置插值仅用于显示。</Caption1>
+            <Caption1 className={s.muted}>CT 蓝方块 / T 橙圆点；白框为选中玩家。</Caption1>
+            <Caption1 className={s.muted}>炸弹标记为事件关联位置；道具十字仅标示已记录生效点，不表示飞行轨迹或烟火范围。</Caption1>
+            {map&&map.layers.length>1?<Caption1 className={s.muted}>{layer?`当前${layer.label}；其他层点位隐藏。`:'选中玩家楼层未知，请手动选层。'}未知 Z 与共享高度边界不自动归层。</Caption1>:null}
+            {info.coverage==='partial'?<Caption1 className={s.muted}>该回合存在缺失或歧义状态；断点不连接，未知状态不补齐。</Caption1>:null}
+          </div>
+        </div>
+        <div className={s.group}>
+          <div className={s.groupHeader}><Caption1>关键事件</Caption1><Caption1 className={s.muted}>当前数据块 · {currentEvents.length}</Caption1></div>
+          <Caption1 className={s.muted}>同 tick 不推断先后顺序。{metadata.excludedRounds.length?` ${metadata.excludedRounds.length} 个回合窗口不可靠，未开放回放。`:''}</Caption1>
+          <div className={s.events} aria-label="回放事件浏览">{currentEvents.length?currentEvents.map(e=><Button key={e.id} className={s.event} appearance="subtle" size="small" data-replay-event={e.id} onClick={()=>seek(e.tick)}>{timeText(e.tick,info,metadata.tickRate)} · {e.description}{(sameTick.get(e.tick)??0)>1?' · 同 tick，顺序未知':''}</Button>):<Caption1>此数据块没有可展示的关键事件。</Caption1>}</div>
         </div>
       </div>
-      <Caption1 className={s.muted}>当前数据块关键事件；同 tick 不推断先后顺序。{metadata.excludedRounds.length?` ${metadata.excludedRounds.length} 个回合窗口不可靠，未开放回放。`:''}</Caption1>
-      <div className={s.events} aria-label="回放事件浏览">{currentEvents.length?currentEvents.map(e=><Button key={e.id} className={s.event} appearance="subtle" size="small" data-replay-event={e.id} onClick={()=>seek(e.tick)}>{timeText(e.tick,info,metadata.tickRate)} · {e.description}{(sameTick.get(e.tick)??0)>1?' · 同 tick，顺序未知':''}</Button>):<Caption1>此数据块没有可展示的关键事件。</Caption1>}</div>
-    </Card>
+    </div>
+    <div className={s.transport}>
+      <Slider aria-label="回放进度" className={s.progress} rail={{className:s.progressRail}}
+        min={info.startTick} max={info.endTick} step={1} value={Math.round(tick)} aria-valuetext={timeText(tick,info,metadata.tickRate)} onChange={(_,d)=>seek(d.value)} />
+      <div className={s.transportRow}>
+        <Body1 data-replay-time>{timeText(tick,info,metadata.tickRate)} / {timeText(info.endTick,info,metadata.tickRate)}</Body1>
+        {info.freezeEndTick!==null&&tick<info.freezeEndTick?<Badge appearance="outline">冻结阶段</Badge>:null}
+        {loading?<Spinner size="tiny" label="加载回放数据…"/>:null}
+        {error?<div role="alert"><Body1>{error}</Body1><Button size="small" onClick={()=>{failed.current.clear();setError(null);}}>重试</Button></div>:null}
+        {metadata.tickRate===null?<Caption1>时钟不可靠，仅支持原始 tick 与事件定位，不能正常倍速播放。</Caption1>:null}
+      </div>
+    </div>
   </section>;
 }

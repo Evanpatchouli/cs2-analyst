@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from 'electron';
+import { contextBridge, ipcRenderer, webUtils } from 'electron';
 import type { DesktopApi, ImportPhase } from '@cs2-analyst/report-contract';
 
 const api: DesktopApi = {
@@ -15,6 +15,8 @@ const api: DesktopApi = {
     },
   },
   importDemo: () => ipcRenderer.invoke('report:import'),
+  importDemoFile: filePath => ipcRenderer.invoke('report:import-file', filePath),
+  getFilePath: file => webUtils.getPathForFile(file),
   cancelImport: () => ipcRenderer.invoke('report:cancel'),
   replay: {
     getChunk: request => ipcRenderer.invoke('replay:chunk', { sessionId:request.sessionId,round:request.round,block:request.block }),

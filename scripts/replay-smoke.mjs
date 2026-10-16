@@ -9,6 +9,30 @@ import { dirname,join,resolve,sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { setTimeout as delay } from 'node:timers/promises';
 import { inspectReplayPackage } from './replay-package-inspection.mjs';
+import { assertNoPageScroll } from './window-shell-checks.mjs';
+/** Map Replay must behave like a tool surface: no page scroll, square radar, locally scrolling rail. */
+async function checkReplayLayout(evaluate, label) {
+  await assertNoPageScroll(evaluate, label);
+  const layout = await evaluate(`(() => {
+    const panel = document.getElementById('replay-panel');
+    const map = document.querySelector('#replay-panel canvas[role=img]')?.parentElement;
+    const rect = map?.getBoundingClientRect();
+    const rail = document.querySelector('[data-replay-rail]');
+    const body = document.querySelector('[data-replay-body]');
+    return { panelOverflow: panel.scrollHeight - panel.clientHeight, viewport: window.innerWidth,
+      square: rect ? Math.abs(rect.width - rect.height) <= 1 : null, size: rect ? Math.round(rect.width) : null,
+      railOverflow: rail ? getComputedStyle(rail).overflowY : null,
+      bodyOverflow: body ? getComputedStyle(body).overflowY : null };
+  })()`);
+  assert.ok(layout.panelOverflow <= 0, `${label}：地图回放面板本身不应出现滚动（溢出 ${layout.panelOverflow}px）`);
+  if (layout.square !== null) {
+    assert.equal(layout.square, true, `${label}：雷达图应保持 1:1`);
+    assert.ok(layout.size >= 200, `${label}：雷达图应充分利用可用空间，实际 ${layout.size}px`);
+  }
+  // Wide layout: the right rail owns its overflow. Narrow layout: the whole middle region does.
+  if (layout.viewport > 860) assert.notEqual(layout.railOverflow, 'visible', `${label}：右侧信息栏应自行滚动`);
+  else assert.notEqual(layout.bodyOverflow, 'visible', `${label}：窄窗口下地图区应局部滚动`);
+}
 const root=fileURLToPath(new URL('../',import.meta.url)),desktop=join(root,'apps/desktop');
 const require=createRequire(new URL('../apps/desktop/package.json',import.meta.url));
 const production=process.argv.includes('--production'),broken=process.argv.includes('--broken'),noMaps=process.argv.includes('--no-map');
@@ -91,6 +115,7 @@ try{
   await waitFor(()=>evaluate('document.querySelector("[data-replay-session]")?.dataset.replayMapReady==="true"&&Number(document.querySelector("[data-replay-session]")?.dataset.replayRevision)>0&&Boolean(document.querySelector("#replay-panel canvas[role=img]")?.dataset.tick)'),'first Canvas frame');
   metrics.firstFrameMs=await evaluate(`performance.now()-${opened}`);assert.ok(metrics.firstFrameMs<=1500);
   assert.ok((await evaluate('document.getElementById("replay-panel").innerText')).includes('全局比赛观察视角'));
+  await checkReplayLayout(evaluate, '地图回放默认窗口');
   const uiStart=await evaluate('Number(document.querySelector("[data-replay-session]").dataset.replayTick)');
   await evaluate('document.querySelector("[aria-label=播放回放]").click()');await delay(600);
   await evaluate('document.querySelector("[aria-label=暂停回放]").click()');await delay(100);
@@ -127,6 +152,7 @@ try{
     await page.send('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:1,mobile:false});await delay(300);
     await evaluate('document.getElementById("replay-panel").scrollIntoView({block:"start"})');await delay(150);
     assert.equal(await evaluate('document.documentElement.scrollWidth>window.innerWidth'),false,`horizontal overflow ${width}`);
+    await checkReplayLayout(evaluate, `地图回放 ${width}×${height}`);
     const screenshot=await page.send('Page.captureScreenshot',{format:'png'});writeFileSync(join(qa,`${metrics.mode}-${width}x${height}.png`),Buffer.from(screenshot.data,'base64'));
   }
   // Real OS minimize: the page must pause, then restore through the existing native window controls.

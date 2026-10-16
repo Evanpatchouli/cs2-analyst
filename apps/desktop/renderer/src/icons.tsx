@@ -30,3 +30,70 @@ export function QuestionCircleIcon(props: IconProps) {
     <circle cx="10" cy="14" r=".55" fill="currentColor" stroke="none" />
   </Icon>;
 }
+
+/** 侧边栏导航：比赛报告（文档）。 */
+export function ReportIcon(props: IconProps) {
+  return <Icon {...props}>
+    <rect x="4.5" y="3" width="11" height="14" rx="1.5" />
+    <path d="M7.5 7h5M7.5 10h5M7.5 13h3" />
+  </Icon>;
+}
+
+/** 侧边栏导航：深度复盘（放大镜）。 */
+export function DeepReviewIcon(props: IconProps) {
+  return <Icon {...props}>
+    <circle cx="9" cy="9" r="5" />
+    <path d="M12.8 12.8 16 16" />
+    <path d="M7 9.4 8.6 7.8 10.4 10.2" />
+  </Icon>;
+}
+
+/** 侧边栏导航：回合时间线（节点列表）。 */
+export function TimelineIcon(props: IconProps) {
+  return <Icon {...props}>
+    <circle cx="5.5" cy="4.5" r="1.5" />
+    <circle cx="5.5" cy="10" r="1.5" />
+    <circle cx="5.5" cy="15.5" r="1.5" />
+    <path d="M9.5 4.5H16M9.5 10H16M9.5 15.5H16" />
+  </Icon>;
+}
+
+/** 侧边栏导航：分析（柱状图）。 */
+export function AnalysisIcon(props: IconProps) {
+  return <Icon {...props}>
+    <path d="M3.5 3.5v13h13" />
+    <path d="M7.5 12.5v-3M11 12.5V8.5M14.5 12.5V6" />
+  </Icon>;
+}
+
+/** 侧边栏导航：地图回放（折叠地图）。 */
+export function ReplayIcon(props: IconProps) {
+  return <Icon {...props}>
+    <path d="M7 4.2 3.2 5.6v9.8L7 14l6 1.4 3.8-1.4V4.2L13 5.6 7 4.2Z" />
+    <path d="M7 4.2V14M13 5.6v9.8" />
+  </Icon>;
+}
+
+/** 首页与侧边栏底栏：导入 DEM（箭头落入托盘）。 */
+export function ImportIcon(props: IconProps) {
+  return <Icon {...props}>
+    <path d="M10 3.5v7.4M6.9 8.3 10 11.4l3.1-3.1" />
+    <path d="M4 12.8v2.2a1.5 1.5 0 0 0 1.5 1.5h9a1.5 1.5 0 0 0 1.5-1.5v-2.2" />
+  </Icon>;
+}
+
+/** 侧边栏：收起（双尖括号向左）。 */
+export function CollapseNavIcon(props: IconProps) {
+  return <Icon {...props}>
+    <path d="M9.2 5 4.7 10l4.5 5" />
+    <path d="M14.8 5l-4.5 5 4.5 5" />
+  </Icon>;
+}
+
+/** 侧边栏：展开（双尖括号向右）。 */
+export function ExpandNavIcon(props: IconProps) {
+  return <Icon {...props}>
+    <path d="M5.2 5l4.5 5-4.5 5" />
+    <path d="M10.8 5l4.5 5-4.5 5" />
+  </Icon>;
+}

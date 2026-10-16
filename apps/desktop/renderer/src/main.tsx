@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import {
   Badge, Body1, Button, Card, Caption1, Divider, Dropdown, FluentProvider,
   MessageBar, MessageBarBody, Option, Spinner, Subtitle1, Title1, Title2,
-  Tooltip, TabList, Tab, makeStyles, tokens,
+  Tooltip, makeStyles, tokens,
 } from '@fluentui/react-components';
 import type {
   DesktopMatchReport, DesktopPlayerAnalytics, DesktopRoundTimeline, DesktopTimelineEvent,
@@ -15,8 +15,11 @@ import { useReport } from './store';
 import { QuestionCircleIcon } from './icons';
 import { UtilityIcon } from './utility-icons';
 import type { UtilityIconKind } from './utility-icons';
-import { coachTheme, palette, useScrollbarStyles } from './theme';
+import { coachTheme, palette, useAppShellStyles, useScrollbarStyles } from './theme';
 import { AppTitlebar } from './app-titlebar';
+import { Home } from './home';
+import { Sidebar } from './sidebar';
+import type { ViewId } from './sidebar';
 import { ReplayPlayer } from './replay-player';
 import type { ReplayJump } from './replay-player';
 
@@ -32,11 +35,19 @@ const cardSurface = {
 const rowHeight = '34px';
 
 const useStyles = makeStyles({
-  page: { height: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: palette.pageBottom, backgroundImage: palette.pageGradient, color: tokens.colorNeutralForeground1 },
-  body: { flex: 1, minHeight: 0, overflowY: 'auto' },
-  content: { maxWidth: '1120px', margin: '0 auto', padding: '28px 32px 44px', display: 'flex', flexDirection: 'column', gap: '20px' },
-  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px' },
+  page: { height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', backgroundColor: palette.pageBottom, backgroundImage: palette.pageGradient, color: tokens.colorNeutralForeground1 },
+  shell: { flex: 1, minHeight: 0, display: 'flex' },
+  // The main view never scrolls as a page; each region owns its own overflow.
+  main: { flex: 1, minWidth: 0, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden' },
+  banner: { flexShrink: 0, padding: '12px 24px 0' },
+  statusStrip: { flexShrink: 0, display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 24px', borderBottom: `1px solid ${palette.rowDivider}`, backgroundColor: palette.pageTop },
+  center: { flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '24px', overflowY: 'auto' },
+  reportFrame: { flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' },
+  viewHeader: { flexShrink: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', padding: '14px 24px', borderBottom: `1px solid ${palette.rowDivider}` },
+  tabPanel: { flex: 1, minHeight: 0, overflowY: 'auto', padding: '20px 24px 32px', '&[hidden]': { display: 'none' } },
+  replayPanel: { flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: '14px 24px 16px', '&[hidden]': { display: 'none' } },
   column: { display: 'flex', flexDirection: 'column', gap: '8px' },
+  headerRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px' },
   section: { display: 'flex', flexDirection: 'column', gap: '16px' },
   muted: { color: tokens.colorNeutralForeground3 },
   grid: { display: 'grid', gridTemplateColumns: 'repeat(4, minmax(0, 1fr))', gap: '12px', '@media (max-width: 900px)': { gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' } },
@@ -69,7 +80,6 @@ const useStyles = makeStyles({
   evidence: { padding: '8px 0', display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) auto', gap: '12px', borderBottom: `1px solid ${palette.rowDivider}`, overflowWrap: 'anywhere' },
   evidenceActions: { display:'flex',alignItems:'center',gap:'8px',flexWrap:'wrap' },
   replayEventRow: { gridTemplateColumns:'64px minmax(0,1fr) 56px' },
-  empty: { ...cardSurface, padding: '72px 32px', alignItems: 'center', textAlign: 'center' },
   timelineRound: {
     borderTop: `1px solid ${palette.rowDivider}`, ':first-child': { borderTopStyle: 'none' },
     borderRadius: tokens.borderRadiusMedium, transitionProperty: 'background-color', transitionDuration: '240ms',
@@ -188,7 +198,7 @@ function Findings({ report, playerId, onShowRounds, onReplay }: {
     <Title2>基础规则提示</Title2>
     <Caption1 className={s.muted}>来自基础指标规则 · 深度交火与团队证据请查看「深度复盘」</Caption1>
     {rows.length ? rows.map(f => <Card key={f.id} className={s.finding} data-rule={f.ruleId}>
-      <div className={s.header}><Subtitle1>{f.title}</Subtitle1><Badge appearance="tint" color={f.severity === 'positive' ? 'success' : f.severity === 'high' ? 'danger' : 'warning'}>{severityText[f.severity] ?? f.severity}</Badge></div>
+      <div className={s.headerRow}><Subtitle1>{f.title}</Subtitle1><Badge appearance="tint" color={f.severity === 'positive' ? 'success' : f.severity === 'high' ? 'danger' : 'warning'}>{severityText[f.severity] ?? f.severity}</Badge></div>
       <Body1>{f.summary}</Body1>
       {f.relatedRounds?.length ? <div>
         <Button appearance="subtle" size="small" onClick={() => onShowRounds(f.relatedRounds!)}>
@@ -293,23 +303,25 @@ function RoundTimeline({ rounds, expanded, highlighted, onToggle, onReplay }: {
   </section>;
 }
 
-function Report({ report, playerId, replayActive }: { report: DesktopMatchReport; playerId: string; replayActive:boolean }) {
+function Report({ report, playerId, replayActive, activeTab, onSelectView }: {
+  report: DesktopMatchReport; playerId: string; replayActive: boolean;
+  activeTab: ViewId; onSelectView: (view: ViewId) => void;
+}) {
   const s = useStyles();
   const selectPlayer = useReport(state => state.selectPlayer);
   const player = report.players.find(p => p.id === playerId)!;
   const p = report.analytics.find(a => a.playerId === playerId)!;
   const timeline = report.timeline.find(t => t.playerId === playerId)?.rounds ?? [];
-  const [activeTab, setActiveTab] = useState('report');
   const [replayJump,setReplayJump]=useState<ReplayJump|null>(null);
   const [replayNotice,setReplayNotice]=useState<string|null>(null);
   const [unavailableReplayRound,setUnavailableReplayRound]=useState<number|null>(null);
   const showReplay=(round:number,tick?:number)=>{
     const target=report.replay?.rounds.find(r=>r.round===round);
-    if(!target){setUnavailableReplayRound(round);setActiveTab('replay');return;}
+    if(!target){setUnavailableReplayRound(round);onSelectView('replay');return;}
     setUnavailableReplayRound(null);
     const outside=tick!==undefined&&(tick<target.startTick||tick>target.endTick);
     setReplayNotice(outside?'该证据位于正式回合窗口之外，仅定位回合起点，未回放该事件。':null);
-    setReplayJump(old=>({round,tick:outside?target.startTick:tick,sequence:(old?.sequence??0)+1}));setActiveTab('replay');
+    setReplayJump(old=>({round,tick:outside?target.startTick:tick,sequence:(old?.sequence??0)+1}));onSelectView('replay');
   };
   const [expanded, setExpanded] = useState<number[]>([]);
   const [highlighted, setHighlighted] = useState<number | null>(null);
@@ -321,7 +333,7 @@ function Report({ report, playerId, replayActive }: { report: DesktopMatchReport
   const showRounds = (rounds: number[]) => {
     const known = rounds.filter(round => timeline.some(r => r.round === round));
     if (!known.length) return;
-    setActiveTab('timeline');
+    onSelectView('timeline');
     setScrollRound(known[0]);
     setExpanded(prev => Array.from(new Set([...prev, ...known])));
     setHighlighted(known[0]);
@@ -338,25 +350,17 @@ function Report({ report, playerId, replayActive }: { report: DesktopMatchReport
     return () => cancelAnimationFrame(frame);
   }, [activeTab, scrollRound]);
   useEffect(() => () => { if (highlightTimer.current !== undefined) window.clearTimeout(highlightTimer.current); }, []);
-  useEffect(()=>{if(activeTab!=='replay')return;const frame=requestAnimationFrame(()=>document.getElementById('replay-panel')?.scrollIntoView({block:'start'}));return()=>cancelAnimationFrame(frame);},[activeTab,replayJump?.sequence]);
-  return <>
-    <div className={s.header}>
+  return <div className={s.reportFrame}>
+    <div className={s.viewHeader}>
       <div className={s.column}><Title1>{report.match.map}</Title1><Body1>{report.match.score ? `${report.match.score.initialCT} : ${report.match.score.initialT}` : '比分不可用'} · 开局 CT 队 / 开局 T 队 · {report.match.rounds} 回合</Body1><Caption1 className={s.muted}>{report.match.fileName}</Caption1></div>
       <div className={s.column}><Caption1>目标玩家</Caption1><Tooltip content={player.nickname} relationship="description"><Dropdown className={s.playerDropdown} listbox={{ style: { maxWidth: '250px' } }} aria-label="目标玩家" value={player.nickname} selectedOptions={[playerId]} onOptionSelect={(_, data) => data.optionValue && selectPlayer(data.optionValue)}>
         {report.players.map(p => <Option key={p.id} value={p.id} text={p.nickname}><Tooltip content={p.nickname} relationship="description"><span className={s.playerName}>{p.nickname}</span></Tooltip></Option>)}
       </Dropdown></Tooltip></div>
     </div>
-    <TabList aria-label="报告页面" selectedValue={activeTab} onTabSelect={(_, data) => setActiveTab(String(data.value))}>
-      <Tab id="report-tab" value="report" aria-controls="report-panel">比赛报告</Tab>
-      <Tab id="deep-review-tab" value="deep-review" aria-controls="deep-review-panel">深度复盘</Tab>
-      <Tab id="timeline-tab" value="timeline" aria-controls="timeline-panel">回合时间线</Tab>
-      <Tab id="analysis-tab" value="analysis" aria-controls="analysis-panel">分析</Tab>
-      <Tab id="replay-tab" value="replay" aria-controls="replay-panel">地图回放</Tab>
-    </TabList>
-    <div id="deep-review-panel" role="tabpanel" aria-labelledby="deep-review-tab" hidden={activeTab !== 'deep-review'}>
+    <div id="deep-review-panel" role="tabpanel" aria-labelledby="deep-review-tab" className={s.tabPanel} hidden={activeTab !== 'deep-review'}>
       <DeepReview key={playerId} player={report.deepReview.players.find(p => p.playerId === playerId)!} onShowRounds={showRounds} onReplayRound={report.replay?.available?showReplay:undefined} />
     </div>
-    <div id="report-panel" role="tabpanel" aria-labelledby="report-tab" hidden={activeTab !== 'report'}>
+    <div id="report-panel" role="tabpanel" aria-labelledby="report-tab" className={s.tabPanel} hidden={activeTab !== 'report'}>
       <div className={s.section}>
       {p.coverage.notes.length ? <MessageBar intent="warning"><MessageBarBody>{p.coverage.notes.join(' ')}</MessageBarBody></MessageBar> : null}
       <div className={s.grid} aria-label="玩家指标">
@@ -401,33 +405,53 @@ function Report({ report, playerId, replayActive }: { report: DesktopMatchReport
       </div>
       </div>
     </div>
-    <div id="timeline-panel" role="tabpanel" aria-labelledby="timeline-tab" hidden={activeTab !== 'timeline'}>
+    <div id="timeline-panel" role="tabpanel" aria-labelledby="timeline-tab" className={s.tabPanel} hidden={activeTab !== 'timeline'}>
       <RoundTimeline rounds={timeline} expanded={expanded} highlighted={highlighted} onToggle={toggleRound} onReplay={report.replay?.available?showReplay:undefined} />
     </div>
-    <div id="analysis-panel" role="tabpanel" aria-labelledby="analysis-tab" hidden={activeTab !== 'analysis'}>
+    <div id="analysis-panel" role="tabpanel" aria-labelledby="analysis-tab" className={s.tabPanel} hidden={activeTab !== 'analysis'}>
       <AnalysisViews analysis={report.analysis} playerId={playerId} />
     </div>
-    <div id="replay-panel" role="tabpanel" aria-labelledby="replay-tab" hidden={activeTab!=='replay'}>
+    <div id="replay-panel" role="tabpanel" aria-labelledby="replay-tab" className={s.replayPanel} hidden={activeTab!=='replay'}>
       {unavailableReplayRound!==null?<><Body1>R{unavailableReplayRound} 的正式回合窗口不可靠，无法定位回放。</Body1><Button appearance="subtle" onClick={()=>setUnavailableReplayRound(null)}>浏览可用回合</Button></>:<>
         {replayNotice?<Caption1>{replayNotice}</Caption1>:null}
         {report.replay?<ReplayPlayer key={report.replay.sessionId??'unavailable'} metadata={report.replay} playerId={playerId} onSelectPlayer={selectPlayer} active={activeTab==='replay'&&replayActive} jump={replayJump}/>:<Body1>此报告没有可用回放会话。</Body1>}
       </>}
     </div>
-  </>;
+  </div>;
 }
 
 function App() {
   const s = useStyles();
-  const { status, report, playerId, error, importDemo, setPhase, cancelImport } = useReport();
+  const { status, report, playerId, error, importDemo, importDemoFile, setPhase, cancelImport } = useReport();
   useEffect(() => window.cs2Analyst.onProgress(setPhase), [setPhase]);
   const busy = status === 'selecting' || status === 'parsing' || status === 'analyzing';
   const phase = status === 'selecting' ? '正在选择 DEM…' : status === 'parsing' ? '正在后台解析 DEM…' : '正在生成指标与深度复盘…';
-  return <main className={s.content} data-status={status}>
-    <header className={s.header}><div className={s.column}><Subtitle1>CS2 Analyst</Subtitle1><Caption1 className={s.muted}>本地赛后报告</Caption1></div><Button appearance="primary" disabled={busy} onClick={() => void importDemo()}>{report || status === 'error' ? '重新选择 DEM' : '选择 DEM'}</Button></header>
-    {busy ? <div role="status"><Spinner label={phase} /><Caption1 className={s.muted}>大型录像可能需要数十秒，请保持应用打开。</Caption1>{status!=='selecting'?<Button appearance="subtle" onClick={()=>void cancelImport()}>取消导入</Button>:null}</div> : null}
-    {error ? <MessageBar intent="error"><MessageBarBody>{error}</MessageBarBody></MessageBar> : null}
-    {report ? <>{status === 'error' || busy ? <Caption1>下方为上一次成功导入的报告。</Caption1> : null}<Report key={report.match.id} report={report} playerId={playerId} replayActive={!busy&&status==='success'} /></> : !busy ? <Card className={s.empty}><Title1>从一场比赛开始</Title1><Body1>选择 CS2 .dem 录像，查看玩家表现与有证据的复盘重点。</Body1><Caption1 className={s.muted}>文件只在本机处理。</Caption1></Card> : null}
-  </main>;
+  const [activeView, setActiveView] = useState<ViewId>('report');
+  const [collapsed, setCollapsed] = useState(false);
+  // A freshly imported match always opens on its report view.
+  const matchId = report?.match.id;
+  useEffect(() => { setActiveView('report'); }, [matchId]);
+  return <>
+    <Sidebar reportReady={Boolean(report)} busy={busy} collapsed={collapsed} activeView={activeView}
+      importLabel={report || status === 'error' ? '重新选择 DEM' : '选择 DEM'}
+      onSelectView={setActiveView} onToggleCollapsed={() => setCollapsed(value => !value)} onImport={() => void importDemo()} />
+    <main className={s.main} data-app-content data-status={status}>
+      {error ? <div className={s.banner}><MessageBar intent="error"><MessageBarBody>{error}</MessageBarBody></MessageBar></div> : null}
+      {busy && report ? <div className={s.statusStrip} role="status">
+        <Spinner size="tiny" label={phase} />
+        <Caption1 className={s.muted}>大型录像可能需要数十秒，请保持应用打开。</Caption1>
+        {status !== 'selecting' ? <Button appearance="subtle" size="small" onClick={() => void cancelImport()}>取消导入</Button> : null}
+      </div> : null}
+      {report ? <>
+        {status === 'error' || busy ? <div className={s.banner}><Caption1>下方为上一次成功导入的报告。</Caption1></div> : null}
+        <Report key={report.match.id} report={report} playerId={playerId} replayActive={!busy&&status==='success'} activeTab={activeView} onSelectView={setActiveView} />
+      </> : busy ? <div className={s.center} role="status">
+        <Spinner size="large" label={phase} />
+        <Caption1 className={s.muted}>大型录像可能需要数十秒，请保持应用打开。</Caption1>
+        {status !== 'selecting' ? <Button appearance="subtle" onClick={() => void cancelImport()}>取消导入</Button> : null}
+      </div> : <Home busy={busy} onImport={() => void importDemo()} onImportFile={path => void importDemoFile(path)} />}
+    </main>
+  </>;
 }
 
 class ReportErrorBoundary extends React.Component<React.PropsWithChildren, { failed: boolean }> {
@@ -439,8 +463,9 @@ class ReportErrorBoundary extends React.Component<React.PropsWithChildren, { fai
 }
 function DesktopShell() {
   useScrollbarStyles();
+  useAppShellStyles();
   const s = useStyles();
-  return <div className={s.page}><AppTitlebar /><div className={s.body} data-app-content><ReportErrorBoundary><App /></ReportErrorBoundary></div></div>;
+  return <div className={s.page}><AppTitlebar /><div className={s.shell}><ReportErrorBoundary><App /></ReportErrorBoundary></div></div>;
 }
 document.body.style.margin = '0';
 createRoot(document.getElementById('root')!).render(

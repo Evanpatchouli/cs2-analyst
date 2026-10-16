@@ -51,7 +51,7 @@ test('frameless window preserves sandbox and guards every privileged window acti
   assert.ok(calls.some(call => call[0] === 'appId' && call[1] === 'com.evanpatchouli.cs2analyst'));
   assert.equal(window.menuRemoved, true);
   assert.equal(window.options.resizable, true);
-  for (const [key, value] of Object.entries({ width: 1280, height: 800, minWidth: 800, minHeight: 600, backgroundColor: '#111821' })) assert.equal(window.options[key], value);
+  for (const [key, value] of Object.entries({ width: 1280, height: 800, minWidth: 1024, minHeight: 640, backgroundColor: '#111821' })) assert.equal(window.options[key], value);
   for (const [key, value] of Object.entries({ contextIsolation: true, nodeIntegration: false, sandbox: true })) assert.equal(window.options.webPreferences[key], value);
   assert.equal(window.options.titleBarOverlay, undefined);
   const trusted = { sender: window.webContents, senderFrame: window.webContents.mainFrame };
