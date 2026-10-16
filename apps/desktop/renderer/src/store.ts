@@ -10,7 +10,7 @@ interface ReportState {
   setPhase(phase: ImportPhase): void;
   selectPlayer(id: string): void;
   importDemo(): Promise<void>;
-  importDemoFile(filePath: string): Promise<void>;
+  importDroppedFile(file: File): Promise<void>;
   cancelImport(): Promise<void>;
 }
 export const useReport = create<ReportState>((set, get) => ({
@@ -34,12 +34,12 @@ export const useReport = create<ReportState>((set, get) => ({
       set({ status: 'error', error: '桌面分析连接失败。请重新选择 DEM；若仍失败，请重启应用。' });
     }
   },
-  // Drag-and-drop entry: the path was already resolved and validated by the drop handler.
-  importDemoFile: async filePath => {
+  // Preload owns the disk path; Main progress invalidates old replay only when analysis starts.
+  importDroppedFile: async file => {
     if (['selecting', 'parsing', 'analyzing'].includes(get().status)) return;
-    set({ status: 'parsing', error: null });
+    set({ status: 'selecting', error: null });
     try {
-      const result = await window.cs2Analyst.importDemoFile(filePath);
+      const result = await window.cs2Analyst.importDroppedFile(file);
       if (result.kind === 'cancelled') set({ status: get().report ? 'success' : 'idle' });
       else if (result.kind === 'error') set({ status: 'error', error: result.message });
       else set({ status: 'success', report: result.report, playerId: result.report.selectedPlayer });

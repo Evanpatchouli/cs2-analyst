@@ -15,8 +15,14 @@ const api: DesktopApi = {
     },
   },
   importDemo: () => ipcRenderer.invoke('report:import'),
-  importDemoFile: filePath => ipcRenderer.invoke('report:import-file', filePath),
-  getFilePath: file => webUtils.getPathForFile(file),
+  importDroppedFile: async file => {
+    // Only Electron can resolve a disk-backed File; never accept a renderer path.
+    let filePath: string;
+    try { filePath = webUtils.getPathForFile(file); }
+    catch { return { kind: 'error', message: '无法读取拖入文件的位置，请改用点击选择。' }; }
+    if (!filePath) return { kind: 'error', message: '无法读取拖入文件的位置，请改用点击选择。' };
+    return ipcRenderer.invoke('report:import-file', filePath);
+  },
   cancelImport: () => ipcRenderer.invoke('report:cancel'),
   replay: {
     getChunk: request => ipcRenderer.invoke('replay:chunk', { sessionId:request.sessionId,round:request.round,block:request.block }),

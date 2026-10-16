@@ -190,10 +190,8 @@ export interface DesktopApi {
     onMaximizedChange(listener: (maximized: boolean) => void): () => void;
   };
   importDemo(): Promise<ImportResult>;
-  /** Import a DEM chosen by drag-and-drop; the absolute path comes from getFilePath. */
-  importDemoFile(filePath: string): Promise<ImportResult>;
-  /** Resolve the absolute filesystem path of a File dropped onto the renderer window. */
-  getFilePath(file: File): string;
+  /** Resolve a disk-backed File and submit it inside preload, without exposing its path. */
+  importDroppedFile(file: File): Promise<ImportResult>;
   cancelImport(): Promise<void>;
   replay: {
     getChunk(request: DesktopReplayRequest): Promise<DesktopReplayResult>;

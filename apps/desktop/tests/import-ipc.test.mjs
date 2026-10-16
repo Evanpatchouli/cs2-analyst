@@ -51,3 +51,76 @@ test('a dragged import and a dialog import never run at the same time', async ()
   await h.finish(pending);
   h.window.close();
 });
+
+test('preload resolves Files privately and never exposes a path import capability', async () => {
+  let api;
+  const calls = [], diskFile = {}, textFile = {}, syntheticFile = {};
+  const code = transformSync(readFileSync(new URL('../preload/index.ts', import.meta.url), 'utf8'), { loader: 'ts', format: 'cjs' }).code;
+  vm.runInNewContext(code, { require: () => ({
+    contextBridge: { exposeInMainWorld: (_, value) => { api = value; } },
+    ipcRenderer: { invoke: async (channel, path) => { calls.push({ channel, path }); return { kind: 'success' }; } },
+    webUtils: { getPathForFile: file => {
+      if (file === diskFile) return 'C:\\match\\demo.dem';
+      if (file === textFile) return 'C:\\match\\notes.txt';
+      if (file === syntheticFile) return '';
+      throw new TypeError('Not a File');
+    } },
+  }) });
+  assert.deepEqual(Object.keys(api).sort(), ['cancelImport', 'importDemo', 'importDroppedFile', 'onProgress', 'replay', 'version', 'window'].sort());
+  for (const input of [syntheticFile, 'C:\\arbitrary.dem', { path: 'C:\\arbitrary.dem' }, null]) {
+    const result = await api.importDroppedFile(input);
+    assert.equal(result.kind, 'error');
+    assert.match(result.message, /无法读取拖入文件的位置/);
+  }
+  assert.equal(calls.length, 0, 'unresolved Files never reach IPC');
+  assert.equal((await api.importDroppedFile(diskFile)).kind, 'success');
+  await api.importDroppedFile(textFile); // Main owns the extension gate, tested above.
+  assert.deepEqual(calls, [{ channel: 'report:import-file', path: 'C:\\match\\demo.dem' }, { channel: 'report:import-file', path: 'C:\\match\\notes.txt' }]);
+});
+
+test('failed, cancelled and exited imports clean up their worker and release the import lock', async () => {
+  const h = await harness();
+  for (const outcome of ['error', 'cancelled', 'exit']) {
+    const pending = h.handlers.get('report:import-file')(h.trusted, 'C:\\demo.dem');
+    const worker = h.workers.at(-1);
+    if (outcome === 'cancelled') await h.handlers.get('report:cancel')(h.trusted);
+    else if (outcome === 'exit') worker.emit('exit', 1);
+    else worker.emit('message', { kind: 'error', message: 'fixture parse failure' });
+    assert.equal((await pending).kind, outcome === 'cancelled' ? 'cancelled' : 'error');
+    assert.equal(worker.killed, true);
+    const { result } = await h.finish(h.handlers.get('report:import-file')(h.trusted, 'C:\\next.dem'));
+    assert.equal(result.kind, 'success', 'the next import can recover');
+  }
+  h.window.close();
+});
+
+test('renderer preserves report and player on drop failure/cancel and ignores duplicate/late requests', async () => {
+  let complete, calls = 0;
+  const bridge = { importDroppedFile: () => { calls++; return new Promise(resolve => { complete = resolve; }); } };
+  const module = { exports: {} };
+  const code = transformSync(readFileSync(new URL('../renderer/src/store.ts', import.meta.url), 'utf8'), { loader: 'ts', format: 'cjs' }).code;
+  vm.runInNewContext(code, { require, module, window: { cs2Analyst: bridge } });
+  const store = module.exports.useReport;
+  const report = { selectedPlayer: 'p1', players: [{ id: 'p1' }], replay: { available: true, sessionId: 'old' } };
+  store.setState({ status: 'success', report, playerId: 'p1' });
+  for (const result of [{ kind: 'error', message: 'unresolved' }, { kind: 'cancelled' }]) {
+    const pending = store.getState().importDroppedFile({});
+    await store.getState().importDroppedFile({});
+    assert.equal(calls, result.kind === 'error' ? 1 : 2);
+    complete(result); await pending;
+    assert.equal(store.getState().report, report);
+    assert.equal(store.getState().playerId, 'p1');
+    store.getState().setPhase('analyzing');
+    assert.equal(store.getState().status, result.kind === 'error' ? 'error' : 'success');
+  }
+  const pending = store.getState().importDroppedFile({});
+  store.getState().setPhase('parsing');
+  assert.equal(store.getState().report.replay.available, false, 'an actual new analysis ends the old replay session');
+  complete({ kind: 'cancelled' }); await pending;
+  assert.equal(store.getState().report.replay.available, false);
+  const next = { ...report, selectedPlayer: 'p2' };
+  const success = store.getState().importDroppedFile({});
+  complete({ kind: 'success', report: next }); await success;
+  assert.equal(store.getState().report, next);
+  assert.equal(store.getState().playerId, 'p2');
+});

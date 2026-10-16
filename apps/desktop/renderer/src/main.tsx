@@ -422,7 +422,7 @@ function Report({ report, playerId, replayActive, activeTab, onSelectView }: {
 
 function App() {
   const s = useStyles();
-  const { status, report, playerId, error, importDemo, importDemoFile, setPhase, cancelImport } = useReport();
+  const { status, report, playerId, error, importDemo, importDroppedFile, setPhase, cancelImport } = useReport();
   useEffect(() => window.cs2Analyst.onProgress(setPhase), [setPhase]);
   const busy = status === 'selecting' || status === 'parsing' || status === 'analyzing';
   const phase = status === 'selecting' ? '正在选择 DEM…' : status === 'parsing' ? '正在后台解析 DEM…' : '正在生成指标与深度复盘…';
@@ -449,7 +449,7 @@ function App() {
         <Spinner size="large" label={phase} />
         <Caption1 className={s.muted}>大型录像可能需要数十秒，请保持应用打开。</Caption1>
         {status !== 'selecting' ? <Button appearance="subtle" onClick={() => void cancelImport()}>取消导入</Button> : null}
-      </div> : <Home busy={busy} onImport={() => void importDemo()} onImportFile={path => void importDemoFile(path)} />}
+      </div> : <Home busy={busy} onImport={() => void importDemo()} onImportFile={file => void importDroppedFile(file)} />}
     </main>
   </>;
 }

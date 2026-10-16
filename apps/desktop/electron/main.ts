@@ -148,7 +148,7 @@ ipcMain.handle('report:import', async (event): Promise<ImportResult> => {
   }
 });
 
-/** Drag-and-drop import: same pipeline as the dialog, but the renderer supplies an absolute .dem path. */
+/** Drag-and-drop import: same pipeline as the dialog, with an absolute .dem path resolved inside preload. */
 ipcMain.handle('report:import-file', async (event, value: unknown): Promise<ImportResult> => {
   const window = trustedWindow(event);
   if (!window) return { kind: 'error', message: '无效的报告请求。' };
@@ -156,7 +156,7 @@ ipcMain.handle('report:import-file', async (event, value: unknown): Promise<Impo
   if (importing) return { kind: 'error', message: '已有分析任务正在运行。' };
   importing = true;
   try {
-    return await analyzeFromPath(value.trim(), window);
+    return await analyzeFromPath(value, window);
   } catch (error) {
     console.error('DEM import failed', error);
     return { kind: 'error', message: '无法导入 DEM。请检查文件权限后重新选择。' };
