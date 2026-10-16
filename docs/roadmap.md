@@ -112,11 +112,17 @@ Current: **v0.1 Final Acceptance FINAL PASS; P5 COMPLETE; P5.7 FINAL PASS.** 验
 - 地图版本匹配仍未确认，所有地图明确标示示意。按用户2026-10-16扩图指令，Dust2、Inferno、Mirage、Ancient、Overpass、Vertigo、Nuke、Anubis、Train、Cache十图的13张Valve PNG与10份原overview随仓库提交/推送；Nuke/Vertigo/Train双层。新增地图资源/坐标/楼层验证不代表新增真实DEM已验收；保留来源摘要与第三方分发许可未确认记录。缺图时仍可构建并浏览报告/事件。
 - 技术机制见 [P6 回放技术路线](./replay-technical-route.md)，实际范围、命令、失败历史、预算实测和限制见 [实施记录](./replay-implementation.md) / [验收JSON](./replay-acceptance.json)。P7/P8仍未开始。
 
-## P7 地图热力图（未开始）
+## P7 地图热力图（P7.0 审查完成，实现未开始）
 
-- 地图热力图展示。
-- 统计采样、覆盖与口径单独设计；热力图不等于视线、掩体或战术收益证据。
-- 具体指标与验收标准在阶段启动时确定。
+- 地图热力图展示；热力图不等于视线、掩体或战术收益证据。
+- **P7.0 地图热力图可行性与统计口径审查 — PASS / CONDITIONAL GO**（实际基线 `aae55e849ec8da35e4d946d2d883f25e7a88a58a`）。确认候选 A 玩家位置采样密度、候选 B 击杀位置、候选 C 死亡位置三层都可**完全复用现有 `parseWithReplay()` 已共享生成的 `Match` + `MatchReplay` + `MatchSpatialEvidence`**，无需新增 native 查询、第三方依赖，且不修改 P3/P4/Deep Review/Timeline；停留时间、投掷物区域/烟雾/火焰、LOS/掩体/可见性/战术收益明确排除。统计口径、公式、分母、筛选语义、空间聚合、Dust2 实测与架构建议见 [地图热力图可行性与统计口径](./map-heatmap-feasibility.md)。
+  - CONDITION：结论只支持“示意图上的位置分布”；DEM 与雷达版本匹配仍 `unconfirmed`，真实 DEM 验证仅有 Dust2；位置采样密度不等于停留时间。
+  - 真实 DEM 复核：`.demo/spirit-vs-faze-m3-dust2.dem` SHA-256 `db90fe85…4958c` 与 557650967 字节一致；本轮只读实验确认 235604 个有效位置采样、`positionCoverage=0.8205`、`positionCompleteness=1.0`、窗口内击杀 161/162 与死亡 162/162 有精确 at-event 位置。
+- 子阶段（P7.1–P7.3 **均未开始，不得标记完成**）：
+  - **P7.1 统计投影与契约**：纯函数确定性投影 + JSON-only 契约；位置层、击杀/死亡层、coverage/分母/归一化、N=16/32/64。通过条件：统计正确性与数据覆盖合成测试、真实 Dust2 数值可复现、同输入两次一致，且不改 P3/P4/Deep Review。
+  - **P7.2 会话与 IPC 集成**：导入时构建有界热力图投影并入会话；report-contract additive 元数据 + 受信网格请求；独立降级与清理。通过条件：报告/回放不变、会话生命周期与清理正确、热力图失败不影响报告、IPC 体积与在途上限实测。
+  - **P7.3 Renderer 与筛选**：Canvas 2D 叠加、图层开关、玩家/阵营/回合/楼层筛选、图例与覆盖说明。通过条件：五 Tab/回放回归、筛选语义正确、未知数据不伪造、Electron 与安装版端到端、性能预算实测。
+- 验收矩阵（统计正确性 S1–S10、数据覆盖 D1–D8、回归保护 R1–R5）、风险与进入下一阶段的前置条件见该文档 §9–§11。
 
 ## P8 AI Coach（原 P6，未开始）
 
