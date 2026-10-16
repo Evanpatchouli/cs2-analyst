@@ -109,7 +109,7 @@ Current: **v0.1 Final Acceptance FINAL PASS; P5 COMPLETE; P5.7 FINAL PASS.** 验
 - 子阶段：P6.0 资源与可行性验证 → P6.1 地图资源基础 → P6.2 回放采样与传输 → P6.3 播放器与证据联动 → P6.4 回归与安装验收。P6.0 已完成 Dust2 四区域配准与采样预算验证；这不代表 DEM 与底图版本一致或像素级配准已确认。
 - P6.0–P6.4已按用户指定的单一Dust2 fixture与本机个人非商业使用范围通过自动化验收：固定Valve manifest定向提取与区域配准、独立8Hz采样、生命周期断点、有界会话/受信分块IPC、Canvas播放器、Timeline/Findings联动、源码外安装与离线资源检查。
 - `pnpm typecheck` / `pnpm build`、相关回归、真实Electron与生产/测试seam安装检查通过；原报告与旧公开入口完整hash相同。其他地图/个人DEM及缺少的demo1 golden未重跑，不冒充PASS。Nuke仅资源/楼层边界合成验证。
-- 地图版本匹配仍未确认，所有地图明确标示示意；公开分发许可未确认，Valve PNG/raw overview仅本机准备，不推送。公开源码缺图时可构建并浏览报告/事件。
+- 地图版本匹配仍未确认，所有地图明确标示示意。按用户2026-10-16指令，五张Valve PNG与四份原overview随仓库提交/推送，保留来源摘要与第三方分发许可未确认记录。缺图时仍可构建并浏览报告/事件。
 - 技术机制见 [P6 回放技术路线](./replay-technical-route.md)，实际范围、命令、失败历史、预算实测和限制见 [实施记录](./replay-implementation.md) / [验收JSON](./replay-acceptance.json)。P7/P8仍未开始。
 
 ## P7 地图热力图（未开始）

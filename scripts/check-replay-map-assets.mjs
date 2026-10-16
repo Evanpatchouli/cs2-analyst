@@ -15,6 +15,6 @@ export async function checkReplayAssets(directory=new URL('../apps/desktop/rende
     const bytes=await readFile(new URL(file,base));assert.equal(sha256(bytes),record.sha256,`Radar digest mismatch: ${file}`);
     assert.deepEqual(pngDimensions(bytes),{width:record.width,height:record.height});prepared++;
   }
-  return {prepared,expected:expected.size,mode:prepared?'local-personal-assets':'event-only'};
+  return {prepared,expected:expected.size,mode:prepared?'verified-assets':'event-only'};
 }
 if(process.argv[1]&&import.meta.url===pathToFileURL(resolve(process.argv[1])).href)console.log(JSON.stringify(await checkReplayAssets(process.argv[2])));

@@ -61,8 +61,9 @@ Radar/overview pairing, map versions, independent landmark calibration and multi
 be checked; missing/uncertain evidence remains explicit. Display interpolation never becomes analytics
 evidence. P6 has no P7 heatmap or P8 backend dependency and does not establish LOS or tactical quality.
 The development machine has no CS2 installation; there is no game-directory discovery or runtime asset extraction.
-Only local personal/noncommercial asset use is confirmed. Valve PNG/raw overview files remain ignored/local;
-source checkouts without radars support reports and event/state browsing. Local build/pack validates pinned digests.
+The user authorized committing and pushing the five radar PNGs and four original overviews on 2026-10-16.
+Source checkouts include these assets; checkouts without radars still support reports and event/state browsing.
+Build/pack validates pinned digests; provenance and the unconfirmed third-party redistribution license remain recorded in the resource manifest.
 All map/DEM version matches remain unconfirmed and are labelled schematic; Nuke shared-Z transitions stay unknown.
 Current phase status, exact fixture scope and actual measurements: [P6 implementation](./replay-implementation.md).
 

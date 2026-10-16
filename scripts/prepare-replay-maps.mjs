@@ -16,4 +16,4 @@ for (const map of actual) {
 }
 await mkdir(output, { recursive: true });
 for (const map of actual) for (const image of map.images) await copyFile(resolve(input, image.path), new URL(`${map.map}${image.id === 'default' ? '' : '_' + image.id}.png`, output));
-console.log('Prepared 5 verified local radar images. Files are ignored by Git; public redistribution remains unconfirmed.');
+console.log('Prepared 5 verified radar images. Repository assets must match docs/replay-resources.json.');

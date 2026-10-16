@@ -1,0 +1,2 @@
+# Preserve upstream overview bytes, CRLF and whitespace for source digest verification.
+*.txt -text whitespace=-blank-at-eol,-blank-at-eof,cr-at-eol

@@ -8,6 +8,3 @@ dist
 release
 vendor/demoparser/.build/
 packages/demoparser-native/native/
-
-# Locally prepared Valve radars: local personal validation only; public redistribution unconfirmed.
-apps/desktop/renderer/src/assets/replay-maps/

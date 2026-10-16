@@ -70,15 +70,15 @@
     ]
   },
   "usage": {
-    "scope": "local personal non-commercial development and installation verification confirmed by user",
+    "scope": "P6 acceptance used local personal non-commercial development and installation verification; user additionally authorized committing and pushing map assets on 2026-10-16",
     "owner": "Valve Corporation",
-    "publicRedistribution": "unconfirmed; no publish or push authorization",
+    "publicRedistribution": "Third-party redistribution license remains unconfirmed; repository publication explicitly authorized by user on 2026-10-16",
     "references": [
       "https://store.steampowered.com/subscriber_agreement/",
       "https://github.com/pnxenopoulos/awpy-data/blob/7c73907f74521d271f0eb40bcbe14a4912184e05/README.md",
       "https://github.com/MurkyYT/cs2-map-icons/tree/9a22f424dab892f8fd59cec100029883c05e6116"
     ],
-    "publicSourcePolicy": "Only code, digests, normalized numeric coordinate/layer metadata and verification records are committed. Extracted Valve PNGs and original overview files stay ignored/local."
+    "publicSourcePolicy": "Five pinned radar PNGs and four original overviews are tracked with code, digests and normalized metadata. Installers, screenshots, DEMs, VPKs and extraction tools remain local."
   },
   "maps": [
     {
@@ -280,5 +280,12 @@
       "One Inferno overview extraction attempted while the volume was locked; CLI returned 0 despite logging an IO error. Retried after download; offline audit confirms all nine files",
       "Community PNG encoders/alpha handling differ; images are not mixed with other-release overview data"
     ]
+  },
+  "repositoryAssets": {
+    "images": "apps/desktop/renderer/src/assets/replay-maps/",
+    "overviews": "apps/desktop/renderer/src/assets/replay-overviews/",
+    "files": 9,
+    "bytes": 652183,
+    "overviewLineEndings": "Original bytes preserved via directory .gitattributes"
   }
 }

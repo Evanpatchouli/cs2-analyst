@@ -5,7 +5,8 @@
 用户明确选择 `.demo/spirit-vs-faze-m3-dust2.dem` 作为本次真实验证样本：
 SHA-256 `db90fe85aab023a1d2c8a5996182e6120d98ef494f02a070b17982b235e4958c`，557650967 字节。
 缺少其他 DEM 不作为阻塞；未执行的其他地图/个人 DEM 验证不得称为通过。
-用户确认资源仅用于本机个人、非商业开发与安装验证；公开分发许可保持未确认，不 push/发布资源或安装包。
+初次验收时用户确认资源用于本机个人、非商业开发与安装验证；第三方公开分发许可保持未确认。
+2026-10-16用户进一步明确将地图资源一并提交/推送：仓库纳入五张PNG与四份原overview，安装包仍留本机；见本文末尾补充记录。
 
 ## P6.0 — 本机个人非商业开发验证通过
 
@@ -81,7 +82,7 @@ Inferno/Mirage 只验证资源配套与装载，不声称真实 DEM 配准通过
 
 原始 DEM header patch_version=14055，资源当前 manifest 的 client/build version 没有可验证等价关系；
 所有四图 DEM 版本匹配均为 unconfirmed。后续 UI 明示“地图版本未确认，仅示意”，不按地图名声称匹配。
-个人本机开发/安装验证范围由用户明确确认；公开/商业分发许可 UNKNOWN，不在本任务中 push 或发布。
+P6.0时个人本机开发/安装验证范围由用户明确确认，公开/商业分发许可 UNKNOWN；当时未push或发布素材。
 本阶段通过仅针对上述本机技术前置验证，不表示取得公开分发许可。
 
 复现官方资源提取：固定工具包地址与摘要见资源 JSON；两个工具均不放入运行时/安装包。
@@ -105,8 +106,8 @@ Nuke根据版本元数据判层，-495/缺Z/越界保留未知。4个测试覆�
 Nuke层级边界、未知地图/缺图回退；desktop typecheck通过，独立复核无阻塞。
 
 `node scripts/prepare-replay-maps.mjs .tmp/p6-official` 先核验全部原始overview/PNG摘要及参数，再准备5张本地图片。
-远端仓库已核实为PUBLIC，用户要求完成后push代码；为遵守本机素材用途，PNG/raw overview不提交或推送。
-图片位于受Git忽略的renderer assets目录，Vite按相对URL打包；空源码检出允许缺图并降级事件浏览，
+远端仓库已核实为PUBLIC，P6.1时用户要求完成后push代码，当时PNG/raw overview不提交或推送。
+图片当时位于受Git忽略的renderer assets目录（2026-10-16已按用户要求纳入版本管理），Vite按相对URL打包；缺图检出允许降级事件浏览，
 不会热链或下载。归一数值元数据/摘要、准备工具及验证记录提交；公开素材分发许可仍未确认。
 
 UI/真实离线装载在P6.3/P6.4验证。
@@ -241,3 +242,16 @@ pnpm --filter @cs2-analyst/desktop pack:win
 pnpm --filter @cs2-analyst/desktop pack:win:test
 node scripts/replay-installed-smoke.mjs
 ```
+
+## 2026-10-16 — 地图资源纳入仓库
+
+用户明确要求将地图资源一并提交并推送，覆盖此前仅本机保存素材的约定。
+五张原始1024×1024雷达PNG位于`apps/desktop/renderer/src/assets/replay-maps/`，
+四份配套原始overview位于`apps/desktop/renderer/src/assets/replay-overviews/`，共652183字节。
+移除图片目录的Git忽略规则；overview目录用`.gitattributes`保留原始字节，避免换行转换改变来源摘要。
+来源、固定manifest、文件SHA-256与第三方分发许可未确认的记录保留在`replay-resources.json`。
+正常检出即可构建含图回放，不需要重新提取素材；DEM、VPK、提取工具、截图与安装包仍不提交。
+
+九份资源均与固定来源清单摘要一致；资源/地图投影/楼层边界相关测试7/7通过，
+`pnpm --filter @cs2-analyst/desktop build`（含typecheck和资源摘要预检）通过，产物包含全部五张PNG。
+本次未改变回放逻辑或重新执行完整DEM/安装验收；P6.4测量仍为2026-10-15的实际记录。

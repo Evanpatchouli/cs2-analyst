@@ -258,7 +258,7 @@
     "Map/DEM version equivalence is unconfirmed; all available maps are explicitly schematic",
     "Only the selected professional Dust2 DEM was run; other-map/personal real-demo gates and demo1 legacy goldens were not rerun per user scope",
     "Nuke layers/boundaries are validated from paired assets and synthetic tests, without a real Nuke DEM run",
-    "Public/commercial redistribution of Valve assets remains unconfirmed; PNG/raw overview/installers/screenshots are local and excluded from Git",
+    "Third-party redistribution license remains unconfirmed; user authorized committing/pushing five PNGs and four original overviews on 2026-10-16 after this local acceptance run. Installers/screenshots remain local.",
     "Peak memory is per OS process lifetime; renderer/worker maxima are not a simultaneous aggregate application peak",
     "Viewport screenshots are simulations, not native resize walkthroughs; multi-monitor DPI transitions and other recording modes were not manually validated"
   ],
