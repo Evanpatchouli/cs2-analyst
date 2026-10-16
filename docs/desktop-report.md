@@ -1,3 +1,13 @@
+# UI / IPC 修复 — 2026-10-17
+
+本轮基线 `f143169a7c82dcdf811d27425344ab6fc784c1c1`，实现与自动验收见 [UI / IPC 验收记录](./ui-ipc-acceptance.md)。
+
+- Renderer 只公开 `importDroppedFile(file: File)`；preload 用 Electron `webUtils.getPathForFile` 解析磁盘 File 后立即提交 `report:import-file`，不向 Renderer 返回路径，也不公开任意路径导入或通用 IPC。
+- 无磁盘路径的合成 File 返回明确错误；Main 保留可信 sender/main frame、类型、非空绝对路径、扩展名和互斥校验。错误和取消保留已有报告；真正开始解析后旧回放会话失效。
+- 雷达正方形尺寸使用父内容区（扣除 padding、border），无固定最小地图尺寸；ResizeObserver 与 DPR 变化监听更新 Canvas 并清理订阅。
+- 导入按钮展开/折叠均有当前操作的可访问名称与 Fluent Tooltip。滚动验收检查实际可见面板及末项可达，并通过真实 DOM 裁切反向断言防止假通过。
+- 当前代码的窗口最小尺寸为 **1024×640**。下方带日期的旧规格与验收仅为历史记录。
+
 # Current Desktop addition — P6
 
 原报告schema仍为v2，新增可选`replay`元数据，独立回放块schema v1。Utility以一次parseWithReplay

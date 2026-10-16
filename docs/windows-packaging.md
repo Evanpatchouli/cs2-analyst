@@ -93,7 +93,7 @@ Renderer bundle 不含 `demoparser2` / `laihoe` / `@cs2-analyst/*`，桌面与�
 - `CS2_ANALYST_DEM_PATH`：**仅非打包构建**生效（`!app.isPackaged`）。
 - `CS2_ANALYST_TEST_DEM_PATH`：只在 `CS2_ANALYST_TEST_SEAM=1` 的测试构建中编译进去；生产构建里 `__CS2_ANALYST_TEST_SEAM__` 被 `define` 成 `false`，Rollup 消除该死分支，`build-installer.mjs` 再断言生产 `main.js` 不含该变量。
 
-因此正式安装版不存在任意路径注入能力，只能通过原生文件对话框选择 DEM；测试 seam 只用于自动化安装版 E2E。
+因此正式安装版不存在环境变量路径注入能力；DEM 可通过原生文件对话框选择，或由 preload 解析磁盘 File 后导入。Renderer 不公开任意路径导入 API。测试 seam 只用于自动化安装版 E2E。
 
 ## 安装版 E2E
 

@@ -61,7 +61,7 @@ ipcMain.handle('replay:chunk', (event, value:unknown): Promise<DesktopReplayResu
  * `CS2_ANALYST_DEM_PATH` only applies to non-packaged builds. The packaged test seam
  * (`CS2_ANALYST_TEST_DEM_PATH`) is compiled in exclusively for the test-seam installer;
  * the production bundle contains neither the variable nor the branch, so an installed
- * production app can only import a DEM chosen through the native dialog.
+ * production app ignores environment path injection. Disk Files still use the private preload bridge.
  */
 function injectedDemoPath(): string | undefined {
   if (__CS2_ANALYST_TEST_SEAM__) return process.env.CS2_ANALYST_TEST_DEM_PATH;
