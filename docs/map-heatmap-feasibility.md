@@ -1,4 +1,7 @@
-# P7.0 地图热力图可行性与统计口径审查
+# 地图热力图统计契约（P7.0 审查 / P7.1 实现）
+
+P7.1 当前实现与验收见 §12；§5–§6 已修正为实现使用的唯一统计定义。
+其他带有 P7.0 日期、probe 和历史测试数字的章节保留为历史证据。
 
 - 阶段：P7.0（审查与方案确定，**不实现**热力图功能）。
 - 实际基线：`main` / `HEAD` = `aae55e849ec8da35e4d946d2d883f25e7a88a58a`（2026-10-17 05:00:58 +0800，`docs(desktop): 记录独立终审及人工拖放验收`）。
@@ -71,7 +74,7 @@ Worker    apps/desktop/electron/report-worker.ts   （只读一次 DEM，持有�
 5. `MatchSpatialEvidence`（`packages/match-model/src/spatial.ts:55`）为每个事件保存 `eventRef`（round/type/tick/eventIndex）、`participants`（actor/target，未识别为 `null`）与 `samples`（`{role, sample}`，`relation` 为 `before-event|at-event|after-event|boundary`，`position` 缺失为 `null`，`actualTick` 精确或 `null`）。**kill 的 actor/target `at-event` 样本就是精确事件位置来源。**
 6. 事件位置**禁止**用最近 Replay 帧替代（任务书要求）。Replay 帧在事件 tick 上也存在精确帧，但契约上以 `MatchSpatialEvidence` 为准，因为只有它带 `eventRef`/`relation`/逐样本 coverage。
 
-**热力图新增的确定性投影应放在纯函数层**（本阶段不实现），输入 `MatchReplay` + `MatchSpatialEvidence` + `Match`，输出 JSON-only DTO；不进入 Analytics/Findings，不进 `Match`，不触碰 native。
+**P7.1 确定性投影位于纯 presenter 层** `apps/desktop/shared/heatmap.ts`，输入 `MatchReplay` + `MatchSpatialEvidence` + `Match`，输出 `packages/report-contract/src/heatmap.ts` 的独立 JSON-only DTO；不进入 Analytics/Findings，不进 `Match`，不触碰 native。没有接入 worker/会话/IPC。
 
 ---
 
@@ -153,34 +156,42 @@ sample.actualTick !== null        // 该 tick 存在真实 native 行
 
 （在当前 `buildReplay` 实现下，`segment !== null` 已蕴含其余条件；保留完整列表以便未来独立校验。）
 
-**分类计数（全部必须输出，互斥且穷尽 expected）**：
+**源观测分类（互斥且穷尽 expected；优先级自上而下）**：
 
 ```text
-validPositionSamples   = 满足上述定义的样本数
-deadObservations       = actualTick!==null 且 position!==null 且 alive!==true 的样本
-missingObservations    = expected - validPositionSamples - deadObservations
-                         （含 actualTick===null / position===null / alive===null /
-                            stateAmbiguous===true / side==='Unknown'）
+missingPositionObservations = 没有样本，或 actualTick 不等于请求 tick / 为 null，
+                              或 XYZ 缺失 / 非有限
+confirmedDeadObservations   = 有精确有限 XYZ，alive===false && stateAmbiguous===false
+validPositionSamples        = 有精确有限 XYZ，且满足上述全部密度条件
+observedButUnusable         = 其余有精确有限 XYZ 的观测
+                              （alive===null / stateAmbiguous / Unknown side / null segment 等）
+positionObserved            = validPositionSamples + confirmedDeadObservations + observedButUnusable
+expectedOpportunities       = positionObserved + missingPositionObservations
 ```
+
+`alive===null` **永不自动归入死亡**；已确认死亡可以阵营未知，但不进入有效位置密度。
+此处计数位于 `positions.observations`，已经应用回合、玩家、采样集和 freeze 窗口，
+尚未应用 side / floor 网格筛选，避免把其他阵营/楼层的已观测坐标误标为缺失。
 
 **公式与分母**：
 
 ```text
-validPositionSamples   = Σ_{r ∈ scope} Σ_{f ∈ F_r} Σ_{s ∈ f.players} valid(s)
+validPositionSamples   = Σ_{r ∈ scope} Σ_{f ∈ F_r} Σ_{p ∈ roster_r} valid(sample(f,p))
 expectedOpportunities  = Σ_{r ∈ scope} expected_r
 positionCoverage       = validPositionSamples / expectedOpportunities      (expected>0 时有定义；否则 unavailable)
-positionCompleteness   = (validPositionSamples + deadObservations) / expectedOpportunities
-aliveSampleShare       = validPositionSamples / (validPositionSamples + deadObservations)   (分母>0 时)
+positionCompleteness   = positionObserved / expectedOpportunities
+selectedPositionCoverage = grid.validPositionSamples / expectedOpportunities
 ```
 
 - `cellSampleCount(c)`：单元 c 内的有效位置采样数。
-- `validPositionSamples`：当前统计范围内的有效位置采样总数。
-- `cellSampleShare(c) = cellSampleCount(c) / validPositionSamples`，仅当 `validPositionSamples > 0`；为 0 时**未定义**，不是 0。
+- `grid.validPositionSamples`：从源有效样本应用 side/floor 后的当前网格统计人口，包含映射失败/越界的位置；没有筛选时等于 `observations.validPositionSamples`。
+- `cellSampleShare(c) = cellSampleCount(c) / grid.validPositionSamples`，仅当该分母 > 0；否则 `null`，不是 0。
+- `positionCoverage` / `positionCompleteness` 是源覆盖；`selectedPositionCoverage` 是选中阵营/楼层在相同机会分母下的覆盖，图例必须分别命名，不能混用。所有分母为零的比率为 `null`。
 - `positionCoverage`：**注意其分母是“回放请求帧 × 回合名单”，不是时间长度**。它衡量的是“在已请求的采样机会中拿到有效存活位置的比例”，不是“玩家在场上时间的比例”。
 
 **明确限制（不得伪造分母）**：
-- 该分母依赖 `roster_r` 与 `|F_r|`。当 `freezeEndTick` 缺失或名单快照缺失时，`roster_r` 回退会偏大（用全场玩家数），必须显式输出 `rosterFallbackRounds` 与 `freezeBoundaryUnknownRounds`，不能当作精确分母。
-- `|F_r|` 含额外的事件/生命周期补采帧，因此**帧不是等时间间隔**。位置采样密度**不等于**停留时间，也会在事件密集处轻微过采样。若需要近似时间比例口径，使用 `samplingSet='uniform-8hz'`（仅保留 `(tick - startTick) % step === 0`，`step = tickRate/8`），并声明其为近似。
+- 该分母依赖 `roster_r` 与 `|F_r|`。只有 freeze_end / start observed 名单都缺失时才回退，输出 `rosterApproximateRounds`；observed 空名单不回退。缺 freeze 边界记录 `freezeBoundaryUnknownRounds`，不能当作精确实战窗口。
+- `|F_r|` 含额外事件/生命周期补采帧，因此**帧不是等时间间隔**。位置采样密度**不等于**停留时间。`uniform-8hz` 仅保留 `(requestedTick - round.startTick) % step === 0`；须验证安全整数 `tickRate>=8 && tickRate%8===0`、`hz===8`、`maxInterpolationTicks===tickRate/8`，否则位置层显式 unavailable，不使用事件补采帧代替网格。freeze 不改变网格原点。
 
 **缺失与零的区分**：
 - 缺失样本**不**表示玩家不在该位置；未知位置**不**记为零位置。
@@ -189,12 +200,15 @@ aliveSampleShare       = validPositionSamples / (validPositionSamples + deadObse
 **颜色归一化（必须显式，禁止静默改义）**：
 
 ```text
-cellSampleShare(c) = cellSampleCount(c) / validPositionSamples
+cellSampleShare(c) = cellSampleCount(c) / grid.validPositionSamples
 intensity(c)       = clamp(cellSampleShare(c) / maxCellSampleShare(scope), 0, 1)   // scope-relative linear
 ```
 
+实现等价地使用 `cellSampleCount/maxCellSampleCount`；最大计数为零时 intensity 为 `null`。
+网格无聚合样本输出 `status='empty'`，不制造热区；有有效样本但全部越界时 share 可为 0、intensity 仍为 null。
+
 - MVP 采用 **scope-relative 线性归一化**（相对当前筛选范围），因为绝对计数随回合数变化。
-- 图例**必须**同时显示：当前筛选描述、`validPositionSamples`、`maxCellSampleShare` 对应的单元与绝对计数、网格分辨率、采样集（`all-valid` / `uniform-8hz`）、窗口是否含 freeze。
+- 图例**必须**同时显示：当前筛选描述、`grid.validPositionSamples`、`grid.maxCellSampleShare` 对应的单元与绝对计数、网格分辨率、采样集（`all-valid` / `uniform-8hz`）、窗口是否含 freeze，以及源/选中覆盖率。
 - 切换筛选即重新归一化，图例同步更新；**禁止**在筛选变化时保留旧颜色含义。点击/悬停必须能读到该单元的绝对 `cellSampleCount`。
 - 备选固定标尺（`absolute`）以绝对 `cellSampleCount` 映射颜色，跨筛选含义固定但单玩家筛选下几乎不可见；两者都必须标注清楚，不得混用。
 
@@ -214,7 +228,7 @@ intensity(c)       = clamp(cellSampleShare(c) / maxCellSampleShare(scope), 0, 1)
 
 - 击杀位置 = `samples` 中 `role==='actor'` 且 `sample.relation==='at-event'` 的样本位置；
 - 死亡位置 = `samples` 中 `role==='target'` 且 `sample.relation==='at-event'` 的样本位置；
-- 两者都必须满足 `sample.actualTick === event.tick` 且 `sample.position !== null`。
+- 两者必须满足 `sample.actualTick === sample.requestedTick === event.tick`、XYZ 有限、样本 playerId 与该 role 的唯一 participant 和事件主体一致。重复匹配条目/样本保持歧义，不任意挑选。
 - **禁止**最近 Replay 帧、插值、`replayDisplayFrame`、显示 DTO（`DesktopReplayFrame`）或任何展示层数据。
 
 **公式**：
@@ -228,7 +242,7 @@ cellEventCount(c, layer)    = 落入单元 c 的相关事件数
 scopeMaxCellEvents(layer)   = max_c cellEventCount(c, layer)
 ```
 
-**缺失处理**：无法定位的事件**只**影响 `eventPositionCoverage` 与可展示结果，**绝不**当作“该处没有击杀/死亡”。`unlocatableEvents` 必须按原因分解：`killer-unidentified`（`world`/null）、`victim-unidentified`、`player-row-missing`、`position-missing`、`sample-unavailable`、以及（先验排除的）`outside-round-window`。
+**缺失处理**：`scopeEvents-locatableEvents` 等于 `unlocatableReasons` 的总和，按首个失败原因互斥分类：worldActor → unknownPlayer → missingEvidence → ambiguousEvidence → participantMismatch → missingAtEvent → missingExactSample → tickMismatch → invalidPosition → unknownSide（仅指定阵营时）。不依赖 view/weapon/alive coverage 判定事件位置。回合窗口（同默认 freeze 规则）外事件先排除，单列 `outsideWindowEvents`，不进入 scope 或无法定位分母。指定玩家时未知主体无法归给该玩家，单列 `unknownSubjectExcludedByPlayerFilter`；指定阵营时未知 side 仍保留在 scope 并说明无法确定，已知其他阵营计入 `otherSideEvents`。未知阵营计数 `unknownSideEvents` 是正交诊断，不能再加入无法定位原因总和。
 
 **归一化**：与 §5.1 同样的 scope-relative 线性口径；事件图层点极少（Dust2：击杀 161、死亡 162，32×32 下最大单元仅 5 / 4），MVP 建议直接画点或极小硬核，不做 KDE/模糊。
 
@@ -262,7 +276,9 @@ cx = floor(px / sx) , cy = floor(py / sy)      // 半开单元 [cx*sx,(cx+1)*sx)
 
 **确定性**：相同 `matchId + samplingVersion + resourceId + window + samplingSet + 筛选 + N` 必须产生逐位相同的网格。本阶段实测同输入两次 32×32 聚合哈希一致（`14c22f958fc54166`）。
 
-**楼层**：复用 `resolveMapLayer()`（`replay-map.ts:37`）。单层地图（`layers.length===1 && minZ===null`）返回该层；多层地图在 `z===null`、越界或**共享边界**（含边界区间重叠）时返回 `null`。`null` 必须保持未知；楼层筛选下未知 Z 的样本进入 `unknownLayer` 桶并计入覆盖说明，**不得**任意归入某一层。楼层归属使用**采样点自身的 Z**，不用插值 Z。
+**楼层**：复用 `resolveMapLayer()`。多层地图共享边界、越界 Z 保持 `null`，计入 `unknownLayer`；指定楼层时未知层不进入网格，已知其他层计入 `otherFloor`。全部楼层时未知层仍可进入合并平面网格，但无楼层归属。缺 Z 是无效 XYZ，已计为 missingPositionObservations / invalidPosition，不再重复归入有效点的 unknownLayer。楼层选择不改变源覆盖和事件 scope / locatable 分母。
+
+网格守恒：`Σ cellSampleCount = aggregatedSamples`，且 `grid.validPositionSamples = aggregatedSamples + outOfBounds + invalidMapping`。越界与无效映射互斥，不会 clamp。最大 3 层、每层 4096 个普通对象单元；空间索引只取归一雷达坐标，不依赖 Canvas/DPR。
 
 ---
 
@@ -273,7 +289,7 @@ cx = floor(px / sx) , cy = floor(py / sy)      // 半开单元 [cx*sx,(cx+1)*sx)
 | 筛选 | 输入字段 | 规则 | 分母变化 | 未知行为 | 需要的测试 |
 | --- | --- | --- | --- | --- | --- |
 | 全部玩家 / 单玩家 | `ReplayPlayerSample.playerId`；事件层 `KillEvent.killer`（B）/`victim`（C） | 位置层保留该玩家的有效样本；事件层按主体过滤 | 位置层 `expected` 改为该玩家的名单机会（§5.0，`player∈roster_r` 时为 `|F_r|`）；事件层 `scopeEvents` 只含该主体事件 | 玩家不在某回合名单 ⇒ 该回合对该玩家贡献 0 机会，且不得与“缺失”混淆 | 单玩家计数 = 全体计数求和（当名单固定）；非名单回合排除 |
-| CT / T / 全部 | 位置层 `sample.side`；事件层 at-event `SpatialSample.side`，回退 `event.killerSide`/`victimSide` | 按采样时刻真实阵营过滤；**不得**用开局阵营 | 分母不变；分子为该阵营子集；另出 `sideUnknown` 桶 | `Unknown` 不计入 CT/T，单独计数并在覆盖说明中显示 | 换边后同玩家不同回合阵营正确；Unknown 不被强行归入 |
+| CT / T / 全部 | 位置层 `sample.side`；事件层身份/tick 匹配的 at-event `SpatialSample.side`，否则回退事件阵营 | 按采样时刻实际阵营；不用开局阵营 | 源 observations 保留；selectedPositionCoverage 分母不变、分子为阵营子集；网格 share 用所选有效样本 | Unknown 位置不进入有效样本；事件未知 side 保留在 scope 及原因统计 | 换边与未知阵营合成测试 |
 | 全部回合 / 指定回合或范围 | `ReplayRound.round` | 只取选中回合 | `expected`、`scopeEvents`、`validPositionSamples` 全部按选中回合重算 | 被排除的 `excludedRounds` 不参与 | 回合范围与单回合结果一致 |
 | 图层开关 | A/B/C 独立 | 独立绘制，不互相影响 | 各自统计 | 某层不可用时其他层与报告不受影响 | 三层独立开关；缺 Spatial 时 A 仍可用，缺 Replay 时 B/C 仍可用（若 Spatial 存在） |
 | 楼层 | 位置层 `position[2]`；事件层 at-event `position.z` | `resolveMapLayer(map, z)`；仅绘制选中层 | 分母不变；`unknownLayer` 单独计数 | `null`（缺 Z / 越界 / 共享边界）保持未知 | Nuke/Vertigo/Train 共享边界保持 null；缺 Z 不改层 |
@@ -325,9 +341,9 @@ node .tmp/p7-heatmap-probe3.mjs
 | hz / maxInterpolationTicks | 8 / 8 |
 | 请求 tick（=帧数） | 27466 |
 | 玩家帧单元 | 274660 |
-| 有效位置采样 validPositionSamples | 235604 |
+| 全窗口原始有效位置行 rawReplayValidPositionRows（不是默认实战统计人口） | 235604 |
 | 其中 freeze 窗内 / 实战窗内 | 57090 / 178514 |
-| 死亡但仍有位置（deadObservations） | 39056 |
+| 确认死亡且仍有位置（confirmedDeadObservations） | 39056 |
 | 缺失位置/行/状态 | 0 / 0 / 0（posNull=actualTickNull=aliveNull=0，ambiguous=sideUnknown=0） |
 | expectedLiveOpportunities（roster=10×21757 帧） | 217570 |
 | positionCoverage = 178514/217570 | **0.8205** |
@@ -349,7 +365,7 @@ node .tmp/p7-heatmap-probe3.mjs
 | 同输入 32×32 两次聚合哈希 | `14c22f958fc54166`（一致） |
 | 单玩家有效样本 min/max | 21295 / 25518（约 1.20 倍） |
 
-**关键解读**：Dust2 上 `positionCompleteness === 1.0`，`positionCoverage === 0.8205` 的缺口**恰好等于 39056 个死亡观测**；也就是说，本 fixture 的位置数据“缺失”为 0，覆盖率小于 1 是因为玩家已死亡，而不是数据缺口。这正好说明契约必须把 `deadObservations` 与 `missingObservations` 分开。
+**关键解读**：Dust2 上 `positionCompleteness === 1.0`，`positionCoverage === 0.8205` 的缺口**恰好等于 39056 个确认死亡观测**；本 fixture 的位置缺失为 0。其他 fixture 的未知 alive / 状态歧义仍必须归入 observedButUnusable，不能沿用旧 `alive!==true` 死亡判定。
 
 ### 7.4 历史数据（来自 P6.0 实验，非本轮重新测量）
 
@@ -361,7 +377,7 @@ node .tmp/p7-heatmap-probe3.mjs
 | 16 Hz | 5.84 / 6.12 / 6.36 | 50302 / 503020 | 108,677,114 B | 2,028,004 KiB | 0.58 / 9.68 | 1.09° / 8.02° |
 | 32 Hz | 12.26 / 12.39 / 14.37 | 95888 / 958870（1 tick / 10 行缺失） | 207,071,189 B | 3,209,848 KiB | 0.20 / 5.84 | 0.44° / 3.75° |
 
-- `aliveRows = 235604`（8 Hz）与本轮 `validPositionSamples = 235604` 一致，交叉验证通过。
+- `aliveRows = 235604`（P6 全回放请求集）与 P7.0 全窗口原始有效位置行一致；P7.1 默认实战窗口的人口为 178514，不混用分母。
 - 20 秒原始候选块：p95 524110 B、max 593918 B（8 Hz）；文档记录原始 JSON 约 **59.4 MB**、274660 行——据此，**必须预聚合**，不能把整场原始样本经 IPC 传给 Renderer。
 - 位置误差来自 4 个分布战斗窗的最终 tick 参考，**不是全场上限**，也不构成插值精度证明；但足以支撑 §5.4 的网格分辨率判断。
 - 历史数据来源为 P6.0 实验进程，不是本轮 Electron/IPC 实测。
@@ -419,7 +435,7 @@ node .tmp/p7-heatmap-probe3.mjs
 | 首帧 / 12 次 IPC p95 / Canvas p95 | 244.8 ms / 9.4 ms / 0.6 ms（安装版 94.7 / 8.3 / 0.3） | P6.4 历史 |
 | parser Utility 进程生命周期峰值 | 1,505,501,184 B（安装版 1,509,363,712 B） | P6.4 历史 |
 | **热力图额外解析开销** | **0（无新增 native 查询）** | 代码事实 |
-| **聚合耗时（235604 样本，32×32）** | **待测预算** | P7.1 必须实测 |
+| **纯投影耗时（默认实战 178514 有效样本，三层 32×32）** | **47.40 ms** | P7.1 Node 单次实测，非 Electron 指标；§12 |
 | **热力图 DTO 体积（单层 32×32）** | **待测预算**（目测量级 KB） | P7.2 必须实测 |
 | **Renderer 单帧热力图绘制增量** | **待测预算**；现有 Canvas p95 0.6 ms 为参照 | P7.3 必须实测 |
 | **安装版热力图端到端** | **待测预算** | P7.3 必须实测 |
@@ -435,11 +451,11 @@ node .tmp/p7-heatmap-probe3.mjs
 | ID | 检查 | 数据 | 断言 | 阶段 |
 | --- | --- | --- | --- | --- |
 | S1 | 已知点位单元归属 | 合成 | 边界点归入半开单元；`floor(px/sx)` 精确 | P7.1 |
-| S2 | 单元计数与总和 | 合成 | `Σ cellSampleCount = validPositionSamples` | P7.1 |
+| S2 | 单元计数与总和 | 合成 | `Σ cellSampleCount = aggregatedSamples`，映射失败/越界另计 | P7.1 |
 | S3 | 归一化与分母 | 合成 | `cellSampleShare`、`intensity`、`positionCoverage` 按 §5.1 公式 | P7.1 |
 | S4 | 相同输入重复一致 | 合成 + 真实 Dust2 | 两次聚合哈希一致（本轮 32×32 = `14c22f958fc54166`） | P7.1 |
-| S5 | 零值 vs 无效值 | 合成 | `validPositionSamples=0` 时 share 未定义，输出 `unavailable`，不是全 0 | P7.1 |
-| S6 | 缺失样本不作为零位置 | 合成 | `actualTick/position=null` 不计入任何单元，计入 `missingObservations` | P7.1 |
+| S5 | 零值 vs 无效值 | 合成 | `grid.validPositionSamples=0` 时 share/intensity 为 null，grid.status=empty | P7.1 |
+| S6 | 缺失样本不作为零位置 | 合成 | `actualTick/position=null` 不计入任何单元，计入 `missingPositionObservations` | P7.1 |
 | S7 | 缺失事件位置不伪装成无事件 | 合成 | `scopeEvents` 保留，`unlocatableEvents` 输出原因 | P7.1 |
 | S8 | 阵营换边 / 玩家切换 / 回合筛选 | 合成 + 真实 | 阵营取采样时刻；换边后不同回合正确；范围=单回合一致 | P7.1 |
 | S9 | 楼层未知与共享边界 | 合成（Nuke/Vertigo/Train 常量） | 缺 Z/边界保持 `null`，进 `unknownLayer`，不归层 | P7.1 |
@@ -480,7 +496,7 @@ node .tmp/p7-heatmap-probe3.mjs
 
 ## 10. 后续阶段范围与通过条件
 
-> 本阶段只确定范围；P7.1、P7.2、P7.3 **均未开始、均不得标记完成**。
+> P7.0 最初只确定范围；P7.1 实际实现/验证见 §12，P7.2 / P7.3 未开始。
 
 | 子阶段 | 范围 | 通过条件 |
 | --- | --- | --- |
@@ -560,3 +576,55 @@ grid    : position N=32 nonZero=507 maxShare=0.0509(live 0.0136)  determinism=pa
           kill N=32 points=161 nonZero=103 max=5 ; death N=32 points=162 nonZero=114 max=4
 outOfBounds: positions=0 events=0
 ```
+
+## 12. P7.1 实施与验收（2026-10-17）
+
+**P7.1 PASS**。开始时本地 HEAD / 旧 origin/main 为 `f873ea1aad70e784e68c51ddf7e4edd140c1a113`；fetch 后快进到实际最新 `b6d572d9e9f08d08fb74e5545288b7e30b6fb58d`，以该提交实施，工作区开始时干净。未重写历史、未改变版本/依赖。
+
+实现文件：
+
+- `apps/desktop/shared/heatmap.ts`：`projectMapHeatmap()`、`classifyHeatmapObservation()`、`heatmapUniformStep()`；纯 presenter，无 Electron/React/native/文件操作。为了最小复用，直接引用现有 `renderer/src/replay-map.ts` 的纯数值地图定义、`worldToRadar()` 和 `resolveMapLayer()`；未修改该模块、未复制坐标公式，领域包不依赖 Desktop。
+- `packages/report-contract/src/heatmap.ts` + `src/index.ts` 类型导出：独立 `MapHeatmapProjection`，schemaVersion=1 / projectionVersion=p7.1-v1。未加入 DesktopMatchReport / DesktopApi、未新增 IPC/session 字段。
+- `apps/desktop/tsconfig.json`：将 `shared/**/*.ts` 纳入 typecheck，确保未接入生产链的纯投影也被检查。
+- `apps/desktop/tests/heatmap-fixture.mjs`、`heatmap.test.mjs`、`heatmap-real.test.mjs`：合成与独立真实回归；本文件、roadmap 和实测 JSON 保存定义及证据。
+
+DTO 根字段为 `schemaVersion/projectionVersion/matchId/samplingVersion/scope/map/grid/windows/excludedRounds/rosterApproximateRounds/freezeBoundaryUnknownRounds/positions/kills/deaths`。`scope` 保存归一化排序去重后的回合、玩家、阵营、楼层、freeze、采样集、图层；未选择图层为 null。`map.alignment` 与位置/事件 coverage 分开，当前为 unconfirmed；无地图定义为 unavailable，精度仅 schematic-position-distribution。
+
+`positions` 含 available/reason、四类源 observations、未知阵营/其他阵营诊断、selectedPositionCoverage 与 grid。每个 grid 包含筛选人口、aggregatedSamples、outOfBounds、invalidMapping、unknownLayer、otherFloor、峰值绝对计数/占比，以及行主序 `cells[{index,cellSampleCount,cellSampleShare,intensity}]`。`kills` / `deaths` 各有独立 scopeEvents、locatableEvents、eventPositionCoverage、首个失败原因统计与 grid。空网格 status=empty；分母为零的比率/intensity 为 null。未暴露领域事件、Map/Set/TypedArray、undefined 或非有限数字，options 采用字段白名单。
+
+四分类、分母和筛选的规范定义只在 §5–§6 维护。P7.0 的两个最小契约缺口已解决：新增可验证的 uniform 网格读取函数；用四类观测替代 `alive!==true` 死亡判断。此外显式区分源四分类与筛选后 grid 人口，保留 P7.0 阵营/楼层不改变机会分母的意图。位置观测只按名单成员计数，缺行仍占机会；缺 Replay 时位置层 unavailable，事件层仍可用；缺 Spatial 时每个 scope 事件保留 missingEvidence。
+
+真实验证仅用 `.demo/dust2.dem`，557650967 字节，SHA-256 `db90fe85aab023a1d2c8a5996182e6120d98ef494f02a070b17982b235e4958c`，运行前流式复核一致。本地新旧命名文件同时存在且 SHA 相同，两者未覆盖/删除，验证只读取白名单路径。未下载、复制或 Git 跟踪任何 DEM。
+
+[本轮统计 JSON](./map-heatmap-p71-dust2.json) 记录：
+
+| 项目 | P7.1 真实结果 |
+| --- | ---: |
+| 原始全 Replay 窗口有效位置行 | 235604（不作为默认统计人口） |
+| 实战请求帧 / 每回合 roster | 21757 / 10，24 回合均有 freeze_end observed |
+| expectedOpportunities | 217570 |
+| valid / confirmedDead / observedButUnusable / missing | 178514 / 39056 / 0 / 0 |
+| positionCoverage / positionCompleteness | 0.8204899572551363 / 1 |
+| 32×32 非空单元 / 峰值绝对计数 | 507 / 2430 |
+| 击杀 scope / 精确定位 / world | 162 / 161 / 1 |
+| 死亡 scope / 精确定位 | 162 / 162 |
+| 窗口外击杀（两层均先排除） | 4 |
+| 越界 / 无效映射 / 名单回退 / freeze 未知 | 全部 0 |
+| uniform-8hz expected / valid / confirmedDead | 177370 / 146019 / 31351 |
+| 三层默认纯投影 / DTO 字节数 | 47.40 ms / 238029（单次 Node 测量，非 IPC 性能） |
+
+完整 32×32 DTO 两次 SHA-256 均为 `71369ea49c0ae2fa8c4f84c67698614c7b0f091f711894211ffa7f66697888cd`。计时不进入 DTO，因此不影响确定性。输入对象在投影前后 hash 相同。
+
+已执行命令与结果：
+
+- `pnpm typecheck`、`pnpm build`：全仓通过，含 native 校验与13张本地地图资源校验。
+- `node --test apps/desktop/tests/heatmap.test.mjs apps/desktop/tests/heatmap-real.test.mjs`：最终 14/14，13 项合成 + 1 项真实，0 skip。真实报告可用 PowerShell `$env:HEATMAP_REPORT_FILE='docs/map-heatmap-p71-dust2.json'` 显式再生成；不设置时只断言/打印，不修改仓库。
+- `pnpm --filter @cs2-analyst/analytics test`：53/53，demo1 frozen golden 未改。
+- `pnpm --filter @cs2-analyst/findings test`：17/17，V1 规则/排序未改。
+- `pnpm --filter @cs2-analyst/deep-review test`：210/210；现有 core Nuke/Inferno/Dust2/Mirage 回归通过，不视为其他地图热力图验收。
+- `$env:REPLAY_TEST_FILE='E:\cs2-analyst\.demo\dust2.dem'; pnpm --filter @cs2-analyst/dem-parser test`：48/48，包含旧/新解析入口 Match/Spatial hash 一致检查。
+- Desktop：`$selectedTests=Get-ChildItem apps/desktop/tests -Filter '*.test.mjs' | Where-Object { $_.Name -ne 'replay-real.test.mjs' -and $_.Name -ne 'heatmap-real.test.mjs' } | ForEach-Object { $_.FullName }; node --test @selectedTests`，当次 84/84（72 项既有报告/Timeline/Replay/IPC 等测试 + 当时12项热力图合成）。其后新增的归一化/floor 合成测试纳入最终13/13重跑。既有 Timeline 时间、筛选、联动与报告 golden 未改变。
+- 独立 reviewer 初审发现 options spread 可泄漏非 JSON 额外属性；改为白名单并增加 Map 属性回归后，独立复审合成13/13，无剩余阻塞。
+- `git diff --check` 通过；对冻结包、Main/preload/Renderer、worker/session 的 diff 为空；`git ls-files '*.dem'` 为空。
+
+未执行：热力图 UI / IPC / 会话 / Electron 安装版验收（P7.2/P7.3）；其他地图及 Personal DEM 的热力图真实验收；硬编码旧比赛文件名的 Desktop `replay-real.test.mjs` 未运行（以白名单 Parser replay-real 与新热力图真实测试验证本阶段数据）。不改历史测试输入语义来绕过白名单。地图版本仍 unconfirmed、采样密度不是连续停留时间，平滑不在本阶段；P7.1 到此停止。

@@ -1,6 +1,7 @@
 import type { Finding, FindingEvidence } from '@cs2-analyst/findings';
 import type { DesktopReplayMetadata, DesktopReplayRequest, DesktopReplayResult } from './replay.js';
 export type * from './replay.js';
+export type * from './heatmap.js';
 
 /**
  * Presentation-only addition to a frozen evidence row. Seconds from the round

@@ -1,0 +1,126 @@
+{
+  "stage": "P7.1",
+  "fixture": ".demo/dust2.dem",
+  "sha256": "db90fe85aab023a1d2c8a5996182e6120d98ef494f02a070b17982b235e4958c",
+  "bytes": 557650967,
+  "projectionHash": "71369ea49c0ae2fa8c4f84c67698614c7b0f091f711894211ffa7f66697888cd",
+  "repeatedProjectionHash": "71369ea49c0ae2fa8c4f84c67698614c7b0f091f711894211ffa7f66697888cd",
+  "projectionMs": 47.40009999999984,
+  "dtoBytes": 238029,
+  "rawReplayValidPositionRows": 235604,
+  "observations": {
+    "expectedOpportunities": 217570,
+    "validPositionSamples": 178514,
+    "confirmedDeadObservations": 39056,
+    "observedButUnusable": 0,
+    "missingPositionObservations": 0,
+    "positionObserved": 217570,
+    "positionCoverage": 0.8204899572551363,
+    "positionCompleteness": 1,
+    "status": "partial"
+  },
+  "requestedLiveFrames": 21757,
+  "rosterApproximateRounds": [],
+  "freezeBoundaryUnknownRounds": [],
+  "positions": {
+    "validPositionSamples": 178514,
+    "aggregatedSamples": 178514,
+    "outOfBounds": 0,
+    "invalidMapping": 0,
+    "unknownLayer": 0,
+    "nonemptyCells": 507,
+    "maxCellSampleCount": 2430,
+    "maxCellSampleShare": 0.013612377740681404
+  },
+  "kills": {
+    "scopeEvents": 162,
+    "locatableEvents": 161,
+    "eventPositionCoverage": 0.9938271604938271,
+    "status": "partial",
+    "unlocatableReasons": {
+      "worldActor": 1,
+      "unknownPlayer": 0,
+      "missingEvidence": 0,
+      "ambiguousEvidence": 0,
+      "participantMismatch": 0,
+      "missingAtEvent": 0,
+      "missingExactSample": 0,
+      "tickMismatch": 0,
+      "invalidPosition": 0,
+      "unknownSide": 0
+    },
+    "outsideWindowEvents": 4,
+    "unknownSubjectExcludedByPlayerFilter": 0,
+    "unknownSideEvents": 1,
+    "otherSideEvents": 0,
+    "grid": {
+      "validPositionSamples": 161,
+      "aggregatedSamples": 161,
+      "outOfBounds": 0,
+      "invalidMapping": 0,
+      "unknownLayer": 0,
+      "nonemptyCells": 103,
+      "maxCellSampleCount": 5,
+      "maxCellSampleShare": 0.031055900621118012
+    }
+  },
+  "deaths": {
+    "scopeEvents": 162,
+    "locatableEvents": 162,
+    "eventPositionCoverage": 1,
+    "status": "complete",
+    "unlocatableReasons": {
+      "worldActor": 0,
+      "unknownPlayer": 0,
+      "missingEvidence": 0,
+      "ambiguousEvidence": 0,
+      "participantMismatch": 0,
+      "missingAtEvent": 0,
+      "missingExactSample": 0,
+      "tickMismatch": 0,
+      "invalidPosition": 0,
+      "unknownSide": 0
+    },
+    "outsideWindowEvents": 4,
+    "unknownSubjectExcludedByPlayerFilter": 0,
+    "unknownSideEvents": 0,
+    "otherSideEvents": 0,
+    "grid": {
+      "validPositionSamples": 162,
+      "aggregatedSamples": 162,
+      "outOfBounds": 0,
+      "invalidMapping": 0,
+      "unknownLayer": 0,
+      "nonemptyCells": 114,
+      "maxCellSampleCount": 4,
+      "maxCellSampleShare": 0.024691358024691357
+    }
+  },
+  "alignment": "unconfirmed",
+  "scope": {
+    "side": "all",
+    "floor": null,
+    "includeFreezeTime": false,
+    "samplingSet": "all-valid",
+    "rounds": null,
+    "playerIds": null,
+    "layers": [
+      "deaths",
+      "kills",
+      "positions"
+    ]
+  },
+  "resolution": 32,
+  "uniform8hz": {
+    "expectedOpportunities": 177370,
+    "validPositionSamples": 146019,
+    "confirmedDeadObservations": 31351,
+    "observedButUnusable": 0,
+    "missingPositionObservations": 0,
+    "positionObserved": 177370,
+    "positionCoverage": 0.8232451936629644,
+    "positionCompleteness": 1,
+    "status": "partial"
+  },
+  "inputUnchanged": true
+}
