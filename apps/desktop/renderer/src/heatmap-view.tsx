@@ -17,9 +17,15 @@ const failureLabels: Record<string, string> = { worldActor: '世界伤害', unkn
   tickMismatch: 'tick 不匹配', invalidPosition: '无效位置', unknownSide: '阵营未知' };
 const useStyles = makeStyles({
   root: { flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', gap: '10px' },
+  // First row mirrors the replay toolbar: title, layer switches, then the map-version badge.
+  bar: { flexShrink: 0, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '10px', padding: '8px 10px',
+    backgroundColor: palette.card, border: `1px solid ${palette.border}`, borderRadius: tokens.borderRadiusLarge },
+  barTitle: { display: 'flex', alignItems: 'baseline', gap: '8px' },
+  layers: { display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px' },
+  layer: { display: 'flex', alignItems: 'center', gap: '4px' },
+  spacer: { flex: 1 },
   controls: { flexShrink: 0, display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '8px', padding: '10px', backgroundColor: palette.card, borderRadius: tokens.borderRadiusLarge },
   field: { minWidth: '106px', maxWidth: '180px', flex: '1 1 106px' },
-  heading: { display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '10px' },
   body: { flex: 1, minHeight: 0, display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 280px', gap: '12px' },
   map: { minWidth: 0, minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: palette.replay.surface, overflow: 'hidden', position: 'relative' },
   canvas: { flexShrink: 0, maxWidth: '100%', maxHeight: '100%', ':focus-visible': { outline: `2px solid ${tokens.colorBrandStroke1}`, outlineOffset: '-2px' } },
@@ -82,13 +88,17 @@ export function HeatmapView({ metadata, players, active, sessionActive }: {
   const change = (patch: Partial<DesktopHeatmapScope>) => { setScope(old => ({ ...old, ...patch })); setCellIndex(null); };
   const currentCell = cellIndex !== null && cellIndex < resolution * resolution ? cellIndex : null;
   return <section className={s.root} aria-label="地图热力图" data-heatmap-session={metadata?.sessionId} data-heatmap-enabled={enabled.join(',')}>
-    <div className={s.heading}><Title2>热力图</Title2><Badge appearance="tint" color="warning">{url ? '地图版本未确认' : '地图映射或资源不可用'}</Badge></div>
-    <div className={s.controls} aria-label="热力图图层">
-      {heatmapLayers.map(layer => <div key={layer}>
-        <Button aria-pressed={enabled.includes(layer)} aria-label={labels[layer]} disabled={!usable || !metadata?.layers[layer].available}
-          appearance={enabled.includes(layer) ? 'primary' : 'secondary'} onClick={() => setEnabled(old => old.includes(layer) ? old.filter(item => item !== layer) : [...old, layer])}>{labels[layer]}</Button>
-        {!metadata?.layers[layer].available ? <Caption1>{heatmapReason(metadata?.layers[layer].unavailableReason)}</Caption1> : null}
-      </div>)}
+    <div className={s.bar} data-heatmap-bar>
+      <div className={s.barTitle}><Title2>热力图</Title2></div>
+      <div className={s.layers} aria-label="热力图图层">
+        {heatmapLayers.map(layer => <div key={layer} className={s.layer}>
+          <Button aria-pressed={enabled.includes(layer)} aria-label={labels[layer]} disabled={!usable || !metadata?.layers[layer].available}
+            appearance={enabled.includes(layer) ? 'primary' : 'secondary'} onClick={() => setEnabled(old => old.includes(layer) ? old.filter(item => item !== layer) : [...old, layer])}>{labels[layer]}</Button>
+          {!metadata?.layers[layer].available ? <Caption1>{heatmapReason(metadata?.layers[layer].unavailableReason)}</Caption1> : null}
+        </div>)}
+      </div>
+      <span className={s.spacer} />
+      <Badge appearance="tint" color="warning">{url ? '地图版本未确认' : '地图映射或资源不可用'}</Badge>
     </div>
     <div className={s.controls} aria-label="热力图筛选">
       <Field label="玩家" className={s.field}><Select aria-label="热力图玩家" value={scope.playerIds?.[0] ?? ''} onChange={(_, data) => change({ playerIds: data.value ? [data.value] : null })}>

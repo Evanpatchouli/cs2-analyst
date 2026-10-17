@@ -62,9 +62,95 @@ try {
   const meta = report.replay;
   assert.equal(meta.available, true, meta.unavailableReason || 'replay available');
   metrics.session = meta.sessionId; metrics.rounds = meta.rounds.length;
+
+  // Report page: the renamed Findings section and the merged utility card with two tabs.
+  await evaluate('document.getElementById("report-tab").click()');
+  await settleUi(evaluate, 'report utility tabs');
+  const reportText = await evaluate('document.getElementById("report-panel").innerText');
+  assert.ok(reportText.includes('简要分析'));
+  assert.equal(reportText.includes('基础规则提示'), false);
+  const utilityState = await evaluate(`(() => {
+    const card = document.querySelector('[data-utility-panel]');
+    const selected = document.querySelector('[data-utility-tab][aria-selected="true"]');
+    return { selected: selected?.querySelector('.fui-Tab__content')?.textContent ?? selected?.textContent, tabs: [...card.querySelectorAll('[data-utility-tab]')].map(t => t.querySelector('.fui-Tab__content')?.textContent ?? t.textContent),
+      rows: [...card.querySelectorAll('[data-utility-row]')].map(r => [r.dataset.utilityRow, r.querySelector('[data-utility-row-value]').textContent]),
+      text: card.innerText };
+  })()`);
+  assert.equal(utilityState.selected, '投掷统计');
+  assert.deepEqual(utilityState.tabs, ['投掷统计', '伤害统计']);
+  assert.deepEqual(utilityState.rows.map(([label]) => label), ['闪光弹', '烟雾弹', '高爆手雷', '燃烧弹', '诱饵弹']);
+  assert.equal(utilityState.text.includes('燃烧瓶'), false, 'incendiary and molotov merge into one row');
+  assert.equal(utilityState.text.includes('投掷数量'), false);
+  await evaluate('document.querySelector("[data-utility-tab=damage]").click()');
+  await settleUi(evaluate, 'utility damage tab');
+  const damageState = await evaluate(`(() => {
+    const card = document.querySelector('[data-utility-panel]');
+    const selected = document.querySelector('[data-utility-tab][aria-selected="true"]');
+    return { selected: selected?.querySelector('.fui-Tab__content')?.textContent ?? selected?.textContent,
+      rows: [...card.querySelectorAll('[data-utility-row]')].map(r => [r.dataset.utilityRow, r.querySelector('[data-utility-row-value]').textContent]),
+      text: card.innerText };
+  })()`);
+  assert.equal(damageState.selected, '伤害统计');
+  assert.deepEqual(damageState.rows.map(([label]) => label), ['闪光弹', '烟雾弹', '高爆手雷', '燃烧弹', '诱饵弹']);
+  assert.match(damageState.rows.find(([label]) => label === '闪光弹')[1], /^\d+\/\d+\/\d+$/, 'flash composite is enemy/team/assist');
+  assert.equal(damageState.rows.find(([label]) => label === '烟雾弹')[1], '-');
+  assert.equal(damageState.rows.find(([label]) => label === '诱饵弹')[1], '-');
+  assert.ok(damageState.rows.find(([label]) => label === '高爆手雷')[1].includes('点'));
+  assert.ok(damageState.rows.find(([label]) => label === '燃烧弹')[1].includes('点'));
+  await shot('p7-report-damage-tab');
+  await evaluate('document.querySelector("[data-utility-flash]").focus()');
+  await wait(() => evaluate('[...document.querySelectorAll("[role=tooltip]")].some(t => t.textContent.includes("致盲敌人") && t.textContent.includes("闪光助攻"))'), 'flash value tooltip', 10000);
+  await evaluate('document.querySelector("[aria-label=道具面板说明]").focus()');
+  await wait(() => evaluate('[...document.querySelectorAll("[role=tooltip]")].some(t => t.textContent.includes("受闪次数") && t.textContent.includes("有效闪光次数"))'), 'utility help tooltip', 10000);
+  await evaluate('document.querySelector("[data-utility-tab=throws]").click()');
+  await settleUi(evaluate, 'utility throws tab return');
+  assert.equal(await evaluate('document.querySelector("[data-utility-tab][aria-selected=true] .fui-Tab__content").textContent'), '投掷统计');
+  await shot('p7-report-default');
+
+  // Timeline: the panel itself never scrolls; only the round list inside the card does.
+  await evaluate('document.getElementById("timeline-tab").click()');
+  await settleUi(evaluate, 'timeline internal scroll');
+  const timelineState = await evaluate(`(() => {
+    const panel = document.getElementById('timeline-panel');
+    const list = document.querySelector('[data-timeline-list]');
+    return { panelOverflow: panel.scrollHeight - panel.clientHeight, panelStyle: getComputedStyle(panel).overflowY,
+      listOverflow: list.scrollHeight - list.clientHeight, listStyle: getComputedStyle(list).overflowY,
+      rows: document.querySelectorAll('[data-round-summary]').length,
+      text: panel.innerText };
+  })()`);
+  assert.ok(timelineState.panelOverflow <= 1, 'timeline panel has no view-level scroll');
+  assert.equal(timelineState.listStyle, 'auto');
+  assert.ok(timelineState.listOverflow > 0, '24 rounds scroll inside the card');
+  assert.equal(timelineState.rows, 24);
+  assert.ok(timelineState.text.includes('回合时间线') && timelineState.text.includes('时间'));
+  assert.ok(await evaluate('document.documentElement.scrollHeight-innerHeight<=1'));
+  await shot('p7-timeline-default');
+
   await evaluate('document.getElementById("replay-tab").click()');
+
   await wait(() => evaluate('document.querySelector("[data-replay-session]")?.dataset.replayMapReady==="true" && Number(document.querySelector("[data-replay-session]")?.dataset.replayRevision)>0'), 'replay first frame');
   await settleUi(evaluate, 'replay initial');
+
+  const replayBodyText = await evaluate('document.getElementById("replay-panel").innerText');
+  assert.equal(replayBodyText.includes('最近炸弹'), false, 'player status no longer repeats the bomb line');
+  assert.equal(replayBodyText.includes('仅显示当前播放进度已到达的事件。'), false, 'key-event explanation moved into its help tooltip');
+  const panes = await evaluate(`(() => {
+    const panel = document.getElementById('replay-panel');
+    const map = document.querySelector('[data-replay-map]').getBoundingClientRect();
+    const transport = document.querySelector('[data-replay-transport]');
+    const t = transport.getBoundingClientRect();
+    const rail = document.querySelector('[data-replay-rail]').getBoundingClientRect();
+    return { map: [map.left, map.right, map.bottom], transport: [t.left, t.right, t.top, t.bottom],
+      railLeft: rail.left, panelBottom: panel.getBoundingClientRect().bottom,
+      inLeft: transport.parentElement.hasAttribute('data-replay-left'),
+      overflow: panel.scrollHeight - panel.clientHeight };
+  })()`);
+  assert.equal(panes.inLeft, true, 'transport stays inside the left map column');
+  assert.ok(Math.abs(panes.map[0] - panes.transport[0]) <= 1, 'transport left edge aligns with the map container');
+  assert.ok(Math.abs(panes.map[1] - panes.transport[1]) <= 1, 'transport right edge aligns with the map container');
+  assert.ok(panes.transport[2] >= panes.map[2] - 1 && panes.transport[3] <= panes.panelBottom + 1, 'transport sits below the map inside the panel');
+  assert.ok(panes.transport[1] < panes.railLeft, 'the rail is an independent right column');
+  assert.ok(panes.overflow <= 1, 'the replay panel has no page-level overflow');
 
   const labels = await evaluate('document.getElementById("replay-panel").innerText');
   assert.ok(labels.includes('比赛回放')); assert.equal(labels.includes('地图回放'), false);
@@ -80,7 +166,10 @@ try {
   await wait(() => evaluate('[...document.querySelectorAll("[role=tooltip]")].some(t=>t.textContent.includes("全局比赛观察视角"))'), 'map info hover tooltip', 10000);
   await page.send('Input.dispatchMouseEvent', { type: 'mouseMoved', x: 4, y: 4 });
   await wait(() => evaluate('![...document.querySelectorAll("[role=tooltip]")].some(t=>t.checkVisibility()&&t.textContent.includes("全局比赛观察视角"))'), 'map info hover closes', 5000);
-  metrics.checks.push('naming + map label + map info tooltip');
+  await evaluate('document.querySelector("[aria-label=关键事件说明]").focus()');
+  await wait(() => evaluate('[...document.querySelectorAll("[role=tooltip]")].some(t => t.textContent.includes("仅显示当前播放进度已到达的事件") && t.textContent.includes("同 tick"))'), 'key-event help tooltip', 10000);
+  await evaluate('document.activeElement.blur()');
+  metrics.checks.push('naming + map label + map info tooltip + key-event help');
 
   const switchState = await evaluate('(() => {const s=document.querySelector("[role=switch]");return {checked:s.checked, label:s.parentElement.innerText};})()');
   assert.equal(switchState.checked, true); assert.ok(switchState.label.includes('连续播放'));
@@ -222,17 +311,37 @@ try {
     await waitForUi(evaluate, 'innerWidth===' + width + ' && innerHeight===' + height, 'viewport ' + width);
     await settleUi(evaluate, 'layout ' + width);
     assert.equal(await evaluate('document.documentElement.scrollHeight-innerHeight <= 1'), true);
+    await evaluate('document.getElementById("report-tab").click()');
+    await settleUi(evaluate, 'report ' + width);
+    assert.equal(await evaluate('document.documentElement.scrollHeight-innerHeight <= 1'), true);
+    assert.equal(await evaluate('document.querySelector("[data-utility-tab][aria-selected=true] .fui-Tab__content").textContent'), '投掷统计');
+    await shot('p7-report-' + width + 'x' + height);
+    await evaluate('document.getElementById("timeline-tab").click()');
+    await settleUi(evaluate, 'timeline ' + width);
+    const compactTimeline = await evaluate('(() => {const panel=document.getElementById("timeline-panel"),list=document.querySelector("[data-timeline-list]");return {panelOverflow:panel.scrollHeight-panel.clientHeight,listOverflow:list.scrollHeight-list.clientHeight,listStyle:getComputedStyle(list).overflowY,page:document.documentElement.scrollHeight-innerHeight};})()');
+    assert.ok(compactTimeline.panelOverflow <= 1, 'timeline panel must not scroll at ' + width + 'x' + height);
+    assert.equal(compactTimeline.listStyle, 'auto');
+    assert.ok(compactTimeline.listOverflow > 0, 'timeline rounds must scroll inside the card at ' + width + 'x' + height);
+    assert.ok(compactTimeline.page <= 1);
+    await shot('p7-timeline-' + width + 'x' + height);
     await evaluate('document.getElementById("replay-tab").click()');
     await settleUi(evaluate, 'replay ' + width);
-    const compact = await evaluate('(() => {const side=document.querySelector("[data-replay-rail]"),groups=side.children,list=groups[1].querySelector("[aria-label=回放事件浏览]");return {eventsHeight:groups[1].getBoundingClientRect().height,listHeight:list.clientHeight,playerHeight:groups[0].getBoundingClientRect().height,sideHeight:side.getBoundingClientRect().height,playerMax:getComputedStyle(document.querySelector("[aria-label=回放玩家状态]")).maxHeight,playerBottom:groups[0].getBoundingClientRect().bottom,eventsTop:groups[1].getBoundingClientRect().top};})()');
+    const compact = await evaluate('(() => {const side=document.querySelector("[data-replay-rail]"),groups=side.children,list=groups[1].querySelector("[aria-label=回放事件浏览]");const map=document.querySelector("[data-replay-map]").getBoundingClientRect(),transport=document.querySelector("[data-replay-transport]").getBoundingClientRect();return {eventsHeight:groups[1].getBoundingClientRect().height,listHeight:list.clientHeight,playerHeight:groups[0].getBoundingClientRect().height,sideHeight:side.getBoundingClientRect().height,playerMax:getComputedStyle(document.querySelector("[aria-label=回放玩家状态]")).maxHeight,playerBottom:groups[0].getBoundingClientRect().bottom,eventsTop:groups[1].getBoundingClientRect().top,map:[map.left,map.right],transport:[transport.left,transport.right],page:document.documentElement.scrollHeight-innerHeight};})()');
     assert.ok(compact.eventsHeight >= 90, 'key events card keeps usable height at ' + width + 'x' + height);
     assert.ok(compact.listHeight >= 24, 'key events list keeps a usable scroll viewport at ' + width + 'x' + height);
     assert.ok(compact.playerBottom <= compact.eventsTop + 1);
+    assert.ok(Math.abs(compact.map[0] - compact.transport[0]) <= 1 && Math.abs(compact.map[1] - compact.transport[1]) <= 1, 'transport aligns with the map container at ' + width + 'x' + height);
+    assert.ok(compact.page <= 1);
     await shot('p7-replay-' + width + 'x' + height);
     await evaluate('document.getElementById("heatmap-tab").click()');
     await settleUi(evaluate, 'heatmap ' + width);
+    const heatmapBar = await evaluate('(() => {const bar=document.querySelector("[data-heatmap-bar]"),title=bar.querySelector("h2, [class*=fui-Title2]"),badge=bar.querySelector("[class*=fui-Badge]");const r=bar.getBoundingClientRect(),t=title?.getBoundingClientRect(),b=badge?.getBoundingClientRect();return {titleLeft:t?t.left-r.left:null,badgeRight:b?r.right-b.right:null,layers:bar.querySelectorAll("[aria-pressed]").length,page:document.documentElement.scrollHeight-innerHeight};})()');
+    assert.equal(heatmapBar.layers, 3);
+    assert.ok(heatmapBar.titleLeft <= 16, 'heatmap title stays on the left of the toolbar');
+    assert.ok(heatmapBar.badgeRight <= 16, 'map-version badge stays on the right of the toolbar');
+    assert.ok(heatmapBar.page <= 1);
     await shot('p7-heatmap-' + width + 'x' + height);
-    metrics.checks.push('layout ' + width + 'x' + height);
+    metrics.checks.push('layout ' + width + 'x' + height + ' (report/timeline/replay/heatmap)');
   }
   await page.send('Emulation.clearDeviceMetricsOverride');
   // A failed next-round load must stop continuous switching and surface a retryable error.

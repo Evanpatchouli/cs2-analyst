@@ -135,8 +135,8 @@ await scenario({
     for (const expected of ['de_dust2', '13 : 11', 'twinkle', '25 / 20 / 4', '91.38', '75%', '22.2%',
       'CT 方 ADR 明显低于 T 方', '死亡后队友补枪偏少', '本场多次闪到队友',
       'R24 1v3 残局获胜', '本场首杀对决贡献突出', '重新选择 DEM',
-      '4 / 18 次死亡后队友完成补枪', '投掷数量', '道具效果',
-      '闪光弹', '烟雾弹', '燃烧瓶', '诱饵弹', '高爆手雷对敌伤害', '燃烧伤害', '闪光助攻',
+      '4 / 18 次死亡后队友完成补枪', '简要分析', '投掷统计', '伤害统计',
+      '闪光弹', '烟雾弹', '燃烧弹', '诱饵弹',
       '回合开始后', '26.63 秒', '局面', '结果', '回合时间线', '查看详情']) {
       assert.ok(text.includes(expected), `报告缺少内容：${expected}`);
     }
@@ -145,13 +145,41 @@ await scenario({
   assertDom: async (evaluate, send) => {
     assert.equal(await evaluate(`document.getElementById('report-panel').hidden`), false);
     assert.equal(await evaluate(`document.getElementById('report-tab').getAttribute('aria-selected')`), 'true');
-    assert.deepEqual(await evaluate(`[...document.querySelectorAll('[role="tab"]')].map(t => t.querySelector('.fui-Tab__content').textContent)`), ['比赛报告', '深度复盘', '回合时间线', '分析', '比赛回放', '热力图']);
+    assert.deepEqual(await evaluate(`[...document.querySelectorAll('[data-app-sidebar] [role="tab"]')].map(t => t.querySelector('.fui-Tab__content').textContent)`), ['比赛报告', '深度复盘', '回合时间线', '分析', '比赛回放', '热力图']);
     assert.equal(await evaluate(`document.querySelectorAll('[role="tabpanel"]').length`), 6);
     await checkDeepReviewUx(evaluate, send, process.env.CS2_ANALYST_QA_DIR);
     await evaluate(`document.getElementById('report-tab').click()`);
     await settleUi(evaluate, 'report Tab render');
     const helps = await evaluate('document.querySelectorAll(\'button[aria-label$="说明"]\').length');
     assert.ok(helps >= 9, `核心指标与道具面板的 Tooltip 入口不足：${helps}`);
+
+    // Utility card: one card, two tabs, merged fire throws and a flash-only composite value.
+    assert.equal(await evaluate(`document.querySelector('[data-utility-tab="throws"]').getAttribute('aria-selected')`), 'true');
+    const utilityTabs = await evaluate(`[...document.querySelectorAll('[data-utility-tab]')].map(t => t.querySelector('.fui-Tab__content')?.textContent ?? t.textContent)`);
+    assert.deepEqual(utilityTabs, ['投掷统计', '伤害统计']);
+    const throwLabels = await evaluate(`[...document.querySelectorAll('[data-utility-row-label]')].map(e => e.textContent)`);
+    assert.deepEqual(throwLabels, ['闪光弹', '烟雾弹', '高爆手雷', '燃烧弹', '诱饵弹']);
+    assert.equal(await evaluate(`document.querySelector('[data-utility-panel]').textContent.includes('投掷数量')`), false);
+    assert.equal(await evaluate(`document.querySelector('[data-utility-panel]').textContent.includes('燃烧瓶')`), false);
+    await evaluate(`document.querySelector('[data-utility-tab="damage"]').click()`);
+    await settleUi(evaluate, '伤害统计 Tab');
+    assert.equal(await evaluate(`document.querySelector('[data-utility-tab="damage"]').getAttribute('aria-selected')`), 'true');
+    const damageLabels = await evaluate(`[...document.querySelectorAll('[data-utility-row-label]')].map(e => e.textContent)`);
+    assert.deepEqual(damageLabels, throwLabels);
+    const damageValues = await evaluate(`[...document.querySelectorAll('[data-utility-row]')].map(r => [r.dataset.utilityRow, r.querySelector('[data-utility-row-value]').textContent])`);
+    assert.match(damageValues.find(([label]) => label === '闪光弹')[1], /^\d+\/\d+\/\d+$/);
+    assert.equal(damageValues.find(([label]) => label === '烟雾弹')[1], '-');
+    assert.equal(damageValues.find(([label]) => label === '诱饵弹')[1], '-');
+    assert.ok(damageValues.find(([label]) => label === '高爆手雷')[1].includes('点'));
+    assert.ok(damageValues.find(([label]) => label === '燃烧弹')[1].includes('点'));
+    await evaluate(`document.querySelector('[data-utility-flash]').focus()`);
+    await waitFor(async () => evaluate(`[...document.querySelectorAll('[role="tooltip"]')].some(t => t.textContent.includes('致盲敌人') && t.textContent.includes('闪光助攻'))`), 10_000, '闪光数值 Tooltip');
+    assert.equal(await evaluate(`document.querySelector('[data-utility-panel]').textContent.includes('受闪次数按游戏记录到的受闪事件统计')`), false, '底部说明已迁移到标题旁 Tooltip');
+    await evaluate(`document.querySelector('[aria-label="道具面板说明"]').focus()`);
+    await waitFor(async () => evaluate(`[...document.querySelectorAll('[role="tooltip"]')].some(t => t.textContent.includes('受闪次数') && t.textContent.includes('有效闪光次数'))`), 10_000, '道具面板说明 Tooltip');
+    await evaluate(`document.querySelector('[data-utility-tab="throws"]').click()`);
+    await settleUi(evaluate, '投掷统计 Tab return');
+    assert.equal(await evaluate(`document.querySelector('[data-utility-tab="throws"]').getAttribute('aria-selected')`), 'true');
 
     // Round Timeline: 24 collapsed summaries; R24 reads T / 成功 / 13 : 11.
     const summaries = await evaluate(`(() => {

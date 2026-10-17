@@ -16,7 +16,7 @@ import { palette } from './theme';
  * middle region becomes its own scroll area.
  */
 const useStyles = makeStyles({
-  root: { flex: 1, minHeight: 0, display: 'grid', gridTemplateRows: 'auto minmax(0, 1fr) auto', gap: '10px' },
+  root: { flex: 1, minHeight: 0, display: 'grid', gridTemplateRows: 'auto minmax(0, 1fr)', gap: '10px' },
   bar: {
     flexShrink: 0, display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '10px', padding: '8px 10px',
     backgroundColor: palette.card, border: `1px solid ${palette.border}`, borderRadius: tokens.borderRadiusLarge,
@@ -30,6 +30,11 @@ const useStyles = makeStyles({
   body: {
     minHeight: 0, display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 292px', gap: '10px',
     '@media (max-width: 860px)': { gridTemplateColumns: 'minmax(0, 1fr)', overflowY: 'auto' },
+  },
+  // The transport belongs to the map column only; the rail keeps its own full-height column.
+  left: {
+    minWidth: 0, minHeight: 0, display: 'grid', gridTemplateRows: 'minmax(0, 1fr) auto', gap: '10px',
+    '@media (max-width: 860px)': { gridTemplateRows: 'auto auto' },
   },
   mapColumn: {
     position: 'relative', minWidth: 0, minHeight: 0, overflow: 'hidden',
@@ -59,6 +64,7 @@ const useStyles = makeStyles({
     '@media (max-width: 860px)': { flex: '0 0 auto' },
   },
   groupHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' },
+  groupTitle: { display: 'flex', alignItems: 'center', gap: '2px', minWidth: 0 },
   players: {
     display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0, maxHeight: 'min(34vh, 300px)', overflowY: 'auto',
     // Short windows still need a usable, independently scrolling key-event card.
@@ -73,8 +79,9 @@ const useStyles = makeStyles({
   },
   event: { justifyContent:'flex-start',textAlign:'left',whiteSpace:'normal' },
   transport: {
-    flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '6px', padding: '10px 12px',
+    width: '100%', alignSelf: 'end', display: 'flex', flexDirection: 'column', gap: '6px', padding: '10px 12px',
     backgroundColor: palette.card, border: `1px solid ${palette.border}`, borderRadius: tokens.borderRadiusLarge,
+    boxSizing: 'border-box',
   },
   transportRow: { display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '10px' },
   progress: { width:'100%' },
@@ -103,8 +110,15 @@ function MapInfoTip({ content }: { content: ReactElement }) {
       onKeyDown={event=>{if(event.key==='Escape'){focused.current=false;hovered.current=false;setOpen(false);}}} />
   </Tooltip>;
 }
+/** Compact Fluent help entry for short, static notes (hover and keyboard focus). */
+function HelpTip({ label, content }: { label: string; content: string }) {
+  const s = useStyles();
+  return <Tooltip content={content} relationship="description" withArrow>
+    <Button appearance="transparent" size="small" className={s.help}
+      icon={<QuestionCircleIcon size={16} />} aria-label={label} />
+  </Tooltip>;
+}
 const blockAt=replayBlockAt;
-const bombText:Record<string,string>={unknown:'未知',pickup:'拾取',drop:'掉落',plant_start:'开始安放',planted:'安放完成',defuse_start:'开始拆除',defused:'拆除成功',exploded:'爆炸'};
 const timeText=(tick:number,round:DesktopReplayRoundInfo,rate:number|null)=>rate===null?`原始 tick ${Math.round(tick)}`:`+${((tick-round.startTick)/rate).toFixed(2)} 秒`;
 
 export function ReplayPlayer({ metadata, initialPlayerId, active, jump }: {
@@ -315,7 +329,7 @@ export function ReplayPlayer({ metadata, initialPlayerId, active, jump }: {
   },[availableMap]);
   if(!metadata.available||!info)return <section className={s.root} aria-label="比赛回放"><div className={s.group}><Title2>比赛回放</Title2><Body1>{metadata.unavailableReason??'本场缺少可靠回放窗口，比赛报告仍可用。'}</Body1></div></section>;
   const sameTick=new Map<number,number>();for(const e of visibleEvents)sameTick.set(e.tick,(sameTick.get(e.tick)??0)+1);
-  const bombLabel=frame?bombText[frame.bomb.action]??'未知':'未知';
+  const eventsHelp=`仅显示当前播放进度已到达的事件。同 tick 不推断先后顺序。${metadata.excludedRounds.length?` ${metadata.excludedRounds.length} 个回合窗口不可靠，未开放回放。`:''}`;
   return <section className={s.root} aria-label="比赛回放" data-replay-session={metadata.sessionId} data-replay-match={metadata.matchId} data-replay-round={roundNumber} data-replay-tick={tick} data-replay-cache={cache.current.size} data-replay-block={block?.index} data-replay-revision={revision} data-replay-map-ready={imageReady} data-replay-visible-events={visibleEvents.length} data-replay-continuous={continuous?'on':'off'}>
     <div className={s.bar}>
       <div className={s.barTitle}><Title2>比赛回放</Title2><Caption1 className={s.muted}>R{roundNumber}</Caption1></div>
@@ -330,7 +344,8 @@ export function ReplayPlayer({ metadata, initialPlayerId, active, jump }: {
       <Badge appearance="tint" color="warning">地图版本未确认</Badge>
     </div>
     <div className={s.body} data-replay-body>
-      {availableMap?<div ref={mapColumn} className={s.mapColumn}>
+      <div className={s.left} data-replay-left>
+      {availableMap?<div ref={mapColumn} className={s.mapColumn} data-replay-map>
         <div className={s.mapInfo}>
           <MapInfoTip content={<div className={s.tipContent}>
             <span>全局比赛观察视角 · 朝向仅为记录方向，不表示看到了敌人。位置插值仅用于显示。</span>
@@ -344,31 +359,30 @@ export function ReplayPlayer({ metadata, initialPlayerId, active, jump }: {
           <canvas ref={baseCanvas} className={s.canvas} aria-hidden="true" />
           <canvas ref={canvas} className={s.canvas} tabIndex={0} role="img" aria-label={`R${roundNumber} 全局地图；空格播放或暂停，左右方向键定位，Home/End跳至回合起止。`} onKeyDown={e=>{if(e.key===' '){e.preventDefault();toggle();}else if(['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){e.preventDefault();const at=clock.current.read(performance.now(),metadata.tickRate);seek(e.key==='Home'?info.startTick:e.key==='End'?info.endTick:at+(e.key==='ArrowLeft'?-1:1)*(metadata.tickRate??1));}}} />
         </div>
-      </div>:<div ref={mapColumn} className={s.mapColumn}><Body1>本机没有配套雷达资源或图片无法装载；仍可浏览事件与玩家状态。</Body1></div>}
+      </div>:<div ref={mapColumn} className={s.mapColumn} data-replay-map><Body1>本机没有配套雷达资源或图片无法装载；仍可浏览事件与玩家状态。</Body1></div>}
+        <div className={s.transport} data-replay-transport>
+          <Slider aria-label="回放进度" className={s.progress} rail={{className:s.progressRail}}
+            min={info.startTick} max={info.endTick} step={1} value={Math.round(tick)} aria-valuetext={timeText(tick,info,metadata.tickRate)} onChange={(_,d)=>seek(d.value)} />
+          <div className={s.transportRow}>
+            <Body1 data-replay-time>{timeText(tick,info,metadata.tickRate)} / {timeText(info.endTick,info,metadata.tickRate)}</Body1>
+            {info.freezeEndTick!==null&&tick<info.freezeEndTick?<Badge appearance="outline">冻结阶段</Badge>:null}
+            {loading?<Spinner size="tiny" label="加载回放数据…"/>:null}
+            {error?<div role="alert"><Body1>{error}</Body1><Button size="small" onClick={()=>{failed.current.clear();setError(null);}}>重试</Button></div>:null}
+            {metadata.tickRate===null?<Caption1>时钟不可靠，仅支持原始 tick 与事件定位，不能正常倍速播放。</Caption1>:null}
+          </div>
+        </div>
+      </div>
       <div className={s.side} data-replay-rail>
         <div className={s.group}>
           <div className={s.groupHeader}><Caption1>玩家状态</Caption1><Caption1 className={s.muted}>{metadata.players.length} 人</Caption1></div>
-          <Caption1 className={s.muted}>最近炸弹：{bombLabel}{frame?.bomb.ambiguous?' · 同 tick 冲突，顺序未知':''}</Caption1>
           <div className={s.players} aria-label="回放玩家状态">
             {metadata.players.map((player,index)=>{const p=frame?.players.find(p=>p[0]===index);return <Button key={player.id} className={s.player} appearance={player.id===selectedReplayPlayerId?'secondary':'subtle'} aria-pressed={player.id===selectedReplayPlayerId} onClick={()=>setSelectedReplayPlayerId(player.id)} title={player.nickname}><span className={s.name}>{index+1}. {player.nickname}</span><Caption1>{p?.[8]??'Unknown'} · {p?.[7]===false?'阵亡':p?.[7]===true?`${p[6]??'—'} HP`:'未知'}</Caption1></Button>;})}
           </div>
         </div>
         <div className={`${s.group} ${s.eventsGroup}`}>
-          <div className={s.groupHeader}><Caption1>关键事件</Caption1><Caption1 className={s.muted}>已播放 · {visibleEvents.length}</Caption1></div>
-          <Caption1 className={s.muted}>仅显示当前播放进度已到达的事件。同 tick 不推断先后顺序。{metadata.excludedRounds.length?` ${metadata.excludedRounds.length} 个回合窗口不可靠，未开放回放。`:''}</Caption1>
+          <div className={s.groupHeader}><div className={s.groupTitle}><Caption1>关键事件</Caption1><HelpTip label="关键事件说明" content={eventsHelp} /></div><Caption1 className={s.muted}>已播放 · {visibleEvents.length}</Caption1></div>
           <div ref={eventsList} className={s.events} aria-label="回放事件浏览" aria-live="polite" aria-relevant="additions">{visibleEvents.length?visibleEvents.map(e=><Button key={e.id} className={s.event} appearance="subtle" size="small" data-replay-event={e.id} onClick={()=>seek(e.tick)}>{timeText(e.tick,info,metadata.tickRate)} · {e.description}{(sameTick.get(e.tick)??0)>1?' · 同 tick，顺序未知':''}</Button>):<Caption1>当前播放进度还没有关键事件。</Caption1>}</div>
         </div>
-      </div>
-    </div>
-    <div className={s.transport}>
-      <Slider aria-label="回放进度" className={s.progress} rail={{className:s.progressRail}}
-        min={info.startTick} max={info.endTick} step={1} value={Math.round(tick)} aria-valuetext={timeText(tick,info,metadata.tickRate)} onChange={(_,d)=>seek(d.value)} />
-      <div className={s.transportRow}>
-        <Body1 data-replay-time>{timeText(tick,info,metadata.tickRate)} / {timeText(info.endTick,info,metadata.tickRate)}</Body1>
-        {info.freezeEndTick!==null&&tick<info.freezeEndTick?<Badge appearance="outline">冻结阶段</Badge>:null}
-        {loading?<Spinner size="tiny" label="加载回放数据…"/>:null}
-        {error?<div role="alert"><Body1>{error}</Body1><Button size="small" onClick={()=>{failed.current.clear();setError(null);}}>重试</Button></div>:null}
-        {metadata.tickRate===null?<Caption1>时钟不可靠，仅支持原始 tick 与事件定位，不能正常倍速播放。</Caption1>:null}
       </div>
     </div>
   </section>;

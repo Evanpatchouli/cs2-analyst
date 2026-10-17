@@ -36,7 +36,7 @@ const server=createServer(async(req,res)=>{
    assert.equal(report.schemaVersion,2);
    assert.deepEqual(session.errors,[]);
    const hash=createHash('sha256').update(JSON.stringify(report)).digest('hex');
-   const state=await session.evaluate(`({player:document.querySelector('[data-deep-player]')?.dataset.deepPlayer,metric:document.querySelector('[aria-label="对比指标"]')?.textContent,tabs:[...document.querySelectorAll('[role="tab"]')].map(t=>({id:t.id,selected:t.getAttribute('aria-selected')})),expanded:[...document.querySelectorAll('[data-round-summary][aria-expanded="true"]')].map(x=>Number(x.dataset.roundSummary)),trendRows:document.querySelectorAll('[data-trend-round]').length})`);
+   const state=await session.evaluate(`({player:document.querySelector('[data-deep-player]')?.dataset.deepPlayer,metric:document.querySelector('[aria-label="对比指标"]')?.textContent,tabs:[...document.querySelectorAll('[data-app-sidebar] [role="tab"]')].map(t=>({id:t.id,selected:t.getAttribute('aria-selected')})),expanded:[...document.querySelectorAll('[data-round-summary][aria-expanded="true"]')].map(x=>Number(x.dataset.roundSummary)),trendRows:document.querySelectorAll('[data-trend-round]').length})`);
    if(!development) {
     const fixture=JSON.parse(readFileSync(join(qa,'pipeline.json'),'utf8')).fixtures.find(f=>f.identity.filename==='.demo/'+command.label.split('-')[0]+'.dem');
     assert.ok(fixture,'known mandatory personal import label');assert.equal(hash,fixture.desktop.deterministicHash);

@@ -58,6 +58,15 @@ export function TimelineIcon(props: IconProps) {
   </Icon>;
 }
 
+/** 道具伤害统计：交叉双刀（本地最小图形，不新增资源或依赖）。 */
+export function CrossedSwordsIcon(props: IconProps) {
+  return <Icon {...props}>
+    <path d="M4.2 15.6 15.4 4.4M15.8 15.6 4.6 4.4" />
+    <path d="M13.3 4.4h2.1v2.1M6.7 4.4H4.6v2.1" />
+    <path d="m3.2 13.3 3.5 3.5M16.8 13.3l-3.5 3.5" />
+  </Icon>;
+}
+
 /** 侧边栏导航：分析（柱状图）。 */
 export function AnalysisIcon(props: IconProps) {
   return <Icon {...props}>

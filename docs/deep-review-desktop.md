@@ -35,7 +35,7 @@ parseWithSpatial → Match + Spatial Evidence
 All five evidence analyses run once per import and their results are shared by all players.
 No P5.7.1–7 algorithms, policies, thresholds or rule definitions changed.
 P3 numeric semantics, V1 ranking/contracts and the existing Utility panel remain frozen.
-V1's heading becomes “基础规则提示”, with a link in the copy to 深度复盘.
+V1's heading is “简要分析”; the pointer to 深度复盘 now lives in the title's `?` Tooltip.
 
 ## Contract and boundaries
 

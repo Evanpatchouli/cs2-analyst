@@ -69,7 +69,7 @@ export async function checkHeatmapUx(evaluate, send, { qaDir, direct, memory = a
     return s;
   };
   const shot = async name => { if (qaDir) { const result = await send('Page.captureScreenshot', { format: 'png', captureBeyondViewport: false }); writeFileSync(join(qaDir, name + '.png'), Buffer.from(result.data, 'base64')); } };
-  assert.equal(await evaluate(`document.querySelectorAll('[role=tab]').length`), 6);
+  assert.equal(await evaluate(`document.querySelectorAll('[data-app-sidebar] [role=tab]').length`), 6);
   assert.equal(await evaluate(`document.querySelectorAll('[role=tabpanel]').length`), 6);
   const start = performance.now();
   await evaluate(`document.getElementById('replay-tab').focus()`);

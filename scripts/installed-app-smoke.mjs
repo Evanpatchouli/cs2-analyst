@@ -430,7 +430,7 @@ async function testSeamScenario() {
     assert.equal(findingCount, 5, 'twinkle 应显示 5 条 Findings');
     assert.equal(await session.evaluate(`document.getElementById('report-tab').getAttribute('aria-selected')`), 'true');
     assert.equal(await session.evaluate(`document.getElementById('report-panel').hidden`), false);
-    assert.equal(await session.evaluate(`document.querySelectorAll('[role="tab"]').length`), 6);
+    assert.equal(await session.evaluate(`document.querySelectorAll('[data-app-sidebar] [role="tab"]').length`), 6);
     await checkDeepReviewUx(session.evaluate, session.send);
     await session.evaluate(`[...document.querySelectorAll('button')].find(b => b.textContent.trim() === '查看 R24').click()`);
     await waitFor(async () => session.evaluate(`!document.getElementById('timeline-panel').hidden`), 10_000, '安装版 Finding 切换 Timeline');
@@ -461,7 +461,7 @@ async function testSeamScenario() {
     await importReportDiskFile(session, brokenDemo);
     await waitFor(() => session.evaluate(`document.querySelector('main').dataset.status==='error'&&document.body.textContent.includes('无法分析此 DEM')`), 60_000, 'failed reimport error with old report');
     assert.equal(await session.evaluate(`document.querySelector('[aria-label="目标玩家"]').textContent`), previousPlayer);
-    assert.equal(await session.evaluate(`document.querySelectorAll('[role=tab]').length`), 6, 'old report remains mounted');
+    assert.equal(await session.evaluate(`document.querySelectorAll('[data-app-sidebar] [role=tab]').length`), 6, 'old report remains mounted');
     assert.ok(await session.evaluate(`document.body.textContent.includes('25 / 20 / 4')`));
     await session.evaluate(`document.getElementById('replay-tab').click()`);
     await waitFor(() => session.evaluate(`document.getElementById('replay-panel').textContent.includes('上一次回放会话已结束')`), 10_000, 'failed import retires old replay session');

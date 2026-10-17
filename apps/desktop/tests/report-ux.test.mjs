@@ -34,6 +34,7 @@ const { HeatmapView, HeatmapLayerDetails } = await import('../renderer/src/heatm
 const { ReplayPlayer } = await import('../renderer/src/replay-player.tsx');
 const { fixture: heatmapFixture, map: heatmapMap } = await import('./heatmap-fixture.mjs');
 const { projectMapHeatmap } = await import('../shared/heatmap.ts');
+const { utilityDamageRows, utilityThrowRows } = await import('../renderer/src/utility-display.ts');
 const render = element => renderToStaticMarkup(createElement(SSRProvider, null, element));
 
 test('heatmap missing metadata renders independent disabled layers, all filters, and honest map/source limits', () => {
@@ -58,6 +59,33 @@ test('heatmap defaults to the available position layer only and keeps unavailabl
   assert.ok(off.includes('data-heatmap-enabled=""'));
   assert.equal([...off.matchAll(/aria-pressed="false"/g)].length, 3);
   assert.ok(off.includes('位置回放源不可用'));
+});
+
+test('utility tabs merge the two fire grenades and never confuse missing metrics with zero', () => {
+  const utility = {
+    throws: { flash: 0, smoke: 0, he: 0, incendiary: 2, molotov: 3, decoy: 0 },
+    heDamage: 0, fireDamage: 0, enemyFlashEffects: 30, teamFlashEffects: 13, flashAssists: 2,
+    flashEffectsComplete: true,
+  };
+  const throws = utilityThrowRows(utility);
+  assert.deepEqual(throws.map(row => row.label), ['闪光弹', '烟雾弹', '高爆手雷', '燃烧弹', '诱饵弹']);
+  assert.equal(throws.find(row => row.label === '燃烧弹').value, '5', 'incendiary + molotov throws are summed');
+  assert.equal(throws.some(row => row.label === '燃烧瓶'), false);
+  assert.ok(throws.every(row => row.value === '0' || row.value === '5'), 'legitimate zero stays 0');
+  const damage = utilityDamageRows(utility);
+  assert.deepEqual(damage.map(row => row.label), throws.map(row => row.label), 'same names in both tabs');
+  assert.equal(damage.find(row => row.label === '闪光弹').value, '30/13/2');
+  assert.equal(damage.find(row => row.label === '闪光弹').order, '致盲敌人 / 队友受闪 / 闪光助攻');
+  assert.equal(damage.find(row => row.label === '烟雾弹').value, '-');
+  assert.equal(damage.find(row => row.label === '诱饵弹').value, '-');
+  assert.equal(damage.find(row => row.label === '高爆手雷').value, '0 点');
+  assert.equal(damage.find(row => row.label === '燃烧弹').value, '0 点');
+  const unavailable = { ...utility, throws: { ...utility.throws, incendiary: null, molotov: null },
+    heDamage: null, fireDamage: null, flashAssists: null };
+  assert.equal(utilityThrowRows(unavailable).find(row => row.label === '燃烧弹').value, '—');
+  assert.equal(utilityDamageRows(unavailable).find(row => row.label === '高爆手雷').value, '—');
+  assert.equal(utilityDamageRows(unavailable).find(row => row.label === '燃烧弹').value, '—');
+  assert.equal(utilityDamageRows(unavailable).find(row => row.label === '闪光弹').value, '30/13/—');
 });
 
 test('replay surface is named 比赛回放 in its title, aria label and unavailable fallback', () => {

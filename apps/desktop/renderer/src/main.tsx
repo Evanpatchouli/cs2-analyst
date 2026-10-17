@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
   Badge, Body1, Button, Card, Caption1, Divider, Dropdown, FluentProvider,
-  MessageBar, MessageBarBody, Option, Spinner, Subtitle1, Title1, Title2,
+  MessageBar, MessageBarBody, Option, Spinner, Subtitle1, Tab, TabList, Title1, Title2,
   Tooltip, makeStyles, tokens,
 } from '@fluentui/react-components';
 import type {
@@ -12,9 +12,9 @@ import { KillFeedEvent } from './killfeed-event';
 import { AnalysisViews } from './analysis-views';
 import { DeepReview } from './deep-review';
 import { useReport } from './store';
-import { QuestionCircleIcon } from './icons';
+import { AnalysisIcon, CrossedSwordsIcon, QuestionCircleIcon } from './icons';
 import { UtilityIcon } from './utility-icons';
-import type { UtilityIconKind } from './utility-icons';
+import { flashOrder, utilityDamageRows, utilityThrowRows } from './utility-display';
 import { coachTheme, palette, useAppShellStyles, useScrollbarStyles } from './theme';
 import { AppTitlebar } from './app-titlebar';
 import { Home } from './home';
@@ -46,6 +46,11 @@ const useStyles = makeStyles({
   reportFrame: { flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' },
   viewHeader: { flexShrink: 0, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', padding: '14px 24px', borderBottom: `1px solid ${palette.rowDivider}` },
   tabPanel: { flex: 1, minHeight: 0, overflowY: 'auto', padding: '20px 24px 32px', '&[hidden]': { display: 'none' } },
+  // Timeline owns no view-level scroll: only the round card's inner list scrolls.
+  timelinePanel: { flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: '20px 24px 32px', '&[hidden]': { display: 'none' } },
+  timelineSection: { flex: 1, minHeight: 0 },
+  timelineCard: { flex: 1, minHeight: 0, overflow: 'hidden' },
+  timelineList: { flex: 1, minHeight: 0, overflowY: 'auto' },
   replayPanel: { flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', overflow: 'hidden', padding: '14px 24px 16px', '&[hidden]': { display: 'none' } },
   column: { display: 'flex', flexDirection: 'column', gap: '8px' },
   headerRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px' },
@@ -68,7 +73,9 @@ const useStyles = makeStyles({
     borderBottom: `1px solid ${palette.rowDivider}`, ':last-child': { borderBottomStyle: 'none' },
   },
   listRow: { gridTemplateColumns: '22px minmax(0, 1fr) auto' },
-  effectRow: { gridTemplateColumns: 'minmax(0, 1fr) auto' },
+  utilityTabs: { marginBottom: '2px' },
+  valueHelp: { cursor: 'help', borderRadius: tokens.borderRadiusMedium, padding: '0 2px', ':focus-visible': { outline: `2px solid ${tokens.colorBrandStroke1}`, outlineOffset: '2px' } },
+  tipContent: { display: 'flex', flexDirection: 'column', gap: '6px', maxWidth: '340px' },
   rowIcon: { display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: '22px', height: '22px' },
   rowLabel: { color: tokens.colorNeutralForeground2 },
   clutchHead: { display: 'grid', gridTemplateColumns: '56px minmax(0, 1fr) auto', alignItems: 'center', columnGap: '10px', padding: '0 4px' },
@@ -124,9 +131,8 @@ const help = {
   tradeKills: '队友被敌人击杀后，你在 5 秒内击杀该名敌人的次数。',
   opening: '每回合首个有效击杀形成的首杀对决，包括首杀、首死以及对决胜率，用于观察开局阶段的影响。',
   clutch: '当你成为队伍唯一存活玩家且敌方仍有人存活时形成 1vN 残局机会。只有证据明确的回合才会计入。',
-  utility: '统计本场正式回合内确认的道具事件。投掷数量为游戏记录的投掷次数；伤害为实际从敌人生命值中扣除的有效伤害；受闪次数按游戏记录到的受闪事件统计，可能包含几乎未产生实际致盲效果的记录，因此不能直接理解为“有效闪光次数”或实际致盲时长。“—”表示当前录像证据不足，无法可靠计算。',
+  utility: '统计本场正式回合内确认的道具事件。投掷统计为游戏记录的投掷次数；伤害统计为实际从敌人生命值中扣除的有效伤害。伤害统计中，闪光弹列按“致盲敌人/队友受闪/闪光助攻”排列。受闪次数按游戏记录到的受闪事件统计，可能包含几乎未产生实际致盲效果的记录，因此不能直接理解为“有效闪光次数”或实际致盲时长。“—”表示当前录像证据不足；“-”表示该道具没有对应伤害/效果指标。',
 };
-const flashCaveat = '受闪次数按游戏记录到的受闪事件统计，其中可能包含几乎未产生实际致盲效果的记录，因此不能直接理解为“有效闪光次数”或实际致盲时长。“—”表示当前录像证据不足，无法可靠计算。';
 
 /** Findings evidence is a frozen technical contract; only its presentation is localized. */
 const metricLabels: Record<string, string> = {
@@ -195,9 +201,8 @@ function Findings({ report, playerId, onShowRounds, onReplay }: {
 }) {
   const s = useStyles();
   const rows = report.findings.filter(f => f.playerId === playerId);
-  return <section className={s.section} aria-label="基础规则提示">
-    <Title2>基础规则提示</Title2>
-    <Caption1 className={s.muted}>来自基础指标规则 · 深度交火与团队证据请查看「深度复盘」</Caption1>
+  return <section className={s.section} aria-label="简要分析">
+    <div className={s.panelHeader}><Title2>简要分析</Title2><InfoTip label="简要分析" content="来自基础指标规则 · 深度交火与团队证据请查看「深度复盘」" /></div>
     {rows.length ? rows.map(f => <Card key={f.id} className={s.finding} data-rule={f.ruleId}>
       <div className={s.headerRow}><Subtitle1>{f.title}</Subtitle1><Badge appearance="tint" color={f.severity === 'positive' ? 'success' : f.severity === 'high' ? 'danger' : 'warning'}>{severityText[f.severity] ?? f.severity}</Badge></div>
       <Body1>{f.summary}</Body1>
@@ -221,44 +226,32 @@ function Findings({ report, playerId, onShowRounds, onReplay }: {
   </section>;
 }
 
-/** Row-per-metric utility panel; the numbers come straight from the DTO. */
+/** One utility card with two tabs; the numbers come straight from the DTO. */
 function UtilityPanel({ utility }: { utility: DesktopPlayerAnalytics['utility'] }) {
   const s = useStyles();
-  const throws: { label: string; kind: UtilityIconKind; value: string }[] = [
-    { label: '闪光弹', kind: 'flashbang', value: count(utility.throws.flash) },
-    { label: '烟雾弹', kind: 'smoke', value: count(utility.throws.smoke) },
-    { label: '高爆手雷', kind: 'he', value: count(utility.throws.he) },
-    { label: '燃烧弹', kind: 'incendiary', value: count(utility.throws.incendiary) },
-    { label: '燃烧瓶', kind: 'molotov', value: count(utility.throws.molotov) },
-    { label: '诱饵弹', kind: 'decoy', value: count(utility.throws.decoy) },
-  ];
-  const effects = [
-    { label: '高爆手雷对敌伤害', value: points(utility.heDamage) },
-    { label: '燃烧伤害', value: points(utility.fireDamage) },
-    { label: '敌人受闪效果', value: count(utility.enemyFlashEffects) },
-    { label: '队友受闪效果', value: count(utility.teamFlashEffects) },
-    { label: '闪光助攻', value: count(utility.flashAssists) },
-  ];
-  return <Card className={s.panel}>
-    <div className={s.panelHeader}><Subtitle1>道具</Subtitle1><InfoTip label="道具面板" content={help.utility} /></div>
-    <Caption1 className={s.muted}>投掷数量</Caption1>
-    <div className={s.list}>
-      {throws.map(row => <div key={row.label} className={`${s.row} ${s.listRow}`}>
+  const [tab, setTab] = useState<'throws' | 'damage'>('throws');
+  const rows = tab === 'throws' ? utilityThrowRows(utility) : utilityDamageRows(utility);
+  const helpContent = <div className={s.tipContent}>
+    <span>{help.utility}</span>
+    {utility.flashEffectsComplete ? null : <span>受闪与闪光助攻证据不完整，相关数值可能偏低。</span>}
+  </div>;
+  return <Card className={s.panel} data-utility-panel>
+    <div className={s.panelHeader}><Subtitle1>道具</Subtitle1><InfoTip label="道具面板" content={helpContent} /></div>
+    <TabList className={s.utilityTabs} size="small" selectedValue={tab}
+      onTabSelect={(_, data) => setTab(data.value as 'throws' | 'damage')}>
+      <Tab value="throws" icon={<AnalysisIcon size={16} />} data-utility-tab="throws">投掷统计</Tab>
+      <Tab value="damage" icon={<CrossedSwordsIcon size={16} />} data-utility-tab="damage">伤害统计</Tab>
+    </TabList>
+    <div className={s.list} data-utility-list={tab}>
+      {rows.map(row => <div key={row.label} className={`${s.row} ${s.listRow}`} data-utility-row={row.label}>
         <span className={s.rowIcon}><UtilityIcon kind={row.kind} /></span>
-        <span className={s.rowLabel}>{row.label}</span>
-        <span className={s.rowValue}>{row.value}</span>
+        <span className={s.rowLabel} data-utility-row-label>{row.label}</span>
+        {row.order
+          ? <Tooltip content={row.order} relationship="description"><span className={`${s.rowValue} ${s.valueHelp}`} tabIndex={0}
+              data-utility-row-value data-utility-flash aria-label={`${row.label}：${row.value}，${flashOrder}`}>{row.value}</span></Tooltip>
+          : <span className={s.rowValue} data-utility-row-value>{row.value}</span>}
       </div>)}
     </div>
-    <Divider />
-    <Caption1 className={s.muted}>道具效果</Caption1>
-    <div className={s.list}>
-      {effects.map(row => <div key={row.label} className={`${s.row} ${s.effectRow}`}>
-        <span className={s.rowLabel}>{row.label}</span>
-        <span className={s.rowValue}>{row.value}</span>
-      </div>)}
-    </div>
-    {utility.flashEffectsComplete ? null : <Caption1 className={s.muted}>受闪与闪光助攻证据不完整，相关数值可能偏低。</Caption1>}
-    <Caption1 className={s.muted}>{flashCaveat}</Caption1>
   </Card>;
 }
 
@@ -271,11 +264,11 @@ function RoundTimeline({ rounds, expanded, highlighted, onToggle, onReplay }: {
   onReplay?: (round:number,tick?:number)=>void;
 }) {
   const s = useStyles();
-  return <section id="round-timeline" className={s.section} aria-label="回合时间线">
+  return <section id="round-timeline" className={`${s.section} ${s.timelineSection}`} aria-label="回合时间线">
     <Title2>回合时间线</Title2>
     <Caption1 className={s.muted}>每回合显示目标玩家阵营、胜负、回合结束比分与关键事件；点击回合展开详情，时间为回合开始后的秒数。</Caption1>
-    <Card className={s.panel}>
-      <div className={s.list}>
+    <Card className={`${s.panel} ${s.timelineCard}`}>
+      <div className={`${s.list} ${s.timelineList}`} data-timeline-list>
         {rounds.map(r => {
           const open = expanded.includes(r.round);
           const badge = roundResult(r.result);
@@ -406,7 +399,7 @@ function Report({ report, playerId, replayActive, activeTab, onSelectView }: {
       </div>
       </div>
     </div>
-    <div id="timeline-panel" role="tabpanel" aria-labelledby="timeline-tab" className={s.tabPanel} hidden={activeTab !== 'timeline'}>
+    <div id="timeline-panel" role="tabpanel" aria-labelledby="timeline-tab" className={s.timelinePanel} hidden={activeTab !== 'timeline'}>
       <RoundTimeline rounds={timeline} expanded={expanded} highlighted={highlighted} onToggle={toggleRound} onReplay={report.replay?.available?showReplay:undefined} />
     </div>
     <div id="analysis-panel" role="tabpanel" aria-labelledby="analysis-tab" className={s.tabPanel} hidden={activeTab !== 'analysis'}>
