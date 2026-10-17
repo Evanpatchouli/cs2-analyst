@@ -1,5 +1,6 @@
 import type { Finding, FindingEvidence } from '@cs2-analyst/findings';
 import type { DesktopReplayMetadata, DesktopReplayRequest, DesktopReplayResult } from './replay.js';
+import type { DesktopHeatmapMetadata, DesktopHeatmapRequest, DesktopHeatmapResult } from './heatmap.js';
 export type * from './replay.js';
 export type * from './heatmap.js';
 
@@ -155,6 +156,7 @@ export interface DesktopMatchReport {
   analysis: DesktopAnalysisViews;
   deepReview: { available: boolean; players: DesktopDeepReviewPlayer[] };
   replay?: DesktopReplayMetadata;
+  heatmap?: DesktopHeatmapMetadata;
 }
 /** Presentation contract owned here; Renderer has no dependency on analysis packages. */
 export interface DesktopDeepReviewFinding {
@@ -196,6 +198,12 @@ export interface DesktopApi {
   cancelImport(): Promise<void>;
   replay: {
     getChunk(request: DesktopReplayRequest): Promise<DesktopReplayResult>;
+    release(sessionId: string): Promise<void>;
+  };
+  heatmap: {
+    getGrid(request: DesktopHeatmapRequest): Promise<DesktopHeatmapResult>;
+  };
+  session: {
     release(sessionId: string): Promise<void>;
   };
   onProgress(listener: (phase: ImportPhase) => void): () => void;

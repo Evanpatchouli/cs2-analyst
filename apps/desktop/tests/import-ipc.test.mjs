@@ -66,7 +66,7 @@ test('preload resolves Files privately and never exposes a path import capabilit
       throw new TypeError('Not a File');
     } },
   }) });
-  assert.deepEqual(Object.keys(api).sort(), ['cancelImport', 'importDemo', 'importDroppedFile', 'onProgress', 'replay', 'version', 'window'].sort());
+  assert.deepEqual(Object.keys(api).sort(), ['cancelImport', 'importDemo', 'importDroppedFile', 'onProgress', 'replay', 'heatmap', 'session', 'version', 'window'].sort());
   for (const input of [syntheticFile, 'C:\\arbitrary.dem', { path: 'C:\\arbitrary.dem' }, null]) {
     const result = await api.importDroppedFile(input);
     assert.equal(result.kind, 'error');
@@ -175,4 +175,23 @@ test('only successful imports advance the UI revision, including reimporting the
       assert.equal(store.getState().reportRevision, revision, 'same match still starts a fresh UI report');
     }
   }
+});
+
+test('new parsing invalidates heatmap-only metadata; dialog cancellation preserves its active identity', async () => {
+  let complete;
+  const bridge={importDemo:()=>new Promise(resolve=>{complete=resolve;})},module={exports:{}};
+  const code=transformSync(readFileSync(new URL('../renderer/src/store.ts',import.meta.url),'utf8'),{loader:'ts',format:'cjs'}).code;
+  vm.runInNewContext(code,{require,module,window:{cs2Analyst:bridge}});
+  const store=module.exports.useReport;
+  const heatmap={available:true,sessionId:'old',layers:Object.fromEntries(['positions','kills','deaths'].map(layer=>[layer,{available:true,unavailableReason:null}]))};
+  const report={selectedPlayer:'p1',players:[{id:'p1'}],heatmap};
+  store.setState({status:'success',report,playerId:'p1'});
+  let pending=store.getState().importDemo();complete({kind:'cancelled'});await pending;
+  assert.equal(store.getState().report,report);
+  pending=store.getState().importDemo();store.getState().setPhase('parsing');
+  assert.equal(store.getState().report.heatmap.available,false);
+  assert.equal(store.getState().report.heatmap.unavailableReason,'session-ended');
+  for(const layer of Object.values(store.getState().report.heatmap.layers))assert.equal(layer.available,false);
+  complete({kind:'error',message:'corrupt'});await pending;
+  assert.equal(store.getState().report.heatmap.available,false);assert.equal(heatmap.available,true);
 });

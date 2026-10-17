@@ -9,11 +9,12 @@ test('replay cache failure degrades independently after the successful unchanged
   const port=new EventEmitter(),sent=[];port.postMessage=value=>sent.push(value);
   const report={schemaVersion:2,match:{id:'id'},analytics:[{kills:4}]};let reads=0;
   const code=transformSync(readFileSync(new URL('../electron/report-worker.ts',import.meta.url),'utf8'),{loader:'ts',format:'cjs'}).code;
-  vm.runInNewContext(code,{process:{parentPort:port},require:name=>{
+  vm.runInNewContext(code,{process:{parentPort:port,on(){}},require:name=>{
     if(name==='@cs2-analyst/dem-parser')return {Demoparser2Provider:class {async parseWithReplay(){reads++;return {match:{id:'id',map:'map'},spatial:{},replay:{},replayUnavailableReason:null};}}};
     if(name==='./report.js')return {buildDesktopReport:()=>report};
     if(name==='./replay-session.ts')return {ReplaySession:class {constructor(){throw new Error('budget');}}};
     if(name==='../shared/replay-resource.ts')return {replayResourceId:'resource'};
+    if(name==='./heatmap-session.ts')return {createHeatmapSession:()=>({session:null,metadata:{available:false}})};
     throw new Error(name);
   }});
   port.emit('message',{data:{filePath:'local.dem',sessionId:'session'}});await new Promise(r=>setImmediate(r));

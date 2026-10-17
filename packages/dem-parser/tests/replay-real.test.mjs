@@ -4,7 +4,7 @@ import { existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 import { Demoparser2Provider } from '../dist/index.js';
-const file=process.env.REPLAY_TEST_FILE??fileURLToPath(new URL('../../../.demo/spirit-vs-faze-m3-dust2.dem',import.meta.url));
+const file=process.env.REPLAY_TEST_FILE??fileURLToPath(new URL('../../../.demo/dust2.dem',import.meta.url));
 const hash=value=>createHash('sha256').update(JSON.stringify(value)).digest('hex');
 test('explicit Dust2 replay shares unchanged Match/Spatial and produces exact bounded independent observations', {skip:!existsSync(file)?'Selected local replay DEM absent; no download':false},async()=>{
   const parser=new Demoparser2Provider();

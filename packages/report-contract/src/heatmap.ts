@@ -1,4 +1,4 @@
-/** Independent JSON-only protocol; no IPC/session or report schema change in P7.1. */
+/** Independent JSON-only statistical projection protocol. */
 export type HeatmapLayer = 'positions' | 'kills' | 'deaths';
 export type HeatmapResolution = 16 | 32 | 64;
 export interface HeatmapScope {
@@ -96,3 +96,35 @@ export interface MapHeatmapProjection {
   kills: HeatmapEvents | null;
   deaths: HeatmapEvents | null;
 }
+
+export type DesktopHeatmapScope = Omit<HeatmapScope, 'layers'>;
+export interface DesktopHeatmapLayerAvailability {
+  available: boolean;
+  unavailableReason: 'replay-unavailable' | 'spatial-unavailable' | 'initialization-failed' | 'memory-budget-exceeded' | 'session-ended' | null;
+}
+/** Source availability is independent from map alignment and selected event counts. */
+export interface DesktopHeatmapMetadata {
+  schemaVersion: 1;
+  sessionId: string;
+  matchId: string;
+  available: boolean;
+  unavailableReason: 'sources-unavailable' | 'initialization-failed' | 'memory-budget-exceeded' | 'session-ended' | null;
+  layers: Record<HeatmapLayer, DesktopHeatmapLayerAvailability>;
+  map: MapHeatmapProjection['map'];
+  samplingVersion: string | null;
+  resolutions: HeatmapResolution[];
+  /** Explicit selectable IDs allow Main and Worker to reject invented filters. */
+  playerIds: string[];
+  rounds: number[];
+  floors: string[];
+}
+export interface DesktopHeatmapRequest {
+  schemaVersion: 1;
+  sessionId: string;
+  layer: HeatmapLayer;
+  resolution: HeatmapResolution;
+  scope: DesktopHeatmapScope;
+}
+export type DesktopHeatmapResult =
+  | { kind: 'success'; sessionId: string; projection: MapHeatmapProjection }
+  | { kind: 'error'; message: string };

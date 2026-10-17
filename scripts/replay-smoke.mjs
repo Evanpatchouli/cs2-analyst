@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { existsSync,mkdirSync,mkdtempSync,readFileSync,readdirSync,writeFileSync } from 'node:fs';
+import { createReadStream,existsSync,mkdirSync,mkdtempSync,readFileSync,readdirSync,statSync,writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -90,7 +90,12 @@ const qa=join(root,'.tmp/p6-qa');mkdirSync(qa,{recursive:true});
 const resourceManifest=JSON.parse(readFileSync(join(root,'docs/replay-resources.json'),'utf8'));
 const expectedImages=resourceManifest.maps.flatMap(map=>map.images.map(image=>({prefix:`${map.map}${image.id==='default'?'':'_'+image.id}-`,...image})));
 if(broken)writeFileSync(join(qa,'broken.dem'),'synthetic corrupt input, not a real DEM fixture');
-const demo=broken?join(qa,'broken.dem'):join(root,nuke?'.demo/nuke.dem':'.demo/spirit-vs-faze-m3-dust2.dem');assert.ok(existsSync(demo),'Selected local DEM required; no downloads');
+const demo=broken?join(qa,'broken.dem'):join(root,nuke?'.demo/nuke.dem':'.demo/dust2.dem');assert.ok(existsSync(demo),'Selected local DEM required; no downloads');
+if(!broken&&!nuke){
+  assert.equal(statSync(demo).size,557650967);
+  const digest=createHash('sha256');for await(const chunk of createReadStream(demo))digest.update(chunk);
+  assert.equal(digest.digest('hex'),'db90fe85aab023a1d2c8a5996182e6120d98ef494f02a070b17982b235e4958c','Wrong local Dust2 bytes; no substitute');
+}
 const executableArgument=process.argv.slice(2).find(arg=>!arg.startsWith('--'));
 const installed=executableArgument?resolve(executableArgument):null;
 const executable=installed??require('electron');assert.ok(existsSync(executable));
@@ -143,7 +148,7 @@ try{
   const imported=await evaluate('(async()=>{const start=performance.now();window.__p6=await window.cs2Analyst.importDemo();return {result:window.__p6,totalMs:performance.now()-start};})()');
   assert.equal(imported.result.kind,'success');const report=imported.result.report,meta=report.replay;
   assert.equal(meta.available,true,meta.unavailableReason??'Replay unavailable');assert.equal(report.schemaVersion,2);assert.equal(meta.perspective,'global');
-  const {replay,...baseReport}=report;reportFingerprint=hash(baseReport);
+  const {replay,heatmap,...baseReport}=report;reportFingerprint=hash(baseReport);
   const processes=(await browser.send('SystemInfo.getProcessInfo')).processInfo;
   const osProcesses=(await processTree());
   const workerIds=osProcesses.filter(p=>!before.includes(p.Id)&&p.Role==='analysis-utility').map(p=>p.Id);

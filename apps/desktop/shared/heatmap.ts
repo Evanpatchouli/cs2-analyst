@@ -1,8 +1,7 @@
 import type { Match, MatchReplay, MatchSpatialEvidence, ReplayPlayerSample, Round, SpatialEvidence } from '@cs2-analyst/match-model';
 import type { HeatmapEvents, HeatmapGrid, HeatmapPositionObservations, HeatmapResolution, HeatmapScope, MapHeatmapProjection } from '@cs2-analyst/report-contract';
-// Existing module is pure numeric metadata/geometry: no React, Canvas, Electron or assets.
-import { replayMapDefinitions, resolveMapLayer, worldToRadar } from '../renderer/src/replay-map.ts';
-import type { ReplayMapDefinition } from '../renderer/src/replay-map.ts';
+import { replayMapDefinitions, resolveMapLayer, worldToRadar } from './replay-map-geometry.ts';
+import type { ReplayMapDefinition } from './replay-map-geometry.ts';
 
 const tick = (n: unknown): n is number => typeof n === 'number' && Number.isSafeInteger(n) && n >= 0;
 const xyz = (p: readonly number[] | null | undefined): p is [number, number, number] =>

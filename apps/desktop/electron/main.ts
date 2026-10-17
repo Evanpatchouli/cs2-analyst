@@ -2,7 +2,9 @@ import { app, BrowserWindow, dialog, ipcMain, utilityProcess } from 'electron';
 import { fileURLToPath } from 'node:url';
 import { extname, isAbsolute, join } from 'node:path';
 import { randomUUID } from 'node:crypto';
-import type { ImportPhase, ImportResult, DesktopReplayMetadata, DesktopReplayRequest, DesktopReplayResult } from '@cs2-analyst/report-contract';
+import type { ImportPhase, ImportResult, DesktopReplayMetadata, DesktopReplayRequest, DesktopReplayResult,
+  DesktopHeatmapMetadata, DesktopHeatmapRequest, DesktopHeatmapResult } from '@cs2-analyst/report-contract';
+import { HEATMAP_MAX_PENDING, HEATMAP_TIMEOUT_MS, validateHeatmapRequest, validateHeatmapResult } from '../shared/heatmap-ipc.ts';
 
 /** Replaced at build time by electron.vite.config.ts. False in production installers. */
 declare const __CS2_ANALYST_TEST_SEAM__: boolean;
@@ -11,13 +13,24 @@ let mainWindow: BrowserWindow | null = null;
 let importing = false;
 let activeWorker: Electron.UtilityProcess | null = null;
 let activeReplay: DesktopReplayMetadata | null = null;
+let activeHeatmap: DesktopHeatmapMetadata | null = null;
+let activeSessionId: string | null = null;
 let cancelActiveImport: (() => void) | null = null;
 let requestSequence = 0;
 const pendingChunks = new Map<number, { worker: Electron.UtilityProcess; request: DesktopReplayRequest; timer: ReturnType<typeof setTimeout>; resolve: (result: DesktopReplayResult) => void }>();
-function stopReplayWorker() {
-  const worker=activeWorker;activeWorker=null;activeReplay=null;
+const pendingHeatmaps = new Map<number, { worker: Electron.UtilityProcess; request: DesktopHeatmapRequest; timer: ReturnType<typeof setTimeout>; resolve: (result: DesktopHeatmapResult) => void }>();
+function stopAnalysisWorker() {
+  const worker=activeWorker;activeWorker=null;activeReplay=null;activeHeatmap=null;activeSessionId=null;
   for(const [id,pending] of pendingChunks){clearTimeout(pending.timer);pending.resolve({kind:'error',message:'回放会话已结束。'});pendingChunks.delete(id);}
-  worker?.removeAllListeners();worker?.kill();
+  for(const [id,pending] of pendingHeatmaps){clearTimeout(pending.timer);pending.resolve({kind:'error',message:'热力图会话已结束。'});pendingHeatmaps.delete(id);}
+  // Graceful clear when possible; process termination also drops every retained domain reference.
+  try { worker?.postMessage({kind:'session-release'}); } catch { /* Worker already exited. */ }
+  if(worker){
+    worker.removeAllListeners();
+    // kill() can return false before Utility Process spawn. Retire that late process too.
+    if(worker.pid===undefined)worker.once('spawn',()=>worker.kill());
+    worker.kill();
+  }
 }
 
 /** Only the current application's main frame can invoke privileged actions. */
@@ -37,8 +50,24 @@ ipcMain.handle('window:toggle-maximize', event => {
 ipcMain.handle('window:close', event => { trustedWindow(event)?.close(); });
 ipcMain.handle('window:is-maximized', event => trustedWindow(event)?.isMaximized() ?? false);
 ipcMain.handle('report:cancel', event => { if(trustedWindow(event)&&importing)cancelActiveImport?.(); });
-ipcMain.handle('replay:release', (event, sessionId:unknown) => {
-  if(trustedWindow(event)&&typeof sessionId==='string'&&sessionId===activeReplay?.sessionId)stopReplayWorker();
+const releaseSession = (event: Electron.IpcMainInvokeEvent, sessionId: unknown) => {
+  if(trustedWindow(event)&&typeof sessionId==='string'&&sessionId===activeSessionId){cancelActiveImport?.();stopAnalysisWorker();}
+};
+// Legacy release has always ended the analysis worker. Both APIs retain that ownership.
+ipcMain.handle('replay:release', releaseSession);
+ipcMain.handle('session:release', releaseSession);
+ipcMain.handle('heatmap:grid', (event, value: unknown): Promise<DesktopHeatmapResult> | DesktopHeatmapResult => {
+  const fail = (): DesktopHeatmapResult => ({kind:'error',message:'无效、不可用或已过期的热力图请求。'});
+  const metadata=activeHeatmap,worker=activeWorker;
+  if(!trustedWindow(event)||!metadata||!worker||!validateHeatmapRequest(value,metadata)||pendingHeatmaps.size>=HEATMAP_MAX_PENDING)return fail();
+  // Detach caller-owned arrays before correlating an asynchronous result.
+  const request:DesktopHeatmapRequest=JSON.parse(JSON.stringify(value));
+  return new Promise(resolve=>{
+    const id=++requestSequence,timer=setTimeout(()=>{pendingHeatmaps.delete(id);resolve({kind:'error',message:'热力图请求超时。'});},HEATMAP_TIMEOUT_MS);
+    pendingHeatmaps.set(id,{worker,request,timer,resolve});
+    try {worker.postMessage({kind:'heatmap-grid',requestId:id,request});}
+    catch {clearTimeout(timer);pendingHeatmaps.delete(id);resolve(fail());}
+  });
 });
 ipcMain.handle('replay:chunk', (event, value:unknown): Promise<DesktopReplayResult>|DesktopReplayResult => {
   const fail=():DesktopReplayResult=>({kind:'error',message:'无效或已过期的回放请求。'});
@@ -70,26 +99,39 @@ function injectedDemoPath(): string | undefined {
 }
 
 function analyzeDemo(filePath: string, window: BrowserWindow): Promise<ImportResult> {
-  stopReplayWorker();
+  stopAnalysisWorker();
   return new Promise(resolve => {
     const sessionId=randomUUID();
     const worker = utilityProcess.fork(fileURLToPath(new URL('./report-worker.js', import.meta.url)), [], { serviceName: 'CS2 DEM Analysis' });
     activeWorker = worker;
+    activeSessionId = sessionId;
     let settled = false;
     const finish = (result: ImportResult, retain = false) => {
       if (settled) return;
       settled = true;
       clearTimeout(timeout);
       if(cancelActiveImport===cancel)cancelActiveImport=null;
-      if(!retain&&activeWorker===worker)stopReplayWorker();
+      if(!retain&&activeWorker===worker)stopAnalysisWorker();
       resolve(result);
     };
     const cancel=()=>finish({kind:'cancelled'});
     cancelActiveImport=cancel;
     const timeout = setTimeout(() => finish({ kind: 'error', message: '分析超时（10 分钟）。请重新选择 DEM。' }), 10 * 60_000);
-    worker.on('spawn', () => worker.postMessage({ filePath, sessionId }));
+    worker.on('spawn', () => {
+      if(activeWorker!==worker||settled){worker.kill();return;}
+      worker.postMessage({ filePath, sessionId });
+    });
     worker.on('message', (message) => {
       if(activeWorker!==worker)return;
+      if(!message||typeof message!=='object')return;
+      if(message.kind==='heatmap-grid'){
+        const pending=pendingHeatmaps.get(message.requestId);if(!pending||pending.worker!==worker)return;
+        clearTimeout(pending.timer);pendingHeatmaps.delete(message.requestId);
+        // Every recognized reply ends its Promise, including malformed/error replies.
+        let valid=false;
+        try {valid=activeHeatmap!==null&&validateHeatmapResult(message.result,pending.request,activeHeatmap);}catch { /* Non-JSON/malformed worker reply. */ }
+        pending.resolve(valid?message.result:{kind:'error',message:'热力图响应无效或超过大小限制。'});return;
+      }
       if(message.kind==='replay-chunk'){
         const pending=pendingChunks.get(message.requestId);if(!pending||pending.worker!==worker)return;
         const result=message.result as DesktopReplayResult;
@@ -105,11 +147,15 @@ function analyzeDemo(filePath: string, window: BrowserWindow): Promise<ImportRes
         if (!window.isDestroyed()) window.webContents.send('report:progress', 'analyzing');
       } else if (message.kind === 'success') {
         const metadata=message.report?.replay as DesktopReplayMetadata|undefined;
-        const retain=metadata?.available===true&&metadata.sessionId===sessionId;
-        activeReplay=retain?metadata!:null;finish(message,retain);
+        const heatmap=message.report?.heatmap as DesktopHeatmapMetadata|undefined;
+        const replayAvailable=metadata?.available===true&&metadata.sessionId===sessionId;
+        const heatmapAvailable=heatmap?.available===true&&heatmap.sessionId===sessionId;
+        activeReplay=replayAvailable?metadata!:null;
+        activeHeatmap=heatmapAvailable?heatmap!:null;
+        finish(message,replayAvailable||heatmapAvailable);
       } else if(message.kind==='error')finish(message);
     });
-    worker.on('exit', () => { if(!settled)finish({ kind: 'error', message: '分析进程意外退出。请重新选择 DEM。' });else if(activeWorker===worker)stopReplayWorker(); });
+    worker.on('exit', () => { if(!settled)finish({ kind: 'error', message: '分析进程意外退出。请重新选择 DEM。' });else if(activeWorker===worker)stopAnalysisWorker(); });
   });
 }
 
@@ -197,7 +243,7 @@ async function createWindow() {
   window.on('unmaximize', maximizedChanged);
 
   mainWindow.on('closed', () => {
-    cancelActiveImport?.();stopReplayWorker();
+    cancelActiveImport?.();stopAnalysisWorker();
     mainWindow = null;
   });
   mainWindow.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));

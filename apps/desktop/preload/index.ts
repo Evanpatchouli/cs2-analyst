@@ -28,6 +28,8 @@ const api: DesktopApi = {
     getChunk: request => ipcRenderer.invoke('replay:chunk', { sessionId:request.sessionId,round:request.round,block:request.block }),
     release: sessionId => ipcRenderer.invoke('replay:release',sessionId),
   },
+  session: { release: sessionId => ipcRenderer.invoke('session:release',sessionId) },
+  heatmap: { getGrid: request => ipcRenderer.invoke('heatmap:grid',request) },
   onProgress: (listener) => {
     const handler = (_event: Electron.IpcRendererEvent, phase: ImportPhase) => listener(phase);
     ipcRenderer.on('report:progress', handler);
