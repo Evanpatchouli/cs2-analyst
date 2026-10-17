@@ -28,18 +28,18 @@ const { Sidebar } = await import('../renderer/src/sidebar.tsx');
 const render = element => renderToStaticMarkup(createElement(SSRProvider, null, element));
 const noop = () => {};
 
-test('sidebar lists the five report views in order and disables them before a match is loaded', () => {
+test('sidebar lists the six report views in order and disables them before a match is loaded', () => {
   const html = render(createElement(Sidebar, { reportReady: false, busy: false, collapsed: false, activeView: 'report',
     importLabel: '选择 DEM', onSelectView: noop, onToggleCollapsed: noop, onImport: noop }));
   assert.ok(html.includes('data-app-sidebar'), '侧边栏缺少桌面导航容器');
   assert.ok(html.includes('data-collapsed="false"'), '展开态标记缺失');
   assert.deepEqual([...html.matchAll(/id="([a-z-]+-tab)"/g)].map(match => match[1]),
-    ['report-tab', 'deep-review-tab', 'timeline-tab', 'analysis-tab', 'replay-tab']);
-  const labels = ['比赛报告', '深度复盘', '回合时间线', '分析', '地图回放'];
+    ['report-tab', 'deep-review-tab', 'timeline-tab', 'analysis-tab', 'replay-tab', 'heatmap-tab']);
+  const labels = ['比赛报告', '深度复盘', '回合时间线', '分析', '地图回放', '热力图'];
   for (const label of labels) assert.ok(html.includes(label), '导航缺少 ' + label);
-  assert.equal([...html.matchAll(/role="tab"/g)].length, 5);
-  assert.equal([...html.matchAll(/aria-controls="/g)].length, 5, '每个导航项都要指向自己的面板');
-  assert.equal([...html.matchAll(/disabled/g)].length >= 5, true, '未导入时导航项应不可用');
+  assert.equal([...html.matchAll(/role="tab"/g)].length, 6);
+  assert.equal([...html.matchAll(/aria-controls="/g)].length, 6, '每个导航项都要指向自己的面板');
+  assert.equal([...html.matchAll(/disabled/g)].length >= 6, true, '未导入时导航项应不可用');
   assert.ok(html.includes('data-sidebar-toggle'), '缺少展开/折叠按钮');
   assert.ok(html.includes('aria-label="收起导航"'), '展开态按钮应提示收起');
   assert.ok(html.includes('data-sidebar-import'), '侧边栏缺少导入入口');
@@ -49,7 +49,7 @@ test('collapsed sidebar keeps every icon and hides the text labels from assistiv
   const html = render(createElement(Sidebar, { reportReady: true, busy: false, collapsed: true, activeView: 'replay',
     importLabel: '重新选择 DEM', onSelectView: noop, onToggleCollapsed: noop, onImport: noop }));
   assert.ok(html.includes('data-collapsed="true"'), '折叠态标记缺失');
-  assert.equal([...html.matchAll(/role="tab"/g)].length, 5, '折叠态仍要保留 5 个导航项');
+  assert.equal([...html.matchAll(/role="tab"/g)].length, 6, '折叠态仍要保留 6 个导航项');
   assert.equal([...html.matchAll(/disabled/g)].length, 0, '已导入后导航项必须可用');
   assert.ok(html.includes('aria-label="展开导航"'), '折叠态按钮应提示展开');
   assert.equal(html.includes('>收起导航<'), false, '折叠态不应再渲染文字标签');

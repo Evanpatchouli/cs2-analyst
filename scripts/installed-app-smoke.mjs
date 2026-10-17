@@ -1,12 +1,14 @@
 import { checkReportUx } from './report-ux-checks.mjs';
 import { checkDeepReviewUx } from './deep-review-ux-checks.mjs';
+import { checkHeatmapUx } from './heatmap-ux-checks.mjs';
+import { dust2File, verifyDust2 } from '../apps/desktop/tests/heatmap-real-fixture.mjs';
 import { checkWindowShell } from './window-shell-checks.mjs';
 import { checkWindowsInstallBranding } from './windows-branding-checks.mjs';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
 import nativeParser from '../packages/demoparser-native/index.cjs';
 import { spawn } from 'node:child_process';
-import { closeSync, copyFileSync, existsSync, mkdirSync, openSync, readFileSync, readdirSync, readSync, statSync, writeFileSync } from 'node:fs';
+import { closeSync, existsSync, mkdirSync, openSync, readFileSync, readdirSync, readSync, statSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:net';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -232,6 +234,22 @@ async function clickSelectDemo(session) {
 
 async function closeGracefully(session) { return closeApp(session); }
 
+/** Exercise the existing store's disk-File entry with a mounted report, without copying/mutating a private DEM. */
+async function importReportDiskFile(session, filePath) {
+  await withCleanup(async () => {
+    await session.evaluate(`(() => {const i=document.createElement('input');i.id='qa-report-file';i.type='file';i.hidden=true;document.body.append(i);})()`);
+    const { root } = await session.send('DOM.getDocument');
+    const { nodeId } = await session.send('DOM.querySelector', { nodeId: root.nodeId, selector: '#qa-report-file' });
+    await session.send('DOM.setFileInputFiles', { nodeId, files: [filePath] });
+    await session.evaluate(`(async() => {
+      const node=document.querySelector('main');let root=node[Object.keys(node).find(k=>k.startsWith('__reactFiber$'))];while(root.return)root=root.return;
+      const visit=f=>{if(!f)return null;for(let h=f.memoizedState;h;h=h.next)if(typeof h.memoizedState?.importDroppedFile==='function')return h.memoizedState;return visit(f.child)??visit(f.sibling);};
+      const state=visit(root.stateNode.current);if(!state)throw new Error('Mounted report store not found');
+      await state.importDroppedFile(document.getElementById('qa-report-file').files[0]);
+    })()`);
+  }, [() => session.evaluate(`document.getElementById('qa-report-file')?.remove()`)]);
+}
+
 // ---------------------------------------------------------------- checks
 
 function checkInstalledLayout(variant, expectSeam) {
@@ -372,6 +390,19 @@ async function productionScenario() {
     await closeGracefully(disk);
     await waitFor(async () => (await appProcesses()).length === 0, 20_000, 'production disk File worker cleanup');
     console.log(variant.label + '：真实磁盘 File、非 DEM 拒绝与恢复、报告和进程清理通过（CDP File，非 Explorer）');
+    // Production uses the existing disk-backed File import; no DEM-path environment seam.
+    const heatmap = await launchSession(exe, {}, variant.label + '（Dust2 热力图磁盘 File）');
+    await dropDiskFile(heatmap, dust2File);
+    await waitFor(() => heatmap.evaluate(`document.querySelector('main').dataset.status==='success'`), 120_000, 'production Dust2 File import');
+    const heatmapQa = join(workDir, 'heatmap-production'); mkdirSync(heatmapQa);
+    const result = await checkHeatmapUx(heatmap.evaluate, heatmap.send, { qaDir: heatmapQa, expectedDust2: true });
+    writeFileSync(join(workDir, 'production-heatmap.json'), JSON.stringify(result, null, 2));
+    await heatmap.evaluate(`document.getElementById('replay-tab').click()`);
+    await waitFor(() => heatmap.evaluate(`Number(document.querySelector('#replay-panel canvas[role=img]')?.dataset.playerCount)>0`), 15_000, 'production Replay preserved after heatmap');
+    assert.deepEqual(heatmap.errors, []);
+    await closeGracefully(heatmap);
+    await waitFor(async () => (await appProcesses()).length === 0, 20_000, 'production heatmap worker cleanup');
+    audit({ stage: 'production-heatmap', status: 'PASS', cases: result.cases.length });
   }, [() => killAppProcesses(), () => uninstall(variant), () => killAppProcesses()]);
 }
 
@@ -384,9 +415,7 @@ async function testSeamScenario() {
     const exe = join(variant.installDir, APP_EXE);
 
     // 3. 真实 demo1.dem 全链路报告。
-    const ownedDemo = join(workDir, 'reimport.dem');
-    copyFileSync(demo, ownedDemo);
-    const session = await launchSession(exe, { CS2_ANALYST_TEST_DEM_PATH: ownedDemo }, variant.label);
+    const session = await launchSession(exe, { CS2_ANALYST_TEST_DEM_PATH: demo }, variant.label);
     await clickSelectDemo(session);
     const body = await waitFor(async () => {
       const text = await session.evaluate('document.body.textContent');
@@ -401,7 +430,7 @@ async function testSeamScenario() {
     assert.equal(findingCount, 5, 'twinkle 应显示 5 条 Findings');
     assert.equal(await session.evaluate(`document.getElementById('report-tab').getAttribute('aria-selected')`), 'true');
     assert.equal(await session.evaluate(`document.getElementById('report-panel').hidden`), false);
-    assert.equal(await session.evaluate(`document.querySelectorAll('[role="tab"]').length`), 5);
+    assert.equal(await session.evaluate(`document.querySelectorAll('[role="tab"]').length`), 6);
     await checkDeepReviewUx(session.evaluate, session.send);
     await session.evaluate(`[...document.querySelectorAll('button')].find(b => b.textContent.trim() === '查看 R24').click()`);
     await waitFor(async () => session.evaluate(`!document.getElementById('timeline-panel').hidden`), 10_000, '安装版 Finding 切换 Timeline');
@@ -429,16 +458,14 @@ async function testSeamScenario() {
     await session.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
     await session.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
     const previousPlayer = await session.evaluate(`document.querySelector('[aria-label="目标玩家"]').textContent`);
-    writeFileSync(ownedDemo, 'owned corrupt reimport fixture');
-    await clickSelectDemo(session);
+    await importReportDiskFile(session, brokenDemo);
     await waitFor(() => session.evaluate(`document.querySelector('main').dataset.status==='error'&&document.body.textContent.includes('无法分析此 DEM')`), 60_000, 'failed reimport error with old report');
     assert.equal(await session.evaluate(`document.querySelector('[aria-label="目标玩家"]').textContent`), previousPlayer);
-    assert.equal(await session.evaluate(`document.querySelectorAll('[role=tab]').length`), 5, 'old report remains mounted');
+    assert.equal(await session.evaluate(`document.querySelectorAll('[role=tab]').length`), 6, 'old report remains mounted');
     assert.ok(await session.evaluate(`document.body.textContent.includes('25 / 20 / 4')`));
     await session.evaluate(`document.getElementById('replay-tab').click()`);
     await waitFor(() => session.evaluate(`document.getElementById('replay-panel').textContent.includes('上一次回放会话已结束')`), 10_000, 'failed import retires old replay session');
     await waitFor(async () => !(await appProcesses()).some(p => p.commandLine?.includes('node.mojom.NodeService')), 20_000, 'failed reimport worker cleanup');
-    copyFileSync(demo, ownedDemo);
     await clickSelectDemo(session);
     await waitFor(() => session.evaluate(`document.querySelector('main').dataset.status==='success'&&document.getElementById('report-tab').getAttribute('aria-selected')==='true'`), 120_000, 'successful recovery after corrupt reimport');
     console.log(variant.label + '：导入失败保留旧报告和玩家、旧回放失效、worker 释放及重新导入恢复通过');
@@ -448,6 +475,19 @@ async function testSeamScenario() {
     assert.equal(exitCode, 0, '关闭窗口后应用未正常退出');
     await waitFor(async () => (await appProcesses()).length === 0, 20_000, '分析结束后无残留进程');
     console.log(variant.label + '：demo1 报告与开发环境一致（twinkle 25/20/4、ADR 91.38、KAST 75%、Trade 22.2%、R24 1v3 win、5 条 Findings）');
+    const heatmap = await launchSession(exe, { CS2_ANALYST_TEST_DEM_PATH: dust2File }, variant.label + '（Dust2 热力图）');
+    await clickSelectDemo(heatmap);
+    await waitFor(() => heatmap.evaluate(`document.querySelector('main').dataset.status==='success'`), 120_000, 'test-seam Dust2 import');
+    const heatmapQa = join(workDir, 'heatmap-test-seam'); mkdirSync(heatmapQa);
+    const heatmapResult = await checkHeatmapUx(heatmap.evaluate, heatmap.send, { qaDir: heatmapQa, expectedDust2: true });
+    writeFileSync(join(workDir, 'test-seam-heatmap.json'), JSON.stringify(heatmapResult, null, 2));
+    const oldSession = await heatmap.evaluate(`document.querySelector('[data-heatmap-session]').dataset.heatmapSession`);
+    await clickSelectDemo(heatmap);
+    await waitFor(() => heatmap.evaluate(`document.querySelector('main').dataset.status==='success'&&document.getElementById('report-tab').getAttribute('aria-selected')==='true'&&document.querySelector('[data-heatmap-session]').dataset.heatmapSession!==${JSON.stringify(oldSession)}`), 120_000, 'installed heatmap session replacement');
+    assert.equal(await heatmap.evaluate(`document.querySelectorAll('#heatmap-panel button[aria-pressed=false]').length`), 3);
+    assert.deepEqual(heatmap.errors, []); await closeGracefully(heatmap);
+    await waitFor(async () => (await appProcesses()).length === 0, 20_000, 'test-seam heatmap worker cleanup');
+    audit({ stage: 'test-seam-heatmap', status: 'PASS', cases: heatmapResult.cases.length, replacement: 'PASS' });
 
     // 4. 分析进行中关闭应用不得残留 analysis worker。
     await killAppProcesses();
@@ -486,6 +526,7 @@ export { install, uninstall, launchSession, closeGracefully, clickSelectDemo, ch
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === resolve(process.argv[1])) {
   assert.ok(existsSync(demo), '缺少测试 DEM：' + demo);
+  await verifyDust2();
   await prepareRun();
   // SIGINT/SIGTERM use the same owned-only cleanup; evidence survives interruption.
   let interrupted = false;

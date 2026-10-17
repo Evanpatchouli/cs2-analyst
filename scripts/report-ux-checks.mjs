@@ -17,8 +17,8 @@ export async function checkReportUx(evaluate, send, qaDir) {
   await send('Emulation.setFocusEmulationEnabled', { enabled: true });
   await evaluate(`document.getElementById('report-tab').click()`);
   await settle();
-  assert.deepEqual(await evaluate(`[...document.querySelectorAll('[role="tab"]')].map(t => t.querySelector('.fui-Tab__content').textContent)`), ['比赛报告', '深度复盘', '回合时间线', '分析', '地图回放']);
-  assert.equal(await evaluate(`document.querySelectorAll('[role="tabpanel"]').length`), 5);
+  assert.deepEqual(await evaluate(`[...document.querySelectorAll('[role="tab"]')].map(t => t.querySelector('.fui-Tab__content').textContent)`), ['比赛报告', '深度复盘', '回合时间线', '分析', '地图回放', '热力图']);
+  assert.equal(await evaluate(`document.querySelectorAll('[role="tabpanel"]').length`), 6);
   assert.equal(await evaluate(`document.getElementById('report-panel').hidden`), false);
   await checkSidebarImport(evaluate, send, '重新选择 DEM');
   await evaluate(`document.querySelector('[data-sidebar-toggle]').click()`);

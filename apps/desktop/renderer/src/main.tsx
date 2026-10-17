@@ -21,6 +21,7 @@ import { Home } from './home';
 import { Sidebar } from './sidebar';
 import type { ViewId } from './sidebar';
 import { ReplayPlayer } from './replay-player';
+import { HeatmapView } from './heatmap-view';
 import type { ReplayJump } from './replay-player';
 
 /** One surface for every card on the page: same background, same weak border, same radius, no shadows. */
@@ -416,6 +417,9 @@ function Report({ report, playerId, replayActive, activeTab, onSelectView }: {
         {replayNotice?<Caption1>{replayNotice}</Caption1>:null}
         {report.replay?<ReplayPlayer key={report.replay.sessionId??'unavailable'} metadata={report.replay} playerId={playerId} onSelectPlayer={selectPlayer} active={activeTab==='replay'&&replayActive} jump={replayJump}/>:<Body1>此报告没有可用回放会话。</Body1>}
       </>}
+    </div>
+    <div id="heatmap-panel" role="tabpanel" aria-labelledby="heatmap-tab" className={s.replayPanel} hidden={activeTab !== 'heatmap'}>
+      <HeatmapView key={report.heatmap?.sessionId ?? 'unavailable'} metadata={report.heatmap} players={report.players} active={activeTab === 'heatmap'} sessionActive={replayActive} />
     </div>
   </div>;
 }

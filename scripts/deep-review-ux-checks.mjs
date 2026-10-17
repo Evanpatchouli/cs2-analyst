@@ -19,8 +19,8 @@ export async function checkDeepReviewUx(evaluate, send, qaDir) {
   // 比赛报告 is the default entry; Deep Review must be explicitly reachable from it.
   await evaluate(`document.getElementById('deep-review-tab').click()`);
   await settle();
-  assert.deepEqual(await evaluate(`[...document.querySelectorAll('[role="tab"]')].map(t => t.querySelector('.fui-Tab__content').textContent)`), ['比赛报告', '深度复盘', '回合时间线', '分析', '地图回放']);
-  assert.equal(await evaluate(`document.querySelectorAll('[role="tabpanel"]').length`), 5);
+  assert.deepEqual(await evaluate(`[...document.querySelectorAll('[role="tab"]')].map(t => t.querySelector('.fui-Tab__content').textContent)`), ['比赛报告', '深度复盘', '回合时间线', '分析', '地图回放', '热力图']);
+  assert.equal(await evaluate(`document.querySelectorAll('[role="tabpanel"]').length`), 6);
   await assertNoPageScroll(evaluate, '深度复盘初始导航');
   // Find the actual report consumed by this Renderer. Fixtures mutate only this QA process.
   assert.equal(await evaluate(`(() => {

@@ -11,11 +11,12 @@ import { fileURLToPath } from 'node:url';
 import { Demoparser2Provider } from '../packages/dem-parser/dist/index.js';
 import { projectMapHeatmap } from '../apps/desktop/shared/heatmap.ts';
 import { dust2File, dust2Sha, jsonHash, realHeatmapRequests, verifyDust2 } from '../apps/desktop/tests/heatmap-real-fixture.mjs';
+import { checkHeatmapUx, heatmapSnapshotExpression } from './heatmap-ux-checks.mjs';
 import { closeApp, connectCdp, waitFor, withCleanup } from './smoke-runtime.mjs';
 import { ProcessScope } from './installed-smoke-lifecycle.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url)), desktop = join(root, 'apps/desktop');
-const qa = process.env.HEATMAP_QA_DIR ?? join(root, '.tmp/p72-qa');
+const qa = process.env.HEATMAP_QA_DIR ?? join(root, '.tmp/p73-qa');
 mkdirSync(qa, { recursive: true });
 assert.ok(existsSync(dust2File), 'BLOCKED: local .demo/dust2.dem missing; no download/substitute');
 assert.ok(existsSync(join(desktop, 'dist/electron/main.js')), 'Build the desktop before this smoke');
@@ -28,18 +29,21 @@ const server = createServer();
 await new Promise(resolvePort => server.listen(0, '127.0.0.1', resolvePort));
 const port = server.address().port;
 await new Promise(resolvePort => server.close(resolvePort));
-const profilePrefix = join(tmpdir(), 'cs2-analyst-p72-profile-'), profile = mkdtempSync(profilePrefix);
+await new Promise(resolvePort => server.listen(0, '127.0.0.1', resolvePort));
+const inspectorPort = server.address().port;
+await new Promise(resolvePort => server.close(resolvePort));
+const profilePrefix = join(tmpdir(), 'cs2-analyst-p73-profile-'), profile = mkdtempSync(profilePrefix);
 const env = { ...process.env, CS2_ANALYST_DEM_PATH: dust2File };
 delete env.ELECTRON_RUN_AS_NODE; delete env.ELECTRON_RENDERER_URL;
 const startedAt = Date.now();
-const child = spawn(require('electron'), ['.', `--remote-debugging-port=${port}`, `--user-data-dir=${profile}`,
+const child = spawn(require('electron'), ['.', `--remote-debugging-port=${port}`, `--inspect=${inspectorPort}`, `--user-data-dir=${profile}`,
   '--disable-features=CalculateNativeWinOcclusion', '--disable-backgrounding-occluded-windows'], {
   cwd: desktop, env, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'],
 });
-const scope = new ProcessScope(), tracked = scope.track(child, 'P7.2 heatmap built Electron', startedAt);
-let logs = '', page, failure;
+const scope = new ProcessScope(), tracked = scope.track(child, 'P7.3 heatmap built Electron', startedAt);
+let logs = '', page, inspector, failure;
 child.stdout.on('data', data => { logs += data; }); child.stderr.on('data', data => { logs += data; });
-const metrics = { stage: 'P7.2', fixture: '.demo/dust2.dem', fixtureSha256: dust2Sha, fixtureBytes: 557650967,
+const metrics = { stage: 'P7.3', fixture: '.demo/dust2.dem', fixtureSha256: dust2Sha, fixtureBytes: 557650967,
   environment: { node: process.version, platform: process.platform, arch: process.arch, cpu: cpus()[0]?.model },
   method: 'Built Electron, real contextBridge/Main/Utility IPC, one timed call per case and five cached repeats. Times are individual observations, not p95. OS working set snapshots use scoped Win32_Process identity. No GC is forced inside Electron. A separate --expose-gc session test measures source-retention/cache/release stages.',
   requests: [], memory: [] };
@@ -53,7 +57,12 @@ async function liveWait(probe, label, timeout = 30_000) {
 }
 async function memory(label) {
   const workers = await utilityProcesses();
-  metrics.memory.push({ label, workers: workers.map(p => ({ pid: p.pid, created: p.created, workingSet: p.workingSet, peakWorkingSet: p.peakWorkingSet })) });
+  const rendererLive = page && child.exitCode === null && page.socket.readyState === WebSocket.OPEN;
+  metrics.memory.push({ label,
+    processes: (await scope.live()).map(p=>({pid:p.pid,name:p.name,workingSet:p.workingSet,peakWorkingSet:p.peakWorkingSet})),
+    renderer: rendererLive ? await page.send('Runtime.getHeapUsage') : null,
+    canvas: rendererLive ? await page.evaluate(`(() => {const c=document.querySelector('#heatmap-panel canvas');return c?{count:document.querySelectorAll('#heatmap-panel canvas').length,width:c.width,height:c.height,dpr:devicePixelRatio,pixelBytes:c.width*c.height*4}:null;})()`) : null,
+    workers: workers.map(p => ({ pid: p.pid, created: p.created, workingSet: p.workingSet, peakWorkingSet: p.peakWorkingSet })) });
   return workers;
 }
 try {
@@ -67,13 +76,15 @@ try {
   const exceptions = [];
   page.socket.addEventListener('message', e => { const message = JSON.parse(e.data); if (message.method === 'Runtime.exceptionThrown') exceptions.push(message.params); });
   await page.send('Runtime.enable');
+  page.socket.addEventListener('message', e => { const m=JSON.parse(e.data); if(m.method==='Runtime.consoleAPICalled'&&m.params.type==='error')console.error('Renderer console:',JSON.stringify(m.params.args)); });
   await liveWait(() => evaluate('Boolean(window.cs2Analyst?.heatmap&&window.cs2Analyst?.session&&document.querySelector("main"))'), 'typed preload API');
   assert.equal(await evaluate('typeof window.require'), 'undefined');
   await memory('before-import-no-utility');
-  await evaluate('window.__p72ImportStart=performance.now();window.__p72Import=window.cs2Analyst.importDemo();void 0');
+  await evaluate(`window.__p73ImportStart=performance.now();document.querySelector('[data-sidebar-import]').click()`);
   await liveWait(async () => (await utilityProcesses()).length > 0, 'Utility spawn');
   await memory('utility-observed-during-import');
-  const imported = await evaluate('(async()=>({result:await window.__p72Import,ms:performance.now()-window.__p72ImportStart}))()');
+  await liveWait(()=>evaluate(`document.querySelector('main').dataset.status==='success'`),'actual Renderer import',120_000);
+  const imported = await evaluate(`({result:{kind:'success',report:(()=>{let f=document.getElementById('heatmap-panel')[Object.keys(document.getElementById('heatmap-panel')).find(k=>k.startsWith('__reactFiber$'))];while(f&&!f.memoizedProps?.report)f=f.return;return f.memoizedProps.report;})()},ms:performance.now()-window.__p73ImportStart})`);
   assert.equal(imported.result.kind, 'success');
   const report = imported.result.report, metadata = report.heatmap;
   assert.equal(report.schemaVersion, 2); assert.equal(metadata.available, true);
@@ -102,6 +113,17 @@ try {
   metrics.filteredBatchWallMs = performance.now() - filteredBatchStart;
   metrics.filteredIpcTotalMs = metrics.requests.reduce((total, item) => total + item.ipcMs, 0);
   console.log(JSON.stringify({ stage: 'heatmap-real-ipc', count: metrics.requests.length, totalIpcMs: metrics.filteredIpcTotalMs }));
+  // Opt-in QA inspector observes the existing Main handler; its validation and limits remain intact.
+  const inspectorTarget = await liveWait(async()=>{try{return (await (await fetch(`http://127.0.0.1:${inspectorPort}/json/list`,{signal:AbortSignal.timeout(1000)})).json())[0];}catch{return null;}}, 'Main QA inspector');
+  inspector = await connectCdp(inspectorTarget.webSocketDebuggerUrl);
+  await inspector.evaluate(`(() => {const {ipcMain}=process.getBuiltinModule('node:module').createRequire(${JSON.stringify(join(desktop,'package.json'))})('electron');const original=ipcMain._invokeHandlers.get('heatmap:grid');if(!original)throw new Error('Heatmap handler missing');globalThis.__qaHeatmapTraffic={active:0,max:0,requests:[]};ipcMain.removeHandler('heatmap:grid');ipcMain.handle('heatmap:grid',async(event,request)=>{const q=globalThis.__qaHeatmapTraffic,start=performance.now();q.active++;q.max=Math.max(q.max,q.active);try{const result=await original(event,request);q.requests.push({request,kind:result.kind,ms:performance.now()-start});return result;}finally{q.active--;}});globalThis.__qaRestoreHeatmap=()=>{ipcMain.removeHandler('heatmap:grid');ipcMain.handle('heatmap:grid',original);};})()`);
+  await withCleanup(async()=>{
+    metrics.ui = await checkHeatmapUx(evaluate, page.send, {qaDir:qa, expectedDust2:true, full:true, memory, direct:request=>projectMapHeatmap(parsed.match,parsed.replay,parsed.spatial,{...request.scope,resolution:request.resolution,layers:[request.layer]})});
+    metrics.ui.traffic=await inspector.evaluate('globalThis.__qaHeatmapTraffic');
+    assert.equal(metrics.ui.traffic.max,2,'Actual Renderer/Main in-flight peak');
+    assert.equal(metrics.ui.traffic.active,0);
+  },[()=>inspector.evaluate('globalThis.__qaRestoreHeatmap();delete globalThis.__qaRestoreHeatmap;delete globalThis.__qaHeatmapTraffic')]);
+  inspector.socket.close(); inspector = null;
   parsed = null;
   const cachedRequest = cases.find(c => c.label === 'positions-32').request;
   const cachedHash = metrics.requests.find(c => c.label === 'positions-32').projectionHash;
@@ -140,7 +162,19 @@ try {
   assert.equal((await evaluate(`window.cs2Analyst.heatmap.getGrid(${JSON.stringify(secondRequest)})`)).kind, 'error');
   await liveWait(async () => (await utilityProcesses()).length === 0, 'released Utility exits');
   await memory('released-no-utility');
-  await evaluate('window.__p72ClosingImport=window.cs2Analyst.importDemo();void 0');
+  // Exercise replacement and session-ended UI through the real store, rather than API calls alone.
+  await evaluate(`document.querySelector('[data-sidebar-import]').click()`);
+  await liveWait(() => evaluate(`document.querySelector('main')?.dataset.status==='success'&&document.querySelector('[data-heatmap-session]')?.dataset.heatmapSession!==${JSON.stringify(metadata.sessionId)}`), 'UI recovery and fresh session', 120_000);
+  assert.equal(await evaluate(`document.getElementById('report-tab').getAttribute('aria-selected')`), 'true');
+  assert.equal(await evaluate(`document.querySelectorAll('#heatmap-panel button[aria-pressed=false]').length`), 3);
+  await memory('after-ui-session-replacement');
+  await evaluate(`document.getElementById('heatmap-tab').click();document.querySelector('#heatmap-panel button[aria-label="玩家位置密度"]').click()`);
+  await liveWait(() => evaluate(`Boolean(document.querySelector('[data-heatmap-stats=positions]'))`), 'replacement UI layer');
+  await evaluate(`window.cs2Analyst.session.release(document.querySelector('[data-heatmap-session]').dataset.heatmapSession)`);
+  await evaluate(`(() => {const s=document.querySelector('[aria-label="热力图阵营"]');s.value='CT';s.dispatchEvent(new Event('change',{bubbles:true}));})()`);
+  await liveWait(() => evaluate(`!document.querySelector('#heatmap-panel .fui-Spinner')&&[...document.querySelectorAll('#heatmap-panel button')].some(b=>b.textContent==='重试')&&!document.querySelector('[data-heatmap-stats]')`), 'ended-session request error terminates loading');
+  metrics.sessionEndedUi = 'PASS: current request errors, no Spinner or stale statistics';
+  await evaluate(`document.querySelector('[data-sidebar-import]').click()`);
   await liveWait(async () => (await utilityProcesses()).length > 0, 'Utility before close during import');
   await closeApp({ child, evaluate, socket: page.socket });
   await waitFor(async () => (await utilityProcesses()).length === 0, 30_000, 'no orphan Utility after close');
@@ -150,12 +184,14 @@ try {
   metrics.timeout = 'Controlled timeout/fault injection belongs to runtime IPC tests; no timeout was manufactured in this actual Electron run.';
   metrics.status = 'PASS';
 } catch (error) {
-  failure = new Error(`P7.2 built Electron heatmap smoke failed\n${logs}`, { cause: error });
+  failure = new Error(`P7.3 built Electron heatmap smoke failed\n${logs}`, { cause: error });
   metrics.status = 'FAIL'; metrics.error = String(error.stack ?? error);
+  if(page)try{writeFileSync(join(qa,'failure-state.json'),JSON.stringify({text:await page.evaluate('document.body.innerText'),state:await page.evaluate(heatmapSnapshotExpression)},null,2));const shot=await page.send('Page.captureScreenshot',{format:'png'});writeFileSync(join(qa,'failure.png'),Buffer.from(shot.data,'base64'));}catch{}
+  if(page&&child.exitCode===null)try{await closeApp({child,evaluate:page.evaluate,socket:page.socket});}catch{}
 } finally {
   writeFileSync(join(qa, 'heatmap-electron.json'), JSON.stringify(metrics, null, 2) + '\n');
   await withCleanup(() => { if (failure) throw failure; }, [
-    () => page?.socket.close(), () => scope.cleanup(),
+    () => { page?.socket.close(); inspector?.socket.close(); }, () => scope.cleanup(),
     async () => { assert.ok(resolve(profile).startsWith(resolve(profilePrefix))); await rm(profile, { recursive: true, force: true, maxRetries: 8, retryDelay: 250 }); },
   ]);
 }

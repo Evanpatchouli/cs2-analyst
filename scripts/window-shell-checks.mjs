@@ -143,7 +143,7 @@ export async function checkAppShell(evaluate, send) {
   assert.equal(shell.toggle, true, '缺少侧边栏折叠按钮');
   assert.equal(shell.card, true, '首页缺少导入卡片');
   assert.equal(shell.pick, true, '首页缺少“选择 DEM”入口');
-  assert.equal(shell.tabCount, 5, '侧边栏应列出 5 个报告视图');
+  assert.equal(shell.tabCount, 6, '侧边栏应列出 6 个报告视图');
   assert.equal(shell.tabsDisabled, true, '未导入时导航项应不可用');
   assert.equal(shell.collapsedAttr, 'false');
   assert.ok(shell.width > 150, '展开态侧边栏应显示图标与文本');

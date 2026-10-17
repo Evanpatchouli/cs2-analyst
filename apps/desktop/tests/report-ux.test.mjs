@@ -19,6 +19,7 @@ registerHooks({ resolve(specifier, context, nextResolve) {
   }
   return nextResolve(specifier, context);
 }, load(url, context, nextLoad) {
+  if (url.endsWith('/replay-map-assets.ts')) return { format: 'module', shortCircuit: true, source: 'export const replayMapAssets={};' };
   if (url.endsWith('.svg')) return { format: 'module', shortCircuit: true, source: 'export default ' + JSON.stringify(new URL(url).pathname) + ';' };
   if (url.endsWith('.tsx')) return { format: 'module', shortCircuit: true,
     source: transformSync(readFileSync(new URL(url), 'utf8'), { loader: 'tsx', jsx: 'automatic', format: 'esm' }).code };
@@ -29,7 +30,32 @@ const { WeaponIcon, weaponLabels } = await import('../renderer/src/killfeed-icon
 const { weaponAsset, killfeedWeaponAssets, killfeedDeathNoticeAssets } = await import('../renderer/src/killfeed-assets.ts');
 const { DeepReview } = await import('../renderer/src/deep-review.tsx');
 const { AnalysisViews } = await import('../renderer/src/analysis-views.tsx');
+const { HeatmapView, HeatmapLayerDetails } = await import('../renderer/src/heatmap-view.tsx');
+const { fixture: heatmapFixture, map: heatmapMap } = await import('./heatmap-fixture.mjs');
+const { projectMapHeatmap } = await import('../shared/heatmap.ts');
 const render = element => renderToStaticMarkup(createElement(SSRProvider, null, element));
+
+test('heatmap missing metadata renders independent disabled layers, all filters, and honest map/source limits', () => {
+  const html = render(createElement(HeatmapView, { players: [], active: true, sessionActive: true }));
+  for (const text of ['玩家位置密度', '击杀位置', '死亡位置', '热力图玩家', '热力图阵营', '热力图回合', '热力图楼层', '热力图分辨率', '热力图采样集', '包含冻结时间', '热力图元数据不可用', '地图映射或资源不可用', '不代表连续停留时间']) assert.ok(html.includes(text), text);
+  assert.equal([...html.matchAll(/aria-pressed="false"/g)].length, 3);
+});
+
+test('heatmap details distinguish zero events, undefined ratios, source loss and filtered population', () => {
+  const f = heatmapFixture();
+  const empty = projectMapHeatmap(f.match, f.replay, f.spatial, { rounds: [] }, heatmapMap);
+  const html = render(createElement(HeatmapLayerDetails, { layer: 'kills', projection: empty, cellIndex: 0 }));
+  assert.ok(html.includes('当前筛选范围内没有可统计事件'));
+  assert.ok(html.includes('事件位置覆盖率：—')); assert.ok(html.includes('相对强度：—')); assert.ok(html.includes('无可聚合数据'));
+  const positions = projectMapHeatmap(f.match, f.replay, f.spatial, { side: 'CT' }, heatmapMap);
+  const selected = render(createElement(HeatmapLayerDetails, { layer: 'positions', projection: positions, cellIndex: 0 }));
+  for (const text of ['当前所选有效位置采样：1', '阵营与楼层筛选前有效采样：2', '位置覆盖率：100.0%', '位置完整度：100.0%', '筛选后位置覆盖率：50.0%', '采样机会分母：2', '不代表玩家在场上的时间比例']) assert.ok(selected.includes(text), text);
+  const noReplay = projectMapHeatmap(f.match, null, f.spatial, {}, heatmapMap);
+  assert.ok(render(createElement(HeatmapLayerDetails, { layer: 'positions', projection: noReplay, cellIndex: null })).includes('位置回放源不可用'));
+  f.replay.hz = 16;
+  const noUniform = projectMapHeatmap(f.match, f.replay, f.spatial, { samplingSet: 'uniform-8hz' }, heatmapMap);
+  assert.ok(render(createElement(HeatmapLayerDetails, { layer: 'positions', projection: noUniform, cellIndex: null })).includes('采样集不适用于此回放'));
+});
 
 test('kill feed renders flags only when true, fallback weapon and complete accessible text', () => {
   const event = { id: 'synthetic', type: 'kill', tick: 100, roundTimeSeconds: 122.2,

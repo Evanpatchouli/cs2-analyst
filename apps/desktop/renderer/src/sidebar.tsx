@@ -6,7 +6,7 @@ import {
 } from './icons';
 import type { IconProps } from './icons';
 
-export type ViewId = 'report' | 'deep-review' | 'timeline' | 'analysis' | 'replay';
+export type ViewId = 'report' | 'deep-review' | 'timeline' | 'analysis' | 'replay' | 'heatmap';
 
 /** Sidebar geometry: the icon column stays on one vertical line in both states. */
 const SIDEBAR_WIDTH = 212;
@@ -55,6 +55,7 @@ const items: { value: ViewId; label: string; icon: (props: IconProps) => React.R
   { value: 'timeline', label: '回合时间线', icon: TimelineIcon },
   { value: 'analysis', label: '分析', icon: AnalysisIcon },
   { value: 'replay', label: '地图回放', icon: ReplayIcon },
+  { value: 'heatmap', label: '热力图', icon: AnalysisIcon },
 ];
 
 /**

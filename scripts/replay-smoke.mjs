@@ -159,7 +159,7 @@ try{
   const requests=meta.rounds.flatMap(r=>[r.blocks[0],r.blocks.at(-1)].map(b=>({sessionId:meta.sessionId,round:r.round,block:b.index}))).slice(0,12);
   const timings=[],sizes=[];
   for(const request of requests){const checked=await evaluate(`(async()=>{const start=performance.now(),r=await window.cs2Analyst.replay.getChunk(${JSON.stringify(request)});return {result:r,ms:performance.now()-start};})()`);assert.equal(checked.result.kind,'success');sizes.push(Buffer.byteLength(JSON.stringify(checked.result.chunk)));timings.push(checked.ms);}
-  metrics.ipcMs=quantiles(timings);metrics.chunkBytes=quantiles(sizes);assert.ok(metrics.chunkBytes.max<=1024*1024);assert.ok(metrics.ipcMs.p95<=250);assert.ok(metrics.totalImportMs<=15_000);
+  metrics.ipcMs=quantiles(timings);metrics.chunkBytes=quantiles(sizes);assert.ok(metrics.chunkBytes.max<=1024*1024);assert.ok(metrics.ipcMs.p95<=250);assert.ok(metrics.totalImportMs<=15_000,`Actual import ${metrics.totalImportMs}ms exceeds existing 15000ms acceptance budget`);
   console.log(JSON.stringify({stage:'real-ipc',...metrics.ipcMs,totalImportMs:metrics.totalImportMs}));
   // Enter through the actual import UI. This also verifies replacement of the earlier API session.
   await evaluate('[...document.querySelectorAll("button")].find(b=>b.textContent.includes("选择 DEM")).click()');
