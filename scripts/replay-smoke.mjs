@@ -168,8 +168,40 @@ try{
   const opened=await evaluate('(()=>{const start=performance.now();document.getElementById("replay-tab").click();return start;})()');
   await waitFor(()=>evaluate('document.querySelector("[data-replay-session]")?.dataset.replayMapReady==="true"&&Number(document.querySelector("[data-replay-session]")?.dataset.replayRevision)>0&&Boolean(document.querySelector("#replay-panel canvas[role=img]")?.dataset.tick)'),'first Canvas frame');
   metrics.firstFrameMs=await evaluate(`performance.now()-${opened}`);assert.ok(metrics.firstFrameMs<=1500);
-  assert.ok((await evaluate('document.getElementById("replay-panel").innerText')).includes('全局比赛观察视角'));
-  await checkReplayLayout(evaluate, '地图回放默认窗口');
+  const replayText = await evaluate('document.getElementById("replay-panel").innerText');
+  assert.ok(replayText.includes('比赛回放'), 'the replay surface uses the unified 比赛回放 title');
+  assert.equal(replayText.includes('地图回放'), false, 'no stale 地图回放 label remains');
+  assert.ok(replayText.includes('地图版本未确认')); assert.equal(replayText.includes('仅示意'), false, 'map version label is shortened only');
+  assert.equal(await evaluate('document.querySelector("[data-replay-session]").dataset.replayContinuous'), 'on');
+  assert.equal(await evaluate('document.querySelector("#replay-panel [role=switch]").checked'), true, 'continuous playback defaults on');
+  assert.ok((await evaluate('document.querySelector("#replay-panel [role=switch]").parentElement.innerText')).includes('连续播放'));
+  await evaluate('document.querySelector("#replay-panel [aria-label=地图说明]").focus()');
+  assert.equal(await evaluate('document.activeElement?.getAttribute("aria-label")==="地图说明"'),true,'keyboard focus reaches the map info icon');
+  await waitFor(()=>evaluate(`[...document.querySelectorAll('[role=tooltip]')].some(t=>t.textContent.includes('全局比赛观察视角'))`),'map info tooltip on keyboard focus',10000);
+  assert.ok(await evaluate(`[...document.querySelectorAll('[role=tooltip]')].some(t=>t.textContent.includes('白框为选中玩家'))`));
+  await evaluate('document.activeElement.blur()');
+  await checkReplayLayout(evaluate, '比赛回放默认窗口');
+  // Round menu: compact cap, internal scroll, selected option reveal, keyboard-close.
+  await evaluate('document.querySelector("[aria-label=回放回合]").click()');
+  await waitForUi(evaluate, `Boolean([...document.querySelectorAll('[role=listbox]')].at(-1)?.querySelector('[role=option]'))`, 'round menu open');
+  const menu = await evaluate(`(() => {
+    const box=[...document.querySelectorAll('[role=listbox]')].at(-1), r=box.getBoundingClientRect(), selected=box.querySelector('[aria-selected=true]'), sr=selected?.getBoundingClientRect();
+    return { height:r.height, top:r.top, bottom:r.bottom, viewport:innerHeight, scrollHeight:box.scrollHeight, clientHeight:box.clientHeight,
+      overflow:getComputedStyle(box).overflowY, options:box.querySelectorAll('[role=option]').length,
+      selectedVisible: Boolean(sr && sr.top>=r.top-1 && sr.bottom<=r.bottom+1) };
+  })()`);
+  assert.equal(menu.options, meta.rounds.length, 'the menu exposes exactly the metadata rounds');
+  assert.ok(menu.height <= 320.5, 'round menu height is capped at 320px');
+  assert.ok(menu.top >= -1 && menu.bottom <= menu.viewport + 1, 'round menu stays inside the application viewport');
+  assert.equal(menu.overflow, 'auto');
+  assert.ok(menu.scrollHeight > menu.clientHeight, 'a long round list scrolls inside the popup');
+  assert.equal(menu.selectedVisible, true, 'the selected round is revealed when the menu opens');
+  const menuShot = await page.send('Page.captureScreenshot', { format: 'png' });
+  writeFileSync(join(qa, 'p7-round-menu-320.png'), Buffer.from(menuShot.data, 'base64'));
+  await evaluate('document.querySelector("[aria-label=回放回合]").focus()');
+  await page.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
+  await page.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'Escape', code: 'Escape', windowsVirtualKeyCode: 27 });
+  await waitForUi(evaluate, `(() => {const b=document.querySelector('[role=listbox]');return !b||!b.checkVisibility();})()`, 'round menu Escape close');
   if(nuke){
     assert.equal(meta.map,'de_nuke');
     const base=`document.querySelector('#replay-panel canvas[aria-hidden=true]')`;
@@ -231,7 +263,7 @@ try{
   metrics.drawP95Ms=await evaluate('Number(document.querySelector("#replay-panel canvas[role=img]").dataset.drawP95)');assert.ok(metrics.drawP95Ms<=16.7);assert.ok(await evaluate('Number(document.querySelector("[data-replay-session]").dataset.replayCache)<=3'));
   metrics.sliderRail=await evaluate('(()=>{const e=document.querySelector("#replay-panel .fui-Slider__rail"),r=e.getBoundingClientRect(),t=document.querySelector("#replay-panel .fui-Slider__thumb").getBoundingClientRect(),c=getComputedStyle(e);return {width:r.width,height:r.height,background:c.background,display:c.display,opacity:c.opacity,centerGap:Math.abs(r.y+r.height/2-t.y-t.height/2)};})()');
   assert.ok(metrics.sliderRail.width>100&&metrics.sliderRail.height>=2&&metrics.sliderRail.centerGap<=1,'The visible progress rail aligns with its thumb');
-  const finding=report.findings.find(f=>f.evidence.some(e=>e.round!==undefined&&meta.rounds.some(r=>r.round===e.round)));
+  const finding=report.findings.find(f=>f.playerId===report.selectedPlayer&&f.evidence.some(e=>e.round!==undefined&&meta.rounds.some(r=>r.round===e.round)));
   if(finding){const index=meta.players.findIndex(p=>p.id===finding.playerId);await evaluate(`document.querySelector('[aria-label="回放玩家状态"] button:nth-child(${index+1})').click();document.getElementById('report-tab').click();document.querySelector('#report-panel details summary').click()`);
     const linked=await evaluate('(()=>{const b=document.querySelector("#report-panel [data-finding-replay-round]");if(!b)return null;const value={round:Number(b.dataset.findingReplayRound),tick:b.dataset.findingReplayTick?Number(b.dataset.findingReplayTick):null};b.click();return value;})()');assert.ok(linked);
     const r=meta.rounds.find(r=>r.round===linked.round),expected=linked.tick===null||linked.tick<r.startTick||linked.tick>r.endTick?r.startTick:linked.tick;
@@ -242,7 +274,7 @@ try{
     await page.send('Emulation.setDeviceMetricsOverride',{width,height,deviceScaleFactor:dpr,mobile:false});
     await waitForUi(evaluate, `innerWidth === ${width} && innerHeight === ${height}`, 'viewport resize');
     assert.equal(await evaluate('document.documentElement.scrollWidth>window.innerWidth'),false,`horizontal overflow ${width}`);
-    await checkReplayLayout(evaluate, `地图回放 ${width}×${height}`);
+    await checkReplayLayout(evaluate, `比赛回放 ${width}×${height}`);
     if(width===800){
       await evaluate(`(() => { const rail=document.querySelector('[data-replay-rail]'); window.__railStyle=rail.getAttribute('style'); rail.style.maxHeight='100px'; rail.style.overflowY='hidden'; })()`);
       await withCleanup(()=>assert.rejects(()=>assertReplayContentAccessible(evaluate,'intentional hidden rail probe'),/unreachable/),
@@ -253,10 +285,10 @@ try{
   }
   await evaluate('document.querySelector("[data-sidebar-toggle]").click()');
   await waitForUi(evaluate, `document.querySelector('[data-app-sidebar]').dataset.collapsed === 'true' && document.getAnimations().every(a => a.playState !== 'running')`, 'replay collapsed sidebar');
-  await checkReplayLayout(evaluate, '地图回放折叠导航');
+  await checkReplayLayout(evaluate, '比赛回放折叠导航');
   await evaluate('document.querySelector("[data-sidebar-toggle]").click()');
   await waitForUi(evaluate, `document.querySelector('[data-app-sidebar]').dataset.collapsed === 'false' && document.getAnimations().every(a => a.playState !== 'running')`, 'replay expanded sidebar');
-  await checkReplayLayout(evaluate, '地图回放展开导航');
+  await checkReplayLayout(evaluate, '比赛回放展开导航');
   await page.send('Emulation.clearDeviceMetricsOverride');
   // Real OS minimize: the page must pause, then restore through the existing native window controls.
   await evaluate('document.querySelector("[aria-label=播放回放]").click();window.cs2Analyst.window.minimize()');

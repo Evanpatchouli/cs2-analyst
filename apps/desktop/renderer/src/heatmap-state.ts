@@ -2,6 +2,10 @@ import type { DesktopHeatmapMetadata, DesktopHeatmapRequest, DesktopHeatmapResul
 import { validateHeatmapRequest, validateHeatmapResult } from '../../shared/heatmap-ipc.ts';
 
 export const heatmapLayers: HeatmapLayer[] = ['positions', 'kills', 'deaths'];
+/** Only the position source is on by default; event layers stay opt-in and unavailable sources stay off. */
+export function defaultHeatmapLayers(metadata?: Pick<DesktopHeatmapMetadata, 'available' | 'layers'>): HeatmapLayer[] {
+  return metadata?.available && metadata.layers.positions.available ? ['positions'] : [];
+}
 export const defaultHeatmapScope: DesktopHeatmapScope = {
   rounds: null, playerIds: null, side: 'all', floor: null, includeFreezeTime: false, samplingSet: 'all-valid',
 };

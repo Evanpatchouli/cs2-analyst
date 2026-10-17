@@ -46,7 +46,7 @@ export function DeepReview({ player, onShowRounds, onReplayRound }: {
           onClick={() => onShowRounds(f.relatedRounds)}>
           {f.relatedRounds.length === 1 ? `查看 R${f.relatedRounds[0]}` : `查看 ${f.relatedRounds.length} 个相关回合`}
         </Button></div> : null}
-        {onReplayRound&&f.relatedRounds.length?<div><Button appearance="subtle" size="small" onClick={()=>onReplayRound(f.relatedRounds[0])}>地图回放 R{f.relatedRounds[0]}</Button></div>:null}
+        {onReplayRound&&f.relatedRounds.length?<div><Button appearance="subtle" size="small" onClick={()=>onReplayRound(f.relatedRounds[0])}>比赛回放 R{f.relatedRounds[0]}</Button></div>:null}
         {f.caveats.length ? <details><summary className={s.summary}>说明与限制</summary>
           <div className={s.caveats}>{f.caveats.map((caveat, i) => <Body1 key={i} className={s.muted}>{caveat}</Body1>)}</div>
         </details> : null}

@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { Badge, Body1, Button, Caption1, Dropdown, Option, Slider, Spinner, Title2, makeStyles, tokens } from '@fluentui/react-components';
-import type { DesktopReplayChunk, DesktopReplayFrame, DesktopReplayMetadata, DesktopReplayRoundInfo } from '@cs2-analyst/report-contract';
+import type { ReactElement } from 'react';
+import { Badge, Body1, Button, Caption1, Dropdown, Option, Slider, Spinner, Switch, Title2, Tooltip, makeStyles, tokens } from '@fluentui/react-components';
+import type { DesktopReplayChunk, DesktopReplayEvent, DesktopReplayFrame, DesktopReplayMetadata, DesktopReplayRoundInfo } from '@cs2-analyst/report-contract';
 import { mapResourceState, radarHeading, resolveMapLayer, worldToRadar } from './replay-map';
 import { replayMapAssets } from './replay-map-assets';
-import { ReplayChunkCache, ReplayClock, replayBlockAt, replayDisplayFrame } from './replay-state';
+import { appendReplayEvents, nextReplayRound, replayBlockAt, replayDisplayFrame, ReplayChunkCache, ReplayClock, resolveReplayPlayerId } from './replay-state';
+import { QuestionCircleIcon, PauseIcon, PlayIcon } from './icons';
+import { useRoundMenu } from './round-menu';
 import { palette } from './theme';
 
 /**
@@ -21,6 +24,8 @@ const useStyles = makeStyles({
   barTitle: { display: 'flex', alignItems: 'baseline', gap: '8px' },
   controls: { display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '8px' },
   dropdown: { minWidth: '104px', maxWidth: '168px' },
+  playButton: { minWidth: '92px' },
+  switch: { marginLeft: '2px' },
   spacer: { flex: 1 },
   body: {
     minHeight: 0, display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) 292px', gap: '10px',
@@ -33,22 +38,39 @@ const useStyles = makeStyles({
     '@media (max-width: 860px)': { aspectRatio: '1', alignSelf: 'start' },
   },
   map: { position: 'relative', flexShrink: 0 },
+  mapInfo: { position: 'absolute', top: '8px', right: '8px', zIndex: 1 },
+  help: {
+    color: tokens.colorNeutralForeground3, flexShrink: 0,
+    ':hover': { color: tokens.colorNeutralForeground1 },
+    ':focus-visible': { color: tokens.colorNeutralForeground1 },
+  },
+  tipContent: { display: 'flex', flexDirection: 'column', gap: '6px', maxWidth: '340px' },
   canvas: { position:'absolute',inset:0,width:'100%',height:'100%',':focus-visible':{outline:`2px solid ${tokens.colorBrandStroke1}`,outlineOffset:'2px'} },
   side: {
-    minWidth: 0, minHeight: 0, display: 'flex', flexDirection: 'column', gap: '10px', overflowY: 'auto',
-    '@media (max-width: 860px)': { overflowY: 'visible' },
+    minWidth: 0, minHeight: 0, display: 'flex', flexDirection: 'column', gap: '10px', overflow: 'hidden',
+    '@media (max-width: 860px)': { overflow: 'visible' },
   },
   group: {
     flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '6px', padding: '10px',
     backgroundColor: palette.card, border: `1px solid ${palette.border}`, borderRadius: tokens.borderRadiusLarge,
   },
+  eventsGroup: {
+    flex: '1 1 0', minHeight: 0, overflow: 'hidden',
+    '@media (max-width: 860px)': { flex: '0 0 auto' },
+  },
   groupHeader: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' },
-  players: { display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0, maxHeight: 'min(34vh, 300px)', overflowY: 'auto' },
+  players: {
+    display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0, maxHeight: 'min(34vh, 300px)', overflowY: 'auto',
+    // Short windows still need a usable, independently scrolling key-event card.
+    '@media (max-height: 720px)': { maxHeight: 'min(16vh, 120px)' },
+  },
   player: { justifyContent:'space-between',minWidth:0,gap:'6px',textAlign:'left' },
   name: { overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',minWidth:0 },
-  notes: { display: 'flex', flexDirection: 'column', gap: '4px' },
   muted: { color:tokens.colorNeutralForeground3 },
-  events: { display: 'flex', flexDirection: 'column', maxHeight: '300px', overflowY: 'auto', gap: '4px' },
+  events: {
+    display: 'flex', flexDirection: 'column', flex: '1 1 0', minHeight: 0, overflowY: 'auto', gap: '4px',
+    '@media (max-width: 860px)': { flex: '0 0 auto', maxHeight: '42vh' },
+  },
   event: { justifyContent:'flex-start',textAlign:'left',whiteSpace:'normal' },
   transport: {
     flexShrink: 0, display: 'flex', flexDirection: 'column', gap: '6px', padding: '10px 12px',
@@ -60,48 +82,106 @@ const useStyles = makeStyles({
   progressRail: { '::before':{display:'none'} },
 });
 export interface ReplayJump { round:number; tick?:number; sequence:number }
+/**
+ * Map help stays a Fluent Tooltip, but its visibility is explicit so a keyboard focus
+ * always shows it. Fluent intentionally ignores programmatic focus for mouse users;
+ * a real Tab focus must still expose the complete map notes.
+ */
+function MapInfoTip({ content }: { content: ReactElement }) {
+  const s=useStyles(),[open,setOpen]=useState(false),focused=useRef(false),hovered=useRef(false);
+  const sync=()=>setOpen(focused.current||hovered.current);
+  // Keep the tooltip usable while the pointer travels from the icon into the long notes;
+  // the usual hide delay still belongs to Fluent.
+  const tip=<div onPointerEnter={()=>{hovered.current=true;setOpen(true);}} onPointerLeave={()=>{hovered.current=false;}}>{content}</div>;
+  return <Tooltip content={tip} relationship="description" withArrow visible={open}
+    onVisibleChange={(_,data)=>{if(!data.visible&&!focused.current&&!hovered.current)setOpen(false);}}>
+    <Button appearance="transparent" size="small" className={s.help} icon={<QuestionCircleIcon size={16} />} aria-label="地图说明"
+      onFocus={()=>{focused.current=true;sync();}}
+      onBlur={()=>{focused.current=false;sync();}}
+      onPointerEnter={()=>{hovered.current=true;sync();}}
+      onPointerLeave={()=>{hovered.current=false;}}
+      onKeyDown={event=>{if(event.key==='Escape'){focused.current=false;hovered.current=false;setOpen(false);}}} />
+  </Tooltip>;
+}
 const blockAt=replayBlockAt;
 const bombText:Record<string,string>={unknown:'未知',pickup:'拾取',drop:'掉落',plant_start:'开始安放',planted:'安放完成',defuse_start:'开始拆除',defused:'拆除成功',exploded:'爆炸'};
 const timeText=(tick:number,round:DesktopReplayRoundInfo,rate:number|null)=>rate===null?`原始 tick ${Math.round(tick)}`:`+${((tick-round.startTick)/rate).toFixed(2)} 秒`;
 
-export function ReplayPlayer({ metadata, playerId, onSelectPlayer, active, jump }: {
-  metadata:DesktopReplayMetadata;playerId:string;onSelectPlayer:(id:string)=>void;active:boolean;jump:ReplayJump|null;
+export function ReplayPlayer({ metadata, initialPlayerId, active, jump }: {
+  metadata:DesktopReplayMetadata;initialPlayerId:string;active:boolean;jump:ReplayJump|null;
 }) {
   const s=useStyles(),first=metadata.rounds[0];
   const [roundNumber,setRoundNumber]=useState(first?.round??0),[tick,setTick]=useState(first?.startTick??0);
   const [playing,setPlaying]=useState(false),[speed,setSpeed]=useState(1),[floor,setFloor]=useState('auto');
+  const [continuous,setContinuous]=useState(true);
   const [loading,setLoading]=useState(false),[error,setError]=useState<string|null>(null),[revision,setRevision]=useState(0);
   const [imageReady,setImageReady]=useState(false),[imageFailed,setImageFailed]=useState(false);
+  const [selectedReplayPlayerId,setSelectedReplayPlayerId]=useState(()=>resolveReplayPlayerId(metadata.players,initialPlayerId));
+  const [visibleEvents,setVisibleEvents]=useState<DesktopReplayEvent[]>([]),[appendSequence,setAppendSequence]=useState(0);
   const cache=useRef(new ReplayChunkCache()),clock=useRef(new ReplayClock(first?.startTick??0));
   const inFlight=useRef(false),generation=useRef(0),resume=useRef(false),failed=useRef(new Set<string>());
   const baseCanvas=useRef<HTMLCanvasElement>(null),canvas=useRef<HTMLCanvasElement>(null),box=useRef<HTMLDivElement>(null);
   const image=useRef<HTMLImageElement|null>(null),drawTimes=useRef<number[]>([]);
   const mapColumn=useRef<HTMLDivElement>(null),fit=useRef<()=>void>(()=>{});
+  const roundMenu=useRoundMenu();
+  const eventsList=useRef<HTMLDivElement>(null);
+  const visibleEventsRef=useRef<DesktopReplayEvent[]>([]),seenEventIds=useRef(new Set<string>()),lastEventTick=useRef(-Infinity);
+  const continuousRef=useRef(continuous);continuousRef.current=continuous;
   const info=metadata.rounds.find(r=>r.round===roundNumber);
   const block=info?blockAt(info,tick):undefined,chunk=block?cache.current.get(roundNumber,block.index):undefined;
   const playerIds=metadata.players.map(p=>p.id);
   const mapState=mapResourceState(metadata.map,replayMapAssets),map=mapState.definition;
   const frame=chunk?replayDisplayFrame(chunk,tick,metadata.maxInterpolationTicks,playerIds,map?z=>resolveMapLayer(map,z):undefined):null;
-  const selectedIndex=metadata.players.findIndex(p=>p.id===playerId),selected=frame?.players.find(p=>p[0]===selectedIndex);
+  const selectedIndex=metadata.players.findIndex(p=>p.id===selectedReplayPlayerId),selected=frame?.players.find(p=>p[0]===selectedIndex);
   const layerId=map?(floor==='auto'?resolveMapLayer(map,selected?.[4]??null):floor):null;
   const layer=map?.layers.find(l=>l.id===layerId),url=layer?replayMapAssets[layer.image]:undefined;
   const availableMap=mapState.status!=='unavailable'&&!imageFailed;
-  const live=useRef({info,playerId,active,map,layerId,imageReady,onSelectPlayer});
-  live.current={info,playerId,active,map,layerId,imageReady,onSelectPlayer};
+  const live=useRef({info,selectedPlayerId:selectedReplayPlayerId,active,map,layerId,imageReady});
+  live.current={info,selectedPlayerId:selectedReplayPlayerId,active,map,layerId,imageReady};
 
-  function seek(next:number,round=live.current.info) {
+  useEffect(()=>{setSelectedReplayPlayerId(current=>metadata.players.some(p=>p.id===current)?current:resolveReplayPlayerId(metadata.players,initialPlayerId));},[metadata.sessionId]);
+
+  function resetVisibleEvents(){
+    visibleEventsRef.current=[];seenEventIds.current.clear();lastEventTick.current=-Infinity;setVisibleEvents([]);
+  }
+  function trimVisibleEvents(at:number){
+    const reached=Math.floor(at),kept=visibleEventsRef.current.filter(event=>Math.floor(event.tick)<=reached);
+    lastEventTick.current=reached;
+    if(kept.length===visibleEventsRef.current.length)return;
+    visibleEventsRef.current=kept;seenEventIds.current=new Set(kept.map(event=>event.id));setVisibleEvents(kept);
+  }
+  function appendVisibleEvents(currentChunk:DesktopReplayChunk|undefined,round:DesktopReplayRoundInfo|null,at:number){
+    if(!currentChunk||!round)return;
+    const reached=Math.floor(at);
+    if(reached<lastEventTick.current){visibleEventsRef.current=[];seenEventIds.current.clear();setVisibleEvents([]);}
+    lastEventTick.current=reached;
+    const result=appendReplayEvents(visibleEventsRef.current,seenEventIds.current,currentChunk.events,reached);
+    if(!result.appended)return;
+    visibleEventsRef.current=result.events;setVisibleEvents(result.events);setAppendSequence(sequence=>sequence+1);
+  }
+  useEffect(()=>{
+    if(appendSequence===0)return;
+    const list=eventsList.current;if(!list)return;
+    // Never yank the list while the user is operating an event with the keyboard.
+    if(list.contains(document.activeElement))return;
+    const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+    list.scrollTo({top:list.scrollHeight,behavior:reduced?'auto':'smooth'});
+  },[appendSequence]);
+
+  function seek(next:number,round=live.current.info,resetEvents=false) {
     if(!round)return;
     clock.current.pause(performance.now(),metadata.tickRate);resume.current=false;setPlaying(false);
     const bounded=Math.max(round.startTick,Math.min(round.endTick,next));clock.current.seek(bounded,performance.now());setTick(bounded);setError(null);
+    if(resetEvents)resetVisibleEvents();else trimVisibleEvents(bounded);
   }
   function selectRound(number:number,nextTick?:number){
     const round=metadata.rounds.find(r=>r.round===number);if(!round)return;
-    live.current.info=round;setRoundNumber(number);seek(nextTick??round.startTick,round);
+    live.current.info=round;setRoundNumber(number);seek(nextTick??round.startTick,round,true);
   }
   function toggle(){
     const round=live.current.info;if(!round||metadata.tickRate===null)return;
     if(clock.current.playing){clock.current.pause(performance.now(),metadata.tickRate);resume.current=false;setPlaying(false);setTick(clock.current.tick);}
-    else {if(clock.current.tick>=round.endTick)clock.current.seek(round.startTick,performance.now());clock.current.play(performance.now());setPlaying(true);}
+    else {if(clock.current.tick>=round.endTick){clock.current.seek(round.startTick,performance.now());trimVisibleEvents(round.startTick);setTick(round.startTick);}clock.current.play(performance.now());setPlaying(true);}
   }
   async function load(round:DesktopReplayRoundInfo,index:number,prefetch=false){
     const key=`${round.round}:${index}`;
@@ -117,7 +197,7 @@ export function ReplayPlayer({ metadata, playerId, onSelectPlayer, active, jump 
       if(next.schemaVersion!==1||next.sessionId!==metadata.sessionId||next.matchId!==metadata.matchId||next.round!==round.round||next.block!==index)throw new Error('回放会话已更新。');
       cache.current.put(next);setRevision(n=>n+1);
       const currentRound=live.current.info;
-      if(resume.current&&live.current.active&&currentRound?.round===round.round&&blockAt(currentRound,clock.current.tick)?.index===index){
+      if(resume.current&&live.current.active&&!document.hidden&&currentRound?.round===round.round&&blockAt(currentRound,clock.current.tick)?.index===index){
         resume.current=false;clock.current.play(performance.now());setPlaying(true);
       }
     }catch(reason){if(token===generation.current){failed.current.add(key);if(!prefetch){setError(reason instanceof Error?reason.message:'回放数据不可用。');resume.current=false;setPlaying(false);}}}
@@ -135,7 +215,7 @@ export function ReplayPlayer({ metadata, playerId, onSelectPlayer, active, jump 
       if(p[7]!==true||p[2]===null||p[3]===null||resolveMapLayer(map,p[4])!==view.layerId)continue;
       const point=worldToRadar(map,{x:p[2],y:p[3]});if(!point||point.x<0||point.y<0||point.x>map.width||point.y>map.height)continue;
       drawnPlayers++;
-      const chosen=metadata.players[p[0]]?.id===view.playerId,color=p[8]==='CT'?palette.replay.ct:p[8]==='T'?palette.replay.t:palette.replay.unknown;
+      const chosen=metadata.players[p[0]]?.id===view.selectedPlayerId,color=p[8]==='CT'?palette.replay.ct:p[8]==='T'?palette.replay.t:palette.replay.unknown;
       ctx.fillStyle=color;ctx.strokeStyle=chosen?palette.replay.selection:palette.replay.surface;ctx.lineWidth=chosen?3:2;
       ctx.beginPath();if(p[8]==='CT')ctx.rect(point.x-7,point.y-7,14,14);else ctx.arc(point.x,point.y,chosen?9:7,0,Math.PI*2);ctx.fill();ctx.stroke();
       if(p[5]!==null){const heading=radarHeading(p[5]);if(heading){ctx.strokeStyle=color;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(point.x+heading.x*10,point.y+heading.y*10);ctx.lineTo(point.x+heading.x*22,point.y+heading.y*22);ctx.stroke();}}
@@ -158,14 +238,29 @@ export function ReplayPlayer({ metadata, playerId, onSelectPlayer, active, jump 
     if(!active||!metadata.available){clock.current.pause(performance.now(),metadata.tickRate);resume.current=false;setPlaying(false);return;}
     let raf=0,lastUi=0;
     const animate=(now:number)=>{
-      const round=live.current.info;if(!round)return;
+      let round=live.current.info;if(!round)return;
       let at=Math.min(round.endTick,clock.current.read(now,metadata.tickRate));
-      if(at>=round.endTick&&clock.current.playing){clock.current.seek(round.endTick,now);clock.current.pause(now,metadata.tickRate);setPlaying(false);}
+      if(at>=round.endTick&&clock.current.playing){
+        const next=continuousRef.current?nextReplayRound(metadata,round.round):null;
+        if(next){
+          // The next round is a real metadata window; switch to its start and only resume
+          // after its first block is available. The clock never runs ahead of loaded data.
+          clock.current.pause(now,metadata.tickRate);
+          live.current.info=next;setRoundNumber(next.round);clock.current.seek(next.startTick,now);
+          resetVisibleEvents();setError(null);round=next;at=next.startTick;setTick(at);
+          const firstBlock=blockAt(next,at),loaded=firstBlock?cache.current.get(next.round,firstBlock.index):undefined;
+          if(loaded&&!document.hidden){clock.current.play(now);setPlaying(true);}
+          else {resume.current=!document.hidden;setPlaying(false);}
+        }else{
+          clock.current.seek(round.endTick,now);clock.current.pause(now,metadata.tickRate);resume.current=false;setPlaying(false);
+        }
+      }
       const needed=blockAt(round,at),data=needed?cache.current.get(round.round,needed.index):undefined;
       if(!data&&needed){
         if(clock.current.playing){resume.current=true;clock.current.seek(at,now);clock.current.pause(now,metadata.tickRate);setPlaying(false);}
         void load(round,needed.index);
       }
+      appendVisibleEvents(data,round,at);
       paint(data?replayDisplayFrame(data,at,metadata.maxInterpolationTicks,playerIds,live.current.map?z=>resolveMapLayer(live.current.map!,z):undefined):null,data,at);
       if(now-lastUi>=100){setTick(at);lastUi=now;}
       if(data&&needed&&!inFlight.current){const neighbor=[needed.index+1,needed.index-1].find(index=>round.blocks.some(b=>b.index===index)&&!cache.current.get(round.round,index)&&!failed.current.has(`${round.round}:${index}`));if(neighbor!==undefined)void load(round,neighbor,true);}
@@ -218,23 +313,33 @@ export function ReplayPlayer({ metadata, playerId, onSelectPlayer, active, jump 
     watchResolution();
     return()=>{observer.disconnect();resolution.removeEventListener('change',watchResolution);};
   },[availableMap]);
-  if(!metadata.available||!info)return <section className={s.root} aria-label="2D地图回放"><div className={s.group}><Title2>2D 地图回放</Title2><Body1>{metadata.unavailableReason??'本场缺少可靠回放窗口，比赛报告仍可用。'}</Body1></div></section>;
-  const currentEvents=(chunk?.events??[]).filter(e=>e.type!=='weapon_fire'&&e.type!=='damage'&&e.type!=='flash');
-  const sameTick=new Map<number,number>();for(const e of chunk?.events??[])sameTick.set(e.tick,(sameTick.get(e.tick)??0)+1);
-  return <section className={s.root} aria-label="2D地图回放" data-replay-session={metadata.sessionId} data-replay-match={metadata.matchId} data-replay-round={roundNumber} data-replay-tick={tick} data-replay-cache={cache.current.size} data-replay-block={block?.index} data-replay-revision={revision} data-replay-map-ready={imageReady}>
+  if(!metadata.available||!info)return <section className={s.root} aria-label="比赛回放"><div className={s.group}><Title2>比赛回放</Title2><Body1>{metadata.unavailableReason??'本场缺少可靠回放窗口，比赛报告仍可用。'}</Body1></div></section>;
+  const sameTick=new Map<number,number>();for(const e of visibleEvents)sameTick.set(e.tick,(sameTick.get(e.tick)??0)+1);
+  const bombLabel=frame?bombText[frame.bomb.action]??'未知':'未知';
+  return <section className={s.root} aria-label="比赛回放" data-replay-session={metadata.sessionId} data-replay-match={metadata.matchId} data-replay-round={roundNumber} data-replay-tick={tick} data-replay-cache={cache.current.size} data-replay-block={block?.index} data-replay-revision={revision} data-replay-map-ready={imageReady} data-replay-visible-events={visibleEvents.length} data-replay-continuous={continuous?'on':'off'}>
     <div className={s.bar}>
-      <div className={s.barTitle}><Title2>2D 地图回放</Title2><Caption1 className={s.muted}>R{roundNumber}</Caption1></div>
+      <div className={s.barTitle}><Title2>比赛回放</Title2><Caption1 className={s.muted}>R{roundNumber}</Caption1></div>
       <div className={s.controls}>
-        <Button appearance="primary" aria-label={playing?'暂停回放':'播放回放'} aria-pressed={playing} disabled={metadata.tickRate===null||!active} onClick={toggle}>{playing?'暂停':'播放'}</Button>
+        <Button appearance="primary" className={s.playButton} aria-label={playing?'暂停回放':'播放回放'} aria-pressed={playing} disabled={metadata.tickRate===null||!active} onClick={toggle} icon={playing?<PauseIcon size={16}/>:<PlayIcon size={16}/>}>{playing?'暂停':'播放'}</Button>
         <Dropdown className={s.dropdown} aria-label="回放倍速" value={`${speed}×`} selectedOptions={[String(speed)]} disabled={metadata.tickRate===null} onOptionSelect={(_,d)=>{if(!d.optionValue)return;const value=Number(d.optionValue);clock.current.setSpeed(value,performance.now(),metadata.tickRate);setSpeed(value);}}>{[.25,.5,1,2,4].map(v=><Option key={v} value={String(v)}>{`${v}×`}</Option>)}</Dropdown>
-        <Dropdown className={s.dropdown} aria-label="回放回合" value={`R${roundNumber}`} selectedOptions={[String(roundNumber)]} onOptionSelect={(_,d)=>d.optionValue&&selectRound(Number(d.optionValue))}>{metadata.rounds.map(r=><Option key={r.round} value={String(r.round)}>{`R${r.round}`}</Option>)}</Dropdown>
+        <Dropdown ref={roundMenu.triggerRef} className={s.dropdown} aria-label="回放回合" value={`R${roundNumber}`} selectedOptions={[String(roundNumber)]} listbox={{className:roundMenu.listboxClassName}} positioning={roundMenu.positioning} onOpenChange={roundMenu.onOpenChange} onOptionSelect={(_,d)=>d.optionValue&&selectRound(Number(d.optionValue))}>{metadata.rounds.map(r=><Option key={r.round} value={String(r.round)}>{`R${r.round}`}</Option>)}</Dropdown>
+        <Switch className={s.switch} checked={continuous} onChange={(_,d)=>setContinuous(d.checked)} label="连续播放" />
         {map&&map.layers.length>1?<Dropdown className={s.dropdown} aria-label="回放楼层" value={floor==='auto'?'跟随玩家':map.layers.find(l=>l.id===floor)?.label} selectedOptions={[floor]} onOptionSelect={(_,d)=>d.optionValue&&setFloor(d.optionValue)}><Option value="auto">跟随玩家</Option>{map.layers.map(l=><Option key={l.id} value={l.id}>{l.label}</Option>)}</Dropdown>:null}
       </div>
       <span className={s.spacer} />
-      <Badge appearance="tint" color="warning">地图版本未确认 · 仅示意</Badge>
+      <Badge appearance="tint" color="warning">地图版本未确认</Badge>
     </div>
     <div className={s.body} data-replay-body>
       {availableMap?<div ref={mapColumn} className={s.mapColumn}>
+        <div className={s.mapInfo}>
+          <MapInfoTip content={<div className={s.tipContent}>
+            <span>全局比赛观察视角 · 朝向仅为记录方向，不表示看到了敌人。位置插值仅用于显示。</span>
+            <span>CT 蓝方块 / T 橙圆点；白框为选中玩家。</span>
+            <span>炸弹标记为事件关联位置；道具十字仅标示已记录生效点，不表示飞行轨迹或烟火范围。</span>
+            {map&&map.layers.length>1?<span>{layer?`当前${layer.label}；其他层点位隐藏。`:'选中玩家楼层未知，请手动选层。'}未知 Z 与共享高度边界不自动归层。</span>:null}
+            {info.coverage==='partial'?<span>该回合存在缺失或歧义状态；断点不连接，未知状态不补齐。</span>:null}
+          </div>} />
+        </div>
         <div ref={box} className={s.map}>
           <canvas ref={baseCanvas} className={s.canvas} aria-hidden="true" />
           <canvas ref={canvas} className={s.canvas} tabIndex={0} role="img" aria-label={`R${roundNumber} 全局地图；空格播放或暂停，左右方向键定位，Home/End跳至回合起止。`} onKeyDown={e=>{if(e.key===' '){e.preventDefault();toggle();}else if(['ArrowLeft','ArrowRight','Home','End'].includes(e.key)){e.preventDefault();const at=clock.current.read(performance.now(),metadata.tickRate);seek(e.key==='Home'?info.startTick:e.key==='End'?info.endTick:at+(e.key==='ArrowLeft'?-1:1)*(metadata.tickRate??1));}}} />
@@ -243,24 +348,15 @@ export function ReplayPlayer({ metadata, playerId, onSelectPlayer, active, jump 
       <div className={s.side} data-replay-rail>
         <div className={s.group}>
           <div className={s.groupHeader}><Caption1>玩家状态</Caption1><Caption1 className={s.muted}>{metadata.players.length} 人</Caption1></div>
+          <Caption1 className={s.muted}>最近炸弹：{bombLabel}{frame?.bomb.ambiguous?' · 同 tick 冲突，顺序未知':''}</Caption1>
           <div className={s.players} aria-label="回放玩家状态">
-            {metadata.players.map((player,index)=>{const p=frame?.players.find(p=>p[0]===index);return <Button key={player.id} className={s.player} appearance={player.id===playerId?'secondary':'subtle'} aria-pressed={player.id===playerId} onClick={()=>onSelectPlayer(player.id)} title={player.nickname}><span className={s.name}>{index+1}. {player.nickname}</span><Caption1>{p?.[8]??'Unknown'} · {p?.[7]===false?'阵亡':p?.[7]===true?`${p[6]??'—'} HP`:'未知'}</Caption1></Button>;})}
+            {metadata.players.map((player,index)=>{const p=frame?.players.find(p=>p[0]===index);return <Button key={player.id} className={s.player} appearance={player.id===selectedReplayPlayerId?'secondary':'subtle'} aria-pressed={player.id===selectedReplayPlayerId} onClick={()=>setSelectedReplayPlayerId(player.id)} title={player.nickname}><span className={s.name}>{index+1}. {player.nickname}</span><Caption1>{p?.[8]??'Unknown'} · {p?.[7]===false?'阵亡':p?.[7]===true?`${p[6]??'—'} HP`:'未知'}</Caption1></Button>;})}
           </div>
         </div>
-        <div className={s.group}>
-          <div className={s.groupHeader}><Caption1>地图说明</Caption1><Caption1 className={s.muted}>最近炸弹：{frame?bombText[frame.bomb.action]??'未知':'未知'}{frame?.bomb.ambiguous?' · 同 tick 冲突，顺序未知':''}</Caption1></div>
-          <div className={s.notes}>
-            <Caption1 className={s.muted}>全局比赛观察视角 · 朝向仅为记录方向，不表示看到了敌人。位置插值仅用于显示。</Caption1>
-            <Caption1 className={s.muted}>CT 蓝方块 / T 橙圆点；白框为选中玩家。</Caption1>
-            <Caption1 className={s.muted}>炸弹标记为事件关联位置；道具十字仅标示已记录生效点，不表示飞行轨迹或烟火范围。</Caption1>
-            {map&&map.layers.length>1?<Caption1 className={s.muted}>{layer?`当前${layer.label}；其他层点位隐藏。`:'选中玩家楼层未知，请手动选层。'}未知 Z 与共享高度边界不自动归层。</Caption1>:null}
-            {info.coverage==='partial'?<Caption1 className={s.muted}>该回合存在缺失或歧义状态；断点不连接，未知状态不补齐。</Caption1>:null}
-          </div>
-        </div>
-        <div className={s.group}>
-          <div className={s.groupHeader}><Caption1>关键事件</Caption1><Caption1 className={s.muted}>当前数据块 · {currentEvents.length}</Caption1></div>
-          <Caption1 className={s.muted}>同 tick 不推断先后顺序。{metadata.excludedRounds.length?` ${metadata.excludedRounds.length} 个回合窗口不可靠，未开放回放。`:''}</Caption1>
-          <div className={s.events} aria-label="回放事件浏览">{currentEvents.length?currentEvents.map(e=><Button key={e.id} className={s.event} appearance="subtle" size="small" data-replay-event={e.id} onClick={()=>seek(e.tick)}>{timeText(e.tick,info,metadata.tickRate)} · {e.description}{(sameTick.get(e.tick)??0)>1?' · 同 tick，顺序未知':''}</Button>):<Caption1>此数据块没有可展示的关键事件。</Caption1>}</div>
+        <div className={`${s.group} ${s.eventsGroup}`}>
+          <div className={s.groupHeader}><Caption1>关键事件</Caption1><Caption1 className={s.muted}>已播放 · {visibleEvents.length}</Caption1></div>
+          <Caption1 className={s.muted}>仅显示当前播放进度已到达的事件。同 tick 不推断先后顺序。{metadata.excludedRounds.length?` ${metadata.excludedRounds.length} 个回合窗口不可靠，未开放回放。`:''}</Caption1>
+          <div ref={eventsList} className={s.events} aria-label="回放事件浏览" aria-live="polite" aria-relevant="additions">{visibleEvents.length?visibleEvents.map(e=><Button key={e.id} className={s.event} appearance="subtle" size="small" data-replay-event={e.id} onClick={()=>seek(e.tick)}>{timeText(e.tick,info,metadata.tickRate)} · {e.description}{(sameTick.get(e.tick)??0)>1?' · 同 tick，顺序未知':''}</Button>):<Caption1>当前播放进度还没有关键事件。</Caption1>}</div>
         </div>
       </div>
     </div>

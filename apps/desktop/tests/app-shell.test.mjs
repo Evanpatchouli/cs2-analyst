@@ -35,8 +35,9 @@ test('sidebar lists the six report views in order and disables them before a mat
   assert.ok(html.includes('data-collapsed="false"'), '展开态标记缺失');
   assert.deepEqual([...html.matchAll(/id="([a-z-]+-tab)"/g)].map(match => match[1]),
     ['report-tab', 'deep-review-tab', 'timeline-tab', 'analysis-tab', 'replay-tab', 'heatmap-tab']);
-  const labels = ['比赛报告', '深度复盘', '回合时间线', '分析', '地图回放', '热力图'];
+  const labels = ['比赛报告', '深度复盘', '回合时间线', '分析', '比赛回放', '热力图'];
   for (const label of labels) assert.ok(html.includes(label), '导航缺少 ' + label);
+  assert.equal(html.includes('地图回放'), false, '导航必须统一使用“比赛回放”');
   assert.equal([...html.matchAll(/role="tab"/g)].length, 6);
   assert.equal([...html.matchAll(/aria-controls="/g)].length, 6, '每个导航项都要指向自己的面板');
   assert.equal([...html.matchAll(/disabled/g)].length >= 6, true, '未导入时导航项应不可用');

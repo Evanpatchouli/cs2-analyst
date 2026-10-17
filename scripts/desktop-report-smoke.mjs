@@ -145,7 +145,7 @@ await scenario({
   assertDom: async (evaluate, send) => {
     assert.equal(await evaluate(`document.getElementById('report-panel').hidden`), false);
     assert.equal(await evaluate(`document.getElementById('report-tab').getAttribute('aria-selected')`), 'true');
-    assert.deepEqual(await evaluate(`[...document.querySelectorAll('[role="tab"]')].map(t => t.querySelector('.fui-Tab__content').textContent)`), ['比赛报告', '深度复盘', '回合时间线', '分析', '地图回放', '热力图']);
+    assert.deepEqual(await evaluate(`[...document.querySelectorAll('[role="tab"]')].map(t => t.querySelector('.fui-Tab__content').textContent)`), ['比赛报告', '深度复盘', '回合时间线', '分析', '比赛回放', '热力图']);
     assert.equal(await evaluate(`document.querySelectorAll('[role="tabpanel"]').length`), 6);
     await checkDeepReviewUx(evaluate, send, process.env.CS2_ANALYST_QA_DIR);
     await evaluate(`document.getElementById('report-tab').click()`);

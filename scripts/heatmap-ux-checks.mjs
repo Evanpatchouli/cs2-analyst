@@ -30,7 +30,17 @@ export async function checkHeatmapUx(evaluate, send, { qaDir, direct, memory = a
   const snapshot = () => evaluate(heatmapSnapshotExpression);
   const painted = () => evaluate(`new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve())))`);
   const choose = async (name, value) => {
+    if (name === '回合') {
+      await chooseRound(value ? 'R' + value : '全部回合');
+      return;
+    }
     await evaluate(`(() => {const s=document.querySelector('[aria-label=${JSON.stringify('热力图' + name)}]');Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set.call(s,${JSON.stringify(String(value))});s.dispatchEvent(new Event('change',{bubbles:true}));})()`);
+  };
+  const chooseRound = async label => {
+    await evaluate(`document.querySelector('[aria-label="热力图回合"]').click()`);
+    await waitFor(() => evaluate(`Boolean([...document.querySelectorAll('[role=option]')].find(o=>o.textContent.trim()===${JSON.stringify(label)}))`), 5000, 'heatmap round option ' + label);
+    await evaluate(`[...document.querySelectorAll('[role=option]')].find(o=>o.textContent.trim()===${JSON.stringify(label)}).click()`);
+    await waitFor(() => evaluate(`document.querySelector('[aria-label="热力图回合"]').textContent===${JSON.stringify(label)}`), 5000, 'heatmap round value ' + label);
   };
   const ready = async () => wait(async () => {
     const s = await snapshot();
@@ -68,18 +78,25 @@ export async function checkHeatmapUx(evaluate, send, { qaDir, direct, memory = a
   assert.equal(await evaluate(`document.activeElement.id`), 'heatmap-tab', 'sixth tab participates in existing keyboard navigation');
   await evaluate(`document.getElementById('heatmap-tab').click()`);
   await settleUi(evaluate, 'heatmap initial layout');
-  assert.deepEqual((await snapshot()).enabled, []);
-  assert.equal(await evaluate(`document.querySelectorAll('#heatmap-panel button[aria-pressed=false]').length`), 3);
-  assert.ok((await evaluate(`document.getElementById('heatmap-panel').innerText`)).includes('请开启图层'));
+  assert.deepEqual((await snapshot()).enabled, ['positions'], 'position density is on by default when its source is available');
+  assert.equal(await evaluate(`document.querySelectorAll('#heatmap-panel button[aria-pressed=true]').length`), 1);
+  assert.equal(await evaluate(`document.querySelectorAll('#heatmap-panel button[aria-pressed=false]').length`), 2, 'kill/death layers stay off');
+  await ready();
   await wait(() => evaluate(`document.querySelector('#heatmap-panel canvas').width>1`), 'radar backing size');
   // A decoded image must really have been painted, even before the guidance overlay is dismissed.
   await wait(async () => (await evaluate(pixelExpression)).opaque > 0, 'actual radar pixels');
   metrics.firstDisplayMs = performance.now() - start;
-  const base = await evaluate(pixelExpression);
   await memory('base-only');
   const targetPlayer = await evaluate(`document.querySelector('[aria-label="目标玩家"]').textContent`);
-  assert.ok((await evaluate(`document.getElementById('heatmap-panel').innerText`)).includes('地图版本未确认 · 仅示意'));
+  const mapBadge = await evaluate(`document.getElementById('heatmap-panel').innerText`);
+  assert.ok(mapBadge.includes('地图版本未确认')); assert.equal(mapBadge.includes('仅示意'), false, 'the shortened label is authoritative');
+  let base;
   for (const [layer, label] of [['positions', '玩家位置密度'], ['kills', '击杀位置'], ['deaths', '死亡位置']]) {
+    if (layer === 'positions') {
+      await evaluate(`document.querySelector('#heatmap-panel button[aria-label="玩家位置密度"]').click()`);
+      await settleUi(evaluate, 'default position off for pixel baseline');
+      base = await evaluate(pixelExpression);
+    }
     await evaluate(`(() => {const c=document.querySelector('#heatmap-panel canvas');window.__qaRadarPixels=c.getContext('2d').getImageData(0,0,c.width,c.height);})()`);
     const began = performance.now();
     if (layer === 'positions') {
@@ -153,7 +170,17 @@ export async function checkHeatmapUx(evaluate, send, { qaDir, direct, memory = a
     metrics.layouts.push({ width, height, dpr, ...layout }); await shot(`heatmap-${width}x${height}-dpr${dpr}`);
   }
   await send('Emulation.clearDeviceMetricsOverride');
-  for (let i = 0; i < 5; i++) { await evaluate(`document.getElementById('report-tab').click()`); await settleUi(evaluate, 'hidden map'); await evaluate(`document.getElementById('heatmap-tab').click()`); await settleUi(evaluate, 'map return'); assert.ok((await evaluate(pixelExpression)).opaque > 0); }
+  // A manual position-layer off must survive Tab leave/return; the default applies only at mount.
+  await evaluate(`document.querySelector('#heatmap-panel button[aria-label="玩家位置密度"]').click()`);
+  await settleUi(evaluate, 'manual position off');
+  assert.equal((await snapshot()).enabled.includes('positions'), false);
+  for (let i = 0; i < 5; i++) {
+    await evaluate(`document.getElementById('report-tab').click()`); await settleUi(evaluate, 'hidden map');
+    await evaluate(`document.getElementById('heatmap-tab').click()`); await settleUi(evaluate, 'map return');
+    assert.equal((await snapshot()).enabled.includes('positions'), false, 'tab return must not re-enable a user-closed position layer');
+    assert.ok((await evaluate(pixelExpression)).opaque > 0);
+  }
+  await evaluate(`document.querySelector('#heatmap-panel button[aria-label="玩家位置密度"]').click()`); await ready();
   await memory('after-tab-returns');
   await evaluate(`window.cs2Analyst.window.toggleMaximize()`); await settleUi(evaluate, 'native maximize heatmap');
   assert.ok((await evaluate(pixelExpression)).opaque > 0);
@@ -185,10 +212,14 @@ export async function checkHeatmapUx(evaluate, send, { qaDir, direct, memory = a
     await evaluate(`window.__qaHeatmapReport.heatmap={...window.__qaHeatmapOriginal,map:{...window.__qaHeatmapOriginal.map,resourceId:'missing-qa-map'}}`); await refresh();
     assert.ok((await evaluate(`document.getElementById('heatmap-panel').innerText`)).includes('地图映射或底图不可用'));
     await evaluate(`window.__qaOriginalImage=window.Image;window.Image=class extends window.__qaOriginalImage{set src(value){super.src=value?value+'.missing-qa':'';}get src(){return super.src;}};window.__qaHeatmapReport.heatmap=window.__qaHeatmapOriginal;`); await refresh();
+    // The image failure is only observable with an enabled layer that requests the bitmap.
+    if (!(await snapshot()).enabled.includes('positions')) await evaluate(`document.querySelector('#heatmap-panel button[aria-label="玩家位置密度"]').click()`);
     await wait(() => evaluate(`document.getElementById('heatmap-panel').innerText.includes('地图图片加载失败')`), 'image failure fallback');
     await ready();
     assert.ok(await evaluate(`document.querySelector('#heatmap-panel [data-heatmap-stats]')!==null`));
   }, [async () => { await evaluate(`if(window.__qaOriginalImage){window.Image=window.__qaOriginalImage;delete window.__qaOriginalImage;}window.__qaHeatmapReport.heatmap={...window.__qaHeatmapOriginal,map:{...window.__qaHeatmapOriginal.map,resourceId:'missing-qa-map'}};`); await refresh(); await evaluate(`window.__qaHeatmapReport.heatmap=window.__qaHeatmapOriginal`); await refresh(); await evaluate(`delete window.__qaHeatmapReport;delete window.__qaHeatmapOriginal`); }]);
+  if (!(await snapshot()).enabled.includes('positions')) await evaluate(`document.querySelector('#heatmap-panel button[aria-label="玩家位置密度"]').click()`);
+  await ready();
   await verify('restored-after-faults'); await shot('heatmap-final');
   metrics.status = 'PASS';
   return metrics;

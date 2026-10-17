@@ -212,7 +212,7 @@ function Findings({ report, playerId, onShowRounds, onReplay }: {
           return <div key={i} className={s.evidence}>
             <Caption1 className={s.muted}>{metricLabel(e.metric)}{when ? ` · ${when}` : ''}</Caption1>
             <div className={s.evidenceActions}><Caption1>{evidenceText(e.value, e.unit)}</Caption1>
-              {onReplay&&e.round!==undefined?<Button appearance="subtle" size="small" data-finding-replay-round={e.round} data-finding-replay-tick={e.tick} onClick={()=>onReplay(e.round!,e.tick)}>地图回放 R{e.round}</Button>:null}
+              {onReplay&&e.round!==undefined?<Button appearance="subtle" size="small" data-finding-replay-round={e.round} data-finding-replay-tick={e.tick} onClick={()=>onReplay(e.round!,e.tick)}>比赛回放 R{e.round}</Button>:null}
             </div>
           </div>;
         })}
@@ -415,7 +415,7 @@ function Report({ report, playerId, replayActive, activeTab, onSelectView }: {
     <div id="replay-panel" role="tabpanel" aria-labelledby="replay-tab" className={s.replayPanel} hidden={activeTab!=='replay'}>
       {unavailableReplayRound!==null?<><Body1>R{unavailableReplayRound} 的正式回合窗口不可靠，无法定位回放。</Body1><Button appearance="subtle" onClick={()=>setUnavailableReplayRound(null)}>浏览可用回合</Button></>:<>
         {replayNotice?<Caption1>{replayNotice}</Caption1>:null}
-        {report.replay?<ReplayPlayer key={report.replay.sessionId??'unavailable'} metadata={report.replay} playerId={playerId} onSelectPlayer={selectPlayer} active={activeTab==='replay'&&replayActive} jump={replayJump}/>:<Body1>此报告没有可用回放会话。</Body1>}
+        {report.replay?<ReplayPlayer key={report.replay.sessionId??'unavailable'} metadata={report.replay} initialPlayerId={playerId} active={activeTab==='replay'&&replayActive} jump={replayJump}/>:<Body1>此报告没有可用回放会话。</Body1>}
       </>}
     </div>
     <div id="heatmap-panel" role="tabpanel" aria-labelledby="heatmap-tab" className={s.replayPanel} hidden={activeTab !== 'heatmap'}>

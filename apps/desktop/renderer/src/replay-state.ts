@@ -1,5 +1,40 @@
-import type { DesktopReplayChunk, DesktopReplayFrame, DesktopReplayPlayer, DesktopReplayRoundInfo } from '@cs2-analyst/report-contract';
+import type { DesktopReplayChunk, DesktopReplayEvent, DesktopReplayFrame, DesktopReplayPlayer, DesktopReplayRoundInfo } from '@cs2-analyst/report-contract';
 export const replayBlockAt=(round:DesktopReplayRoundInfo,tick:number)=>round.blocks.find(b=>Math.floor(tick)>=b.startTick&&Math.floor(tick)<=b.endTick);
+
+/** Next round the metadata actually exposes; never invent a round number or a window. */
+export function nextReplayRound(metadata: { rounds: DesktopReplayRoundInfo[]; excludedRounds: number[] }, roundNumber: number): DesktopReplayRoundInfo | null {
+  const excluded = new Set(metadata.excludedRounds);
+  return metadata.rounds
+    .filter(round => round.round > roundNumber && !excluded.has(round.round) && round.blocks.length > 0)
+    .sort((a, b) => a.round - b.round)[0] ?? null;
+}
+
+/** Replay owns its selection; invalid/stale ids fall back to a roster identity without nickname guessing. */
+export function resolveReplayPlayerId(players: readonly { id: string }[], candidate: string): string {
+  if (players.some(player => player.id === candidate)) return candidate;
+  return players[0]?.id ?? '';
+}
+
+export const REPLAY_VISIBLE_EVENT_LIMIT = 200;
+const hiddenReplayEventTypes = new Set(['weapon_fire', 'damage', 'flash']);
+
+/**
+ * Presentation-only append: only events at or before the displayed tick become visible,
+ * ids are never appended twice, and the rendered list stays bounded. Same-tick order is
+ * whatever the frozen Replay contract supplied; this function never reorders it.
+ */
+export function appendReplayEvents(current: readonly DesktopReplayEvent[], seen: Set<string>, events: readonly DesktopReplayEvent[],
+  tick: number, limit = REPLAY_VISIBLE_EVENT_LIMIT): { events: DesktopReplayEvent[]; appended: number } {
+  const appended: DesktopReplayEvent[] = [];
+  for (const event of events) {
+    if (hiddenReplayEventTypes.has(event.type) || Math.floor(event.tick) > Math.floor(tick) || seen.has(event.id)) continue;
+    seen.add(event.id);
+    appended.push(event);
+  }
+  if (!appended.length) return { events: [...current], appended: 0 };
+  const next = [...current, ...appended];
+  return { events: next.length > limit ? next.slice(next.length - limit) : next, appended: appended.length };
+}
 
 export class ReplayClock {
   tick: number; anchorMs = 0; speed = 1; playing = false;

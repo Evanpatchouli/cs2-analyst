@@ -81,9 +81,9 @@ test('real child installer timeout is failure, captures output and cleans only i
   const events = [];
   scope = new ProcessScope({ snapshot: async () => scope.roots.filter(r => r.child.exitCode === null && r.child.signalCode === null && r.child.pid).map(r => p(r.pid, process.pid, r.startedAt, 'node.exe')), terminate: async process => { const r = scope.roots.find(r => r.pid === process.pid); r.child.kill(); } });
   try {
-    await assert.rejects(runInstaller(scope, process.execPath, ['-e', 'console.log("installer-fixture");setInterval(()=>{},1000)'], { label: 'fixture install', directory: tmpdir(), timeoutMs: 250, audit: e => events.push(e) }), /installer exit.*超时/);
+    await assert.rejects(runInstaller(scope, process.execPath, ['-e', 'console.log("installer-fixture");setInterval(()=>{},1000)'], { label: 'fixture install', directory: tmpdir(), timeoutMs: 1500, audit: e => events.push(e) }), /installer exit.*超时/);
     assert.match(events[0].stdout, /installer-fixture/);
-    assert.ok(events[0].elapsedMs >= 250);
+    assert.ok(events[0].elapsedMs >= 1500);
     assert.equal(scope.roots[0].child.exitCode !== null || scope.roots[0].child.signalCode !== null, true);
     assert.equal(sentinel.exitCode, null, 'unrelated same-image process survives');
   } finally { sentinel.kill(); }

@@ -54,7 +54,7 @@ const items: { value: ViewId; label: string; icon: (props: IconProps) => React.R
   { value: 'deep-review', label: '深度复盘', icon: DeepReviewIcon },
   { value: 'timeline', label: '回合时间线', icon: TimelineIcon },
   { value: 'analysis', label: '分析', icon: AnalysisIcon },
-  { value: 'replay', label: '地图回放', icon: ReplayIcon },
+  { value: 'replay', label: '比赛回放', icon: ReplayIcon },
   { value: 'heatmap', label: '热力图', icon: AnalysisIcon },
 ];
 

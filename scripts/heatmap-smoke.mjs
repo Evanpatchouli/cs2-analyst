@@ -166,9 +166,10 @@ try {
   await evaluate(`document.querySelector('[data-sidebar-import]').click()`);
   await liveWait(() => evaluate(`document.querySelector('main')?.dataset.status==='success'&&document.querySelector('[data-heatmap-session]')?.dataset.heatmapSession!==${JSON.stringify(metadata.sessionId)}`), 'UI recovery and fresh session', 120_000);
   assert.equal(await evaluate(`document.getElementById('report-tab').getAttribute('aria-selected')`), 'true');
-  assert.equal(await evaluate(`document.querySelectorAll('#heatmap-panel button[aria-pressed=false]').length`), 3);
+  assert.equal(await evaluate(`document.querySelectorAll('#heatmap-panel button[aria-pressed=true]').length`), 1, 'fresh report opens with the position layer on');
+  assert.equal(await evaluate(`document.querySelectorAll('#heatmap-panel button[aria-pressed=false]').length`), 2, 'kill/death layers start off');
   await memory('after-ui-session-replacement');
-  await evaluate(`document.getElementById('heatmap-tab').click();document.querySelector('#heatmap-panel button[aria-label="玩家位置密度"]').click()`);
+  await evaluate(`document.getElementById('heatmap-tab').click()`);
   await liveWait(() => evaluate(`Boolean(document.querySelector('[data-heatmap-stats=positions]'))`), 'replacement UI layer');
   await evaluate(`window.cs2Analyst.session.release(document.querySelector('[data-heatmap-session]').dataset.heatmapSession)`);
   await evaluate(`(() => {const s=document.querySelector('[aria-label="热力图阵营"]');s.value='CT';s.dispatchEvent(new Event('change',{bubbles:true}));})()`);

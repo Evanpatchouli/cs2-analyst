@@ -32,6 +32,6 @@ export function KillFeedEvent({ event, round, onReplay }: { event: DesktopTimeli
       {event.assistedFlash === true ? <Tooltip content="闪光助攻" relationship="description"><span className={s.icon} tabIndex={0} aria-label="闪光助攻"><FlashAssistIcon /></span></Tooltip> : null}
     </span>
     <Tooltip content={victim} relationship="description"><span className={s.name} tabIndex={0} data-killfeed-victim>{victim}</span></Tooltip>
-    {onReplay?<Button appearance="subtle" size="small" aria-label={`在地图回放中查看 ${label}`} data-timeline-replay-tick={event.tick} onClick={onReplay}>回放</Button>:null}
+    {onReplay?<Button appearance="subtle" size="small" aria-label={`在比赛回放中查看 ${label}`} data-timeline-replay-tick={event.tick} onClick={onReplay}>回放</Button>:null}
   </div>;
 }

@@ -1,7 +1,9 @@
 import { app, BrowserWindow, dialog, ipcMain, utilityProcess } from 'electron';
 import { fileURLToPath } from 'node:url';
-import { extname, isAbsolute, join } from 'node:path';
+import { dirname, extname, isAbsolute, join } from 'node:path';
 import { randomUUID } from 'node:crypto';
+import { access, mkdir, readFile, stat, writeFile } from 'node:fs/promises';
+import { constants as fsConstants } from 'node:fs';
 import type { ImportPhase, ImportResult, DesktopReplayMetadata, DesktopReplayRequest, DesktopReplayResult,
   DesktopHeatmapMetadata, DesktopHeatmapRequest, DesktopHeatmapResult } from '@cs2-analyst/report-contract';
 import { HEATMAP_MAX_PENDING, HEATMAP_TIMEOUT_MS, validateHeatmapRequest, validateHeatmapResult } from '../shared/heatmap-ipc.ts';
@@ -98,6 +100,53 @@ function injectedDemoPath(): string | undefined {
   return undefined;
 }
 
+/**
+ * Remember only the last DEM directory, never the DEM itself. The file lives under
+ * userData so a normal restart keeps the chooser start location. Every filesystem
+ * failure is best-effort: a broken setting must never block an otherwise valid import.
+ */
+const DEM_SETTINGS_FILE = 'demo-settings.json';
+async function accessibleDirectory(value: unknown): Promise<string | undefined> {
+  if (typeof value !== 'string' || value.trim().length === 0 || !isAbsolute(value)) return undefined;
+  try {
+    const info = await stat(value);
+    if (!info.isDirectory()) return undefined;
+    await access(value, fsConstants.R_OK);
+    return value;
+  } catch {
+    return undefined;
+  }
+}
+async function documentsDirectory(): Promise<string | undefined> {
+  try {
+    return await accessibleDirectory(app.getPath('documents'));
+  } catch {
+    return undefined;
+  }
+}
+async function lastDemoDirectory(): Promise<string | undefined> {
+  try {
+    const parsed = JSON.parse(await readFile(join(app.getPath('userData'), DEM_SETTINGS_FILE), 'utf8'));
+    return await accessibleDirectory(parsed?.lastDemoDirectory);
+  } catch {
+    return undefined;
+  }
+}
+async function demChooserDirectory(): Promise<string | undefined> {
+  return (await lastDemoDirectory()) ?? (await documentsDirectory());
+}
+async function rememberDemoDirectory(filePath: string): Promise<void> {
+  try {
+    const directory = await accessibleDirectory(dirname(filePath));
+    if (!directory) return;
+    const settings = join(app.getPath('userData'), DEM_SETTINGS_FILE);
+    await mkdir(dirname(settings), { recursive: true });
+    await writeFile(settings, JSON.stringify({ lastDemoDirectory: directory }, null, 2) + '\n', 'utf8');
+  } catch {
+    // Best-effort only: the import pipeline continues with its existing behaviour.
+  }
+}
+
 function analyzeDemo(filePath: string, window: BrowserWindow): Promise<ImportResult> {
   stopAnalysisWorker();
   return new Promise(resolve => {
@@ -160,8 +209,11 @@ function analyzeDemo(filePath: string, window: BrowserWindow): Promise<ImportRes
 }
 
 /** Shared tail of every import path: extension gate, parsing progress, worker analysis. */
-async function analyzeFromPath(filePath: string, window: BrowserWindow): Promise<ImportResult> {
+async function analyzeFromPath(filePath: string, window: BrowserWindow, rememberDirectory = false): Promise<ImportResult> {
   if (extname(filePath).toLowerCase() !== '.dem') return { kind: 'error', message: '请选择 .dem 文件。' };
+  // Injected test paths must not become a real user's recent directory. Persistence is
+  // deliberately fire-and-forget so a slow or broken settings write never delays import.
+  if (rememberDirectory) void rememberDemoDirectory(filePath);
   if (!window.isDestroyed()) window.webContents.send('report:progress', 'parsing');
   return await analyzeDemo(filePath, window);
 }
@@ -181,11 +233,16 @@ ipcMain.handle('report:import', async (event): Promise<ImportResult> => {
     if (injected) {
       filePath = injected;
     } else {
-      const result = await dialog.showOpenDialog(window, { title: '选择 CS2 DEM', properties: ['openFile'], filters: [{ name: 'CS2 Demo', extensions: ['dem'] }] });
+      const defaultPath = await demChooserDirectory();
+      const result = await dialog.showOpenDialog(window, {
+        title: '选择 CS2 DEM', ...(defaultPath ? { defaultPath } : {}),
+        properties: ['openFile'], filters: [{ name: 'CS2 Demo', extensions: ['dem'] }],
+      });
+      // Cancelling must leave the previously remembered directory untouched.
       if (result.canceled || !result.filePaths.length || window.isDestroyed()) return { kind: 'cancelled' };
       filePath = result.filePaths[0];
     }
-    return await analyzeFromPath(filePath, window);
+    return await analyzeFromPath(filePath, window, injected === undefined);
   } catch (error) {
     console.error('DEM import failed', error);
     return { kind: 'error', message: '无法导入 DEM。请检查文件权限后重新选择。' };
@@ -202,7 +259,7 @@ ipcMain.handle('report:import-file', async (event, value: unknown): Promise<Impo
   if (importing) return { kind: 'error', message: '已有分析任务正在运行。' };
   importing = true;
   try {
-    return await analyzeFromPath(value, window);
+    return await analyzeFromPath(value, window, true);
   } catch (error) {
     console.error('DEM import failed', error);
     return { kind: 'error', message: '无法导入 DEM。请检查文件权限后重新选择。' };

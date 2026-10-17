@@ -66,7 +66,21 @@ export function AnalysisIcon(props: IconProps) {
   </Icon>;
 }
 
-/** 侧边栏导航：地图回放（折叠地图）。 */
+/** 回放：播放（播放三角，单色线稿）。 */
+export function PlayIcon(props: IconProps) {
+  return <Icon {...props}>
+    <path d="M7 4.6 15 10 7 15.4V4.6Z" />
+  </Icon>;
+}
+
+/** 回放：暂停（两条竖线，与播放图标同网格）。 */
+export function PauseIcon(props: IconProps) {
+  return <Icon {...props}>
+    <path d="M7.5 5v10M12.5 5v10" />
+  </Icon>;
+}
+
+/** 侧边栏导航：比赛回放（折叠地图）。 */
 export function ReplayIcon(props: IconProps) {
   return <Icon {...props}>
     <path d="M7 4.2 3.2 5.6v9.8L7 14l6 1.4 3.8-1.4V4.2L13 5.6 7 4.2Z" />

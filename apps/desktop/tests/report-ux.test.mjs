@@ -31,6 +31,7 @@ const { weaponAsset, killfeedWeaponAssets, killfeedDeathNoticeAssets } = await i
 const { DeepReview } = await import('../renderer/src/deep-review.tsx');
 const { AnalysisViews } = await import('../renderer/src/analysis-views.tsx');
 const { HeatmapView, HeatmapLayerDetails } = await import('../renderer/src/heatmap-view.tsx');
+const { ReplayPlayer } = await import('../renderer/src/replay-player.tsx');
 const { fixture: heatmapFixture, map: heatmapMap } = await import('./heatmap-fixture.mjs');
 const { projectMapHeatmap } = await import('../shared/heatmap.ts');
 const render = element => renderToStaticMarkup(createElement(SSRProvider, null, element));
@@ -39,6 +40,34 @@ test('heatmap missing metadata renders independent disabled layers, all filters,
   const html = render(createElement(HeatmapView, { players: [], active: true, sessionActive: true }));
   for (const text of ['玩家位置密度', '击杀位置', '死亡位置', '热力图玩家', '热力图阵营', '热力图回合', '热力图楼层', '热力图分辨率', '热力图采样集', '包含冻结时间', '热力图元数据不可用', '地图映射或资源不可用', '不代表连续停留时间']) assert.ok(html.includes(text), text);
   assert.equal([...html.matchAll(/aria-pressed="false"/g)].length, 3);
+});
+
+test('heatmap defaults to the available position layer only and keeps unavailable sources off', () => {
+  const metadata = {
+    schemaVersion: 1, sessionId: 'session', matchId: 'match', available: true, unavailableReason: null,
+    layers: { positions: { available: true, unavailableReason: null }, kills: { available: true, unavailableReason: null }, deaths: { available: true, unavailableReason: null } },
+    map: { id: 'synthetic', resourceId: 'test', alignment: 'unconfirmed', precision: 'schematic-position-distribution' },
+    samplingVersion: 'test', resolutions: [16, 32, 64], playerIds: ['1'], rounds: [1, 2], floors: ['default'],
+  };
+  const html = render(createElement(HeatmapView, { metadata, players: [{ id: '1', nickname: 'A' }], active: true, sessionActive: true }));
+  assert.ok(html.includes('data-heatmap-enabled="positions"'));
+  assert.equal([...html.matchAll(/aria-pressed="true"/g)].length, 1);
+  assert.equal([...html.matchAll(/aria-pressed="false"/g)].length, 2);
+  const unavailable = { ...metadata, layers: { ...metadata.layers, positions: { available: false, unavailableReason: 'replay-unavailable' } } };
+  const off = render(createElement(HeatmapView, { metadata: unavailable, players: [{ id: '1', nickname: 'A' }], active: true, sessionActive: true }));
+  assert.ok(off.includes('data-heatmap-enabled=""'));
+  assert.equal([...off.matchAll(/aria-pressed="false"/g)].length, 3);
+  assert.ok(off.includes('位置回放源不可用'));
+});
+
+test('replay surface is named 比赛回放 in its title, aria label and unavailable fallback', () => {
+  const metadata = { schemaVersion: 1, available: false, unavailableReason: '本场缺少可靠回放窗口', sessionId: null, matchId: 'm', map: 'de_dust2',
+    resourceId: 'de_dust2', samplingVersion: 'test', tickRate: 64, maxInterpolationTicks: 8, perspective: 'global', players: [], rounds: [], excludedRounds: [] };
+  const html = render(createElement(ReplayPlayer, { metadata, initialPlayerId: '1', active: false, jump: null }));
+  assert.ok(html.includes('比赛回放'));
+  assert.ok(html.includes('aria-label="比赛回放"'));
+  assert.equal(html.includes('地图回放'), false);
+  assert.equal(html.includes('2D 地图回放'), false);
 });
 
 test('heatmap details distinguish zero events, undefined ratios, source loss and filtered population', () => {
