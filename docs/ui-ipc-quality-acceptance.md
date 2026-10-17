@@ -75,9 +75,9 @@ Nuke 楼层自动测试使用真实 DEM/真实 IPC：验证实际解码 PNG URL�
 | 原生最大化/还原 | PASS；鼠标标题栏操作，1920×1032 → 1024×640，Canvas 669px → 277px，恢复清晰且控制区可见 |
 | Nuke 多楼层 fixture | PASS；原生 chooser 选 `.demo/nuke.dem`，鼠标切下层/主层，雷达正确切换，0/10 玩家点位，截图保留 |
 | Explorer 拖放 `demo1.dem` 与非 DEM 文件 | PASS（用户手工反馈）；用户明确确认“demo1 能出报告，非 DEM 拒绝后再拖 demo1 也能恢复”。用户未指定非 DEM 文件名。Agent 工具曾拒绝跨来源窗口拖动（`outside window bounds`），没有将 CDP File 冒充 Explorer，也没有声称保存了用户操作截图 |
-| 不同缩放的物理显示器间移动 | NOT RUN；没有可核验的跨物理显示器执行证据；CDP DPR 变化不能替代 |
+| 不同缩放的物理显示器间移动 | **ACCEPTED / WAIVED（产品负责人 2026-10-17 决策）**；未进行物理实测，CDP DPR 变化不能替代；不再阻塞当前 UI / IPC 质量验收 |
 
-用户已补充 Explorer 拖放、非 DEM 错误反馈及恢复的手工结果。物理 DPI 尚无执行反馈，继续保持 NOT RUN。
+用户已补充 Explorer 拖放、非 DEM 错误反馈及恢复的手工结果。产品负责人于 2026-10-17 明确接受跨物理显示器 DPI 未实测这一剩余风险：该验收项状态关闭为 **ACCEPTED / WAIVED**，不再阻塞当前 UI / IPC 质量验收。此决定是产品验收豁免，不代表物理显示器切换已被技术实测通过；CDP 模拟 DPR 仍不能替代真实跨屏测试。
 
 原生输入使用 computer-use 技能的 `@oai/sky`，未混用 PowerShell UI Automation。工具误将 Electron 窗口归在 Codex appId 下，按唯一的 `CS2 Analyst` 返回窗口及实际截图确认目标；没有操作 Codex 聊天界面。`native-observations.json` 保存时间、状态、viewport、screen、所选 Tab、Canvas 与异常列表；PNG 是同一会话的 CDP 证据快照，原生截图和输入仍可在工具轨迹核验。原始 observations 包含首次未成功 resize 的 1280×800 观测，未将其写成 1024×640 PASS。
 
@@ -88,12 +88,12 @@ Nuke 楼层自动测试使用真实 DEM/真实 IPC：验证实际解码 PNG URL�
 | 维度 | 权重 | 得分 | 评分依据及剩余扣分原因 |
 | --- | ---: | ---: | --- |
 | IPC 安全边界与生命周期 | 20% | 9.4 | File、trusted sender/frame、互斥及失败/取消/session 清理有效；精确进程身份保护无关实例。异常进程树依赖 CIM 观测，未形成 OS 级进程容器保证 |
-| 回放几何、DPR 与资源清理 | 20% | 9.0 | 内容盒/DPR/监听清理、真实播放与 Dust2/Nuke 验证完整；跨物理显示器 DPI 仍 NOT RUN |
+| 回放几何、DPR 与资源清理 | 20% | 9.0 | 内容盒/DPR/监听清理、真实播放与 Dust2/Nuke 验证完整；跨物理显示器 DPI 未实测，产品负责人已接受该剩余风险且不再阻塞本轮验收 |
 | UI 可访问性与交互正确性 | 15% | 9.0 | 真实 DOM/AX/键盘/Tooltip/五 Tab/原生最小窗口/滚动及同场重导入通过；评分时 Explorer 手工结果尚未确认，此后用户补充成功反馈，未据此自行加分 |
 | 自动化确定性及反向验证 | 20% | 9.2 | 条件等待、暂停帧同步、主错误保留及隐藏/裁切反向断言有效；部分深度复盘 fixture 依赖 React 私有 Fiber，有升级脆弱性 |
 | 安装、打包与端到端验证 | 15% | 9.2 | 两包完整安装/ASAR/安全边界/报告/异常/卸载通过；真实 NSIS 超时故障注入覆盖有限，Explorer 现有用户反馈但无录屏 |
 | 可维护性和验收文档 | 10% | 9.0 | 共享生命周期工具、范围有限的产品修复、诊断与状态记录清楚；部分 smoke 脚本仍密集，完整材料主要保留本机 |
 
-加权分：`9.4×20% + 9.0×20% + 9.0×15% + 9.2×20% + 9.2×15% + 9.0×10% = 9.15`。代码质量达到目标，自动化安装验收通过；仍不宣布全部物理设备验收或发布 PASS。本页后续提交只补充独立结论、用户手工反馈和交付记录，不改变已验收代码。
+加权分：`9.4×20% + 9.0×20% + 9.0×15% + 9.2×20% + 9.2×15% + 9.0×10% = 9.15`。代码质量达到目标，自动化安装验收通过；跨物理显示器 DPI 未实测，但已由产品负责人接受并豁免为非阻塞项。**当前 UI / IPC 质量验收 PASS（9.15/10）**。此豁免不等于全部物理设备场景均已实测，也不自动替代独立的 v0.1 发布验收结论。
 
 代码修改文件：`apps/desktop/renderer/src/{store.ts,main.tsx}`、`apps/desktop/tests/{import-ipc.test.mjs,installed-smoke-lifecycle.test.mjs}`、`scripts/{installed-smoke-lifecycle.mjs,smoke-runtime.mjs,installed-app-smoke.mjs,desktop-report-smoke.mjs,replay-smoke.mjs,window-shell-checks.mjs,report-ux-checks.mjs,deep-review-ux-checks.mjs,final-installed-walkthrough.mjs}`。文档修改：本页、`ui-ipc-acceptance.md`、`windows-packaging.md`、`desktop-report.md`。
