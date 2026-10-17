@@ -62,7 +62,7 @@ P5.5 Round Timeline MVP — **PASS**。报告页底部新增独立“回合时�
 - P5.5 已完成：回合时间线与 Findings → Timeline 联动。
 - P5.5.1 已完成：名单与 Timeline 统一隐藏原始长数字玩家标识，保留 DTO 追溯 ID。
 - P5.6 已完成：Analysis Views MVP（全场玩家指标对比、回合击杀趋势、CT/T 对比），基于冻结 Analytics 与 Timeline 的只读展示投影。
-- 后续阶段：P6 2D地图回放已完成本机Dust2验收（见下文）；P7.1统计投影、P7.2会话与IPC已通过，P7.3与额外Analytics算法未开始。不做3D回放；额外Analytics算法尚未排期。
+- 后续阶段：P6 2D地图回放已完成本机Dust2验收（见下文）；P7.1统计投影、P7.2会话与IPC、P7.3 Renderer与筛选已通过；额外Analytics算法未开始。不做3D回放；额外Analytics算法尚未排期。
 
 P5.6.2 Report UX Polish — **PASS**。比赛报告 / 回合时间线 / 分析三个 mounted Tab；Findings 原生证据入口 hover/focus 与先切 Tab 的回合联动；当前玩家姓名和条图统一 #62abf5；Frozen multiKills counts 直接投影、零项隐藏；CT/T 独立内缩 divider；Timeline 单色自绘 SVG kill-feed、爆头/闪光助攻原样投影与未知武器 fallback。严格保持 P3/P4 与 Timeline 筛选、round time、nickname 原样规则；无新增算法或产品模块。
 
@@ -110,9 +110,9 @@ Current: **v0.1 Final Acceptance FINAL PASS; P5 COMPLETE; P5.7 FINAL PASS.** 验
 - P6.0–P6.4已按用户指定的单一Dust2 fixture与本机个人非商业使用范围通过自动化验收：固定Valve manifest定向提取与区域配准、独立8Hz采样、生命周期断点、有界会话/受信分块IPC、Canvas播放器、Timeline/Findings联动、源码外安装与离线资源检查。
 - `pnpm typecheck` / `pnpm build`、相关回归、真实Electron与生产/测试seam安装检查通过；原报告与旧公开入口完整hash相同。其他地图/个人DEM及缺少的demo1 golden未重跑，不冒充PASS。Nuke仅资源/楼层边界合成验证。
 - 地图版本匹配仍未确认，所有地图明确标示示意。按用户2026-10-16扩图指令，Dust2、Inferno、Mirage、Ancient、Overpass、Vertigo、Nuke、Anubis、Train、Cache十图的13张Valve PNG与10份原overview随仓库提交/推送；Nuke/Vertigo/Train双层。新增地图资源/坐标/楼层验证不代表新增真实DEM已验收；保留来源摘要与第三方分发许可未确认记录。缺图时仍可构建并浏览报告/事件。
-- 技术机制见 [P6 回放技术路线](./replay-technical-route.md)，实际范围、命令、失败历史、预算实测和限制见 [实施记录](./replay-implementation.md) / [验收JSON](./replay-acceptance.json)。P7.1/P7.2 PASS见下文；P7.3/P8未开始。
+- 技术机制见 [P6 回放技术路线](./replay-technical-route.md)，实际范围、命令、失败历史、预算实测和限制见 [实施记录](./replay-implementation.md) / [验收JSON](./replay-acceptance.json)。P7.1/P7.2/P7.3 PASS见下文；P8未开始。
 
-## P7 地图热力图（P7.1 / P7.2 PASS；P7.3 未开始）
+## P7 地图热力图（P7.1 / P7.2 / P7.3 PASS）
 
 - P7 及后续研发阶段的真实 DEM 输入遵循 [DEM 样本白名单](./demo-fixtures.md)：纯地图名文件（如 `dust2.dem`）及 `demo1.dem`、`demo2.dem`、`demo.dem`；不使用带比赛名称的文件名或历史 `demo3.dem` 样本。
 
@@ -123,7 +123,7 @@ Current: **v0.1 Final Acceptance FINAL PASS; P5 COMPLETE; P5.7 FINAL PASS.** 验
 - 子阶段：
   - **P7.1 统计投影与契约 — PASS（2026-10-17，基线 `b6d572d9e9f08d08fb74e5545288b7e30b6fb58d`）**：独立纯 presenter `projectMapHeatmap()` + JSON-only `MapHeatmapProjection` schema v1；三层独立统计与筛选，16/32/64 网格，all-valid / 经 tick 对齐核验的 uniform-8hz。修正未知 alive 误算死亡的歧义，源四分类、筛选后网格人口/覆盖、映射拒绝与事件定位原因明确分开。13/13 合成 + 1/1 白名单 Dust2 真实测试通过；217570 = 178514 有效 + 39056 确认死亡 + 0 不可用 + 0 缺失；击杀 161/162、死亡 162/162、1 world、4 窗外事件排除；32×32 完整 DTO 两次 SHA-256 一致。P3 53/53、P4 17/17、Deep Review 210/210、Parser 48/48、Desktop 72 项既有测试及全仓 typecheck/build 通过，独立复审无阻塞。完整契约与命令见 [§12 实施验收](./map-heatmap-feasibility.md#12-p71-实施与验收2026-10-17) / [Dust2 实测 JSON](./map-heatmap-p71-dust2.json)。未接入 UI / IPC / 会话，未执行安装版热力图验收；其他地图不据此获得真实热力图验收。
   - **P7.2 会话与 IPC 集成 — PASS（2026-10-17，基线 `1d03dd5463f980764dac61fba256b584f8602bb8`，实现提交 `bc3a84ea64444fac8791db705477e10c131549de`）**：共享几何提取、Worker持有现有解析引用、默认32×32三层有界缓存、JSON-only元数据与单图层请求、Main/Worker双重运行时校验已完成。请求16KiB、响应/默认缓存各512KiB、最多2在途/15秒、总Worker JS堆512MiB初始化准入；Replay64MiB原上限不变。三层独立降级，热力图单独可用时保留原Worker，重导入/取消/release/关窗清理；真实Electron发现并修复spawn前取消残留。Dust2默认hash与P7.1一致，178514有效位置、击杀161/162、死亡162/162；30组真实IPC筛选/16/32/64/三层一致。最大实测响应352194B、缓存238029B、源引用相关堆差126568496B；实际Utility峰值1499947008B，不能由小DTO推断内存安全。最终各包443项＋辅助9项全过，0失败/跳过；报告/回放/新增热力图真实smoke通过，独立复审无剩余阻断。完整协议、性能、内存、失败修复与未执行项见 [§13 P7.2验收](./map-heatmap-feasibility.md#13-p72-会话与-ipc-实施验收2026-10-17)。
-  - **P7.3 Renderer 与筛选 — 未开始**：前置P7.1/P7.2已通过，必须直接消费已验证的单层DTO/筛选协议并尊重会话生命周期和预算；保持P7.1统计与P7.2安全/内存准入不变。待实现Canvas 2D叠加、图层/玩家/阵营/回合/楼层控件、图例与coverage、unconfirmed/仅示意说明及缺源降级UI；待执行五Tab/回放回归、真实绘制/筛选性能、Electron及Windows安装版热力图端到端。其他地图/个人DEM与地图版本配准尚无本阶段热力图真实验收，不得从Dust2推定通过。
+  - **P7.3 Renderer 与筛选 — PASS（2026-10-17，基线 `614350988033166b575c141a834f6b0af1d0b8d8`，实现提交 `8cb39393bb63e3a599155be0e7d4ae924c59e3f4`）**：第六个「热力图」Tab、单个高DPI Canvas的三独立图层、七项筛选、两路有界请求/合并/过期保护、覆盖率/图例/缺源与图片降级已完成。真实Dust2：178514有效位置、击杀161/162、死亡162/162；54个UI DTO与实际IPC及纯函数投影一致，168请求峰值2，180个绘制样本；16/32/64绘制p95 0.5/0.8/1.4ms，DPR1/2四组尺寸181476–6656400B且始终一个Canvas。Desktop 122、唯一覆盖450、辅助9、typecheck 15/15、build 8/8、报告smoke 3场景、heatmap与replay真实smoke通过（导入13009.7ms≤15000）；生产与test-seam安装包各54案例、生命周期与卸载通过。导入耗时本机波动（P7.2 6.6s、QA 15.65s、最终13.0s）保留为性能余量风险；其他地图/个人DEM热力图与物理跨屏DPI未实测，地图版本仍unconfirmed。详见[实施与验收](./map-heatmap-feasibility.md)。
 - 验收矩阵（统计正确性 S1–S10、数据覆盖 D1–D8、回归保护 R1–R5）、风险与进入下一阶段的前置条件见该文档 §9–§11。
 
 ## P8 AI Coach（原 P6，未开始）

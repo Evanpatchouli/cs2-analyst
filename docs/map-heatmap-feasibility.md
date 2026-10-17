@@ -813,3 +813,147 @@ RSS 仅下降286720 B，说明 native/V8 allocator 留存，不能把堆回收�
 超时/超大/缺源/异常由运行时故障注入验证，实际Electron没有人为阻塞15秒制造超时。
 地图版本仍unconfirmed，图只表达采样位置分布；P7.3须消费本协议并完成UI、覆盖/图例/版本说明、
 Electron绘制性能和安装版端到端后才能验收。本阶段到P7.2停止。
+
+
+## P7.3 — Renderer、筛选与 Windows 安装验收（2026-10-17）
+
+本轮采用基线 `614350988033166b575c141a834f6b0af1d0b8d8`。开始前执行 `git fetch origin`，HEAD 与 origin/main 相同，工作区干净。
+本节只记录本轮工作；前面的 P7.1/P7.2 数字与状态仍是各阶段的历史记录。
+
+### 页面、绘制与统计展示
+
+- 保留原五个 Tab 的 ID、panel、键盘与折叠导航，在地图回放后新增 `heatmap-tab` / `heatmap-panel`。成功导入仍回到比赛报告。热力图自己的玩家筛选不写全局目标玩家。
+- `heatmap-view.tsx` 使用 Fluent UI v9 和既有深色令牌，顶部可换行控件、左侧正方形地图、右侧独立滚动统计。`HeatmapLayerDetails` 只呈现 DTO，零分母为 `—`，零事件与源不可用分别表达。
+- 三层默认全关，真实 Button / aria-pressed / 可访问名称；源开关依据 metadata.layers.available / unavailableReason 独立禁用，不从空 projection status 猜源缺失。
+- 单个 Canvas 2D 复用 `replayMapDefinitions`、资源身份、楼层元数据与 `replayMapAssets`。网格直接按 row-major normalized-radar 索引画矩形，不再次做 worldToRadar，不增加采样、平滑或空间插值。合法非空单元格才绘制；null intensity 不画。
+- palette.heatmap 的 positions `#54c8f0`、kills `#f8c45a`、deaths `#f27896`；固定位置 → 击杀 → 死亡 source-over 合成，alpha = intensity × 0.8。图例说明当前图层/筛选内相对最大单元格计数归一化，不能跨层比较数量；同时列绝对采样/事件/网格与单元格计数。指针及方向键可选择单元格。
+- 位置源有效采样明确标为阵营/楼层筛选前，另列 grid.validPositionSamples 的当前所选有效采样。positionCoverage、positionCompleteness、selectedPositionCoverage 分别列出并解释同一采样机会分母；已确认死亡/不可用/缺位置、未知与其他阵营分别计数。覆盖率不是时间占比。
+- 事件列 scopeEvents / locatableEvents / eventPositionCoverage、首个失败原因与窗口外/未知主体/阵营计数。网格还列越界、无效映射、未知或歧义楼层、其他楼层，保留 excluded / approximate roster / freeze-boundary-unknown 提示。
+- 地图缺失或图片加载失败保留统计并明确遮罩降级。双层地图的“全部楼层”明确说明是合并统计、主层底图，提示选择单层；不猜未知 Z 或边界。地图存在时显示“地图版本未确认 · 仅示意”，声明不是连续停留时间、LOS、掩体、可见性或战术收益，不声称当前地图版本精确配准。
+
+### 请求调度和 Canvas 生命周期
+
+`heatmap-state.ts` 的 renderer-wide scheduler 始终保留真实未完成请求的槽位，最多 2 路；更新时取消旧队列并只保留最新目标，每个图层最多一个待执行请求。即使旧组件卸载或会话替换，也不提前释放旧在途槽位。generation 保护迟到结果，渲染 key 在新状态提交时立即使旧 DTO 失效，显示加载或错误；不复用旧筛选的统计。完整 scope 的“全部”字段使用 null，schemaVersion=1，按单层经现有 preload getGrid 调用。Main 的验证、缓存、15s 超时和预算未改；Renderer 也复用既有请求/结果验证器。错误与异常均收敛为可重试状态。不在组件卸载时释放整个分析会话。
+
+`heatmap-canvas.ts` 管理一个图片对象、ResizeObserver、DPR 媒体监听和一个合并 RAF。图片不随筛选重载，隐藏 Tab 缩至 1×1 backing store，回到 Tab 重新适配；卸载清理图片事件、observer、window/media listener、RAF 和 DPR timer。独立 Electron 探针复现同 CSS 尺寸的 CDP DPR 变化不发 MQL/resize/RO 事件，因此增加 750ms 的 DPR 标量检查，仅 DPR 改变才安排重绘，不发送 IPC。RAF/取消 RAF 显式绑定 window，避免浏览器 Illegal invocation。DPR 1/2 是 CDP 模拟，不冒称物理跨显示器实测。
+
+### 自动化证据方法与失败记录
+
+新增 scheduler/Canvas 测试覆盖并发、队列合并、过期结果、会话替换、错误、异常/无效结果、row-major/颜色合成、null/空/非法 cell、隐藏恢复、无事件 DPR 检查和清理。Report SSR 覆盖缺 metadata、零事件、null 比率、独立源降级、uniform 不适用及三个位置覆盖率的区别。六 Tab 断言保留既有五 Tab 验收内容。
+
+`heatmap-ux-checks.mjs` 由 built Electron 与两安装包共同调用，实际操作六 Tab、键盘开关、三单层/三双层/三层、16/32/64、所有筛选、真实零事件范围、快速连续筛选、DPR/尺寸/最大化还原与 Tab 返回；读取 React current tree 仅用于 QA 核对真实 DTO，没有新增产品 debug API。每个 UI DTO 比较一次实际 preload IPC，built smoke 另比较独立控制进程纯函数投影。Canvas 使用实际 RGBA 哈希变化及每层非空单元格中心 source-over 颜色检查（允许底图重采样的微小舍入误差），不是仅查 canvas/data-*。缺源、会话结束、缺地图与坏图片为明确标注的运行时合成 UX 场景，不冒充真实地图或源故障。
+
+built smoke 额外在显式 `--inspect` 的 Main QA 连接中包装并委托原有 heatmap handler，记录真实在途数与耗时，不改原验证/限额，不加入安装包或产品协议。观察完成恢复原 handler 并断开 Inspector，避免干扰关窗退出。原 P7.2 的真实 IPC、安全、并发拒绝、会话替换/取消/release/关窗 Utility 清理断言保留。
+
+开发中真实失败均保留本机日志：首次 RAF 未绑定触发报告错误边界，已修复；QA 曾误把 React effect 环状状态当 useState，已改只检查 state queue；旧截图严格哈希在 Chromium GPU/软件底图重采样切换后不同，改用真实单元格中心颜色合成加开关像素变化；DPR-only 检查实际失败后补标量后备。独立复审发现关窗后继续查 Renderer heap 的 QA 问题，已改为仅在连接/应用仍活着时查询，关闭后只核对进程且 heap 记录 null。并行重跑曾出现 Windows CIM 命令 10s 超时，作为失败记录，最终需串行重跑；未加长或跳过原清理断言。
+
+实际 Dust2：`.demo/dust2.dem`，557650967 B，SHA-256 `db90fe85aab023a1d2c8a5996182e6120d98ef494f02a070b17982b235e4958c`；每次真实 smoke 前重新校验，无下载或替代样本。默认 all-valid / 排除冻结 / 32×32：有效采样 178514，分母 217570，确认死亡 39056，位置覆盖率 0.8204899572551363、完整度 1；击杀 161/162（1 世界伤害不可定位），死亡 162/162。Dust2 为单层，其他地图/个人 DEM 的真实热力图验收独立且本轮未执行。
+
+本轮最终执行、性能/内存和独立终审结论见本节后续验收表；全部硬性项目实际通过之前不将 P7.3 标记 PASS。QA 日志、图像、安装目录及进程证据是私有本机产物，不提交。
+
+### 最终验收结果（2026-10-17）
+
+本节数字全部来自本轮最终产物：`.tmp/p73-qa-final/heatmap-electron.json`、`.tmp/p73-installed-smoke.log` 与
+`.tmp/installed-smoke-runs/run-Oss5UI/`、`.tmp/p73-replay-smoke-final2.log`、`.tmp/p73-desktop-tests-retry.log`、
+`.tmp/p73-typecheck-final.log`、`.tmp/p73-build-normal-final.log`、`.tmp/p73-pack-production-final.log`、
+`.tmp/p73-pack-test-seam-final.log`、`.tmp/p73-report-smoke.log`、`.tmp/p73-aux-tests-final.log`、
+`.tmp/p73-heatmap-smoke-final2.log`。其中 210/48/53/17 四项来自同日较早的 `.tmp/p73-tests.log` 全仓 run
+（该轮 Desktop 为 121，已被最终串行 122 取代）。这些是本机私有材料，不提交。
+
+**回归与测试**（唯一覆盖，不把重叠命令重复计数）：
+
+| 范围 | 结果 |
+|---|---|
+| Deep Review | 210 passed |
+| dem-parser | 48 passed |
+| analytics | 53 passed |
+| findings | 17 passed |
+| desktop（最终串行重跑，含新增 SSR/Canvas/scheduler 测试） | 122 passed |
+| 唯一覆盖合计 | **450 passed / 0 failed / 0 skipped** |
+| 辅助脚本测试（replay/radar/asset 等） | 9 passed，单独记账 |
+| `pnpm typecheck` | 15/15 tasks |
+| `pnpm build` | 8/8 tasks |
+| `desktop-report-smoke` | 3 个场景通过（真实报告、损坏 DEM、非 .dem 拒绝） |
+| `heatmap-smoke`（built Electron） | PASS，30 次真实 IPC，导入 15650.1 ms，缓存重复 9.3–10.9 ms |
+| `replay-smoke`（built Electron） | PASS，导入 13009.7 ms（既有 15000 ms 门槛未放宽） |
+| `test:installed`（生产包 + test-seam 包） | PASS，含安装、注入拒绝、磁盘 File 导入、热力图、失败恢复、会话替换、中断关闭、卸载 |
+| `git diff --check` / `git ls-files "*.dem"` | 干净 / 空输出 |
+
+**真实 Dust2 性能**（单次观测；只有绘制带 60 样本分位数）：
+
+| 指标 | 实测 |
+|---|---|
+| 导入（heatmap QA 运行，该脚本无 15 s 门槛） | 15650.1 ms |
+| 导入（最终 replay smoke，既有门槛） | 13009.7 ms |
+| 30 次真实单层 IPC（每案一次） | p50 13.45 ms / p95 96.4 ms / max 109.1 ms，合计 887.7 ms |
+| 缓存重复 5 次 | 10.9 / 10.7 / 9.3 / 9.5 / 9.6 ms |
+| 筛选批次墙钟 / IPC 合计 | 1996.2 ms / 887.7 ms |
+| 首次显示热力图（built Electron） | 647.4 ms |
+| 首次显示（正式安装包 / test-seam） | 562.8 ms / 581.5 ms |
+| 绘制 16×16（60 样本） | median 0.2 ms / p95 0.5 ms / max 0.6 ms |
+| 绘制 32×32（60 样本） | median 0.3 ms / p95 0.8 ms / max 1.2 ms |
+| 绘制 64×64（60 样本） | median 0.8 ms / p95 1.4 ms / max 2.2 ms |
+| 最大响应 / 元数据 | 352194 B / 909 B |
+| Replay 首帧 / drawP95 | 261.3 ms / 0.7 ms |
+
+**DPR 与布局**（CDP 视口模拟，不是物理跨屏实测）：
+
+| 视口 | DPR | CSS 正方形 | Backing | 像素字节 | Canvas 数 | 页面溢出 |
+|---|---|---|---|---|---|---|
+| 1024×640 | 1 | 213² | 213² | 181476 | 1 | 否 |
+| 1024×640 | 2 | 213² | 426² | 725904 | 1 | 否 |
+| 1920×1032 | 1 | 645² | 645² | 1664100 | 1 | 否 |
+| 1920×1032 | 2 | 645² | 1290² | 6656400 | 1 | 否 |
+
+四组布局均为右侧栏独立滚动，`canvasCount` 始终为 1。
+
+**Renderer 堆与进程内存**（`Runtime.getHeapUsage` usedSize 快照，未强制 GC；表中 MB 按 10^6 字节计，非 MiB）：
+
+| 阶段 | Renderer usedSize | Canvas |
+|---|---|---|
+| 导入后 base-only | 19.03 MB | 413² @DPR1，682276 B |
+| 单层 positions | 23.21 MB | 同上 |
+| 三层合成 | 21.00 MB | 同上 |
+| 重复筛选后 | 39.43 MB | 同上 |
+| 离开/返回 Tab | 42.61 MB | 同上 |
+| 30 组筛选与并发后 | 40.95 MB | 同上 |
+| 显式 release 后 | 11.88 MB | 同上 |
+| UI 会话替换后 | 16.32 MB | 隐藏态 1×1，4 B |
+| 关窗后 | —（进程已退出，不再查询 CDP） | — |
+
+Utility 进程条目的峰值 1503113216 B（约 1.50 GB）；import 期间进程表观察峰值 1335123968 B。两者口径不同
+（worker 条目 peakWorkingSet 与进程表快照），不能直接相减。关窗后进程表为空，无 worker/renderer 残留。
+这些是快照和单次观察，不构成所有场景的内存安全证明。
+
+**请求并发与 DTO 对照**：UI 流量记录 168 次请求，在途峰值 2，结束归 0；并发探测 3 发起 / 2 成功 / 1 被拒绝；
+54 个 UI DTO 与直接 preload IPC 及独立控制进程纯函数投影一致；三层单层案例的中心像素 source-over 检查为
+positions 265/277（其余 12 个落在 ±4 舍入容差外，门槛 ≥95%）、kills 103/103、deaths 114/114。
+
+**安装版**：生产包与 test-seam 包各 111.7 MB，asar 5.40 MB / 97 条目，原生绑定 4.1 MB unpacked，renderer 无 Node；
+各 54 个 UI DTO 案例、四组布局、热力图截图分别在 `heatmap-production` / `heatmap-test-seam` 子目录；
+正式包保留原生 chooser（注入 DEM 路径无效）、磁盘 File 导入、报告与进程清理、卸载；test-seam 保留失败恢复、
+会话替换、损坏 DEM 与中断关闭清理。
+
+**文件清单**：
+
+- 新增：`apps/desktop/renderer/src/heatmap-state.ts`、`heatmap-canvas.ts`、`heatmap-view.tsx`、
+  `apps/desktop/tests/heatmap-renderer.test.mjs`、`scripts/heatmap-ux-checks.mjs`。
+- 修改：`apps/desktop/renderer/src/{main.tsx,sidebar.tsx,theme.ts}`、
+  `apps/desktop/tests/{app-shell.test.mjs,report-ux.test.mjs}`、
+  `scripts/{heatmap-smoke,installed-app-smoke,replay-smoke,desktop-report-smoke,report-ux-checks,deep-review-ux-checks,window-shell-checks}.mjs`、
+  `docs/{map-heatmap-feasibility.md,roadmap.md}`。
+- 未改：Main/preload/shared 协议、Parser、Analytics、Findings、回放绘制算法、依赖与版本号。
+
+**实现提交**：`8cb39393bb63e3a599155be0e7d4ae924c59e3f4`（feat）和记录本节与路线图的 docs 提交；不 amend、不 force push、不改版本/tag/release。
+不提交 DEM、截图、安装包或 QA 日志。
+
+**未执行与剩余风险**：
+
+- 只有 Dust2 有真实热力图验收；其他地图与个人 DEM 未实测，不能从 Dust2 推定通过。楼层过滤只做了 Nuke 合成/几何边界验证。
+- DPR 1/2 是 CDP 模拟；物理跨显示器 DPI 变化未实测。
+- 缺源、缺地图、坏图片为运行时合成的 UX 场景，不是真实故障注入。
+- 导入耗时在本机 6.6 s（P7.2）到 15.7 s 之间波动；本轮两次 replay 复测曾超过既有 15000 ms 门槛，最终串行复测 13009.7 ms 通过。
+  P7.3 未改动 Main/Worker/Parser/解析路径，故归因为本机负载与 IO 波动而非 P7.3 代码；但该预算余量偏小，保留为风险。
+- 单元测试覆盖缺口（非阻断）：partial `metadata.layers` 的独立降级只有 Electron fault-injection 覆盖，SSR 单测只测 metadata 缺失；
+  组件级 key 失效只有 scheduler 级单测。热力图导航复用「分析」图标，没有专用图标。
+- 地图版本仍 `unconfirmed`，所有热力图均为示意；位置覆盖率不是时间占比，强度不能跨图层比较数量。
