@@ -1,5 +1,18 @@
 # Demo fixture matrix
 
+## Active development DEM whitelist (effective 2026-10-17)
+
+For new development work from P7 onward, only use these local input names:
+
+- **Map-only filename:** `.demo/<map-name>.dem`, for example `.demo/dust2.dem`, `.demo/nuke.dem`, or `.demo/mirage.dem`.
+- **Personal fixture names:** `.demo/demo1.dem`, `.demo/demo2.dem`, and `.demo/demo.dem`.
+
+Do not use match-named DEM filenames or `.demo/demo3.dem` as P7+ validation inputs. Existing P5.7 records that mention legacy personal fixtures remain historical evidence only and must not be treated as current-stage test results.
+
+The active Dust2 fixture path is `.demo/dust2.dem`. If the same local bytes still use a match-specific filename, rename the local file to `.demo/dust2.dem` without changing its contents; verify the expected SHA-256 before relying on historical measurements. The `.demo/` directory is local-only: never track DEM files, copy them into the repository, or download replacement samples.
+
+---
+
 Map-only names identify local fixtures; renaming does not change DEM bytes. No DEM is tracked, copied or downloaded by this migration.
 
 | Role | Local file | Required scope |
@@ -9,7 +22,7 @@ Map-only names identify local fixtures; renaming does not change DEM bytes. No D
 | Findings sanity | `.demo/mirage.dem` | P5.7.7 core gate |
 | Extended compatibility | `.demo/ancient.dem`, `.demo/anubis.dem`, `.demo/overpass.dem` | Optional; not mandatory acceptance gates |
 | Excluded / Not Required | `.demo/train.dem` | **REMOVED / NOT REQUIRED** |
-| Personal compatibility | `.demo/demo1.dem`, `.demo/demo2.dem`, `.demo/demo3.dem` | Product Owner-confirmed personal fixtures; compatibility gate **FAIL** (demo2) |
+| Historical P5.7 personal compatibility | `.demo/demo1.dem`, `.demo/demo2.dem`, `.demo/demo3.dem` | Historical P5.7 evidence only; `demo3.dem` is not permitted for P7+ validation |
 
 Train is retained locally only. Its professional sample is stale and insufficiently compatible with current CS2; high-quality current competitive samples are difficult to obtain. Historical-version compatibility noise is not introduced for map coverage. Train is neither a P5.7 nor a v0.1 Final Acceptance gate, debt or blocker; do not run it or add tests.
 

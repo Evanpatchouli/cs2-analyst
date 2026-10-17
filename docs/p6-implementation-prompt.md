@@ -1,7 +1,7 @@
 # P6 新会话实施提示词
 
 下方为最初实施任务原文，现保留用于追溯。2026-10-15 已执行至P6.4，本机实际范围、结果和限制见
-[实施记录](./replay-implementation.md)。执行中用户进一步明确：仅用现有`spirit-vs-faze-m3-dust2.dem`作真实验收，
+[实施记录](./replay-implementation.md)。执行中用户进一步明确：仅用现有`dust2.dem`作真实验收，
 初次验收素材仅本机个人非商业使用；完成后提交并推送代码。2026-10-16用户进一步明确将地图资源一并提交/推送，并扩至Dust2、Inferno、Mirage、Ancient、Overpass、Vertigo、Nuke、Anubis、Train、Cache十图（13张PNG与10份原overview）。下方原文不覆盖这些后续指令。
 
 ```text

@@ -20,6 +20,13 @@ Out of scope:
 - GSI live tracking.
 - General CS2 companion features.
 
+## DEM Fixture Policy
+
+- For new development phases, use only local `.demo/<map-name>.dem` fixtures with a map-only filename (for example `dust2.dem`, `nuke.dem`) and `.demo/demo1.dem`, `.demo/demo2.dem`, or `.demo/demo.dem`.
+- Do not use match-named DEM files or `demo3.dem` for P7+ validation. Historical acceptance records may preserve legacy fixture facts, but legacy inputs must not be reused as new-stage validation evidence.
+- The Dust2 real-data fixture path is `.demo/dust2.dem`. If the same local bytes still use an old match-specific filename, rename the file locally to this map-only name without changing its contents; verify its SHA-256 when required.
+- DEM files are local-only: never commit them, copy them into the repository, or download replacement samples.
+
 ## Architecture Rules
 
 - Desktop application: Electron + React + TypeScript.

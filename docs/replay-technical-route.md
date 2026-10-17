@@ -1,7 +1,7 @@
 # P6 2D 地图回放技术路线
 
 日期：2026-10-15。状态：P6.0–P6.4已完成本机范围的实现/自动化验收；真实结果、失败历史与固定预算见 [实施记录](./replay-implementation.md) / [验收JSON](./replay-acceptance.json)。
-用户指定仅使用现有 `spirit-vs-faze-m3-dust2.dem` 作本次真实 DEM 验证；其他样本缺失不阻塞，未执行项如实保留。
+用户指定仅使用现有 `dust2.dem` 作本次真实 DEM 验证；其他样本缺失不阻塞，未执行项如实保留。
 原P6验收使用范围为本机个人、非商业开发/安装验证。用户于2026-10-16进一步明确将地图资源一并提交/推送，并扩展至Dust2、Inferno、Mirage、Ancient、Overpass、Vertigo、Nuke、Anubis、Train、Cache十图：13张PNG与10份原overview随仓库保存；第三方分发许可仍未确认的记录保留。
 安装包、DEM、VPK和提取工具仍为本机产物，不随本次地图资源提交。
 其他真实地图/个人DEM与旧golden缺失按用户限定范围不阻塞，未执行项不记PASS；所有地图版本匹配仍未确认。

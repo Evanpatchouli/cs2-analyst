@@ -2,7 +2,7 @@
 
 2026-10-15，起点 `31124ff`。仅实施 P6；P3/P4/Deep Review 算法、阈值、golden 不变。
 
-用户明确选择 `.demo/spirit-vs-faze-m3-dust2.dem` 作为本次真实验证样本：
+用户明确选择 `.demo/dust2.dem` 作为本次真实验证样本：
 SHA-256 `db90fe85aab023a1d2c8a5996182e6120d98ef494f02a070b17982b235e4958c`，557650967 字节。
 缺少其他 DEM 不作为阻塞；未执行的其他地图/个人 DEM 验证不得称为通过。
 初次验收时用户确认资源用于本机个人、非商业开发与安装验证；第三方公开分发许可保持未确认。
@@ -60,7 +60,7 @@ P6.2 必须显式扩展会话生命周期，不能直接假定现有导入支持
 ```powershell
 node --test packages/dem-parser/dev/replay-sampling.test.mjs scripts/replay-resource-audit.test.mjs
 foreach ($rate in @(8,16,32)) {
-  node --expose-gc packages/dem-parser/dev/replay-probe.mjs .demo/spirit-vs-faze-m3-dust2.dem $rate ".tmp/p6-resources/replay-$rate.json"
+  node --expose-gc packages/dem-parser/dev/replay-probe.mjs .demo/dust2.dem $rate ".tmp/p6-resources/replay-$rate.json"
 }
 ```
 

@@ -3,7 +3,7 @@
 - 阶段：P7.0（审查与方案确定，**不实现**热力图功能）。
 - 实际基线：`main` / `HEAD` = `aae55e849ec8da35e4d946d2d883f25e7a88a58a`（2026-10-17 05:00:58 +0800，`docs(desktop): 记录独立终审及人工拖放验收`）。
   - 任务书给出的基线 `f0b3a224dbf15dff66d051ce69e02ff5a6d0caa4` 在本仓库不存在（`git merge-base` / `git log` 均报 `Not a valid commit name`）；以实际 `HEAD` 为准，工作区开始时干净。
-- 真实 DEM 基线：`.demo/spirit-vs-faze-m3-dust2.dem`，SHA-256 `db90fe85aab023a1d2c8a5996182e6120d98ef494f02a070b17982b235e4958c`，557650967 字节 —— 本次**重新计算并一致**。
+- 真实 DEM 基线：`.demo/dust2.dem`，SHA-256 `db90fe85aab023a1d2c8a5996182e6120d98ef494f02a070b17982b235e4958c`，557650967 字节 —— 本次**重新计算并一致**。
 - 审查环境：Windows x64，Node v26.3.0，pnpm 10.0.0，AMD Ryzen 7 5700G / 32 GiB，native `@cs2-analyst/demoparser-native` 0.42.0 绑定已构建。
 - 本次结论所依据的历史数据明确标注来源（P6.0 / P6.4），不冒充本轮重新测量；本轮新增的 Dust2 只读实验单独记账。
 
@@ -526,7 +526,7 @@ node .tmp/p7-heatmap-probe3.mjs
 | 命令 | 结果 |
 | --- | --- |
 | `git rev-parse HEAD; git status --porcelain` | HEAD `aae55e8…`，开始时工作区干净 |
-| `Get-FileHash .demo/spirit-vs-faze-m3-dust2.dem -Algorithm SHA256` | `db90fe85…4958c`，与记录一致 |
+| `Get-FileHash .demo/dust2.dem -Algorithm SHA256` | `db90fe85…4958c`，与记录一致 |
 | `node --test packages/dem-parser/tests/replay.test.mjs` | 7 pass / 0 fail |
 | `node --test packages/dem-parser/tests/*.test.mjs` | 48 pass / 0 fail / 0 skip |
 | `node --test packages/analytics/tests/*.test.mjs` | 53 pass / 0 fail |

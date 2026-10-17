@@ -3,7 +3,7 @@
   "date": "2026-10-15",
   "scope": "P6.0 developer experiment, one explicitly selected Dust2 DEM; not Electron/IPC acceptance",
   "fixture": {
-    "fileName": "spirit-vs-faze-m3-dust2.dem",
+    "fileName": "dust2.dem",
     "sha256": "db90fe85aab023a1d2c8a5996182e6120d98ef494f02a070b17982b235e4958c",
     "bytes": 557650967,
     "map": "de_dust2",

@@ -114,10 +114,12 @@ Current: **v0.1 Final Acceptance FINAL PASS; P5 COMPLETE; P5.7 FINAL PASS.** 验
 
 ## P7 地图热力图（P7.0 审查完成，实现未开始）
 
+- P7 及后续研发阶段的真实 DEM 输入遵循 [DEM 样本白名单](./demo-fixtures.md)：纯地图名文件（如 `dust2.dem`）及 `demo1.dem`、`demo2.dem`、`demo.dem`；不使用带比赛名称的文件名或历史 `demo3.dem` 样本。
+
 - 地图热力图展示；热力图不等于视线、掩体或战术收益证据。
 - **P7.0 地图热力图可行性与统计口径审查 — PASS / CONDITIONAL GO**（实际基线 `aae55e849ec8da35e4d946d2d883f25e7a88a58a`）。确认候选 A 玩家位置采样密度、候选 B 击杀位置、候选 C 死亡位置三层都可**完全复用现有 `parseWithReplay()` 已共享生成的 `Match` + `MatchReplay` + `MatchSpatialEvidence`**，无需新增 native 查询、第三方依赖，且不修改 P3/P4/Deep Review/Timeline；停留时间、投掷物区域/烟雾/火焰、LOS/掩体/可见性/战术收益明确排除。统计口径、公式、分母、筛选语义、空间聚合、Dust2 实测与架构建议见 [地图热力图可行性与统计口径](./map-heatmap-feasibility.md)。
   - CONDITION：结论只支持“示意图上的位置分布”；DEM 与雷达版本匹配仍 `unconfirmed`，真实 DEM 验证仅有 Dust2；位置采样密度不等于停留时间。
-  - 真实 DEM 复核：`.demo/spirit-vs-faze-m3-dust2.dem` SHA-256 `db90fe85…4958c` 与 557650967 字节一致；本轮只读实验确认 235604 个有效位置采样、`positionCoverage=0.8205`、`positionCompleteness=1.0`、窗口内击杀 161/162 与死亡 162/162 有精确 at-event 位置。
+  - 真实 DEM 复核：`.demo/dust2.dem` SHA-256 `db90fe85…4958c` 与 557650967 字节一致；本轮只读实验确认 235604 个有效位置采样、`positionCoverage=0.8205`、`positionCompleteness=1.0`、窗口内击杀 161/162 与死亡 162/162 有精确 at-event 位置。
 - 子阶段（P7.1–P7.3 **均未开始，不得标记完成**）：
   - **P7.1 统计投影与契约**：纯函数确定性投影 + JSON-only 契约；位置层、击杀/死亡层、coverage/分母/归一化、N=16/32/64。通过条件：统计正确性与数据覆盖合成测试、真实 Dust2 数值可复现、同输入两次一致，且不改 P3/P4/Deep Review。
   - **P7.2 会话与 IPC 集成**：导入时构建有界热力图投影并入会话；report-contract additive 元数据 + 受信网格请求；独立降级与清理。通过条件：报告/回放不变、会话生命周期与清理正确、热力图失败不影响报告、IPC 体积与在途上限实测。
