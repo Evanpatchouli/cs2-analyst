@@ -157,6 +157,7 @@ try {
   await setContinuous(true); await seek(first.endTick - 8);
   await evaluate(play + '.click()');
   await waitForUi(evaluate, 'document.querySelector("[data-replay-session]").dataset.replayRound==="' + second.round + '" && Number(document.querySelector("#replay-panel canvas[role=img]").dataset.tick)>=' + second.startTick + ' && document.querySelector("[aria-label=暂停回放]") !== null', 'continuous next round');
+  assert.ok((await evaluate('document.querySelector("[aria-label=回放倍速]").textContent')).includes('2×'), 'speed survives a round transition');
   await evaluate(pause + '.click()');
   await waitForUi(evaluate, 'document.querySelector("[aria-label=播放回放]") !== null', 'paused after continuous');
   await seek(second.startTick + 10); await evaluate(play + '.click()');
