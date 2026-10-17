@@ -1,6 +1,6 @@
 # 地图热力图统计契约（P7.0 审查 / P7.1 实现）
 
-P7.1 当前实现与验收见 §12；§5–§6 已修正为实现使用的唯一统计定义。
+P7.1 实现与验收见 §12；P7.2 会话与 IPC 实施验收见 §13。§5–§6 是唯一统计定义。
 其他带有 P7.0 日期、probe 和历史测试数字的章节保留为历史证据。
 
 - 阶段：P7.0（审查与方案确定，**不实现**热力图功能）。
@@ -628,3 +628,188 @@ DTO 根字段为 `schemaVersion/projectionVersion/matchId/samplingVersion/scope/
 - `git diff --check` 通过；对冻结包、Main/preload/Renderer、worker/session 的 diff 为空；`git ls-files '*.dem'` 为空。
 
 未执行：热力图 UI / IPC / 会话 / Electron 安装版验收（P7.2/P7.3）；其他地图及 Personal DEM 的热力图真实验收；硬编码旧比赛文件名的 Desktop `replay-real.test.mjs` 未运行（以白名单 Parser replay-real 与新热力图真实测试验证本阶段数据）。不改历史测试输入语义来绕过白名单。地图版本仍 unconfirmed、采样密度不是连续停留时间，平滑不在本阶段；P7.1 到此停止。
+
+## 13. P7.2 会话与 IPC 实施验收（2026-10-17）
+
+**P7.2 PASS；P7.3 未开始。** 本次先执行 `git fetch origin`，本地 HEAD / origin/main 均为实际基线
+`1d03dd5463f980764dac61fba256b584f8602bb8`，工作区干净。实现提交：
+`bc3a84ea64444fac8791db705477e10c131549de`。未修改版本、依赖、tag、release，也未重写历史。
+下列是本轮执行结果，不替换 §12 的历史记录。
+
+### 实现与边界
+
+- `shared/replay-map-geometry.ts` 原样承接 `ReplayMapLayer`、`ReplayMapDefinition`、地图定义、
+  `worldToRadar()` 和 `resolveMapLayer()`；Renderer 原路径 re-export，`radarHeading` 和资源状态留在 Renderer。
+  几何模块只依赖资源身份字符串，没有 React、DOM、Canvas、Electron、fs 或图片加载。兼容测试检查相同函数/对象引用及各图坐标、楼层输出。
+- `shared/heatmap.ts` 只改两条 import 路径与旧注释；P7.1 核心统计未改。P3/P4、Deep Review、Timeline、
+  Replay 采样/播放/seek/块协议生产算法均未改。
+- `electron/heatmap-session.ts` 在唯一一次 `parseWithReplay()` 后接收现成 Match / Replay / Spatial 的引用，
+  默认三层 32×32 只构建一次，仅缓存 UTF-8 有界的序列化默认投影。筛选请求重新调用原纯函数，
+  不解析 DEM、不复制完整原始数据到 Main、不缓存筛选结果。单层缓存响应重新 JSON 解码并创建根对象及 scope。
+  Replay 缺失某回合时，事件层重新计算，以保持 P7.1 `excludedRounds` 与直接单层调用完全相同。
+- `clear()` 清除 Match / Replay / Spatial / map 引用和默认缓存；重复 clear 安全。正常退出有清理处理，
+  强制结束 Utility 时由进程退出回收所有领域对象；不声称强制 kill 一定执行 JS exit handler。
+- `report-worker.ts` 独立建立 ReplaySession / HeatmapSession；同步设置初始化标记，防止解析 await 期间重入。
+  release 后晚完成的解析不能再创建会话。网格异常返回固定安全错误，不泄露路径或抛出文本，不把可用报告变为导入失败。
+- `main.ts` 只保存报告元数据和两套独立 pending Maps。只要 Replay 或热力图任一个可用，就保留原分析 Worker；
+  两者都不可用时立即退役。超时、错误/畸形响应、退出、重新导入、取消解析、释放和关窗均结束对应 Promise。
+  旧 Worker 响应必须同时匹配 Worker 身份、requestId 和当前 session。
+- 新 `session.release(sessionId)` / `session:release` 释放整个分析会话；旧 `replay.release` 保留整会话释放的兼容语义。
+  当前 Renderer 没有 release 调用点，不在组件卸载时终止会话。store 在 parsing 开始时失效旧 Replay 和热力图元数据，
+  包括热力图可用而 Replay 缺失的报告；取消文件对话框仍保留原会话。
+
+新增生产文件为 `electron/heatmap-session.ts`、`shared/{heatmap-ipc,replay-map-geometry}.ts`；修改上述 Main / Worker /
+preload / store / 几何旧入口与 report-contract。新增 `heatmap-{ipc,protocol,session,worker,real-session}.test.mjs`、
+`heatmap-real-fixture.mjs` 和 `scripts/heatmap-smoke.mjs`；原 import/replay IPC 测试与真实回放路径、replay smoke 兼容新增元数据。
+完整文件清单可用 `git show --stat bc3a84e` 复核。
+
+### JSON-only 协议与运行时预算
+
+报告保持 schemaVersion=2，新增可选 `heatmap?: DesktopHeatmapMetadata`。热力图独立 schemaVersion=1：
+sessionId、matchId、三层源可用性/原因、地图/资源身份、alignment、schematic-position-distribution、
+samplingVersion、16/32/64 与可选择的 playerIds / rounds / floors；不含 DEM 路径或原始领域对象。
+
+固定 API：`cs2Analyst.heatmap.getGrid(request)` → `heatmap:grid` → Worker `heatmap-grid`。
+请求必须恰含 `{schemaVersion:1, sessionId, layer, resolution, scope}`，layer 为 positions / kills / deaths。
+scope 六项均须提供：`rounds`、`playerIds`、`side`、`floor`、`includeFreezeTime`、`samplingSet`；
+rounds / playerIds / floor 用 null 表示全部，side 使用 all/CT/T。内部固定 `layers:[layer]`。
+成功结果为 `{kind:'success',sessionId,projection}`；projection 其余两层为 null。失败为固定安全 `{kind:'error',message}`。
+
+Main 复用 `trustedWindow(event)` 主窗口及主 frame 校验；Main / Worker 各自执行共享运行时校验。
+拒绝额外字段、非普通对象、非 JSON 数值/对象、accessor、重复项、超长字符串/数组、无效回合/玩家/楼层及枚举。
+回合须为已登记正安全整数，玩家/楼层须为当前会话已登记身份。响应逐字段核验 JSON-only 结构、有限数字、
+单元数量与索引、session/match/map/sampling/layer/resolution 和归一化后 scope；畸形响应立即结束请求，不等超时。
+
+| 可测试常量 | 固定边界 |
+| --- | ---: |
+| HEATMAP_REQUEST_BYTES | 16 KiB UTF-8 JSON |
+| HEATMAP_RESPONSE_BYTES | 512 KiB，包含 success/error 根包装 |
+| HEATMAP_CACHE_BYTES | 默认投影 512 KiB；超限不缓存，保留按需请求能力 |
+| HEATMAP_MAX_PENDING | 2；与 Replay 的 pending Map 独立 |
+| HEATMAP_TIMEOUT_MS | 15000 ms |
+| HEATMAP_MAX_PLAYERS / HEATMAP_MAX_ROUNDS | 64 / 1024；同时受请求字节上限约束 |
+| 字符串 | 最多 256 字符；筛选 ID 还须匹配当前会话白名单 |
+| HEATMAP_WORKER_HEAP_BYTES | 512 MiB，初始化前后观察的整个 Worker JS heapUsed 准入阈值 |
+| Replay 原缓存上限 | 保持 64 MiB；未提高 |
+
+Worker 在初始投影前、缓存创建后观察 `process.memoryUsage().heapUsed`；超限清理热力图引用/缓存，
+元数据给出 `memory-budget-exceeded`，报告和 Replay 继续工作。不强制 GC，也不为了估计大小序列化源数据。
+这是**总 JS 堆准入策略**，不是源对象精确大小、每次请求堆硬上限、RSS 或 native 内存限制；尚未 GC 的垃圾可能保守地禁用热力图。
+当前测得持有会话的 GC 后总堆约 204 MB，为该策略提供本机依据；解析器原有 60000 tick / 600000 Replay 玩家样本预算保持不变。
+512 KiB DTO 合格本身不构成内存安全证明。
+
+### 独立降级
+
+| 场景 | 本轮行为与验证 |
+| --- | --- |
+| Replay + Spatial 可用 | 三层分别可请求；默认统计与 P7.1 hash 相同 |
+| Replay 缺失 / ReplaySession 缓存预算失败 | 位置层按原 Replay 源是否存在决定；Spatial 存在时 kills/deaths 可请求；Main 不误关 Worker |
+| Spatial 缺失 | kills/deaths 元数据 `spatial-unavailable` 并拒绝请求；位置层继续工作，不把缺源伪造成零事件 |
+| 零相关事件 / 部分证据 | 零事件不自动禁用源；保留 P7.1 scope/coverage/missingEvidence 等语义 |
+| 地图映射缺失 | 源可用性保留，map.alignment=unavailable，invalidMapping 继续可审计 |
+| 热力图初始化异常 / 堆准入超限 | 独立 initialization-failed / memory-budget-exceeded；报告和 Replay 正常 |
+| 网格错误 / 超时 / 超大响应 | 安全错误，缓存不增长，后续请求与 Replay 仍可工作；不向 Renderer 发送超大对象 |
+| 两会话都不可用 | 报告成功，Worker 不保留 |
+
+缺源、异常、预算、超时和晚响应主要使用实际 Main/Worker 运行时 VM 故障注入；不是把这些故障称为真实 DEM 自发故障。
+真实 Electron 额外验证了并发、替换、取消、释放、旧 session 与关窗。
+
+### Dust2 本轮结果与性能
+
+仅使用 `.demo/dust2.dem`：**557650967 B**，流式重新验证 SHA-256：
+`db90fe85aab023a1d2c8a5996182e6120d98ef494f02a070b17982b235e4958c`。
+同目录旧比赛命名副本 `spirit-vs-faze-m3-dust2.dem` 的大小/完整 SHA 均与此相同，核实后仅删除该副本；
+`demo3.dem` 和其他 DEM 未删除、未使用为本阶段验证输入。未下载/复制任何 DEM，`git ls-files '*.dem'` 为空。
+Desktop 与 Parser real Replay 默认路径、相关 Replay smoke 已改为白名单 Dust2。
+无关历史 personal acceptance / parser diagnostic 脚本保留旧个人样本引用，本轮未执行。
+
+实战 expected=217570，valid=178514、confirmedDead=39056、unusable/missing=0；coverage=0.8204899572551363，completeness=1。
+击杀 **161/162**、死亡 **162/162** 精确定位，worldActor=1、两层各排除窗外事件4；地图仍 **unconfirmed**。
+完整默认投影 SHA-256 仍为 `71369ea49c0ae2fa8c4f84c67698614c7b0f091f711894211ffa7f66697888cd`。
+默认缓存 **238029 B**；原 Replay 缓存 **34757998 B**，159 块，最大块371621 B。
+
+环境：Windows 10.0.26200 x64、Intel i7-13620H、Node v26.3.0、pnpm10.0.0、Electron44.5.1。
+单独 Node 进程解析一次；每个 case 计时一次直接纯投影、一次会话请求，再重复一次检查确定性。
+另在实际 built Electron 中通过 preload → Main → Utility 计时；控制进程的纯函数对照独立解析，不是产品重复解析。
+每项均为单次观测，**不称 p95**。下表字节包含成功结果根包装：
+
+| 图层 / 网格 | 纯投影 ms | 会话请求 ms | 响应 B | 真实 IPC 往返 ms |
+| --- | ---: | ---: | ---: | ---: |
+| positions16 | 28.45 | 22.79 | 27380 | 29.2 |
+| kills16 | 2.15 | 2.48 | 22251 | 5.1 |
+| deaths16 | 1.35 | 2.10 | 23302 | 6.7 |
+| positions32 | 24.62 | 3.26 | 93098 | 5.3 |
+| kills32 | 1.82 | 2.49 | 75252 | 4.8 |
+| deaths32 | 1.68 | 1.70 | 75554 | 5.5 |
+| positions64 | 25.10 | 35.23 | 352194 | 43.7 |
+| kills64 | 1.48 | 6.35 | 287917 | 19.1 |
+| deaths64 | 1.61 | 5.49 | 289963 | 20.1 |
+
+热力图初始化额外耗时 **41.3461 ms**；Node parse5752.8058 ms。
+30 种 resolution/layer/玩家/阵营/回合/楼层/freeze/采样集/组合请求全部与直接函数一致且重复确定；
+Node 的 direct+session+repeat 批次 **695.0312 ms**，实际 Electron 30 个 IPC 耗时之和 **380.7 ms**，
+含控制进程断言的批次 wall971.5563 ms。Electron 整体导入7056.5 ms，元数据909 B，默认位置层5次缓存 IPC 为4.6/4.1/4.3/4.5/4.4 ms。
+3 个并发请求结果为2 success +1 error；连续筛选不增加默认缓存。计时和内存字段从未进入 projection DTO。
+
+### 内存与释放证据
+
+`node --expose-gc` 的独立 Worker 等价会话进程在每个快照前请求两次 GC，释放外部 parsed 引用后先让出一个事件循环。
+其源引用对照与实际 Electron 的 OS 观测分开记账：
+
+| Node 会话快照 | RSS B | heapUsed B |
+| --- | ---: | ---: |
+| 解析前 | 71995392 | 6387368 |
+| 解析后 | 438366208 | 133004864 |
+| 默认热力图缓存后 | 458981376 | 136746328 |
+| 仅 HeatmapSession 持有源引用、Replay 缓存保留 | 535060480 | 204096976 |
+| clear 热力图、Replay 缓存仍保留 | 534773760 | 77528480 |
+| 两缓存均 clear | 466759680 | 9772528 |
+
+热力图源引用保留相关堆差 **126568496 B（126.57 MB / 120.70 MiB）**，独立于238029 B默认 JSON缓存。
+RSS 仅下降286720 B，说明 native/V8 allocator 留存，不能把堆回收冒称为 OS 工作集同步下降；
+快照之间仍有小型测试 DTO，因此这些是同进程可观察差异，不是逐对象精确分配计量。
+
+实际 Electron 不强制 GC，按本次进程 PID + CreationDate 跟踪 Win32_Process：
+导入前无 Utility；导入中观测工作集1231474688 B；缓存后990797824 B；
+30次筛选+重复/并发后994013184 B；本次 Utility 观察到的 peak1499947008 B。
+取消替换、显式 release、关窗后均无本次 Utility。native 解析瞬时峰值与持续领域堆成本均需继续关注，
+512 MiB JS 准入不覆盖native/RSS，也不代表全部地图/个人DEM内存安全。
+
+### 失败修复、复审与执行清单
+
+实际 Electron 首次 smoke 的30个统计/筛选请求及并发通过，随后立即重导入并取消时，
+发现新 Utility 在 spawn 前 `kill()` 失败，而原 `removeAllListeners()` 丢掉迟到 spawn，造成进程残留。
+本次保留退休 Worker 的一次性 spawn→kill 处理，且原 spawn 回调再次验证当前身份；
+新增模拟 pre-spawn kill=false 的运行时回归。修复后的实际 Electron 全流程通过，旧失败 JSON 保留，未放宽30秒清理断言。
+独立复审还核对稀疏 Replay 回合的默认缓存派生差异、源引用内存与固定 resolution 白名单；确定性问题均已关闭。
+
+| 本次实际命令 | 通过 / 失败 / 跳过 |
+| --- | --- |
+| `pnpm -r --workspace-concurrency=1 test` | Deep Review210 / Parser48 / Analytics53 / Findings17全部通过；当次Desktop109通过，0失败/跳过 |
+| `pnpm --filter @cs2-analyst/desktop test`（补齐最终回归后） | **115 / 0 / 0**；含P7.1合成/真实、P7.2会话真实与修复路径后的real Replay |
+| `node --test scripts/*.test.mjs packages/dem-parser/dev/*.test.mjs` | **9 / 0 / 0** |
+| `node --test apps/desktop/tests/heatmap-ipc.test.mjs apps/desktop/tests/heatmap-protocol.test.mjs apps/desktop/tests/heatmap-session.test.mjs apps/desktop/tests/heatmap-worker.test.mjs` | **26 / 0 / 0**；最终固定resolution收紧后重跑；protocol6项再跑通过 |
+| `node --expose-gc --test apps/desktop/tests/heatmap-real-session.test.mjs` | **1 / 0 / 0**；真实30组＋确定性重复和内存对照 |
+| `node --test apps/desktop/tests/replay-real.test.mjs` | **1 / 0 / 0**；159块、最大371621B |
+| `pnpm typecheck` / `pnpm build` | **15/15** / **8/8** Turbo tasks；含13个地图资源和native校验 |
+| `node scripts/desktop-report-smoke.mjs` | 真实demo1、损坏DEM、非DEM共**3场景PASS**；五Tab、报告/Timeline/Deep Review和窗口既有断言通过 |
+| `node scripts/heatmap-smoke.mjs` | 修复后**PASS**；30组真实IPC、重复、2/3并发、替换/取消/释放/关窗清理 |
+| `node scripts/replay-smoke.mjs` | 白名单Dust2 **PASS**；reportUnchanged=true；导入6657.4ms，12次Replay IPC原脚本p95约6.6ms，首帧84.6ms |
+| `git diff --check` / `git ls-files '*.dem'` | PASS / 空输出 |
+
+最终各包不重复累计为 **443 passed / 0 failed / 0 skipped**（上游328 + 最终Desktop115）；辅助9项独立记账。
+不同命令覆盖重叠，定向重复和smoke场景不累加为独立测试总数。match-model契约编译也通过。
+独立 reviewer 审核全部生产边界、真实smoke失败与修复证据，独立执行34项定向用例，通过且无剩余代码阻断。
+大规模真实/全量套件由执行日志核对，不冒称 reviewer 全量重跑。
+
+本机原始记录：`.tmp/p72/{workspace-tests,desktop-final-tests,script-tests,typecheck-final,build-final,report-smoke}.log`、
+`.tmp/p72-qa/{heatmap-real-session,heatmap-electron,heatmap-electron-before-spawn-fix}.json`、
+`.tmp/p72-qa/{replay-real,replay-smoke}.log`；这些是私有本机材料，不提交二进制/DEM。
+可复现：先构建，再设置 `HEATMAP_SESSION_REPORT_FILE` 指向已存在的输出目录后运行上述 `--expose-gc` 命令；
+`node scripts/heatmap-smoke.mjs` 默认生成 `.tmp/p72-qa/heatmap-electron.json`，也可设置 `HEATMAP_QA_DIR`。
+
+**未执行及剩余范围**：本次没有实现热力图Canvas/筛选UI，也未执行Windows安装版热力图最终验收；
+这些仍属P7.3。没有其他地图/个人DEM热力图真实验收，没有物理跨屏DPI重验；原产品豁免不扩大为本次实测。
+超时/超大/缺源/异常由运行时故障注入验证，实际Electron没有人为阻塞15秒制造超时。
+地图版本仍unconfirmed，图只表达采样位置分布；P7.3须消费本协议并完成UI、覆盖/图例/版本说明、
+Electron绘制性能和安装版端到端后才能验收。本阶段到P7.2停止。
