@@ -77,7 +77,12 @@ const useStyles = makeStyles({
     display: 'flex', flexDirection: 'column', flex: '1 1 0', minHeight: 0, overflowY: 'auto', gap: '4px',
     '@media (max-width: 860px)': { flex: '0 0 auto', maxHeight: '42vh' },
   },
-  event: { justifyContent:'flex-start',textAlign:'left',whiteSpace:'normal' },
+  event: {
+    justifyContent:'flex-start',textAlign:'left',whiteSpace:'normal',
+    width:'100%',height:'auto',minHeight:'32px',flexShrink:0,boxSizing:'border-box',
+    alignItems:'flex-start',padding:'5px 8px',lineHeight:tokens.lineHeightBase300,
+    overflowWrap:'anywhere',wordBreak:'break-word',
+  },
   transport: {
     width: '100%', alignSelf: 'end', display: 'flex', flexDirection: 'column', gap: '6px', padding: '10px 12px',
     backgroundColor: palette.card, border: `1px solid ${palette.border}`, borderRadius: tokens.borderRadiusLarge,
@@ -328,7 +333,6 @@ export function ReplayPlayer({ metadata, initialPlayerId, active, jump }: {
     return()=>{observer.disconnect();resolution.removeEventListener('change',watchResolution);};
   },[availableMap]);
   if(!metadata.available||!info)return <section className={s.root} aria-label="比赛回放"><div className={s.group}><Title2>比赛回放</Title2><Body1>{metadata.unavailableReason??'本场缺少可靠回放窗口，比赛报告仍可用。'}</Body1></div></section>;
-  const sameTick=new Map<number,number>();for(const e of visibleEvents)sameTick.set(e.tick,(sameTick.get(e.tick)??0)+1);
   const eventsHelp=`仅显示当前播放进度已到达的事件。同 tick 不推断先后顺序。${metadata.excludedRounds.length?` ${metadata.excludedRounds.length} 个回合窗口不可靠，未开放回放。`:''}`;
   return <section className={s.root} aria-label="比赛回放" data-replay-session={metadata.sessionId} data-replay-match={metadata.matchId} data-replay-round={roundNumber} data-replay-tick={tick} data-replay-cache={cache.current.size} data-replay-block={block?.index} data-replay-revision={revision} data-replay-map-ready={imageReady} data-replay-visible-events={visibleEvents.length} data-replay-continuous={continuous?'on':'off'}>
     <div className={s.bar}>
@@ -381,7 +385,7 @@ export function ReplayPlayer({ metadata, initialPlayerId, active, jump }: {
         </div>
         <div className={`${s.group} ${s.eventsGroup}`}>
           <div className={s.groupHeader}><div className={s.groupTitle}><Caption1>关键事件</Caption1><HelpTip label="关键事件说明" content={eventsHelp} /></div><Caption1 className={s.muted}>已播放 · {visibleEvents.length}</Caption1></div>
-          <div ref={eventsList} className={s.events} aria-label="回放事件浏览" aria-live="polite" aria-relevant="additions">{visibleEvents.length?visibleEvents.map(e=><Button key={e.id} className={s.event} appearance="subtle" size="small" data-replay-event={e.id} onClick={()=>seek(e.tick)}>{timeText(e.tick,info,metadata.tickRate)} · {e.description}{(sameTick.get(e.tick)??0)>1?' · 同 tick，顺序未知':''}</Button>):<Caption1>当前播放进度还没有关键事件。</Caption1>}</div>
+          <div ref={eventsList} className={s.events} aria-label="回放事件浏览" aria-live="polite" aria-relevant="additions">{visibleEvents.length?visibleEvents.map(e=><Button key={e.id} className={s.event} appearance="subtle" size="small" data-replay-event={e.id} onClick={()=>seek(e.tick)}>{timeText(e.tick,info,metadata.tickRate)} · {e.description}</Button>):<Caption1>当前播放进度还没有关键事件。</Caption1>}</div>
         </div>
       </div>
     </div>

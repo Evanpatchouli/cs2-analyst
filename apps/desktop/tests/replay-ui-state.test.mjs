@@ -45,10 +45,11 @@ test('only reached visible events append, across chunks, without duplicates and 
   assert.equal(bounded.events.at(-1).id, 'b' + (REPLAY_VISIBLE_EVENT_LIMIT + 4));
 });
 
-test('same-tick events keep the contract order and future events are never exposed', () => {
+test('same-tick events keep the contract order, original rows and future events are never exposed', () => {
   const sameTick = [event('first', 12), event('second', 12), event('future', 13)];
   const result = appendReplayEvents([], new Set(), sameTick, 12);
   assert.deepEqual(result.events.map(item => item.id), ['first', 'second']);
+  assert.deepEqual(result.events, sameTick.slice(0, 2), 'same-tick rows keep their original tick/description and gain no label');
   assert.equal(result.appended, 2);
   assert.equal(appendReplayEvents(result.events, new Set(result.events.map(item => item.id)), sameTick, 11).appended, 0);
 });
